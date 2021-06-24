@@ -35,7 +35,7 @@ def create_app():
 	createFolder('./log')
 	filepath = './log/flask.log'
 	if not os.path.isfile(filepath):
-		f = open('./log/flask.log','a', encoding='UTF8')
+		f = open('./log/flask.log','a', encoding='utf-8')
 	logger = logging.getLogger(__name__)
 	logging.basicConfig(format = '%(asctime)s:%(levelname)s:%(message)s', 
 						datefmt = '%m/%d/%Y %I:%M:%S %p', 
