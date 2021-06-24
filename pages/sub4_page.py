@@ -130,9 +130,14 @@ def ok():
 		cur.execute("select * from database2")
 		rows = cur.fetchall()
 		return redirect(url_for('sub4.second'))
-		
- #def download():
-     #return send_from_directory(directory='file', filename="database.csv")
+
+@bp4.route("csv_download")		
+def csv_download():
+	file_name = f"./database.csv"
+	return send_file(file_name, 
+					mimetype='text/csv', 
+					attachment_filename='database.csv',# 다운받아지는 파일 이름. 
+					as_attachment=True)
 
 @bp4.route("csv_import")		
 def csv_import():
