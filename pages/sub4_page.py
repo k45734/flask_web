@@ -16,8 +16,7 @@ import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
-import logging
-from logging.handlers import RotatingFileHandler
+
 bp4 = Blueprint('sub4', __name__, url_prefix='/sub4')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
@@ -29,16 +28,7 @@ conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key auto
 conn.close()
 scheduler = BackgroundScheduler()
 scheduler.start()
-logger = logging.getLogger(__name__)
-fileHandler = RotatingFileHandler('./log/flask.log', maxBytes=1024*5, backupCount=5) 
-fileHandler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)s] >> %(message)s')) 
-logger.addHandler(fileHandler) 
-logger.setLevel(logging.DEBUG)
-logger.debug("test debug log") 
-logger.info("info log") 
-logger.warning("warring !!!!") 
-logger.error("bug bug bug bug") 
-logger.critical("critical !! ~~")
+
 @bp4.route('/')
 @bp4.route('index')
 def second():

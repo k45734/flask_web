@@ -20,24 +20,13 @@ import time
 from flask_sqlalchemy import SQLAlchemy
 import psutil
 import platform
-import logging
-from logging.handlers import RotatingFileHandler
 from requests import get  
 import zipfile
 import os       
 import shutil
 from distutils.dir_util import copy_tree
 bp = Blueprint('main', __name__, url_prefix='/')
-logger = logging.getLogger(__name__)
-fileHandler = RotatingFileHandler('./log/flask.log', maxBytes=1024*5, backupCount=5) 
-fileHandler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)s] >> %(message)s')) 
-logger.addHandler(fileHandler) 
-logger.setLevel(logging.DEBUG)
-logger.debug("test debug log") 
-logger.info("info log") 
-logger.warning("warring !!!!") 
-logger.error("bug bug bug bug") 
-logger.critical("critical !! ~~")
+
 	
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:

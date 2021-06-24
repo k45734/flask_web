@@ -9,21 +9,10 @@ from flask_ipblock import IPBlock
 from flask_ipblock.documents import IPNetwork
 import random
 import bs4
-import logging
-from logging.handlers import RotatingFileHandler
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
-logger = logging.getLogger(__name__)
-fileHandler = RotatingFileHandler('./log/flask.log', maxBytes=1024*5, backupCount=5) 
-fileHandler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)s] >> %(message)s')) 
-logger.addHandler(fileHandler) 
-logger.setLevel(logging.DEBUG)
-logger.debug("test debug log") 
-logger.info("info log") 
-logger.warning("warring !!!!") 
-logger.error("bug bug bug bug") 
-logger.critical("critical !! ~~")
+
 @bp2.route('/')
 @bp2.route('index')
 def second():

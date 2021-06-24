@@ -15,7 +15,6 @@ import os.path
 from flask_ipblock import IPBlock
 from flask_ipblock.documents import IPNetwork
 import logging
-from logging.handlers import RotatingFileHandler
 from pytz import timezone
 import sqlite3
 import time
@@ -37,24 +36,13 @@ def create_app():
 	if not os.path.isfile(filepath):
 		f = open('./log/flask.log','a', encoding='UTF8')
 	logger = logging.getLogger(__name__)
-	fileHandler = RotatingFileHandler('./log/flask.log', maxBytes=1024*5, backupCount=5) 
-	fileHandler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] [%(filename)s:%(lineno)s] >> %(message)s')) 
-	logger.addHandler(fileHandler) 
-	logger.setLevel(logging.DEBUG)
-	logger.debug("test debug log") 
-	logger.info("info log") 
-	logger.warning("warring !!!!") 
-	logger.error("bug bug bug bug") 
-	logger.critical("critical !! ~~")
-
-	#logging.basicConfig(format = '%(asctime)s:%(levelname)s:%(message)s', 
-	#					datefmt = '%m/%d/%Y %I:%M:%S %p', 
-	#					filename = "./log/flask.log", 
-	#					level = logging.DEBUG
-	#					)
+	logging.basicConfig(format = '%(asctime)s:%(levelname)s:%(message)s', 
+						datefmt = '%m/%d/%Y %I:%M:%S %p', 
+						filename = "./log/flask.log", 
+						level = logging.DEBUG
+						)
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
-	#app.config['SECRET_KEY'] = os.urandom(12)
 	from pages import main_page
 	#from pages import sub_page
 	from pages import sub2_page
