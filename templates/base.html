@@ -21,6 +21,7 @@ a:hover { color: blue; text-decoration: underline;}
 	<a href="{{ url_for('sub3.second') }}">프로그램</a>&nbsp;
 	<a href="{{ url_for('sub4.second') }}">재고관리</a>&nbsp;
 	<a href="{{ url_for('main.log') }}">로그</a>&nbsp;
+	<a href="/update">업데이트</a>&nbsp;
 	<a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a> |
 	<a href="/logout">로그아웃</a>
 	{% else %}

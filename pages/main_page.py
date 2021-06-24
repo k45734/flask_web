@@ -22,6 +22,11 @@ import psutil
 import platform
 import logging
 from logging.handlers import RotatingFileHandler
+from requests import get  
+import zipfile
+import os       
+import shutil
+from distutils.dir_util import copy_tree
 bp = Blueprint('main', __name__, url_prefix='/')
 logger = logging.getLogger(__name__)
 fileHandler = RotatingFileHandler('./log/flask.log', maxBytes=1024*5, backupCount=5) 
@@ -33,6 +38,7 @@ logger.info("info log")
 logger.warning("warring !!!!") 
 logger.error("bug bug bug bug") 
 logger.critical("critical !! ~~")
+	
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
 		if abs(num) < 1024.0:
@@ -175,3 +181,30 @@ def log():
 				tltl.append(test)
 				cnt += 1
 			return render_template('log.html', tltl=tltl)	
+
+@bp.route("update")
+def update(file_name = None):
+	url = "https://github.com/k45734/flask_web/archive/refs/heads/main.zip"
+	
+	if not file_name:
+		file_name = url.split('/')[-1]
+
+	with open(file_name, "wb") as file:   
+        	response = get(url)               
+        	file.write(response.content)      
+	fantasy_zip = zipfile.ZipFile('./main.zip')
+	fantasy_zip.extractall('./')
+	fantasy_zip.close()
+	os.remove('./flask_web-main/login.db')
+	org = './flask_web-main/app.py'
+	org2 = './flask_web-main/pages'
+	org3 = './flask_web-main/templates'
+	new = './'
+	new2 = './pages'
+	new3 = './templates'
+	shutil.copy(org, new)
+	copy_tree(org2, new2)
+	copy_tree(org3, new3)
+	os.remove('./main.zip')
+	shutil.rmtree ('./flask_web-main')
+	return redirect(url_for('main.index'))
