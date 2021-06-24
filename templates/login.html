@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<form action="/login_proc" method="POST">
+  <center>
+  <input type="text" name="user" placeholder="user" style="width:100px;height:50px;font-size:30px;"><br>
+  <input type="password" name="passwd" placeholder="passwd" style="width:100px;height:50px;font-size:30px;"><br>
+  <input type="submit" value="로그인" style="width:100px;height:50px;font-size:30px;">
+  </center>
+</form>
+{% endblock %}

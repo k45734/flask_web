@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>프로그램 추가</p>
+<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form action="start" method="POST">
+
+<thead>
+  <tr>
+    <th align="center" class="tg-baqh">프로그램명</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPSNAME" placeholder="FLASKAPPSNAME" style="width:100%; border: 0;" ></td>
+  </tr>
+<tbody>
+  <tr>
+    <th align="center" class="tg-baqh">실행</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPS" placeholder="FLASKAPPS" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">시간(초)</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKTIME" placeholder="FLASKTIME" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">반복</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPSREPEAT" placeholder="FLASKAPPSREPEAT" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh" rowspan="4">텔레그램</th>
+    <th align="center" class="tg-baqh">사용</th>
+    <td align="center" class="tg-baqh"><select name="FLASKTELGM">
+	<option value="1">안함</option>
+    <option value="0">사용</option>
+    
+</select></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">토큰</th>
+    <td align="center" class="tg-baqh"><input type="text" name="FLASKTOKEN" placeholder="FLASKTOKEN" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">아이디</th>
+    <td align="center" class="tg-baqh"><input type="text" name="FLASKBOTID" placeholder="FLASKBOTID" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">알림</th>
+    <td align="center" class="tg-baqh"><select name="FLASKALIM">
+    <option value="0">무음</option>
+    <option value="1">소리</option>
+</select></td>
+  </tr>
+<tr>
+<th align="center" colspan="8" ><input type="submit" value="추가"></th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+	<center><h4>목록보기</p>
+	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+		<thead>
+		{% for row in rows %}
+  <tr>
+    <th align="center" class="tg-0lax">프로그램명</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKAPPSNAME"] }}</td>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <th align="center" class="tg-0lax">실행</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKAPPS"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">시간(초)</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKTIME"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">반복</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKAPPSREPEAT"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">사용</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKTELGM"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">텔레그램 토큰</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKTOKEN"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">텔레그렘아이디</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKBOTID"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax">텔레그램 알림</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKALIM"] }}</td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok?FLASKAPPS={{ row["FLASKAPPS"] }}&FLASKTIME={{ row["FLASKTIME"] }}&FLASKALIM={{ row["FLASKALIM"] }}&FLASKBOTID={{ row["FLASKBOTID"] }}&FLASKTOKEN={{ row["FLASKTOKEN"] }}&FLASKTELGM={{ row["FLASKTELGM"] }}&FLASKAPPSNAME={{ row["FLASKAPPSNAME"] }}&FLASKAPPSREPEAT={{ row["FLASKAPPSREPEAT"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="수정" onClick="location.href='edit?FLASKAPPS={{ row["FLASKAPPS"] }}&FLASKTIME={{ row["FLASKTIME"] }}&FLASKALIM={{ row["FLASKALIM"] }}&FLASKBOTID={{ row["FLASKBOTID"] }}&FLASKTOKEN={{ row["FLASKTOKEN"] }}&FLASKTELGM={{ row["FLASKTELGM"] }}&FLASKAPPSNAME={{ row["FLASKAPPSNAME"] }}&FLASKAPPSREPEAT={{ row["FLASKAPPSREPEAT"] }}'"></th>
+  </tr>
+</thead>
+		
+		{% endfor %}
+
+</center>
+
+{% endblock %}

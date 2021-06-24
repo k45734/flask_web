@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body>
+<!-- edit.html -->
+<div class="col-4 d-flex justify-content-center">
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<form action="edit_result">
+<center>
+<tr>
+<th align="center">번호</th>
+<th align="center">날짜</th>
+<th align="center">상품명</th>
+<th align="center">입고</th>
+<th align="center">출고</th>
+<th align="center">합계</th>
+</tr>
+<tr>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="idx" value="{{idx}}" readonly></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="MY_DATE" value="{{MY_DATE}}" readonly></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="PRODUCT_NAME" value="{{PRODUCT_NAME}}" readonly></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="RECEIVING" value="{{RECEIVING}}"/></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="SHIPPING" value="{{SHIPPING}}"/></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="TOTAL" value="{{TOTAL}}" readonly></td>
+</tr>
+<tr>
+<td align="center" colspan="8"><input type="submit" value="수정"><input type="button" value="취소" onclick="history.back(-1);">
+</tr>
+</table>
+</center>
+</div>
+</form>
+</body>
+</html>
+{% endblock %}
+
+{# <input type="text" style="width:100%; border: 0;" name="idx" value="{{idx}}"/></td> #}

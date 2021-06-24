@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body>
+        <center>{% for key, value in all.items() %}
+{{ value }} <br>
+{% endfor %}</center>
+    </body>
+</html>
+
+{% endblock %}

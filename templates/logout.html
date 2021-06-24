@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<body>
+{% if session.get('logFlag') %}
+user : {{ session.get('userid')}} <br>
+<a href="/user_info_edit/{{ session['idx'] }}">회원정보 수정</a> |
+<a href="/logout">로그아웃</a>
+{% else %}
+<a href="/login">로그인</a>
+{% endif %}
+{% endblock %}

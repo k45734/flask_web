@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>재고관리추가</p>
+<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form action="start" method="POST">
+
+<thead>
+  <tr>
+    <th align="center" class="tg-baqh">날짜</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="date" name="MY_DATE" placeholder="날짜" style="width:100%; border: 0;" ></td>
+  </tr>
+<tbody>
+  <tr>
+    <th align="center" class="tg-baqh">상품명</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="PRODUCT_NAME" placeholder="상품명" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">입고</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RECEIVING" placeholder="입고" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">출고</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="SHIPPING" placeholder="출고" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">합계</th>
+    <td align="center" class="tg-baqh"><input type="text" name="TOTAL" placeholder="자동입력" style="width:100%; border: 0;" readonly ></td>
+  </tr>
+<tr>
+<th align="center" colspan="8"><input type="submit" value="추가"></th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+	<center><h4>재고현황</p>
+	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+		<thead>		
+  <tr>
+	<th align="center" class="tg-0lax">번호</th>
+    <th align="center" class="tg-0lax">날짜</th>
+    <th align="center" class="tg-0lax">상품명</th>
+    <th align="center" class="tg-0lax">입고</th>
+    <th align="center" class="tg-0lax">출고</th>
+    <th align="center" class="tg-0lax">합계</th>
+	<th align="center" class="tg-0lax">동작</th>
+  </tr>
+  {% for row in rows %}
+	<tr>
+	<td align="center" class="tg-0lax">{{ row["idx"] }}</td>
+	<td align="center" class="tg-0lax">{{ row["MY_DATE"] }}</td>
+    <td align="center" class="tg-0lax">{{ row["PRODUCT_NAME"] }}</td>
+    <td align="center" class="tg-0lax">{{ row["RECEIVING"] }}</td>
+    <td align="center" class="tg-0lax">{{ row["SHIPPING"] }}</td>
+    <td align="center" class="tg-0lax">{{ row["TOTAL"] }}</td>
+	<td align="center"><input type="button" value="수정" onClick="location.href='edit?idx={{ row["idx"] }}&MY_DATE={{ row["MY_DATE"] }}&PRODUCT_NAME={{ row["PRODUCT_NAME"] }}&SHIPPING={{ row["SHIPPING"] }}&RECEIVING={{ row["RECEIVING"] }}&TOTAL={{ row["TOTAL"] }}'">
+	<input type="button" value="삭제" onClick="location.href='databasedel/{{ row["idx"] }}'"></td>
+  </tr>
+</thead>
+		
+		{% endfor %}
+
+</center>
+</table>
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<thead>	
+<tr>
+<th align="center" class="tg-0lax"><input type="button" value="CSV받기" onClick="location.href='csv_import'"></th>
+{% endblock %}

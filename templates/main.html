@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body>
+	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<tr>
+<td align="center">현재시간</td>
+<td align="center"> {{test}}</td>
+</tr>	
+<tr>
+<td align="center"> 운영체제</td>
+<td align="center"> {{oos}}</td>
+</tr>
+<tr>
+<td align="center"> 프로세서</td>
+<td align="center"> {{oocpu}}</td>
+</tr>
+<tr>
+<td align="center"> 메모리</td>
+<td align="center"> {{mem_percent}}</td>
+</tr>
+<tr>
+<td align="center"> 디스크</td>
+<td align="center"> {{disk_percent}}</td>
+</tr>
+</table><br>
+
+    </body>
+</html>
+
+{% endblock %}
