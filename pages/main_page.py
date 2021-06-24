@@ -97,7 +97,7 @@ def login_proc():
 		return redirect(url_for('main.index'))
 		#return userid
 	else:
-		con = sqlite3.connect('login.db')
+		con = sqlite3.connect('./login.db')
 		cursor = con.cursor()
 		sql = "select idx, id, pwd from member where id = ?"
 		cursor.execute(sql, (userid,))
@@ -119,7 +119,7 @@ def login_proc():
 def getUser(edit_idx):
 	if session.get('logFlag') != True:
 		return redirect(url_for(login))
-	conn = sqlite3.connect('login.db')
+	conn = sqlite3.connect('./login.db')
 	cursor = conn.cursor()
 	sql = "select id from member where idx = ?"
 	cursor.execute(sql, (edit_idx,))
@@ -136,7 +136,7 @@ def user_info_edit_proc():
 	if len(idx) == 0:
 		return 'Edit Data Not Found!'
 	else:
-		conn = sqlite3.connect('login.db')
+		conn = sqlite3.connect('./login.db')
 		cursor = conn.cursor()
 		sql = """
 			update member
@@ -155,12 +155,12 @@ def log():
 	createFolder('./log')
 	filepath = './log/flask.log'
 	if not os.path.isfile(filepath):
-		f = open('./log/flask.log','a', encoding='cp949')
+		f = open('./log/flask.log','a', encoding='utf-8')
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
 		filepath = './log/flask.log'
-		with open(filepath, 'rt', encoding='cp949') as fp:
+		with open(filepath, 'rt', encoding='utf-8') as fp:
 			line = fp.readline()
 			cnt = 1
 			tltl = []

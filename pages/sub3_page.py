@@ -55,7 +55,7 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect('database.db')
+		c = sqlite3.connect('./database.db')
 		FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
 		FLASKAPPS = request.args.get('FLASKAPPS')
 		FLASKTIME = request.args.get('FLASKTIME')
@@ -87,7 +87,7 @@ def edit():
 		FLASKBOTID = request.args.get('FLASKBOTID')
 		FLASKALIM = request.args.get('FLASKALIM')
 		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
-		c = sqlite3.connect('database.db')
+		c = sqlite3.connect('./database.db')
 		db = c.cursor()
 		contents = "SELECT '{}' FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKTIME, FLASKAPPSNAME) 
 		#.fetchone()
@@ -99,7 +99,7 @@ def databasedel(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect("database.db")	
+		con = sqlite3.connect("./database.db")	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKAPPSNAME)
@@ -128,7 +128,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	while True:
 		cnt += 1
 		test -= 1
-		con = sqlite3.connect("database.db")
+		con = sqlite3.connect("./database.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -171,7 +171,7 @@ def ok():
 		FLASKBOTID = request.args.get('FLASKBOTID')
 		FLASKALIM = request.args.get('FLASKALIM')
 		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
-		con = sqlite3.connect("database.db")
+		con = sqlite3.connect("./database.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -200,7 +200,7 @@ def start():
 			FLASKALIM = request.form['FLASKALIM']
 			FLASKAPPSREPEAT = request.form['FLASKAPPSREPEAT']
 			FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-			with sqlite3.connect("database.db")	as con:
+			with sqlite3.connect("./database.db")	as con:
 				if session.get('logFlag'):
 					#print("OK")
 					con.row_factory = sqlite3.Row

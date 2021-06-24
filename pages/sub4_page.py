@@ -21,7 +21,7 @@ bp4 = Blueprint('sub4', __name__, url_prefix='/sub4')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 #데이타베이스 없으면 생성
-conn = sqlite3.connect('database.db')
+conn = sqlite3.connect('./database.db')
 #print ("Opened database successfully")
 conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
 #print ("Table created successfully")
@@ -53,7 +53,7 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect('database.db')
+		c = sqlite3.connect('./database.db')
 		idx = request.args.get('idx')
 		MY_DATE = request.args.get('MY_DATE')
 		PRODUCT_NAME = request.args.get('PRODUCT_NAME')
@@ -92,7 +92,7 @@ def edit():
 		test = int(a) + int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
 		#TOTAL = request.args.get('TOTAL')
-		c = sqlite3.connect('database.db')
+		c = sqlite3.connect('./database.db')
 		db = c.cursor()
 		contents = "SELECT '{}' FROM database2 WHERE idx = '{}'".format(MY_DATE, idx) 
 		db.execute(contents)
@@ -103,7 +103,7 @@ def databasedel(idx):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect("database.db")	
+		con = sqlite3.connect("./database.db")	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database2 WHERE idx = '{}'".format(idx)
@@ -124,7 +124,7 @@ def ok():
 		RECEIVING = request.args.get('RECEIVING')
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
-		con = sqlite3.connect("database.db")
+		con = sqlite3.connect("./database.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2")
@@ -144,7 +144,7 @@ def csv_import():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
-		con = sqlite3.connect('database.db')
+		con = sqlite3.connect('./database.db')
 		cur = con.cursor()
 		bables = cur.execute('SELECT * FROM database2')
 		com_te=""
