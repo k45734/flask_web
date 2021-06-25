@@ -11,7 +11,7 @@
 <!-- edit.html -->
 <div class="col-4 d-flex justify-content-center">
 <table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
-<form action="edit_result">
+<form action="/sub3/edit_result" method="POST">
 <center>
 <tr>
 <th rowspan="2" align="center">프로그램명</th>
@@ -27,20 +27,20 @@
 <th align="center">사용</th>
 </tr>
 <tr>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSNAME" value="{{FLASKAPPSNAME}}" readonly></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPS" value="{{FLASKAPPS}}"></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{FLASKTIME}}"/></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSREPEAT" value="{{FLASKAPPSREPEAT}}"/></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSNAME" value="{{ FLASKAPPSNAME }}" readonly></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPS" value="{{ FLASKAPPS }}"></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSREPEAT" value="{{ FLASKAPPSREPEAT }}"/></td>
 <td align="center"><select name="FLASKALIM">
-    <option value="{{FLASKALIM}}">{{FLASKALIM}}</option>
+    <option value="{{ FLASKALIM }}">{{ FLASKALIM }}</option>
     <option value="0">무음</option>
     <option value="1">소리</option>
 </select></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKBOTID" value="{{FLASKBOTID}}"></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTOKEN" value="{{FLASKTOKEN}}"></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKBOTID" value="{{ FLASKBOTID }}"></td>
+<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTOKEN" value="{{ FLASKTOKEN }}"></td>
 
 <td align="center"><select name="FLASKTELGM">
-    <option value="{{FLASKTELGM}}">{{FLASKTELGM}}</option>
+    <option value="{{ FLASKTELGM }}">{{ FLASKTELGM }}</option>
     <option value="0">사용</option>
     <option value="1">안함</option>
 </select></td>

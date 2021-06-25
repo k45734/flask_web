@@ -97,12 +97,12 @@
     <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKALIM"] }}</td>
   </tr>
   <tr>
-    <th align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok?FLASKAPPS={{ row["FLASKAPPS"] }}&FLASKTIME={{ row["FLASKTIME"] }}&FLASKALIM={{ row["FLASKALIM"] }}&FLASKBOTID={{ row["FLASKBOTID"] }}&FLASKTOKEN={{ row["FLASKTOKEN"] }}&FLASKTELGM={{ row["FLASKTELGM"] }}&FLASKAPPSNAME={{ row["FLASKAPPSNAME"] }}&FLASKAPPSREPEAT={{ row["FLASKAPPSREPEAT"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="수정" onClick="location.href='edit?FLASKAPPS={{ row["FLASKAPPS"] }}&FLASKTIME={{ row["FLASKTIME"] }}&FLASKALIM={{ row["FLASKALIM"] }}&FLASKBOTID={{ row["FLASKBOTID"] }}&FLASKTOKEN={{ row["FLASKTOKEN"] }}&FLASKTELGM={{ row["FLASKTELGM"] }}&FLASKAPPSNAME={{ row["FLASKAPPSNAME"] }}&FLASKAPPSREPEAT={{ row["FLASKAPPSREPEAT"] }}'"></th>
+    <th align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="수정" onClick="location.href='edit/{{ row["FLASKAPPSNAME"] }}'"></th>
   </tr>
 </thead>
 		
 		{% endfor %}
-
+ 
 </center>
 
 {% endblock %}

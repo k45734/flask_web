@@ -50,20 +50,41 @@ def second():
 		rows = cur.fetchall()
 		#return 'Hello, python !<br>Flask TEST PAGE 3!'
 		return render_template('program.html', rows = rows)
-@bp3.route("edit_result", methods=["GET"])
+		
+@bp3.route("edit/<FLASKAPPSNAME>", methods=['GET'])
+def edit(FLASKAPPSNAME):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		conn = sqlite3.connect('./database.db')
+		cursor = conn.cursor()
+		sql = "select * from database where FLASKAPPSNAME = ?"
+		cursor.execute(sql, (FLASKAPPSNAME,))
+		row = cursor.fetchone()
+		FLASKAPPSREPEAT = row[0]
+		FLASKAPPSNAME = row[1]
+		FLASKAPPS = row[2]
+		FLASKTIME = row[3]
+		FLASKTELGM = row[4]
+		FLASKTOKEN = row[5]
+		FLASKBOTID = row[6]
+		FLASKALIM = row[7]
+		return render_template('edit.html', FLASKAPPSNAME=FLASKAPPSNAME, FLASKAPPSREPEAT=FLASKAPPSREPEAT,FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME)	
+
+@bp3.route("edit_result", methods=['POST'])
 def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
 		c = sqlite3.connect('./database.db')
-		FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
-		FLASKAPPS = request.args.get('FLASKAPPS')
-		FLASKTIME = request.args.get('FLASKTIME')
-		FLASKTELGM = request.args.get('FLASKTELGM')
-		FLASKTOKEN = request.args.get('FLASKTOKEN')
-		FLASKBOTID = request.args.get('FLASKBOTID')
-		FLASKALIM = request.args.get('FLASKALIM')
-		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
+		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
+		FLASKAPPS = request.form['FLASKAPPS']
+		FLASKTIME = request.form['FLASKTIME']
+		FLASKTELGM = request.form['FLASKTELGM']
+		FLASKTOKEN = request.form['FLASKTOKEN']
+		FLASKBOTID = request.form['FLASKBOTID']
+		FLASKALIM = request.form['FLASKALIM']
+		FLASKAPPSREPEAT = request.form['FLASKAPPSREPEAT']	
 		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
 		db = c.cursor()
 		sql_update = "UPDATE database SET FLASKAPPSREPEAT=?, FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
@@ -73,27 +94,7 @@ def edit_result():
 		#print(FLASKAPPS)
 		#print(tee)
 		return redirect(url_for('sub3.second'))
-	
-@bp3.route("edit", methods=["POST", "GET"])
-def edit():
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
-		FLASKAPPS = request.args.get('FLASKAPPS')
-		FLASKTIME = request.args.get('FLASKTIME')
-		FLASKTELGM = request.args.get('FLASKTELGM')
-		FLASKTOKEN = request.args.get('FLASKTOKEN')
-		FLASKBOTID = request.args.get('FLASKBOTID')
-		FLASKALIM = request.args.get('FLASKALIM')
-		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
-		c = sqlite3.connect('./database.db')
-		db = c.cursor()
-		contents = "SELECT '{}' FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKTIME, FLASKAPPSNAME) 
-		#.fetchone()
-		db.execute(contents)
-		return render_template('edit.html',FLASKAPPSREPEAT=FLASKAPPSREPEAT,FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME,FLASKAPPSNAME=FLASKAPPSNAME)	
-	
+		
 @bp3.route("databasedel/<FLASKAPPSNAME>", methods=["GET"])
 def databasedel(FLASKAPPSNAME):
 	if not session.get('logFlag'):
@@ -122,7 +123,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	i = 0
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
-	#print(FLASKAPPS)
+	print(FLASKAPPS)
 	#print(tee)
 	#print(scheduler.get_jobs())
 	while True:
@@ -154,37 +155,26 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 			break
 		time.sleep(int(FLASKTIME))
 		print(parse_start)
-		#print(test)
-		#print(FLASKAPPSNAME)
-		#print(scheduler.get_jobs())
 
-@bp3.route("ok", methods=["GET","POST"])
-def ok():
+@bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
+def ok(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
-		FLASKAPPS = request.args.get('FLASKAPPS')
-		FLASKTIME = request.args.get('FLASKTIME')
-		FLASKTELGM = request.args.get('FLASKTELGM')
-		FLASKTOKEN = request.args.get('FLASKTOKEN')
-		FLASKBOTID = request.args.get('FLASKBOTID')
-		FLASKALIM = request.args.get('FLASKALIM')
-		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
-		con = sqlite3.connect("./database.db")
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		cur.execute("select * from database")
-		rows = cur.fetchall()
-		#thread = threading.Thread(name=FLASKAPPSNAME, target=exec_start(int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
-		#thread.daemon = True
-		#thread.start()
-		# in your case you could change seconds to hours
+		conn = sqlite3.connect('./database.db')
+		cursor = conn.cursor()
+		sql = "select * from database where FLASKAPPSNAME = ?"
+		cursor.execute(sql, (FLASKAPPSNAME,))
+		row = cursor.fetchone()
+		FLASKAPPSREPEAT = row[0]
+		FLASKAPPSNAME = row[1]
+		FLASKAPPS = row[2]
+		FLASKTIME = row[3]
+		FLASKTELGM = row[4]
+		FLASKTOKEN = row[5]
+		FLASKBOTID = row[6]
+		FLASKALIM = row[7]
 		scheduler.add_job(exec_start, trigger='interval', seconds=1, id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		#threading.Timer(2, exec_start(int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM)).start()
-		#test = '{}\n {}\n {}\n {}\n {}\n {}\n {}\n'.format(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM)
-		#test = '실행되었습니다'
-		#print(test)
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
