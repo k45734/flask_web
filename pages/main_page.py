@@ -113,8 +113,8 @@ def login_proc():
 				#return 'eeeeee'
 			else:
 				print("ttt")
-				return redirect(url_for('main.index'))
-	return redirect(url_for('main.index'))			
+				return '아이디가 없다'
+	#return redirect(url_for('main.index'))			
 @bp.route('user_info_edit/<int:edit_idx>', methods=['GET'])
 def getUser(edit_idx):
 	if session.get('logFlag') != True:
