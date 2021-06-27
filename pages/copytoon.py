@@ -221,6 +221,8 @@ def exec_start(t_main, compress, cbz):
 			except:
 				pass
 			#마지막 실행까지 작업안했던 결과물 저장
+			con = sqlite3.connect("./webtoon.db")
+			cur = con.cursor()
 			sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
 			cur.execute(sql,('True',subtitle))
 			con.commit()
