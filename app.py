@@ -46,7 +46,7 @@ def create_app():
 	from pages import sub2_page
 	from pages import sub3_page
 	from pages import sub4_page
-	from webtoon import copytoon
+	from pages import copytoon
 	app.register_blueprint(main_page.bp)
 	#app.register_blueprint(sub_page.bp1)
 	app.register_blueprint(sub2_page.bp2)
