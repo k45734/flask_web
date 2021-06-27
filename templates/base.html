@@ -18,6 +18,7 @@ a:hover { color: blue; text-decoration: underline;}
 	<a href="{{ url_for('sub2.menu') }}">점심메뉴</a>&nbsp;
 	<a href="{{ url_for('sub2.kospi') }}">코스피</a>&nbsp;
 	{% if session.get('logFlag') %}
+	<a href="{{ url_for('webtoon.second') }}">웹툰다운로드</a>&nbsp;
 	<a href="{{ url_for('sub3.second') }}">프로그램</a>&nbsp;
 	<a href="{{ url_for('sub4.second') }}">재고관리</a>&nbsp;
 	<a href="{{ url_for('main.log') }}">로그</a>&nbsp;

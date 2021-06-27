@@ -46,11 +46,13 @@ def create_app():
 	from pages import sub2_page
 	from pages import sub3_page
 	from pages import sub4_page
+	from webtoon import copytoon
 	app.register_blueprint(main_page.bp)
 	#app.register_blueprint(sub_page.bp1)
 	app.register_blueprint(sub2_page.bp2)
 	app.register_blueprint(sub3_page.bp3)
 	app.register_blueprint(sub4_page.bp4)
+	app.register_blueprint(copytoon.webtoon)
 	app.run(host="0.0.0.0", debug=True, threaded=True)
 	return app
 	

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>웹툰다운로드</p>
+<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form action="copytoon" method="POST">
+
+<thead>
+  <tr>
+    <th align="center" class="tg-baqh">카피툰주소</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://copytoon142.com" placeholder="https://copytoon142.com" style="width:100%; border: 0;" ></td>
+  </tr>
+ <tr>
+    <th align="center" class="tg-baqh">압축여부</td>
+    <td align="center" class="tg-baqh" colspan="2">
+  
+  <select name="compress">
+    <option value="0">사용</option>
+    <option value="1">안함</option></td></tr>
+ <tr>
+    <th align="center" class="tg-baqh">CBZ사용압축여부</td>
+    <td align="center" class="tg-baqh" colspan="2">
+  
+  <select name="cbz">
+    <option value="0">사용</option>
+    <option value="1">안함</option></td></tr>
+<tbody>
+<tr>
+<th align="center" colspan="8"><input type="submit" value="시작"></th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+{% endblock %}
