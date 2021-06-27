@@ -164,7 +164,7 @@ def exec_start(t_main, compress, cbz):
 			cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
 	con.close()
-	scheduler.remove_job(FLASKAPPSNAME)
+	scheduler.remove_job('copytoon_list')
 	
 def exec_start2(t_main, compress, cbz):	
 	#DB 목록을 받아와 다운로드를 진행한다.
@@ -231,7 +231,8 @@ def exec_start2(t_main, compress, cbz):
 			con.commit()
 				
 		con.close()
-		
+	scheduler.remove_job('copytoon_down')
+	
 @webtoon.route('copytoon_list', methods=['POST'])
 def copytoon_list():
 	if session.get('logFlag') != True:
