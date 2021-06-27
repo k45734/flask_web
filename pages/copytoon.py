@@ -254,7 +254,7 @@ def copytoon_down():
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
-		scheduler.add_job(exec_start, trigger='interval', seconds=1, id='copytoon_down', args=[t_main,compress,cbz] )
+		scheduler.add_job(exec_start2, trigger='interval', seconds=1, id='copytoon_down', args=[t_main,compress,cbz] )
 		print(t_main)
 		print(compress)
 		print(cbz)
