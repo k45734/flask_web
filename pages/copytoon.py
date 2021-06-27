@@ -164,6 +164,9 @@ def exec_start(t_main, compress, cbz):
 			cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
 	con.close()
+	scheduler.remove_job(FLASKAPPSNAME)
+	
+def exec_start2(t_main, compress, cbz):	
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect("./webtoon.db")
 	cur = con.cursor()
@@ -229,17 +232,30 @@ def exec_start(t_main, compress, cbz):
 				
 		con.close()
 		
-@webtoon.route('copytoon', methods=['POST'])
-def copytoon():
+@webtoon.route('copytoon_list', methods=['POST'])
+def copytoon_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
-		scheduler.add_job(exec_start, trigger='interval', hours=1, id='copytoon', args=[t_main,compress,cbz] )
+		scheduler.add_job(exec_start, trigger='interval', seconds=1, id='copytoon_list', args=[t_main,compress,cbz] )
 		print(t_main)
 		print(compress)
 		print(cbz)
 		return redirect(url_for('main.index'))
-		
+
+@webtoon.route('copytoon_down', methods=['POST'])
+def copytoon_down():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		scheduler.add_job(exec_start, trigger='interval', hours=1, id='copytoon_down', args=[t_main,compress,cbz] )
+		print(t_main)
+		print(compress)
+		print(cbz)
+		return redirect(url_for('main.index'))
