@@ -168,12 +168,15 @@ def update(file_name = None):
 	org = './flask_web-main/app.py'
 	org2 = './flask_web-main/pages'
 	org3 = './flask_web-main/templates'
+	org4 = './flask_web-main/webtoon'
 	new = './'
 	new2 = './pages'
 	new3 = './templates'
+	new3 = './webtoon'
 	shutil.copy(org, new)
 	copy_tree(org2, new2)
 	copy_tree(org3, new3)
+	copy_tree(org4, new4)
 	os.remove('./main.zip')
 	shutil.rmtree ('./flask_web-main')
 	return redirect(url_for('main.index'))
