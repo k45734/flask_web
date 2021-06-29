@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>게시판알림서비스</p>
+<table class="tg" style="undefined;table-layout: fixed; width: 600px">
+<colgroup>
+<col style="width: 109px">
+<col style="width: 491px">
+</colgroup>
+<center>
+<form method="POST">
+
+<thead>
+  <tr>
+    <th class="tg-baqh" colspan="2">게시판 알림 공통</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-baqh">텔레그램알림</td>
+    <td class="tg-0lax"><select name="telgm">
+	<option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램무음</td>
+    <td class="tg-0lax"><select name="telgm_alim">
+    <option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램토큰</td>
+    <td class="tg-0lax"><input type="text" name="telgm_token" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램아이디</td>
+    <td class="tg-0lax"><input type="text" name="telgm_botid" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">실행주기</td>
+    <td class="tg-0lax"><input type="number" name="start_time" style="width:100%; border: 0;" ></td>
+  </tr>
+ <tr>
+    <td class="tg-baqh">스케줄이름</td>
+    <td class="tg-0lax"><input type="text" name="startname" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh" colspan="2">일반 게시판 알림</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">주소</td>
+    <td class="tg-0lax"><input type="text" name="t_main" placeholder="t_main" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">셀렉터주소</td>
+    <td class="tg-0lax"><input type="text" name="sel" placeholder="sel" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">셀렉터숫자</td>
+    <td class="tg-0lax"><input type="number" name="selnum" placeholder="selnum" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh" colspan="2">네이베 카페 알리미</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">카페주소</td>
+    <td class="tg-baqh"><input type="text" name="cafe" placeholder="cafe" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">카페번호</td>
+    <td class="tg-baqh"><input type="number" name="cafenum" placeholder="cafenum" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">카페메뉴번호</td>
+    <td class="tg-baqh"><input type="number" name="cafemenu" placeholder="cafemenu" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh" rowspan="2">카페게시판</td>
+    <td class="tg-baqh" rowspan="2"><input type="text" name="cafeboard" placeholder="cafeboard" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+  </tr>
+  <tr>
+    <td class="tg-baqh">게시판선택</td>
+    <td class="tg-baqh"><input type="number" name="num" placeholder="num" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">셀렉터주소</td>
+    <td class="tg-baqh"><input type="text" name="boardpath" placeholder="boardpath" style="width:100%; border: 0;" ></td>
+  </tr>
+ 
+
+<tr>
+
+<th align="center" colspan="8"><input type="checkbox" name="choice" value="a">일반 게시판 알림<input type="checkbox" name="choice" value="b">네이베 카페 알리미<br>
+<input type="submit" value="테스트" onclick="javascript: form.action='board';">
+</th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+{% endblock %}
