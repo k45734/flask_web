@@ -5,7 +5,7 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import os
+import json, os
 import re
 import time
 from datetime import datetime
@@ -40,7 +40,6 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from flask import Blueprint
 #여기서 필요한 모듈
-import os
 from datetime import datetime, timedelta
 import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
@@ -309,6 +308,89 @@ def exec_start3():
 			print("{} 페이지가 완료되었습니다.".format(gogo))
 			gogo += 1
 
+def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
+	code = { "DHL":"de.dhl",
+			"Sagawa":"jp.sagawa",
+			"Kuroneko Yamato":"jp.yamato",
+			"Japan Post":"jp.yuubin",
+			"천일택배":"kr.chunilps",
+			"CJ대한통운":"kr.cjlogistics",
+			"CU 편의점택배":"kr.cupost",
+			"GS Postbox 택배":"kr.cvsnet",
+			"CWAY (Woori Express)":"kr.cway",
+			"대신택배":"kr.daesin",
+			"우체국 택배":"kr.epost",
+			"한의사랑택배":"kr.hanips",
+			"한진택배":"kr.hanjin",
+			"합동택배":"kr.hdexp",
+			"홈픽":"kr.homepick",
+			"한서호남택배":"kr.honamlogis",
+			"일양로지스":"kr.ilyanglogis",
+			"경동택배":"kr.kdexp",
+			"건영택배":"kr.kunyoung",
+			"로젠택배":"kr.logen",
+			"롯데택배":"kr.lotte",
+			"SLX":"kr.slx",
+			"성원글로벌카고":"kr.swgexp",
+			"TNT":"nl.tnt",
+			"EMS":"un.upu.ems",
+			"Fedex":"us.fedex",
+			"UPS":"us.ups",
+			"USPS":"us.usps"
+			}
+	carrier = code[f'{carrier_id}']
+	with requests.Session() as s:
+		url = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id #기본 URL
+		#print(url)
+		resp = s.get(url)
+		html = resp.text
+		jsonObject = json.loads(html)
+		try:
+			json_string = jsonObject.get("from").get("name") #누가 보냈냐			
+			json_string2 = jsonObject.get("to").get("name") #누가 받냐
+			json_string3 = jsonObject.get("state").get("text") #배송현재상태
+			#json_string_m = jsonObject.get("progresses") #배송상황
+			#for list in json_string_m:
+			#	print(list.get("description"))
+			json_string4 = jsonObject.get("carrier").get("name") #택배사
+			msg = '{} 님이 {} 으로 보내신 {} 님의 현재 배송상태는 {} 입니다.'.format(json_string,json_string4,json_string2,json_string3)
+		except:
+			msg = '송장번호가 없는거 같습니다.'
+		
+		#json_string6 = json_string4.get("description")
+		
+		#print(jsonObject) 
+		if telgm == '0' :
+			bot = telepot.Bot(token = telgm_token)
+			if telgm_alim == '0' :
+				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
+			else:
+				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)	
+		print(msg)
+
+@bp2.route('tracking')
+def tracking():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:	
+		return render_template('tracking.html')
+
+@bp2.route('tracking_ok', methods=['POST'])
+def tracking_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		carrier_id = request.form['carrier_id']
+		track_id = request.form['track_id']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		scheduler.add_job(exec_start4, trigger='interval', seconds=int(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		return render_template('tracking.html')
+		
 @bp2.route('funmom')
 def funmom():
 	if not session.get('logFlag'):
