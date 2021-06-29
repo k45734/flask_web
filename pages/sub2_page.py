@@ -388,7 +388,10 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		scheduler.add_job(exec_start4, trigger='interval', seconds=int(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		try:
+			scheduler.add_job(exec_start4, trigger='interval', seconds=int(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		except:
+				pass
 		return render_template('tracking.html')
 		
 @bp2.route('funmom')
@@ -405,7 +408,10 @@ def funmom_ok():
 	else:
 		start_time = request.form['start_time']
 		startname = request.form['startname']
-		scheduler.add_job(exec_start3, trigger='interval', seconds=int(start_time), id=startname)
+		try:
+			scheduler.add_job(exec_start3, trigger='interval', seconds=int(start_time), id=startname)
+		except:
+				pass
 		return render_template('funmom.html')
 
 		
