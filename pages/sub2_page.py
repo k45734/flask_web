@@ -48,7 +48,6 @@ import os.path
 from flask_ipblock import IPBlock
 from flask_ipblock.documents import IPNetwork
 import random
-import bs4
 import sqlite3
 import threading
 import telegram
@@ -59,7 +58,6 @@ from apscheduler.jobstores.base import JobLookupError
 
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 scheduler = BackgroundScheduler()
 scheduler.start()
 
@@ -90,14 +88,29 @@ def menu():
 def kospi():
 	url="https://finance.naver.com/sise/"
 	pathway=requests.get(url).text
-	bs4_trans=bs4.BeautifulSoup(pathway,"html.parser")
-	result=bs4_trans.select_one("#KOSPI_now").text
+	soup = bs(pathway, 'html.parser')
+	#bs4_trans=bs4.BeautifulSoup(pathway,"html.parser")
+	result=soup.select_one("#KOSPI_now").text
 	return render_template('start.html', testDataHtml=result)
 
+def url_to_image(s, thisdata, url, dfolder2, filename):
+	#time.sleep(60) #배포용 기능 제한
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	#req = requests.get(url, timeout=sleep)
+	req = s.get(url,headers=header)
+	fifi = dfolder2 + '/' + thisdata + '/' + filename
+	print(fifi)
+	if not os.path.exists('{}'.format(dfolder2)):
+		os.makedirs('{}'.format(dfolder2))
+	if not os.path.exists('{}/{}'.format(dfolder2,thisdata)):
+		os.makedirs('{}/{}'.format(dfolder2,thisdata))
+	with open(fifi, 'wb') as code:
+		code.write(req.content)
+		
 def cleanText(readData):
-    #텍스트에 포함되어 있는 특수 문자 제거
-    text = re.sub('["]', '', readData)
-    return text
+	#텍스트에 포함되어 있는 특수 문자 제거
+	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
+	return text	
 	
 #일반게시판의 새로운 글 알림
 def exec_start(t_main,sel,selnum,telgm,telgm_alim,telgm_token,telgm_botid):
@@ -235,7 +248,85 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 			with io.open(file, 'w+' ,-1, "utf-8") as f_write:
 				f_write.write(message)
 				f_write.close()
+				
+def exec_start3():
+	with requests.Session() as s:
+		gogo = 1
+		timestr = time.strftime("%Y%m%d-%H%M%S-")
+		timestr2 = time.strftime("%Y%m%d-%H%M%S")
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		while True:
+			print("{} 페이지가 시작되었습니다.".format(gogo))
+			dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
+			#login = s.get(dd, timeout=sleep)
+			login = s.get(dd,headers=header)
+			#time.sleep(60) #배포용 기능 제한		
+			html = login.text
+			soup = bs(html, 'html.parser')
+			list_test = soup.find(attrs={'class' :'jb-index-title jb-index-title-front'}) #목록이 있나 없나 확인
+			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
+			#print(list)
+			#print(list_test)
+			if list_test == None:
+				print("마지막 페이지입니다.\n종료합니다.")
+				break
+			
+			hrefs = []
+			for href in list:
+				t = href.find("a")["href"]
+				hrefs.append(str(t))
+				#print(t)
+				
+			for go in hrefs:
+				dd = 'https://funmom.tistory.com' + go
+				#login = s.get(dd, timeout=sleep)
+				#print(dd)
+				login = s.get(dd,headers=header)
+				#time.sleep(60) #배포용 기능 제한
+				html = login.text
+				soup = bs(html, 'html.parser')
+				menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
+				test = menu.find('h4')
+				#print(test)
+				ttt = test('a')
+				category = ttt[0].text
+				category2 = ttt[1].text
+				dfolder2 = os.path.dirname(os.path.abspath(__file__)) + '/funmom/' + category + '/' + category2
+				title = soup.find('title')	
+				thisdata = cleanText(title.text)
+				ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+				urls = []
 
+				for img in ex_id_divs:
+					img_url = img.find("img")
+					urls.append(str(img_url["src"]))		
+				jpeg_no = 00
+				for url in urls:
+					#print(url)
+					filename="funmom-" + str(jpeg_no) + ".jpg"
+					url_to_image(s, thisdata, url, dfolder2, filename="funmom-" + str(jpeg_no) + ".jpg")
+					jpeg_no += 1
+			print("{} 페이지가 완료되었습니다.".format(gogo))
+			gogo += 1
+
+@bp2.route('funmom')
+def funmom():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:	
+		return render_template('funmom.html')
+
+@bp2.route('funmom_ok', methods=['POST'])
+def funmom_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		scheduler.add_job(exec_start3, trigger='interval', seconds=int(start_time), id=startname)
+		return render_template('funmom.html')
+
+		
 @bp2.route('board', methods=['POST'])
 def board():
 	if session.get('logFlag') != True:
