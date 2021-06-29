@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>택배알림서비스</p>
+<table class="tg" style="undefined;table-layout: fixed; width: 600px">
+<colgroup>
+<col style="width: 109px">
+<col style="width: 491px">
+</colgroup>
+<center>
+<form method="POST">
+
+<thead>
+  <tr>
+    <th class="tg-baqh" colspan="2">택배알림서비스</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-baqh">텔레그램알림</td>
+    <td class="tg-0lax"><select name="telgm">
+	<option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램무음</td>
+    <td class="tg-0lax"><select name="telgm_alim">
+    <option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램토큰</td>
+    <td class="tg-0lax"><input type="text" name="telgm_token" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램아이디</td>
+    <td class="tg-0lax"><input type="text" name="telgm_botid" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">실행주기</td>
+    <td class="tg-0lax"><input type="number" name="start_time" style="width:100%; border: 0;" ></td>
+  </tr>
+ <tr>
+    <td class="tg-baqh">스케줄이름</td>
+    <td class="tg-0lax"><input type="text" name="startname" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">택배사</td>
+    <td class="tg-0lax"><select name="carrier_id">
+    <option value="DHL">DHL</option>
+<option value="Sagawa">Sagawa</option>
+<option value="Kuroneko Yamato">Kuroneko Yamato</option>
+<option value="Japan Post">Japan Post</option>
+<option value="천일택배">천일택배</option>
+<option value="CJ대한통운">CJ대한통운</option>
+<option value="CU 편의점택배">CU 편의점택배</option>
+<option value="GS Postbox 택배">GS Postbox 택배</option>
+<option value="CWAY (Woori Express)">CWAY (Woori Express)</option>
+<option value="대신택배">대신택배</option>
+<option value="우체국 택배">우체국 택배</option>
+<option value="한의사랑택배">한의사랑택배</option>
+<option value="한진택배">한진택배</option>
+<option value="합동택배">합동택배</option>
+<option value="홈픽">홈픽</option>
+<option value="한서호남택배">한서호남택배</option>
+<option value="일양로지스">일양로지스</option>
+<option value="경동택배">경동택배</option>
+<option value="건영택배">건영택배</option>
+<option value="로젠택배">로젠택배</option>
+<option value="롯데택배">롯데택배</option>
+<option value="SLX">SLX</option>
+<option value="성원글로벌카고">성원글로벌카고</option>
+<option value="TNT">TNT</option>
+<option value="EMS">EMS</option>
+<option value="Fedex">Fedex</option>
+<option value="UPS">UPS</option>
+<option value="USPS">USPS</option>
+	</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">송장번호</td>
+    <td class="tg-0lax"><input type="number" name="track_id" placeholder="송장번호" style="width:100%; border: 0;" ></td>
+  </tr>
+
+<tr>
+
+<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='tracking_ok';">
+</th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+{% endblock %}
