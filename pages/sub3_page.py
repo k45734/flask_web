@@ -16,6 +16,7 @@ import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
 
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -153,7 +154,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 			print(parse_start)
 			scheduler.remove_job(FLASKAPPSNAME)
 			break
-		time.sleep(int(FLASKTIME))
+		#time.sleep(int(FLASKTIME))
 		print(parse_start)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
@@ -174,7 +175,7 @@ def ok(FLASKAPPSNAME):
 		FLASKTOKEN = row[5]
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
-		scheduler.add_job(exec_start, trigger='interval', seconds=1, id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
