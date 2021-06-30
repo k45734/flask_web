@@ -488,6 +488,102 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 			else :
 				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=False)
 
+
+old_sbs = []
+def esbsnews(old_sbs = []):
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
+	req = session.get(URL,headers=header)
+	bs0bj = bs(req.content.decode('utf-8','replace'),'lxml')
+	posts = bs0bj.find("div",{"class":"w_news_list"})
+	lists = posts.findAll("a")
+	sbsnews = []
+	for i in lists:
+		a1 = i.attrs['href']
+		a5 = i.text
+		a2 = "".join(a5.split())
+		a3 = 'https://news.sbs.co.kr' + a1
+		a4 = "{} \n{}\n".format(a2, a3)
+		sbsnews.append(a4)
+		
+	sbsnews_new = []
+	for link in sbsnews:
+		if link not in old_sbs:
+			sbsnews_new.append(link)
+	return sbsnews_new		
+old_kbs = []
+def ekbsnews(old_kbs = []):
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	URL = 'http://news.kbs.co.kr/common/main.html'
+	req = session.get(URL,headers=header)
+	bs0bj = bs(req.content.decode('utf-8','replace'),'lxml')
+	posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
+	lists = posts.findAll("a")
+	kbsnews = []
+	for i in lists:
+		a1 = i.attrs['href']
+		a2 = i.text
+		a3 = 'http://news.kbs.co.kr' + a1
+		a4 = "{} \n{}\n".format(a2, a3)
+		kbsnews.append(a4)
+		
+	kbsnews_new = []
+	for link in kbsnews:
+		if link not in old_kbs:
+			kbsnews_new.append(link)
+	return kbsnews_new		
+	
+def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
+
+	global old_sbs
+	global old_kbs
+
+	sbsnews_new = esbsnews(old_sbs)
+	news = []
+	if sbsnews_new:
+		for link in sbsnews_new:
+			news.append(link)
+	kbsnews_new = ekbsnews(old_kbs)
+	if kbsnews_new:
+		for link in kbsnews_new:
+			news.append(link)
+	for i in news:
+		#test = i.decode('utf-8')
+		if telgm == '0' :
+			bot = telegram.Bot(token = telgm_token)
+			if telgm_alim == '0':
+				bot.sendMessage(chat_id = telgm_botid, text=i, disable_notification=True)
+			else :		
+				bot.sendMessage(chat_id = telgm_botid, text=i, disable_notification=False)
+		else:
+			print(i)
+
+@bp2.route('news')
+def news():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:	
+		return render_template('news.html')
+
+@bp2.route('news_ok', methods=['POST'])
+def news_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		try:
+			scheduler.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+		except:
+				pass
+		return render_template('news.html')
+		
 @bp2.route('unse')
 def unse():
 	if not session.get('logFlag'):
