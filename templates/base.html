@@ -104,7 +104,8 @@ section {
 		<li><a href="{{ url_for('sub2.funmom') }}" aria-label="subemnu">아이들색칠공부다운로더</a></li>
 		<li><a href="{{ url_for('sub2.tracking') }}" aria-label="subemnu">택배조회</a></li>
 		<li><a href="{{ url_for('sub2.weather') }}" aria-label="subemnu">날씨알림서비스</a></li>		
-		<li><a href="{{ url_for('sub2.unse') }}" aria-label="subemnu">운세알림서비스</a></li>		
+		<li><a href="{{ url_for('sub2.unse') }}" aria-label="subemnu">운세알림서비스</a></li>
+<li><a href="{{ url_for('sub2.news') }}" aria-label="subemnu">뉴스알림서비스</a></li>				
       </ul>
     </li>
 	<li><a href="#">웹툰 메뉴</a>
@@ -119,6 +120,7 @@ section {
         <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
         <li><a href="{{ url_for('main.log') }}" aria-label="subemnu">로그</a></li>
       <li><a href="{{ url_for('main.update') }}" aria-label="subemnu">업데이트</a></li>
+	  <li><a href="#">Ver 1.0</a></li>
       </ul>
     </li>   
     <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
@@ -126,7 +128,6 @@ section {
 	{% else %}
     <li><a href="/login">로그인</a></li>
 	{% endif %}
-    <li><a href="#">Ver 1.0</a></li>
   </ul>
 </nav>
 			
