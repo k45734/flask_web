@@ -47,6 +47,7 @@ import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -241,7 +242,7 @@ def copytoon_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start, trigger='interval', seconds=int(start_time), id=startname, args=[t_main,compress,cbz] )
+		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz] )
 		print(t_main)
 		print(compress)
 		print(cbz)
@@ -257,7 +258,7 @@ def copytoon_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start2, trigger='interval', seconds=int(start_time), id=startname, args=[t_main,compress,cbz] )
+		scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz] )
 		print(t_main)
 		print(compress)
 		print(cbz)

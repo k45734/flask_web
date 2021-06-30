@@ -54,6 +54,7 @@ import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
 
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -506,7 +507,7 @@ def unse_ok():
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
 		try:
-			scheduler.add_job(exec_start6, trigger='interval', seconds=int(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
 				pass
 		return render_template('unse.html')
@@ -543,7 +544,7 @@ def weather_ok():
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
 		try:
-			scheduler.add_job(exec_start5, trigger='interval', seconds=int(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
 				pass
 		return render_template('weather.html')
@@ -568,10 +569,10 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		try:
-			scheduler.add_job(exec_start4, trigger='interval', seconds=int(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
-		except:
-				pass
+		#try:
+		scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		#except:
+		#		pass
 		return render_template('tracking.html')
 		
 @bp2.route('funmom')
@@ -589,7 +590,7 @@ def funmom_ok():
 		start_time = request.form['start_time']
 		startname = request.form['startname']
 		try:
-			scheduler.add_job(exec_start3, trigger='interval', seconds=int(start_time), id=startname)
+			scheduler.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
 		except:
 				pass
 		return render_template('funmom.html')
@@ -636,12 +637,12 @@ def board():
 			pass
 		if choice == 'a':
 			try:
-				scheduler.add_job(exec_start, trigger='interval', seconds=int(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
+				scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
 			except:
 				pass
 		if choice == 'b':
 			try:
-				scheduler.add_job(exec_start2, trigger='interval', seconds=int(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
+				scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
 			except:
 				pass
 		return redirect(url_for('main.index'))
