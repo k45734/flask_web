@@ -367,7 +367,187 @@ def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 			else:
 				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)	
 		print(msg)
+		
+def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
+	Finallocation = location + '날씨' 
+	LocationInfo = "" 
+	NowTemp = "" 
+	CheckDust = [] 
+	url = 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=' + Finallocation 
+	hdr = {'User-Agent': ('mozilla/5.0 (windows nt 10.0; win64; x64) applewebkit/537.36 (khtml, like gecko) chrome/78.0.3904.70 safari/537.36')} 
+	req = requests.get(url, headers=hdr) 
+	html = req.text 
+	soup = bs(html, 'html.parser') 
+	# 오류 체크 
+	ErrorCheck = soup.find('span', {'class' : 'btn_select'}) 
+	if 'None' in str(ErrorCheck): 
+		print("Error! 지역 검색 오류!") 
+	else: 
+	# 지역 정보 
+		for i in soup.select('span[class=btn_select]'): 
+			LocationInfo = i.text 
+			# 현재 온도 
+			NowTemp = soup.find('span', {'class': 'todaytemp'}).text + soup.find('span', {'class' : 'tempmark'}).text[2:] 
+			# 날씨 캐스트 
+			WeatherCast = soup.find('p', {'class' : 'cast_txt'}).text 
+			# 오늘 오전온도, 오후온도, 체감온도 
+			TodayMorningTemp = soup.find('span', {'class' : 'min'}).text 
+			TodayAfternoonTemp = soup.find('span', {'class' : 'max'}).text 
+			TodayFeelTemp = soup.find('span', {'class' : 'sensible'}).text[5:] 
+			# 자외선 지수 
+			TodayUV = soup.find('span', {'class' : 'indicator'}).text[4:-2] + " " + soup.find('span', {'class' : 'indicator'}).text[-2:] 
+			# 미세먼지, 초미세먼지, 오존 지수 
+			CheckDust1 = soup.find('div', {'class': 'sub_info'}) 
+			CheckDust2 = CheckDust1.find('div', {'class': 'detail_box'}) 
+			for i in CheckDust2.select('dd'): 
+				CheckDust.append(i.text) 
+			FineDust = CheckDust[0][:-2] + " " + CheckDust[0][-2:] 
+			UltraFineDust = CheckDust[1][:-2] + " " + CheckDust[1][-2:] 
+			Ozon = CheckDust[2][:-2] + " " + CheckDust[2][-2:] 
+			# 내일 오전, 오후 온도 및 상태 체크 
+			tomorrowArea = soup.find('div', {'class': 'tomorrow_area'}) 
+			tomorrowCheck = tomorrowArea.find_all('div', {'class': 'main_info morning_box'}) 
+			# 내일 오전온도 
+			tomorrowMoring1 = tomorrowCheck[0].find('span', {'class': 'todaytemp'}).text 
+			tomorrowMoring2 = tomorrowCheck[0].find('span', {'class' : 'tempmark'}).text[2:] 
+			tomorrowMoring = tomorrowMoring1 + tomorrowMoring2 
+			# 내일 오전상태 
+			tomorrowMState1 = tomorrowCheck[0].find('div', {'class' : 'info_data'}) 
+			tomorrowMState2 = tomorrowMState1.find('ul', {'class' : 'info_list'}) 
+			tomorrowMState3 = tomorrowMState2.find('p', {'class' : 'cast_txt'}).text 
+			tomorrowMState4 = tomorrowMState2.find('div', {'class' : 'detail_box'}) 
+			tomorrowMState5 = tomorrowMState4.find('span').text.strip() 
+			tomorrowMState = tomorrowMState3 + " " + tomorrowMState5 
+			# 내일 오후온도 
+			tomorrowAfter1 = tomorrowCheck[1].find('p', {'class' : 'info_temperature'}) 
+			tomorrowAfter2 = tomorrowAfter1.find('span', {'class' : 'todaytemp'}).text 
+			tomorrowAfter3 = tomorrowAfter1.find('span', {'class' : 'tempmark'}).text[2:] 
+			tomorrowAfter = tomorrowAfter2 + tomorrowAfter3 
+			# 내일 오후상태 
+			tomorrowAState1 = tomorrowCheck[1].find('div', {'class' : 'info_data'}) 
+			tomorrowAState2 = tomorrowAState1.find('ul', {'class' : 'info_list'}) 
+			tomorrowAState3 = tomorrowAState2.find('p', {'class' : 'cast_txt'}).text 
+			tomorrowAState4 = tomorrowAState2.find('div', {'class' : 'detail_box'}) 
+			tomorrowAState5 = tomorrowAState4.find('span').text.strip() 
+			tomorrowAState = tomorrowAState3 + " " + tomorrowAState5 
+			msg1 = "=========================================\n"
+			msg2 = LocationInfo + " 날씨 정보입니다.\n" 
+			msg3 = "=========================================" 
+			msg4 = "\n현재온도: " + NowTemp
+			msg5 = "\n체감온도: " + TodayFeelTemp 
+			msg6 = "\n오전/오후 온도: " + TodayMorningTemp + "/" + TodayAfternoonTemp 
+			msg7 = "\n현재 상태: " + WeatherCast 
+			msg8 = "\n현재 자외선 지수: " + TodayUV 
+			msg9 = "\n현재 미세먼지 농도: " + FineDust 
+			msg10 = "\n현재 초미세먼지 농도: " + UltraFineDust
+			msg11 = "\n현재 오존 지수: " + Ozon 
+			msg12 = "\n=========================================\n" 
+			msg13 = LocationInfo + " 내일 날씨 정보입니다.\n" 
+			msg14 = "=========================================\n" 
+			msg15 = "내일 오전 온도: " + tomorrowMoring
+			msg16 = "\n내일 오전 상태: " + tomorrowMState 
+			msg17 = "\n내일 오후 온도: " + tomorrowAfter 
+			msg18 = "\n내일 오후 상태: " + tomorrowAState
+			msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6 + msg7 + msg8 + msg9 + msg10 + msg11 + msg12 + msg13 + msg14 + msg15 + msg16 + msg17 + msg18
+			#msg = LocationInfo + ' 날씨 정보입니다.\n' + '현재온도 : ' + NowTemp + '\n체감온도 : ' + TodayFeelTemp + '\n현재 미세먼지 : ' + FineDust
+			#\n현재온도 : {}\n체감온도 : {}\n현재 미세먼지 : {}',format(LocationInfo, NowTemp, TodayFeelTemp, FineDust)
+			if telgm == '0' :
+				bot = telepot.Bot(token = telgm_token)
+				if telgm_alim == '0':
+					bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
+				else :
+					bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
+				print(msg)
+				#sys.quit();
+			else:
+				print(msg)
 
+def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+
+	auth = 'http://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
+	rs = requests.get(auth,headers=header)
+	bs0bj = bs(rs.content.decode('utf-8','replace'),'lxml')
+	posts = bs0bj.findAll("div",{"class":"ani_result"})
+	for i in posts:
+		a = i.text
+		test = i.find('dd')
+		title = test.text
+		a2 = " ".join(title.split())
+		name = i.find('ul')
+		list = name.text
+		now = time.localtime()
+		test = "{}년{}월{}일{}시{}분{}초".format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+		a4 = a2 + '\n' + list
+		if telgm == '0' :
+			bot = telegram.Bot(token = telgm_token)
+			if telgm_alim == '0':
+				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=True)
+			else :
+				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=False)
+
+@bp2.route('unse')
+def unse():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:	
+		return render_template('unse.html')
+
+@bp2.route('unse_ok', methods=['POST'])
+def unse_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		try:
+			scheduler.add_job(exec_start6, trigger='interval', seconds=int(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+		except:
+				pass
+		return render_template('unse.html')
+		
+@bp2.route('sch_del', methods=['POST'])
+def sch_del():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		startname = request.form['startname']
+		try:
+			scheduler.remove_job(startname)
+		except:
+			pass
+		return redirect(url_for('main.index'))
+		
+@bp2.route('weather')
+def weather():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:	
+		return render_template('weather.html')
+
+@bp2.route('weather_ok', methods=['POST'])
+def weather_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		location = request.form['location']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		try:
+			scheduler.add_job(exec_start5, trigger='interval', seconds=int(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+		except:
+				pass
+		return render_template('weather.html')
+		
 @bp2.route('tracking')
 def tracking():
 	if not session.get('logFlag'):

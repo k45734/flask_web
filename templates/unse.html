@@ -12,7 +12,7 @@
 .tg .tg-0lax{text-align:left;vertical-align:top}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>아이들색칠공부다운로더</p>
+<center><h4>운세알림서비스</p>
 <table class="tg" style="undefined;table-layout: fixed; width: 600px">
 <colgroup>
 <col style="width: 109px">
@@ -23,23 +23,44 @@
 
 <thead>
   <tr>
-    <th class="tg-baqh" colspan="2">아이들색칠공부다운로더</th>
+    <th class="tg-baqh" colspan="2">운세알림서비스</th>
   </tr>
 </thead>
 <tbody>
   <tr>
+    <td class="tg-baqh">텔레그램알림</td>
+    <td class="tg-0lax"><select name="telgm">
+	<option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램무음</td>
+    <td class="tg-0lax"><select name="telgm_alim">
+    <option value="1">안함</option>
+    <option value="0">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램토큰</td>
+    <td class="tg-0lax"><input type="text" name="telgm_token" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램아이디</td>
+    <td class="tg-0lax"><input type="text" name="telgm_botid" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
     <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="number" name="start_time" value="1" style="width:100%; border: 0;" ></td>
+    <td class="tg-0lax"><input type="number" name="start_time" style="width:100%; border: 0;" ></td>
   </tr>
  <tr>
     <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="funmom" style="width:100%; border: 0;" ></td>
+    <td class="tg-0lax"><input type="text" name="startname" style="width:100%; border: 0;" ></td>
   </tr>
- 
 
 <tr>
 
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='funmom_ok';">
+<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='unse_ok';">
 <input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
 </th>
 </thead>

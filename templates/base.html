@@ -103,25 +103,30 @@ section {
 		<li><a href="{{ url_for('sub2.second') }}" aria-label="subemnu">게시판알림</a></li>
 		<li><a href="{{ url_for('sub2.funmom') }}" aria-label="subemnu">아이들색칠공부다운로더</a></li>
 		<li><a href="{{ url_for('sub2.tracking') }}" aria-label="subemnu">택배조회</a></li>
+		<li><a href="{{ url_for('sub2.weather') }}" aria-label="subemnu">날씨알림서비스</a></li>		
+		<li><a href="{{ url_for('sub2.unse') }}" aria-label="subemnu">운세알림서비스</a></li>		
+      </ul>
+    </li>
+	<li><a href="#">웹툰 메뉴</a>
+      <ul id="sub-menu">
+		<li><a href="{{ url_for('webtoon.second') }}" aria-label="subemnu">카피툰</a></li>
       </ul>
     </li>
 	{% if session.get('logFlag') %}
     <li><a href="#">관리 메뉴</a>
-      <ul id="sub-menu">
-        <li><a href="{{ url_for('webtoon.second') }}" aria-label="subemnu">웹툰다운로드</a></li>
+      <ul id="sub-menu">     
         <li><a href="{{ url_for('sub3.second') }}" aria-label="subemnu">프로그램</a></li>
         <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
         <li><a href="{{ url_for('main.log') }}" aria-label="subemnu">로그</a></li>
       <li><a href="{{ url_for('main.update') }}" aria-label="subemnu">업데이트</a></li>
       </ul>
-    </li>
-    
+    </li>   
     <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
     <li><a href="/logout">로그아웃</a></li>
 	{% else %}
     <li><a href="/login">로그인</a></li>
 	{% endif %}
-    
+    <li><a href="#">Ver 1.0</a></li>
   </ul>
 </nav>
 			
