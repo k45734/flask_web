@@ -52,10 +52,6 @@ from apscheduler.triggers.cron import CronTrigger
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
-#데이타베이스 없으면 생성
-conn = sqlite3.connect('./webtoon.db')
-conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-conn.close()
 scheduler = BackgroundScheduler()
 scheduler.start()
 
@@ -67,11 +63,19 @@ def second():
 	else:
 		#t_main = request.form['t_main']
 		return render_template('copytoon.html')
+
+@webtoon.route('toonkor')
+def second2():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		#t_main = request.form['t_main']
+		return render_template('toonkor.html') 
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
-	text = re.sub('[=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
+	text = re.sub('[\/:*?"<>|]', '', readData)
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
@@ -80,11 +84,12 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	req = session2.get(url,headers=header)	
 	time.sleep(random.uniform(2,5)) 
-	parse = re.sub('[-=.#/?:$}]', '', title)
-	fifi = dfolder + '/' + parse + '/' + subtitle + '/' + filename
+	parse = re.sub('[\/:*?"<>|]', '', title)
+	parse2 = re.sub('[\/:*?"<>|]', '', subtitle)
+	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
 	#폴더 없으면 만들다
-	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,subtitle)):
-		os.makedirs('{}/{}/{}'.format(dfolder,parse,subtitle))
+	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
+		os.makedirs('{}/{}/{}'.format(dfolder,parse,parse2))
 	if not os.path.exists('{}/{}'.format(dfolder,parse)):
 		os.makedirs('{}/{}'.format(dfolder,parse))
 	if not os.path.exists('{}'.format(dfolder)):
@@ -94,41 +99,55 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 			code.write(req.content)
 			
 def manazip(subtitle, title ,filename , dfolder, cbz):
-	parse = re.sub('[-=.#/?:$}]', '', title)
-	if os.path.isdir(dfolder + '/{}/{}'.format(parse,subtitle)):
+	parse = re.sub('[\/:*?"<>|]', '', title)
+	parse2 = re.sub('[\/:*?"<>|]', '', subtitle)
+	if os.path.isdir(dfolder + '/{}/{}'.format(parse,parse2)):
 		if cbz == '0':
-			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.cbz'.format(parse,subtitle), 'w')   
+			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.cbz'.format(parse,parse2), 'w')   
 		else:
-			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.zip'.format(parse,subtitle), 'w')   
-		for folder, subfolders, files in os.walk(dfolder + '/{}/{}'.format(parse,subtitle)):                     
+			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.zip'.format(parse,parse2), 'w')   
+		for folder, subfolders, files in os.walk(dfolder + '/{}/{}'.format(parse,parse2)):                     
 			for file in files:
 				if file.endswith('.jpg'):
-					fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), dfolder + '/{}/{}'.format(parse,subtitle)), compress_type = zipfile.ZIP_DEFLATED)                     
+					fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), dfolder + '/{}/{}'.format(parse,parse2)), compress_type = zipfile.ZIP_DEFLATED)                     
 		fantasy_zip.close()
-	shutil.rmtree(dfolder + '/{}/{}'.format(parse,subtitle))
+	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
 	print('{}  압축 완료'.format(parse))				
 
-def exec_start(t_main, compress, cbz):
-	#print(t_main)
-	#print(compress)
+def exec_start(t_main, code, packege):
+	print(packege)
 	maintitle = []
 	subtitle = []
 	urltitle = []
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	response = requests.get(t_main)
-	html = response.text
-	soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
-	for tag in soup:
-		url = tag.find('a')
-		maintitle.append(url["href"])
-		
+	if code == 'all':
+		response = requests.get(t_main)
+		html = response.text
+		soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
+		for tag in soup:
+			url = tag.find('a')
+			maintitle.append(url["href"])
+	else:
+		allcode = code.split('|')
+		print(allcode)
+		for i in allcode:
+			#aa = '/'+ i
+			#print(aa)
+			t_maincode = t_main + i
+			#print(t_maincode)
+			maintitle.append(i)
+			
 	for mainurl in maintitle:
-		url = mainurl.strip()
+		#url = mainurl.strip()
+		url = mainurl.lstrip()
 		wkt = url
 		wat = wkt.replace("/", "")
 		title = wat.replace(".html", "")
-		all = t_main + url
+		if code == 'all':
+			all = t_main + url
+		else:
+			all = t_main + '/' + url
 		#print(all)
 		response1 = session2.get(all,headers=header)
 		html = response1.text
@@ -165,12 +184,84 @@ def exec_start(t_main, compress, cbz):
 			cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
 	con.close()
+
+def exec_start2(t_main, code, packege):
+	maintitle = []
+	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
+	subtitle = []
+	urltitle = []
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	
-def exec_start2(t_main, compress, cbz):	
+	if code == 'all':
+		response = requests.get(t_main)
+		time.sleep(random.uniform(2,5)) 	
+		html = response.text
+		soup = bs(html, "html.parser").findAll("a",{"id":"title"})
+		for tag in soup:
+			latest = tag.text
+			test1 = latest.lstrip()
+			maintitle.append(test1)
+			#print(test1)
+	else:
+		allcode = code.split('|')
+		print(allcode)
+		for i in allcode:
+			print(i)
+			t_maincode = t_main + i
+			print(t_maincode)
+			maintitle.append(i)
+			
+	for mainurl in maintitle:	
+		test = mainurl
+		all = t_main + '/' + test
+		#print(all)
+		response1 = session.get(all,headers=header)
+		time.sleep(random.uniform(2,5)) 
+		html = response1.text
+		soup2 = bs(html, "html.parser").find("table",{"class":"web_list"})
+		try:
+			toonview_list = soup2.findAll("tr",{"class":"tborder"})
+			for post in toonview_list:
+				post = post.find("td",{"class":"content__title"})
+				title = post.get_text().lstrip()
+				url3 = post.attrs['data-role']
+				wat = url3.replace("/", "")
+				title = wat.replace(".html", "")
+				urltitle.append(url3)
+				subtitle.append(title)	
+				maintitle2.append(mainurl)
+				print(title)
+				print(url3)
+				print(mainurl)					
+		except:
+			pass
+		
+	#앞에서 크롤링한 정보를 DB에 저장한다.
+	for a,b,c in zip(maintitle2,subtitle,urltitle):
+		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+		print(a, b , c ,d)
+		con = sqlite3.connect("./webtoon.db")
+		cur = con.cursor()
+		sql = "select * from database2 where urltitle = ?"
+		cur.execute(sql, (c,))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			con.commit()
+	con.close()	
+
+#공통 다운로드	
+def godown(t_main, compress, cbz, packege):	
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect("./webtoon.db")
 	cur = con.cursor()
-	sql = "select * from database"
+	if packege == 'toonkor':
+		sql = "select * from database2"
+	else:
+		sql = "select * from database"
 	cur.execute(sql)
 	row = cur.fetchall()
 	
@@ -182,6 +273,7 @@ def exec_start2(t_main, compress, cbz):
 		url = i[2]
 		complte = i[3]
 		wwwkt = t_main + url
+		print(wwwkt)
 		if complte == 'True':
 			pass
 		else:
@@ -189,21 +281,30 @@ def exec_start2(t_main, compress, cbz):
 			html = response1.text				
 			print("{} 의 {} 을 시작합니다".format(title, subtitle))		
 			soup = bs(html, "html.parser")
-			obj = soup.find("div",{"id":"bo_v_con"})
-			taglist = obj.findAll("img")
+			if packege == 'toonkor':
+				tt = re.search(r'var toon_img = (.*?);', html, re.S)
+				json_string = tt.group(1)
+				obj = str(base64.b64decode(json_string), encoding='utf-8')
+				taglist = re.compile(r'src="(.*?)"').findall(obj)				
+			else:
+				obj = soup.find("div",{"id":"bo_v_con"})
+				taglist = obj.findAll("img")
 			urls = []
-				
+			print(taglist)	
 			for img in taglist:
-				if img["src"].endswith("jpg"):
-					urls.append(str(img["src"]))
-					#print(img["src"])
+				if packege == 'toonkor':
+					urls.append(img)
+				else:
+					if img["src"].endswith("jpg"):
+						urls.append(str(img["src"]))
+						#print(img["src"])
 
 			jpeg_no = 00
 				
 			timestr = time.strftime("%Y%m%d-%H%M%S-")
 			parse2 = re.sub('[-=.#/?:$}]', '', title)
 			parse = cleanText(parse2)
-			dfolder = os.path.dirname(os.path.abspath(__file__)) + '/copytoon'
+			dfolder = os.path.dirname(os.path.abspath(__file__)) + '/' + packege
 			for url in urls:
 				#print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
@@ -226,7 +327,10 @@ def exec_start2(t_main, compress, cbz):
 			#마지막 실행까지 작업안했던 결과물 저장
 			con = sqlite3.connect("./webtoon.db")
 			cur = con.cursor()
-			sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
+			if packege == 'toonkor':
+				sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+			else:
+				sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
 			cur.execute(sql,('True',subtitle))
 			con.commit()
 				
@@ -237,28 +341,80 @@ def copytoon_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'copytoon'
 		t_main = request.form['t_main']
+		code = request.form['code']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz] )
+		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
 		print(t_main)
 		print(compress)
 		print(cbz)
 		return redirect(url_for('main.index'))
-
+		
 @webtoon.route('copytoon_down', methods=['POST'])
 def copytoon_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'copytoon'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz] )
+		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		print(t_main)
+		print(compress)
+		print(cbz)
+		return redirect(url_for('main.index'))
+
+@webtoon.route('toonkor_list', methods=['POST'])
+def toonkor_list():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'toonkor'
+		t_main = request.form['t_main']
+		code = request.form['code']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
+		print(t_main)
+		print(compress)
+		print(cbz)
+		return redirect(url_for('main.index'))
+		
+@webtoon.route('toonkor_down', methods=['POST'])
+def toonkor_down():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'toonkor'
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
 		print(t_main)
 		print(compress)
 		print(cbz)
