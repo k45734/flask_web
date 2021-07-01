@@ -79,7 +79,7 @@ def cleanText(readData):
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
-	print("시작")
+	#print("시작")
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	req = session2.get(url,headers=header)	
@@ -115,7 +115,7 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 	print('{}  압축 완료'.format(parse))				
 
 def exec_start(t_main, code, packege):
-	print(packege)
+	#print(packege)
 	maintitle = []
 	subtitle = []
 	urltitle = []
@@ -130,7 +130,7 @@ def exec_start(t_main, code, packege):
 			maintitle.append(url["href"])
 	else:
 		allcode = code.split('|')
-		print(allcode)
+		#print(allcode)
 		for i in allcode:
 			#aa = '/'+ i
 			#print(aa)
@@ -205,11 +205,11 @@ def exec_start2(t_main, code, packege):
 			#print(test1)
 	else:
 		allcode = code.split('|')
-		print(allcode)
+		#print(allcode)
 		for i in allcode:
-			print(i)
+			#print(i)
 			t_maincode = t_main + i
-			print(t_maincode)
+			#print(t_maincode)
 			maintitle.append(i)
 			
 	for mainurl in maintitle:	
@@ -231,16 +231,16 @@ def exec_start2(t_main, code, packege):
 				urltitle.append(url3)
 				subtitle.append(title)	
 				maintitle2.append(mainurl)
-				print(title)
-				print(url3)
-				print(mainurl)					
+				#print(title)
+				#print(url3)
+				#print(mainurl)					
 		except:
 			pass
 		
 	#앞에서 크롤링한 정보를 DB에 저장한다.
 	for a,b,c in zip(maintitle2,subtitle,urltitle):
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-		print(a, b , c ,d)
+		#print(a, b , c ,d)
 		con = sqlite3.connect("./webtoon.db")
 		cur = con.cursor()
 		sql = "select * from database2 where urltitle = ?"
