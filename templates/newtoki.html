@@ -3,7 +3,7 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>툰코 다운로더</p>
+<center><h4>뉴토끼 다운로더</p>
 <table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
 <center>
 <form method="POST">
@@ -11,14 +11,21 @@
 <thead>
   <tr>
     <th align="center" class="tg-baqh">툰코주소</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://tkor.band" placeholder="https://tkor.band" style="width:100%; border: 0;" ></td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://newtoki95.com" placeholder="https://newtoki95.com" style="width:100%; border: 0;" ></td>
+  </tr>
+   <tr>
+    <th align="center" class="tg-baqh">장르</td>
+    <td align="center" class="tg-baqh" colspan="2"><select name="genre">
+    <option value="일반웹툰">일반웹툰</option>
+<option value="성인웹툰">성인웹툰</option>
+<option value="BL%2FGL">BL%2FGL</option></td>
   </tr>
    <tr>
     <th align="center" class="tg-baqh">만화목록</td>
     <td align="center" class="tg-baqh" colspan="2">
 	<input type="text" name="code" value="all" placeholder="전체다운로드시에는 all 입력하며 구분자는 |" style="width:100%; border: 0;" >
 	<p align="center"><font size="2px">전체다운로드시에는 all 입력</font></p>
-	<p align="center"><font size="2px">코드입력시에는 예) 나-혼자만-레벨업<font color='red'>|</font>귀환자의-마법은-특별해야-합니다 입력</font></p>
+	<p align="center"><font size="2px">코드입력시에는 예) 146194<font color='red'>|</font>12363602 입력</font></p>
 	</td>
   </tr>
  <tr>
@@ -37,7 +44,7 @@
     <option value="1">안함</option></td></tr>
  <tr>
     <th align="center" class="tg-baqh">스케줄이름</td>
-    <td align="center" class="tg-0lax"><input type="text" name="startname" value="toonkor" style="width:100%; border: 0;" ></td>
+    <td align="center" class="tg-0lax"><input type="text" name="startname" value="newtoki" style="width:100%; border: 0;" ></td>
   </tr>
    <tr>
     <th align="center" class="tg-baqh">실행주기</td>
@@ -47,8 +54,8 @@
 <tr>
 <th align="center" colspan="8">
 <p align="center">스케줄이름은 동시사용이 않됩니다.</p>
-<input type="submit" value="목록갱신시작" onclick="javascript: form.action='toonkor_list';">
-<input type="submit" value="다운로드시작"  onclick="javascript: form.action='toonkor_down';">
+<input type="submit" value="목록갱신시작" onclick="javascript: form.action='newtoki_list';">
+<input type="submit" value="다운로드시작"  onclick="javascript: form.action='newtoki_down';">
 <input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
 </th>
 </thead>
