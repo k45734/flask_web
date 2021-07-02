@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>네이버웹툰 다운로더</p>
+<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form method="POST">
+
+<thead>
+  <tr>
+    <th align="center" class="tg-baqh">네이버웹툰</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://naver.com" placeholder="https://naver.com" style="width:100%; border: 0;" ></td>
+  </tr>
+    <tr>
+    <th align="center" class="tg-baqh">만화목록</td>
+    <td align="center" class="tg-baqh" colspan="2">
+	<input type="text" name="code" value="all" placeholder="전체다운로드시에는 all 입력하며 구분자는 |" style="width:100%; border: 0;" >
+	<p align="center"><font size="2px">전체다운로드시에는 all 입력</font></p>
+	<p align="center"><font size="2px">코드입력시에는 예) 183559<font color='red'>|</font>703846 입력</font></p>
+	</td>
+  </tr>
+ <tr>
+    <th align="center" class="tg-baqh">압축여부</td>
+    <td align="center" class="tg-baqh" colspan="2">
+  
+  <select name="compress">
+    <option value="0">사용</option>
+    <option value="1">안함</option></td></tr>
+ <tr>
+    <th align="center" class="tg-baqh">CBZ사용압축여부</td>
+    <td align="center" class="tg-baqh" colspan="2">
+  
+  <select name="cbz">
+    <option value="0">사용</option>
+    <option value="1">안함</option></td></tr>
+ <tr>
+    <th align="center" class="tg-baqh">스케줄이름</td>
+    <td align="center" class="tg-0lax"><input type="text" name="startname" value="naver" style="width:100%; border: 0;" ></td>
+  </tr>
+   <tr>
+    <th align="center" class="tg-baqh">실행주기</td>
+    <td align="center" class="tg-0lax"><input type="text" name="start_time" value="*/1 * * * *" style="width:100%; border: 0;" ></td>
+  </tr>
+<tbody>
+<tr>
+<th align="center" colspan="8"><p align="center">스케줄이름은 동시사용이 않됩니다.</p><input type="submit" value="목록갱신시작" onclick="javascript: form.action='naver_list';">
+<input type="submit" value="다운로드시작"  onclick="javascript: form.action='naver_down';">
+<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
+</th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+{% endblock %}

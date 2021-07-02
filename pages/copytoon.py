@@ -79,6 +79,14 @@ def second3():
 	else:
 		#t_main = request.form['t_main']
 		return render_template('newtoki.html')
+
+@webtoon.route('naver')
+def second4():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		#t_main = request.form['t_main']
+		return render_template('naver.html')
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -340,6 +348,94 @@ def exec_start3(t_main,code,packege,genre):
 				con.commit()
 		con.close()	
 		
+def exec_start4(code,packege):
+	packege = 'naver'
+	maintitle = []
+	subtitle = []
+	urltitle = []
+	titleid = []
+
+	with requests.Session() as s:
+		url = 'https://comic.naver.com/webtoon/weekday.nhn'
+		response = s.get(url)
+		html = response.text
+		soup = bs(html, "html.parser")
+		tags = soup.findAll("div",{"class":"thumb"})
+		if code == 'all':
+			#전체 웹툰코드를 받아온다. 
+			for tag in tags:		
+				href = tag.find('a')['href']
+				title_id = href.split('titleId=')[1].split('&')[0].strip()
+				titleid.append(title_id)
+		else:
+			allcode = code.split('|')
+			#print(allcode)
+			for i in allcode:
+				#print(i)
+				t_maincode = i
+				#print(t_maincode)
+				titleid.append(i)			
+
+		for i in titleid:
+			#print(i)
+			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
+			response = s.get(suburl)
+			html = response.text
+			soup = bs(html, "html.parser")
+			#대제목을 가져온다.
+			tags = soup.find("div",{"class":"detail"})
+			#for i in tags:
+				#대제목을 찾는다.
+			test = tags('h2')
+			tt = re.sub('<span.*?>.*?</h2>', '', str(test), 0, re.I|re.S)
+			tt2 = re.sub('<h2>', '', str(tt), 0, re.I|re.S)
+			pattern = re.compile(r'\s+')
+			tt2 = re.sub(pattern, '', tt2)
+			tt2 = tt2.replace("[", "")
+			tt2 = tt2.replace("]", "")
+			for p in range(1, 1001):
+				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
+				response = s.get(pageurl)
+				html = response.text
+				soup = bs(html, "html.parser")
+				sublist = soup.findAll("td",{"class":"title"})
+				pageend = soup.find("a",{"class":"next"})
+	
+				if pageend:
+					for ii in sublist:
+						test = ii.find('a')['href']
+						tests = ii.text
+						test2 = tests.strip()
+						maintitle.append(tt2)
+						subtitle.append(test2)
+						urltitle.append(test)
+						#print('{} {} {}'.format(tt2,test2,test))
+				else:
+					for ii in sublist:
+						test = ii.find('a')['href']
+						tests = ii.text
+						test2 = tests.strip()
+						maintitle.append(tt2)
+						subtitle.append(test2)
+						urltitle.append(test)
+						#print('{} {} {}'.format(tt2,test2,test))
+					break
+				
+	#앞에서 크롤링한 정보를 DB에 저장한다.
+	for a,b,c in zip(maintitle,subtitle,urltitle):
+		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+		#print(a, b , c ,d)
+		con = sqlite3.connect("./webtoon.db")
+		cur = con.cursor()
+		sql = "select * from database4 where urltitle = ?"
+		cur.execute(sql, (c,))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			con.commit()
+	con.close()					
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege):	
 	#DB 목록을 받아와 다운로드를 진행한다.
@@ -349,6 +445,8 @@ def godown(t_main, compress, cbz, packege):
 		sql = "select * from database2"
 	elif packege == 'newtoki':
 		sql = "select * from database3"
+	elif packege == 'naver':
+		sql = "select * from database4"
 	else:
 		sql = "select * from database"
 	cur.execute(sql)
@@ -361,8 +459,10 @@ def godown(t_main, compress, cbz, packege):
 		subtitle = i[1]
 		url = i[2]
 		complte = i[3]
-		wwwkt = t_main + url
-		print(wwwkt)
+		if packege == 'naver':
+			wwwkt = 'https://comic.naver.com' + url
+		else:
+			wwwkt = t_main + url
 		if complte == 'True':
 			pass
 		else:
@@ -380,11 +480,16 @@ def godown(t_main, compress, cbz, packege):
 				html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 				#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
+			elif packege == 'naver':
+				#print(soup)
+				obj = soup.find("div",{"class":"wt_viewer"})
+				taglist = obj.findAll("img")
+				#print(obj)
 			else:
 				obj = soup.find("div",{"id":"bo_v_con"})
 				taglist = obj.findAll("img")
 			urls = []
-			print(taglist)	
+			#print(taglist)	
 			for img in taglist:
 				if packege == 'toonkor':
 					urls.append(img)
@@ -409,6 +514,8 @@ def godown(t_main, compress, cbz, packege):
 				elif 'https://newtoki13.org/' in url:
 					url_to_image(subtitle, title, url, filename, dfolder)
 				elif 'https://cloudflare.africa.com/' in url:
+					url_to_image(subtitle,title, url, filename, dfolder)
+				elif 'https://image-comic.pstatic.net' in url:
 					url_to_image(subtitle,title, url, filename, dfolder)
 				else:
 					domain = t_main + url
@@ -438,6 +545,41 @@ def godown(t_main, compress, cbz, packege):
 				
 		con.close()
 
+@webtoon.route('naver_list', methods=['POST'])
+def naver_list():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'naver'
+		code = request.form['code']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		return redirect(url_for('main.index'))
+		
+@webtoon.route('naver_down', methods=['POST'])
+def naver_down():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'naver'
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		return redirect(url_for('main.index'))
+		
 @webtoon.route('newtoki_list', methods=['POST'])
 def newtoki_list():
 	if session.get('logFlag') != True:
