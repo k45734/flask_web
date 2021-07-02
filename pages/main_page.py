@@ -139,46 +139,62 @@ def log():
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
-		filepath = './log/flask.log'
-		with open(filepath, 'rt', encoding='utf-8') as fp:
-			line = fp.readline()
-			cnt = 1
-			tltl = []
-			while line:
-				test = line.strip()
+		if platform.system() == 'Windows':
+			filepath = './log/flask.log'
+			with open(filepath, 'rt', encoding='cp949') as fp:
 				line = fp.readline()
-				tltl.append(test)
-				cnt += 1
+				cnt = 1
+				tltl = []
+				while line:
+					test = line.strip()
+					line = fp.readline()
+					tltl.append(test)
+					cnt += 1
+		
+		else:
+			filepath = './log/flask.log'
+			with open(filepath, 'rt', encoding='utf-8') as fp:
+				line = fp.readline()
+				cnt = 1
+				tltl = []
+				while line:
+					test = line.strip()
+					line = fp.readline()
+					tltl.append(test)
+					cnt += 1
 			return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
 def update(file_name = None):
-	url = "https://github.com/k45734/flask_web/archive/refs/heads/main.zip"
-	
-	if not file_name:
-		file_name = url.split('/')[-1]
+	if not session.get('logFlag'):
+		return render_template('login.html')
+	else:
+		url = "https://github.com/k45734/flask_web/archive/refs/heads/main.zip"
+		
+		if not file_name:
+			file_name = url.split('/')[-1]
 
-	with open(file_name, "wb") as file:   
-        	response = get(url)               
-        	file.write(response.content)      
-	fantasy_zip = zipfile.ZipFile('./main.zip')
-	fantasy_zip.extractall('./')
-	fantasy_zip.close()
-	os.remove('./flask_web-main/login.db')
-	org = './flask_web-main/app.py'
-	org2 = './flask_web-main/pages'
-	org3 = './flask_web-main/templates'
-	#org4 = './flask_web-main/webtoon'
-	new = './'
-	new2 = './pages'
-	new3 = './templates'
-	#new3 = './webtoon'
-	shutil.copy(org, new)
-	copy_tree(org2, new2)
-	copy_tree(org3, new3)
-	#copy_tree(org4, new4)
-	os.remove('./main.zip')
-	shutil.rmtree ('./flask_web-main')
-	os.system("flask run --reload")
-	#os.system("flask run ---no-reload")
-	return redirect(url_for('main.index'))
+		with open(file_name, "wb") as file:   
+				response = get(url)               
+				file.write(response.content)      
+		fantasy_zip = zipfile.ZipFile('./main.zip')
+		fantasy_zip.extractall('./')
+		fantasy_zip.close()
+		os.remove('./flask_web-main/login.db')
+		org = './flask_web-main/app.py'
+		org2 = './flask_web-main/pages'
+		org3 = './flask_web-main/templates'
+		#org4 = './flask_web-main/webtoon'
+		new = './'
+		new2 = './pages'
+		new3 = './templates'
+		#new3 = './webtoon'
+		shutil.copy(org, new)
+		copy_tree(org2, new2)
+		copy_tree(org3, new3)
+		#copy_tree(org4, new4)
+		os.remove('./main.zip')
+		shutil.rmtree ('./flask_web-main')
+		os.system("flask run --reload")
+		#os.system("flask run ---no-reload")
+		return redirect(url_for('main.index'))
