@@ -292,8 +292,15 @@ def exec_start3(t_main,code,packege,genre):
 						#print(a_href)
 
 		else:	
-			main_url = t_main + '/webtoon/' + code	
-			main_list.append(main_url)
+			allcode = code.split('|')
+			#print(allcode)
+			for i in allcode:
+				main_url = t_main + '/webtoon/' + i	
+				main_list.append(main_url)
+				#print(i)
+				#t_maincode = t_main + i
+				#print(t_maincode)
+				#maintitle.append(i)
 				
 		#print(main_url)	
 			
