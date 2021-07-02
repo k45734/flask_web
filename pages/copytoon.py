@@ -557,11 +557,11 @@ def godown(t_main, compress, cbz, packege):
 				soup = bs(html, "html.parser")					
 			else:
 				try:
-					data = requests.get(wwwkt,headers=headers).json()
+					data = requests.get(wwwkt,headers=header).json()
 					ass = data['result']['message']
 					status = data['result']['status']
 				except:
-					data = requests.get(wwwkt,headers=headers).json()
+					data = requests.get(wwwkt,headers=header).json()
 					ass = data['result']['message']
 					status = data['result']['status']				
 			print("{} 의 {} 을 시작합니다".format(title, subtitle))
