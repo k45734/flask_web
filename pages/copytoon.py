@@ -714,12 +714,12 @@ def daum_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'daum'
-		#t_main = request.form['t_main']
-		#compress = request.form['compress']
-		#cbz = request.form['cbz']
-		#startname = request.form['startname']
-		#start_time = request.form['start_time']
-		#scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('newtoki_list', methods=['POST'])
