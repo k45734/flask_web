@@ -652,6 +652,41 @@ def godown(t_main, compress, cbz, packege):
 					
 			con.close()
 
+@webtoon.route('daum_list', methods=['POST'])
+def daum_list():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'daum'
+		code = request.form['code']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		return redirect(url_for('main.index'))
+		
+@webtoon.route('daum_down', methods=['POST'])
+def daum_down():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		conn = sqlite3.connect('./webtoon.db')
+		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
+		conn.close()
+		packege = 'daum'
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		return redirect(url_for('main.index'))
+		
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
 	if session.get('logFlag') != True:
@@ -679,41 +714,6 @@ def naver_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'naver'
-		t_main = request.form['t_main']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
-		return redirect(url_for('main.index'))
-
-@webtoon.route('daum_list', methods=['POST'])
-def daum_list():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
-		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
-		packege = 'daum'
-		code = request.form['code']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
-		return redirect(url_for('main.index'))
-		
-@webtoon.route('daum_down', methods=['POST'])
-def daum_down():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		conn = sqlite3.connect('./webtoon.db')
-		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
-		packege = 'daum'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
