@@ -427,6 +427,10 @@ def godown(t_main, compress, cbz, packege):
 			cur = con.cursor()
 			if packege == 'toonkor':
 				sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+			elif packege == 'newtoki':
+				sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
+			elif packege == 'naver':
+				sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
 			else:
 				sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
 			cur.execute(sql,('True',subtitle))
