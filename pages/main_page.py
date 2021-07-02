@@ -179,5 +179,6 @@ def update(file_name = None):
 	#copy_tree(org4, new4)
 	os.remove('./main.zip')
 	shutil.rmtree ('./flask_web-main')
-	os.system("flask run --no-restart")
+	os.system("flask run --reload")
+	#os.system("flask run ---no-reload")
 	return redirect(url_for('main.index'))
