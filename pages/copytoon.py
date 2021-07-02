@@ -87,7 +87,14 @@ def second4():
 	else:
 		#t_main = request.form['t_main']
 		return render_template('naver.html')
-		
+
+@webtoon.route('daum')
+def second5():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		#t_main = request.form['t_main']
+		return render_template('daum.html')		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
