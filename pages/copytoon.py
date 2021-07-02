@@ -94,7 +94,8 @@ def second5():
 		return redirect(url_for('main.index'))
 	else:
 		#t_main = request.form['t_main']
-		return render_template('daum.html')		
+		return render_template('daum.html')
+		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
@@ -279,6 +280,7 @@ def exec_start2(t_main, code, packege):
 			cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
 	con.close()	
+	
 def exec_start3(t_main,code,packege,genre):
 	print(genre)
 	with requests.Session() as s:
@@ -442,7 +444,78 @@ def exec_start4(code,packege):
 		else:
 			cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
-	con.close()					
+	con.close()	
+	
+def exec_start5(code,packege):
+	packege = 'daum'
+	maintitle = []
+	subtitle = []
+	urltitle = []
+	titleid = []
+	episode_id = []
+	headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+    'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language' : 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Referer' : ''
+	} 
+
+	with requests.Session() as s:
+		url = 'http://webtoon.daum.net/data/pc/webtoon/list_serialized/%s' % datetime.now().strftime('%A').lower()[0:3]
+		data = requests.get(url,headers=headers).json()
+		status = data['result']['status']
+		ass = data['result']['message']
+		#print(ass)
+		#전체 웹툰코드를 받아온다. 
+		if code == 'all':				
+			if ass != 'you are not login':
+				for item in data['data']:
+					nickname = item['nickname']
+					titleid.append(nickname)
+			else:
+				print("test")
+				pass
+		else:
+			allcode = code.split('|')
+			for i in allcode:
+				titleid.append(i)
+				
+		for i in titleid:
+			time.sleep(random.uniform(2,10)) 
+			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
+			data = requests.get(url,headers=headers).json()
+			status = data['result']['status']
+			ass = data['result']['message']
+			#print(ass)
+			if ass != 'you are not login':
+				test = data['data']['webtoon']['title']
+				for epi in data['data']['webtoon']['webtoonEpisodes']:
+					tt = epi['id']
+					sub = epi['title']
+					maintitle.append(test)
+					subtitle.append(sub)
+					urltitle.append(tt)
+					#print('{} 의 {}'.format(test,sub))
+			else:
+				print("test1")
+				pass
+				
+		#앞에서 크롤링한 정보를 DB에 저장한다.
+		for a,b,c in zip(maintitle,subtitle,urltitle):
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+			#print(a, b , c)
+			con = sqlite3.connect("./webtoon.db")
+			cur = con.cursor()
+			sql = "select * from database4 where urltitle = ?"
+			cur.execute(sql, (c,))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+				con.commit()
+		con.close()		
+		
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege):	
 	#DB 목록을 받아와 다운로드를 진행한다.
@@ -454,6 +527,8 @@ def godown(t_main, compress, cbz, packege):
 		sql = "select * from database3"
 	elif packege == 'naver':
 		sql = "select * from database4"
+	elif packege == 'daum':
+		sql = "select * from database5"
 	else:
 		sql = "select * from database"
 	cur.execute(sql)
@@ -468,15 +543,28 @@ def godown(t_main, compress, cbz, packege):
 		complte = i[3]
 		if packege == 'naver':
 			wwwkt = 'https://comic.naver.com' + url
+		elif packege == 'daum':
+			time.sleep(random.uniform(2,10)) 
+			wwwkt = 'http://webtoon.daum.net/data/pc/webtoon/viewer_images/%s' % (url)
 		else:
 			wwwkt = t_main + url
 		if complte == 'True':
-			pass
+			continue
 		else:
-			response1 = session2.get(wwwkt,headers=header)
-			html = response1.text				
-			print("{} 의 {} 을 시작합니다".format(title, subtitle))		
-			soup = bs(html, "html.parser")
+			if packege != 'daum':
+				response1 = session2.get(wwwkt,headers=header)
+				html = response1.text
+				soup = bs(html, "html.parser")					
+			else:
+				try:
+					data = requests.get(wwwkt,headers=headers).json()
+					ass = data['result']['message']
+					status = data['result']['status']
+				except:
+					data = requests.get(wwwkt,headers=headers).json()
+					ass = data['result']['message']
+					status = data['result']['status']				
+			print("{} 의 {} 을 시작합니다".format(title, subtitle))
 			if packege == 'toonkor':
 				tt = re.search(r'var toon_img = (.*?);', html, re.S)
 				json_string = tt.group(1)
@@ -488,25 +576,34 @@ def godown(t_main, compress, cbz, packege):
 				#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 			elif packege == 'naver':
-				#print(soup)
 				obj = soup.find("div",{"class":"wt_viewer"})
 				taglist = obj.findAll("img")
-				#print(obj)
+			elif packege == 'daum':
+				pass
 			else:
 				obj = soup.find("div",{"id":"bo_v_con"})
 				taglist = obj.findAll("img")
 			urls = []
-			#print(taglist)	
-			for img in taglist:
-				if packege == 'toonkor':
-					urls.append(img)
-				elif packege == 'newtoki':
-					urls.append(img)
+			if packege != 'daum':	
+				for img in taglist:
+					if packege == 'toonkor':
+						urls.append(img)
+					elif packege == 'newtoki':
+						urls.append(img)
+					else:
+						if img["src"].endswith("jpg"):
+							urls.append(str(img["src"]))
+							#print(img["src"])
+				
+			else:
+				if ass != 'you are not login':
+					for w in data['data']:
+						img = w['url']
+						#print(img)
+						urls.append(img)
 				else:
-					if img["src"].endswith("jpg"):
-						urls.append(str(img["src"]))
-						#print(img["src"])
-
+					print("유료")
+					continue
 			jpeg_no = 00
 				
 			timestr = time.strftime("%Y%m%d-%H%M%S-")
@@ -535,22 +632,25 @@ def godown(t_main, compress, cbz, packege):
 				else:
 					pass
 			except:
-				pass
-			#마지막 실행까지 작업안했던 결과물 저장
-			con = sqlite3.connect("./webtoon.db")
-			cur = con.cursor()
-			if packege == 'toonkor':
-				sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
-			elif packege == 'newtoki':
-				sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
-			elif packege == 'naver':
-				sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
+				print("종료")
 			else:
-				sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
-			cur.execute(sql,('True',subtitle))
-			con.commit()
-				
-		con.close()
+				#마지막 실행까지 작업안했던 결과물 저장
+				con = sqlite3.connect("./webtoon.db")
+				cur = con.cursor()
+				if packege == 'toonkor':
+					sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+				elif packege == 'newtoki':
+					sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
+				elif packege == 'naver':
+					sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
+				elif packege == 'daum':
+					sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
+				else:
+					sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
+				cur.execute(sql,('True',subtitle))
+				con.commit()
+					
+			con.close()
 
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
@@ -597,12 +697,12 @@ def daum_list():
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'daum'
-		#code = request.form['code']
-		#compress = request.form['compress']
-		#cbz = request.form['cbz']
-		#startname = request.form['startname']
-		#start_time = request.form['start_time']
-		#scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		code = request.form['code']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('daum_down', methods=['POST'])
