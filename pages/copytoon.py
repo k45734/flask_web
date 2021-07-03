@@ -124,7 +124,7 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	parse = cleanText(title2)
 	parse2 = cleanText(subtitle2)
 	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
-	print(fifi)
+	#print(fifi)
 	#폴더 없으면 만들다
 	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
 		os.makedirs('{}/{}/{}'.format(dfolder,parse,parse2))
@@ -599,7 +599,7 @@ def godown(t_main, compress, cbz, packege):
 				taglist = obj.findAll("img")
 			urls = []
 			if packege != 'daum':	
-				print(taglist)
+				#print(taglist)
 				for img in taglist:
 					if packege == 'toonkor':
 						urls.append(img)
@@ -626,7 +626,7 @@ def godown(t_main, compress, cbz, packege):
 			parse = cleanText(parse2)
 			dfolder = os.path.dirname(os.path.abspath(__file__)) + '/' + packege
 			for url in urls:
-				print(url)
+				#print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
 				if 'https://' in url:
 					url_to_image(subtitle, title, url, filename, dfolder)
