@@ -103,13 +103,13 @@ def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
 	#text = re.sub('[-_\/:*?"<>|]', '', readData)
-	text = text.replace('/', '')
+	text = readData.replace('/', '')
 	text = re.sub('[\\/:*?\"<>|]', '', text).strip()
 	text = re.sub("\s{2,}", ' ', text)
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
-	print(url)
+	#print(url)
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	time.sleep(random.uniform(2,5)) 
@@ -124,6 +124,7 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	parse = cleanText(title2)
 	parse2 = cleanText(subtitle2)
 	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
+	print(fifi)
 	#폴더 없으면 만들다
 	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
 		os.makedirs('{}/{}/{}'.format(dfolder,parse,parse2))
@@ -598,6 +599,7 @@ def godown(t_main, compress, cbz, packege):
 				taglist = obj.findAll("img")
 			urls = []
 			if packege != 'daum':	
+				print(taglist)
 				for img in taglist:
 					if packege == 'toonkor':
 						urls.append(img)
@@ -624,7 +626,7 @@ def godown(t_main, compress, cbz, packege):
 			parse = cleanText(parse2)
 			dfolder = os.path.dirname(os.path.abspath(__file__)) + '/' + packege
 			for url in urls:
-				#print(url)
+				print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
 				if 'https://' in url:
 					url_to_image(subtitle, title, url, filename, dfolder)
