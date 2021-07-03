@@ -47,7 +47,7 @@ import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.jobstores.base import JobLookupError
+from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -680,7 +680,10 @@ def daum_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		try:
+			scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		except ConflictingIdError:
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('daum_down', methods=['POST'])
@@ -697,7 +700,10 @@ def daum_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		try:
+			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		except ConflictingIdError:
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('naver_list', methods=['POST'])
@@ -715,7 +721,10 @@ def naver_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		try:
+			scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+		except ConflictingIdError:
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('naver_down', methods=['POST'])
@@ -732,7 +741,10 @@ def naver_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		try:
+			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		except ConflictingIdError:	
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('newtoki_list', methods=['POST'])
@@ -752,10 +764,10 @@ def newtoki_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,genre] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,genre] )
+		except ConflictingIdError:	
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('newtoki_down', methods=['POST'])
@@ -773,10 +785,10 @@ def newtoki_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		except ConflictingIdError:	
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('copytoon_list', methods=['POST'])
@@ -795,10 +807,10 @@ def copytoon_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
+		except ConflictingIdError:	
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('copytoon_down', methods=['POST'])
@@ -815,10 +827,10 @@ def copytoon_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		except ConflictingIdError:	
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 
 @webtoon.route('toonkor_list', methods=['POST'])
@@ -837,10 +849,10 @@ def toonkor_list():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
+		except ConflictingIdError:
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('toonkor_down', methods=['POST'])
@@ -857,10 +869,10 @@ def toonkor_down():
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
-		scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
-		print(t_main)
-		print(compress)
-		print(cbz)
+		try:
+			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+		except ConflictingIdError:
+			scheduler.modify_job(startname)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('sch_del', methods=['POST'])
