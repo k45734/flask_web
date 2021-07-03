@@ -27,7 +27,7 @@ conn = sqlite3.connect('database.db')
 conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 #print ("Table created successfully")
 conn.close()
-job_defaults = { 'max_instances': 20 }
+job_defaults = { 'max_instances': 1 }
 scheduler3 = BackgroundScheduler(job_defaults=job_defaults)
 scheduler3.start()
 
