@@ -616,16 +616,12 @@ def godown(t_main, compress, cbz, packege):
 			for url in urls:
 				#print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
-				if 'https://zerotoon.com/' in url:
-					pass
-				elif 'https://newtoki13.org/' in url:
+				if 'https://' in url:
 					url_to_image(subtitle, title, url, filename, dfolder)
-				elif 'https://cloudflare.africa.com/' in url:
-					url_to_image(subtitle,title, url, filename, dfolder)
-				elif 'https://image-comic.pstatic.net' in url:
-					url_to_image(subtitle,title, url, filename, dfolder)
-				elif 'http://t1.daumcdn.net' in url:
-					url_to_image(subtitle,title, url, filename, dfolder)
+				elif 'http://' in url:
+					url_to_image(subtitle, title, url, filename, dfolder)
+				elif 'https://zerotoon.com/' in url:
+					pass
 				else:
 					domain = t_main + url
 					url_to_image(subtitle, title, domain, filename, dfolder)
