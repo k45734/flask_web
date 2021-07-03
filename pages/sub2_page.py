@@ -59,6 +59,10 @@ from apscheduler.triggers.cron import CronTrigger
 
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#데이타베이스 없으면 생성
+conn = sqlite3.connect('./telegram.db')
+conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
+conn.close()
 job_defaults = { 'max_instances': 3 }
 scheduler = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
@@ -70,8 +74,20 @@ def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#t_main = request.form['t_main']
-		return render_template('board.html')
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect("./telegram.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from database")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows[0]
+			telgm_botid = rows[1]
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'	
+		return render_template('board.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
 	
 @bp2.route("lotto")
 def lotto():
@@ -568,8 +584,21 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 def news():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
-	else:	
-		return render_template('news.html')
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect("./telegram.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from database")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows[0]
+			telgm_botid = rows[1]
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'
+		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
 
 @bp2.route('news_ok', methods=['POST'])
 def news_ok():
@@ -582,6 +611,26 @@ def news_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		conn = sqlite3.connect('./telegram.db')
+		cursor = conn.cursor()
+		cursor.execute("select * from database")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update database
+					set telgm_token = ?
+					where telgm_botid = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO database 
+				(telgm_token, telgm_botid) VALUES (?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		try:
 			scheduler.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
@@ -592,8 +641,21 @@ def news_ok():
 def unse():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
-	else:	
-		return render_template('unse.html')
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect("./telegram.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from database")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows[0]
+			telgm_botid = rows[1]
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'
+		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
 
 @bp2.route('unse_ok', methods=['POST'])
 def unse_ok():
@@ -606,6 +668,26 @@ def unse_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		conn = sqlite3.connect('./telegram.db')
+		cursor = conn.cursor()
+		cursor.execute("select * from database")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update database
+					set telgm_token = ?
+					where telgm_botid = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO database 
+				(telgm_token, telgm_botid) VALUES (?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		try:
 			scheduler.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
@@ -629,7 +711,20 @@ def weather():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
-		return render_template('weather.html')
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect("./telegram.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from database")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows[0]
+			telgm_botid = rows[1]
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'
+		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
 
 @bp2.route('weather_ok', methods=['POST'])
 def weather_ok():
@@ -643,6 +738,26 @@ def weather_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		conn = sqlite3.connect('./telegram.db')
+		cursor = conn.cursor()
+		cursor.execute("select * from database")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update database
+					set telgm_token = ?
+					where telgm_botid = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO database 
+				(telgm_token, telgm_botid) VALUES (?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		try:
 			scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
@@ -653,8 +768,21 @@ def weather_ok():
 def tracking():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
-	else:	
-		return render_template('tracking.html')
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect("./telegram.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from database")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows[0]
+			telgm_botid = rows[1]
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'	
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
 
 @bp2.route('tracking_ok', methods=['POST'])
 def tracking_ok():
@@ -669,6 +797,26 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		conn = sqlite3.connect('./telegram.db')
+		cursor = conn.cursor()
+		cursor.execute("select * from database")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update database
+					set telgm_token = ?
+					where telgm_botid = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO database 
+				(telgm_token, telgm_botid) VALUES (?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		#try:
 		scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
 		#except:
@@ -701,6 +849,7 @@ def board():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+
 		#공통
 		telgm = request.form['telgm']
 		telgm_alim = request.form['telgm_alim']
@@ -722,6 +871,26 @@ def board():
 		t_main = request.form['t_main']
 		sel = request.form['sel']
 		selnum = request.form['selnum']
+		conn = sqlite3.connect('./telegram.db')
+		cursor = conn.cursor()
+		cursor.execute("select * from database")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update database
+					set telgm_token = ?
+					where telgm_botid = ?
+				"""
+		else:
+			sql = """
+				INSERT INTO database 
+				(telgm_token, telgm_botid) VALUES (?, ?)
+				"""
+				
+		cursor.execute(sql, (telgm_token, telgm_botid))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		try:
 			print(cafenum, cafe, num, cafemenu, cafeboard, boardpath)
 		except:
@@ -745,4 +914,4 @@ def board():
 				scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
 			except:
 				pass
-		return redirect(url_for('main.index'))
+		return render_template('board.html')
