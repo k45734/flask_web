@@ -215,7 +215,7 @@ def exec_start(t_main, code, packege):
 		b = wat.replace(".html", "") #소제목이다.
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 		#print(a, b , c ,d)
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database where urltitle = ?"
 		cur.execute(sql, (c,))
@@ -283,7 +283,7 @@ def exec_start2(t_main, code, packege):
 	for a,b,c in zip(maintitle2,subtitle,urltitle):
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 		#print(a, b , c ,d)
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database2 where urltitle = ?"
 		cur.execute(sql, (c,))
@@ -359,7 +359,7 @@ def exec_start3(t_main,code,packege,genre):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			#print(a, b , c ,d)
-			con = sqlite3.connect("./webtoon.db")
+			con = sqlite3.connect('./webtoon.db',timeout=60)
 			cur = con.cursor()
 			sql = "select * from database3 where urltitle = ?"
 			cur.execute(sql, (c,))
@@ -448,7 +448,7 @@ def exec_start4(code,packege):
 	for a,b,c in zip(maintitle,subtitle,urltitle):
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 		#print(a, b , c ,d)
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database4 where urltitle = ?"
 		cur.execute(sql, (c,))
@@ -518,7 +518,7 @@ def exec_start5(code,packege):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			#print(a, b , c)
-			con = sqlite3.connect("./webtoon.db")
+			con = sqlite3.connect('./webtoon.db',timeout=60)
 			cur = con.cursor()
 			sql = "select * from database4 where urltitle = ?"
 			cur.execute(sql, (c,))
@@ -533,7 +533,7 @@ def exec_start5(code,packege):
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege):	
 	#DB 목록을 받아와 다운로드를 진행한다.
-	con = sqlite3.connect("./webtoon.db")
+	con = sqlite3.connect('./webtoon.db',timeout=60)
 	cur = con.cursor()
 	if packege == 'toonkor':
 		sql = "select * from database2"
@@ -648,7 +648,7 @@ def godown(t_main, compress, cbz, packege):
 				print("종료")
 			else:
 				#마지막 실행까지 작업안했던 결과물 저장
-				con = sqlite3.connect("./webtoon.db")
+				con = sqlite3.connect('./webtoon.db',timeout=60)
 				cur = con.cursor()
 				if packege == 'toonkor':
 					sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
@@ -671,7 +671,7 @@ def daum_list():
 		return redirect(url_for('main.index'))
 	else:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'daum'
@@ -691,7 +691,7 @@ def daum_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'daum'
@@ -712,7 +712,7 @@ def naver_list():
 		return redirect(url_for('main.index'))
 	else:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'naver'
@@ -732,7 +732,7 @@ def naver_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'naver'
@@ -753,7 +753,7 @@ def newtoki_list():
 		return redirect(url_for('main.index'))
 	else:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'newtoki'
@@ -775,7 +775,7 @@ def newtoki_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'newtoki'
@@ -797,7 +797,7 @@ def copytoon_list():
 		return redirect(url_for('main.index'))
 	else:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'copytoon'
@@ -818,7 +818,7 @@ def copytoon_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'copytoon'
@@ -839,7 +839,7 @@ def toonkor_list():
 		return redirect(url_for('main.index'))
 	else:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'toonkor'
@@ -860,7 +860,7 @@ def toonkor_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db')
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = 'toonkor'
