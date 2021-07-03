@@ -106,8 +106,11 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	#print("시작")
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
-	req = session2.get(url,headers=header)	
 	time.sleep(random.uniform(2,5)) 
+	try:
+		req = session2.get(url,headers=header)	
+	except:
+		req = session2.get(url,headers=header)	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	parse = re.sub('[\/:*?"<>|]', '', title2)
