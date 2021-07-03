@@ -102,7 +102,10 @@ def second5():
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
-	text = re.sub('[\/:*?"<>|]', '', readData)
+	#text = re.sub('[-_\/:*?"<>|]', '', readData)
+	text = text.replace('/', '')
+	text = re.sub('[\\/:*?\"<>|]', '', text).strip()
+	text = re.sub("\s{2,}", ' ', text)
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
@@ -116,8 +119,10 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 		req = session2.get(url,headers=header)	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
-	parse = re.sub('[\/:*?"<>|]', '', title2)
-	parse2 = re.sub('[\/:*?"<>|]', '', subtitle2)
+	#parse = re.sub('[-_\/:*?"<>|]', '', title2)
+	#parse2 = re.sub('[-_\/:*?"<>|]', '', subtitle2)
+	parse = cleanText(title2)
+	parse2 = cleanText(subtitle2)
 	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
 	#폴더 없으면 만들다
 	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
@@ -133,8 +138,10 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 def manazip(subtitle, title ,filename , dfolder, cbz):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
-	parse = re.sub('[\/:*?"<>|]', '', title2)
-	parse2 = re.sub('[\/:*?"<>|]', '', subtitle2)
+	#parse = re.sub('[\/:*?"<>|]', '', title2)
+	#parse2 = re.sub('[\/:*?"<>|]', '', subtitle2)
+	parse = cleanText(title2)
+	parse2 = cleanText(subtitle2)
 	if os.path.isdir(dfolder + '/{}/{}'.format(parse,parse2)):
 		if cbz == '0':
 			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.cbz'.format(parse,parse2), 'w')   
