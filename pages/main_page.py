@@ -195,6 +195,9 @@ def update(file_name = None):
 		#copy_tree(org4, new4)
 		os.remove('./main.zip')
 		shutil.rmtree ('./flask_web-main')
-		os.system("flask run --reload")
+		if platform.system() == 'Windows':
+			os.system("flask run --reload")
+		else:
+			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")	
 		#os.system("flask run ---no-reload")
 		return redirect(url_for('main.index'))
