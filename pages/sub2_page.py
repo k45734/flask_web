@@ -634,7 +634,7 @@ def news_ok():
 		try:
 			scheduler2.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
-				pass
+			pass
 		return render_template('news.html')
 		
 @bp2.route('unse')
@@ -817,10 +817,10 @@ def tracking_ok():
 		conn.commit()
 		cursor.close()
 		conn.close()
-		#try:
-		scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
-		#except:
-		#		pass
+		try:
+			scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		except:
+			pass
 		return render_template('tracking.html')
 		
 @bp2.route('funmom')
@@ -840,7 +840,7 @@ def funmom_ok():
 		try:
 			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
 		except:
-				pass
+			pass
 		return render_template('funmom.html')
 
 		
