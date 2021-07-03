@@ -103,7 +103,7 @@ def cleanText(readData):
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
-	#print("시작")
+	print(url)
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	time.sleep(random.uniform(2,5)) 
@@ -457,11 +457,11 @@ def exec_start5(code,packege):
 	titleid = []
 	episode_id = []
 	headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
-    'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'Accept-Language' : 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-    'Referer' : ''
-	} 
+				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+				'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+				'Accept-Language' : 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+				'Referer' : ''
+				} 
 
 	with requests.Session() as s:
 		url = 'http://webtoon.daum.net/data/pc/webtoon/list_serialized/%s' % datetime.now().strftime('%A').lower()[0:3]
@@ -623,6 +623,8 @@ def godown(t_main, compress, cbz, packege):
 				elif 'https://cloudflare.africa.com/' in url:
 					url_to_image(subtitle,title, url, filename, dfolder)
 				elif 'https://image-comic.pstatic.net' in url:
+					url_to_image(subtitle,title, url, filename, dfolder)
+				elif 'http://t1.daumcdn.net' in url:
 					url_to_image(subtitle,title, url, filename, dfolder)
 				else:
 					domain = t_main + url
