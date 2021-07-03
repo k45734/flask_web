@@ -204,7 +204,7 @@ def update(file_name = None):
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 			os.system("chmod 777 * -R")
+			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 		#os.system("flask run ---no-reload")
 		return redirect(url_for('main.index'))
