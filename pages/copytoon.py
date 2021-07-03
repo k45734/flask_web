@@ -46,13 +46,16 @@ import telegram
 import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
-scheduler = BackgroundScheduler()
+job_defaults = { 'max_instances': 3 }
+scheduler = BackgroundScheduler(job_defaults=job_defaults)
+#scheduler = BackgroundScheduler()
 scheduler.start()
 
 @webtoon.route('/')

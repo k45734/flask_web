@@ -53,12 +53,15 @@ import telegram
 import time
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
 
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-scheduler = BackgroundScheduler()
+job_defaults = { 'max_instances': 3 }
+scheduler = BackgroundScheduler(job_defaults=job_defaults)
+#scheduler = BackgroundScheduler()
 scheduler.start()
 
 @bp2.route('/')
@@ -487,7 +490,8 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=True)
 			else :
 				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=False)
-
+		else:
+			print(a4)
 
 old_sbs = []
 def esbsnews(old_sbs = []):

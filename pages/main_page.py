@@ -25,9 +25,15 @@ import zipfile
 import os       
 import shutil
 from distutils.dir_util import copy_tree
-bp = Blueprint('main', __name__, url_prefix='/')
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
 
-	
+bp = Blueprint('main', __name__, url_prefix='/')
+job_defaults = { 'max_instances': 3 }
+scheduler = BackgroundScheduler(job_defaults=job_defaults)
+#scheduler = BackgroundScheduler()
+scheduler.start()
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
 		if abs(num) < 1024.0:

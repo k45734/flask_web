@@ -21,6 +21,9 @@ import sqlite3
 import time
 from flask_sqlalchemy import SQLAlchemy
 import psutil
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
 
 def createFolder(directory):
     try:
@@ -41,6 +44,10 @@ def create_app():
 	logger = logging.getLogger()
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
+	job_defaults = { 'max_instances': 3 }
+	scheduler = BackgroundScheduler(job_defaults=job_defaults)
+	#scheduler = BackgroundScheduler()
+	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page
 	from pages import sub2_page
