@@ -28,8 +28,8 @@ conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAP
 #print ("Table created successfully")
 conn.close()
 job_defaults = { 'max_instances': 20 }
-scheduler = BackgroundScheduler(job_defaults=job_defaults)
-scheduler.start()
+scheduler3 = BackgroundScheduler(job_defaults=job_defaults)
+scheduler3.start()
 
 @bp3.route('/')
 @bp3.route('index')
@@ -153,7 +153,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 			subprocess.call(FLASKAPPS, shell=True)
 		if test == 0:
 			print(parse_start)
-			scheduler.remove_job(FLASKAPPSNAME)
+			scheduler3.remove_job(FLASKAPPSNAME)
 			break
 		#time.sleep(int(FLASKTIME))
 		print(parse_start)
@@ -176,7 +176,7 @@ def ok(FLASKAPPSNAME):
 		FLASKTOKEN = row[5]
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
-		scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])

@@ -64,9 +64,9 @@ conn = sqlite3.connect('./telegram.db')
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
 conn.close()
 job_defaults = { 'max_instances': 20 }
-scheduler = BackgroundScheduler(job_defaults=job_defaults)
+scheduler2 = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
-scheduler.start()
+scheduler2.start()
 
 @bp2.route('/')
 @bp2.route('index')
@@ -632,7 +632,7 @@ def news_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
 				pass
 		return render_template('news.html')
@@ -689,7 +689,7 @@ def unse_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
 				pass
 		return render_template('unse.html')
@@ -701,7 +701,7 @@ def sch_del():
 	else:
 		startname = request.form['startname']
 		try:
-			scheduler.remove_job(startname)
+			scheduler2.remove_job(startname)
 		except:
 			pass
 		return redirect(url_for('main.index'))
@@ -818,7 +818,7 @@ def tracking_ok():
 		cursor.close()
 		conn.close()
 		#try:
-		scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+		scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
 		#except:
 		#		pass
 		return render_template('tracking.html')
@@ -838,7 +838,7 @@ def funmom_ok():
 		start_time = request.form['start_time']
 		startname = request.form['startname']
 		try:
-			scheduler.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
+			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
 		except:
 				pass
 		return render_template('funmom.html')
@@ -906,12 +906,12 @@ def board():
 			pass
 		if choice == 'a':
 			try:
-				scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
+				scheduler2.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
 			except:
 				pass
 		if choice == 'b':
 			try:
-				scheduler.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
+				scheduler2.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
 			except:
 				pass
 		return render_template('board.html')
