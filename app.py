@@ -44,7 +44,7 @@ def create_app():
 	logger = logging.getLogger()
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
-	job_defaults = { 'max_instances': 3 }
+	job_defaults = { 'max_instances': 20 }
 	scheduler = BackgroundScheduler(job_defaults=job_defaults)
 	#scheduler = BackgroundScheduler()
 	scheduler.start()

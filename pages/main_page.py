@@ -30,7 +30,7 @@ from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
 
 bp = Blueprint('main', __name__, url_prefix='/')
-job_defaults = { 'max_instances': 3 }
+job_defaults = { 'max_instances': 20 }
 scheduler = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
 scheduler.start()

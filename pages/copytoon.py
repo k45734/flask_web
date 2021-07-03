@@ -53,7 +53,7 @@ from apscheduler.triggers.cron import CronTrigger
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
-job_defaults = { 'max_instances': 3 }
+job_defaults = { 'max_instances': 20 }
 scheduler = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
 scheduler.start()

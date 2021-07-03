@@ -26,7 +26,8 @@ conn = sqlite3.connect('./database.db')
 conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
 #print ("Table created successfully")
 conn.close()
-scheduler = BackgroundScheduler()
+job_defaults = { 'max_instances': 20 }
+scheduler = BackgroundScheduler(job_defaults=job_defaults)
 scheduler.start()
 
 @bp4.route('/')

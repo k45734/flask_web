@@ -63,7 +63,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 conn = sqlite3.connect('./telegram.db')
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
 conn.close()
-job_defaults = { 'max_instances': 3 }
+job_defaults = { 'max_instances': 20 }
 scheduler = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
 scheduler.start()
