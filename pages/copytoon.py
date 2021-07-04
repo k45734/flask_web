@@ -190,7 +190,7 @@ def exec_start(t_main, code, packege):
 				all = t_main + url
 			else:
 				all = t_main + '/' + url
-			#print(all)
+			print(packege, all)
 			response1 = s.get(all,headers=header)
 			html = response1.text
 			soup = bs(html, "html.parser")
@@ -256,7 +256,7 @@ def exec_start2(t_main, code, packege):
 		for mainurl in maintitle:	
 			test = mainurl
 			all = t_main + '/' + test
-			#print(all)
+			print(packege, all)
 			response1 = s.get(all,headers=header)
 			time.sleep(random.uniform(2,5)) 
 			html = response1.text
@@ -332,9 +332,10 @@ def exec_start3(t_main,code,packege,genre):
 				#print(t_maincode)
 				#maintitle.append(i)
 				
-		#print(main_url)	
+			
 			
 		for a in main_list :
+			print(packege, a)
 			time.sleep(random.uniform(2,5)) 
 			try:
 				req = s.get(a,headers=header)
@@ -402,7 +403,7 @@ def exec_start4(code,packege):
 				titleid.append(i)			
 
 		for i in titleid:
-			#print(i)
+			print(packege, i)
 			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
 			response = s.get(suburl)
 			html = response.text
@@ -497,6 +498,7 @@ def exec_start5(code,packege):
 				titleid.append(i)
 				
 		for i in titleid:
+			print(packege, i)
 			time.sleep(random.uniform(2,10)) 
 			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
 			try:
