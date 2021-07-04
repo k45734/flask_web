@@ -140,13 +140,17 @@ def user_info_edit_proc():
 def log():
 	createFolder('./log')
 	filepath = './log/flask.log'
+	filepath2 = './log/flaskweb.log'
 	if not os.path.isfile(filepath):
 		f = open('./log/flask.log','a', encoding='utf-8')
+	if not os.path.isfile(filepath2):
+		f = open('./log/flaskweb.log','a', encoding='utf-8')
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
 		if platform.system() == 'Windows':
 			filepath = './log/flask.log'
+			tltl2 = '도커에서만 보입니다.'
 			with open(filepath, 'rt', encoding='cp949') as fp:
 				line = fp.readline()
 				cnt = 1
@@ -156,7 +160,7 @@ def log():
 					line = fp.readline()
 					tltl.append(test)
 					cnt += 1
-		
+					
 		else:
 			filepath = './log/flask.log'
 			with open(filepath, 'rt', encoding='utf-8') as fp:
@@ -168,7 +172,17 @@ def log():
 					line = fp.readline()
 					tltl.append(test)
 					cnt += 1
-		return render_template('log.html', tltl=tltl)	
+			filepath2 = './log/flaskweb.log'
+			with open(filepath2, 'rt', encoding='utf-8') as fp:
+				line = fp.readline()
+				cnt = 1
+				tltl2 = []
+				while line:
+					test = line.strip()
+					line = fp.readline()
+					tltl.append(test)
+					cnt += 1
+		return render_template('log.html', tltl=tltl , tltl=tltl2)	
 
 @bp.route("update")
 def update(file_name = None):
