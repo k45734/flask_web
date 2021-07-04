@@ -180,7 +180,7 @@ def log():
 				while line:
 					test = line.strip()
 					line = fp.readline()
-					tltl.append(test)
+					tltl2.append(test)
 					cnt += 1
 		return render_template('log.html', tltl=tltl , tltl2=tltl2)	
 
