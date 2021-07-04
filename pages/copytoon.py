@@ -297,6 +297,7 @@ def exec_start2(t_main, code, packege):
 	
 def exec_start3(t_main,code,packege,genre):
 	print(genre)
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:
 		main_list = [] #url 주소를 만든다.
 		maintitle = [] #대제목이 저장된다
@@ -337,7 +338,10 @@ def exec_start3(t_main,code,packege,genre):
 			
 		for a in main_list :
 			time.sleep(random.uniform(2,5)) 
-			req = s.get(a)
+			try:
+				req = s.get(a,headers=header)
+			except:
+				req = s.get(a,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
 			title = gogo.find(attrs={'class':'page-desc'})
