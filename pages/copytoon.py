@@ -339,26 +339,29 @@ def exec_start3(t_main,code,packege,genre):
 			try:
 				req = s.get(a,headers=header)
 			except:
-				req = s.get(a,headers=header)
+				print("캡챠있다.")
+				continue
 			html = req.text
 			gogo = bs(html, "html.parser")
 			title = gogo.find(attrs={'class':'page-desc'})
 			cacha = gogo.find("div",{"class":"form-header"})
-			print(cacha)
-			#if cacha:
-			data_tmp = title.text.lstrip() #대제목	
-			posts_list = gogo.find_all(attrs = {'class':'item-subject'})
-			for b in posts_list:
-				aa = b.find('b')
-				a_link = b['href']
-				a_text = b.text
-				sub = a_text.strip()
-				pattern = re.compile(r'\s\s+')
-				aa_tmp = re.sub(pattern, ' ', sub)			
-				maintitle.append(data_tmp) #대제목이다.
-				subtitle.append(aa_tmp) #소제목이다.
-				urltitle.append(a_link) #URL 주소가 저장된다.
-				#print('{} | {} | {}'.format(data_tmp,aa_tmp,a_link)) #대제목 , 소제목
+			if cacha:
+				print("캡챠있다.")
+				continue
+			else:
+				data_tmp = title.text.lstrip() #대제목	
+				posts_list = gogo.find_all(attrs = {'class':'item-subject'})
+				for b in posts_list:
+					aa = b.find('b')
+					a_link = b['href']
+					a_text = b.text
+					sub = a_text.strip()
+					pattern = re.compile(r'\s\s+')
+					aa_tmp = re.sub(pattern, ' ', sub)			
+					maintitle.append(data_tmp) #대제목이다.
+					subtitle.append(aa_tmp) #소제목이다.
+					urltitle.append(a_link) #URL 주소가 저장된다.
+					#print('{} | {} | {}'.format(data_tmp,aa_tmp,a_link)) #대제목 , 소제목
 
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
