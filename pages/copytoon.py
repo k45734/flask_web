@@ -109,14 +109,14 @@ def cleanText(readData):
 	return text	
 
 def url_to_image(subtitle, title, url, filename, dfolder):
-	#print(url)
-	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
-	time.sleep(random.uniform(2,5)) 
-	try:
-		req = session2.get(url,headers=header)	
-	except:
-		req = session2.get(url,headers=header)	
+	with requests.Session() as s:
+		try:
+			time.sleep(random.uniform(2,5)) 
+			req = s.get(url,headers=header)	
+		except:
+			time.sleep(random.uniform(2,5)) 
+			req = s.get(url,headers=header)	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	#parse = re.sub('[-_\/:*?"<>|]', '', title2)
@@ -161,150 +161,148 @@ def exec_start(t_main, code, packege):
 	maintitle = []
 	subtitle = []
 	urltitle = []
-	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	if code == 'all':
-		response = requests.get(t_main)
-		html = response.text
-		soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
-		for tag in soup:
-			url = tag.find('a')
-			maintitle.append(url["href"])
-	else:
-		allcode = code.split('|')
-		#print(allcode)
-		for i in allcode:
-			#aa = '/'+ i
-			#print(aa)
-			t_maincode = t_main + i
-			#print(t_maincode)
-			maintitle.append(i)
-			
-	for mainurl in maintitle:
-		#url = mainurl.strip()
-		url = mainurl.lstrip()
-		wkt = url
-		wat = wkt.replace("/", "")
-		title = wat.replace(".html", "")
+	with requests.Session() as s:
 		if code == 'all':
-			all = t_main + url
+			response = s.get(t_main,headers=header)
+			html = response.text
+			soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
+			for tag in soup:
+				url = tag.find('a')
+				maintitle.append(url["href"])
 		else:
-			all = t_main + '/' + url
-		#print(all)
-		response1 = session2.get(all,headers=header)
-		html = response1.text
-		soup = bs(html, "html.parser")
-		#print(all)
-		mm = soup.find("div",{"class":"contents-list"})
-		try:
-			toonlist = mm.findAll('a')
-			for post in toonlist:
-				urltitle.append(post["href"])
-				subtitle.append(title)
-		except:
-			pass
-	#print(subtitle) #소제목
-	#print(urltitle) #웹툰주소
-	#print(maintitle) #대제목
-	#대제목 소제목 다운로드url 주소를 DB에 저장한다.
-	for a,c in zip(subtitle,urltitle):
-		#subtitle 대제목으로 바뀌었다. a 대제목
-		#urltitle 이곳에서 소제목을 뺀다. c url주소
-		wkt = c #이곳부터 c url 주소에서 소제목을 만들다.
-		wat = wkt.replace("/", "")
-		b = wat.replace(".html", "") #소제목이다.
-		d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-		print(packege, a, b , c ,d)
-		con = sqlite3.connect('./webtoon.db',timeout=60)
-		cur = con.cursor()
-		sql = "select * from database where urltitle = ?"
-		cur.execute(sql, (c,))
-		row = cur.fetchone()
-		if row != None:
-			pass
-		else:
-			cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			con.commit()
-	con.close()
+			allcode = code.split('|')
+			#print(allcode)
+			for i in allcode:
+				#aa = '/'+ i
+				#print(aa)
+				t_maincode = t_main + i
+				#print(t_maincode)
+				maintitle.append(i)
+				
+		for mainurl in maintitle:
+			#url = mainurl.strip()
+			url = mainurl.lstrip()
+			wkt = url
+			wat = wkt.replace("/", "")
+			title = wat.replace(".html", "")
+			if code == 'all':
+				all = t_main + url
+			else:
+				all = t_main + '/' + url
+			#print(all)
+			response1 = s.get(all,headers=header)
+			html = response1.text
+			soup = bs(html, "html.parser")
+			#print(all)
+			mm = soup.find("div",{"class":"contents-list"})
+			try:
+				toonlist = mm.findAll('a')
+				for post in toonlist:
+					urltitle.append(post["href"])
+					subtitle.append(title)
+			except:
+				pass
+		#print(subtitle) #소제목
+		#print(urltitle) #웹툰주소
+		#print(maintitle) #대제목
+		#대제목 소제목 다운로드url 주소를 DB에 저장한다.
+		for a,c in zip(subtitle,urltitle):
+			#subtitle 대제목으로 바뀌었다. a 대제목
+			#urltitle 이곳에서 소제목을 뺀다. c url주소
+			wkt = c #이곳부터 c url 주소에서 소제목을 만들다.
+			wat = wkt.replace("/", "")
+			b = wat.replace(".html", "") #소제목이다.
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
+			print(packege, a, b , c ,d)
+			con = sqlite3.connect('./webtoon.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from database where urltitle = ?"
+			cur.execute(sql, (c,))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+				con.commit()
+		con.close()
 
 def exec_start2(t_main, code, packege):
 	maintitle = []
 	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
 	subtitle = []
 	urltitle = []
-	session = requests.Session()
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	
-	if code == 'all':
-		response = requests.get(t_main)
-		time.sleep(random.uniform(2,5)) 	
-		html = response.text
-		soup = bs(html, "html.parser").findAll("a",{"id":"title"})
-		for tag in soup:
-			latest = tag.text
-			test1 = latest.lstrip()
-			maintitle.append(test1)
-			#print(test1)
-	else:
-		allcode = code.split('|')
-		#print(allcode)
-		for i in allcode:
-			#print(i)
-			t_maincode = t_main + i
-			#print(t_maincode)
-			maintitle.append(i)
-			
-	for mainurl in maintitle:	
-		test = mainurl
-		all = t_main + '/' + test
-		#print(all)
-		response1 = session.get(all,headers=header)
-		time.sleep(random.uniform(2,5)) 
-		html = response1.text
-		soup2 = bs(html, "html.parser").find("table",{"class":"web_list"})
-		try:
-			toonview_list = soup2.findAll("tr",{"class":"tborder"})
-			for post in toonview_list:
-				post = post.find("td",{"class":"content__title"})
-				title = post.get_text().lstrip()
-				url3 = post.attrs['data-role']
-				wat = url3.replace("/", "")
-				title = wat.replace(".html", "")
-				urltitle.append(url3)
-				subtitle.append(title)	
-				maintitle2.append(mainurl)
-				#print(title)
-				#print(url3)
-				#print(mainurl)					
-		except:
-			pass
-		
-	#앞에서 크롤링한 정보를 DB에 저장한다.
-	for a,b,c in zip(maintitle2,subtitle,urltitle):
-		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-		print(packege, a, b , c ,d)
-		con = sqlite3.connect('./webtoon.db',timeout=60)
-		cur = con.cursor()
-		sql = "select * from database2 where urltitle = ?"
-		cur.execute(sql, (c,))
-		row = cur.fetchone()
-		if row != None:
-			pass
-		else:
-			cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			con.commit()
-	con.close()	
-	
-def exec_start3(t_main,code,packege,genre):
-	print(genre)
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:
-		main_list = [] #url 주소를 만든다.
-		maintitle = [] #대제목이 저장된다
-		maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
-		subtitle = [] #소제목이 저장된다.
-		urltitle = []		
+		if code == 'all':
+			response = s.get(t_main,headers=header)
+			time.sleep(random.uniform(2,5)) 	
+			html = response.text
+			soup = bs(html, "html.parser").findAll("a",{"id":"title"})
+			for tag in soup:
+				latest = tag.text
+				test1 = latest.lstrip()
+				maintitle.append(test1)
+				#print(test1)
+		else:
+			allcode = code.split('|')
+			#print(allcode)
+			for i in allcode:
+				#print(i)
+				t_maincode = t_main + i
+				#print(t_maincode)
+				maintitle.append(i)
+				
+		for mainurl in maintitle:	
+			test = mainurl
+			all = t_main + '/' + test
+			#print(all)
+			response1 = s.get(all,headers=header)
+			time.sleep(random.uniform(2,5)) 
+			html = response1.text
+			soup2 = bs(html, "html.parser").find("table",{"class":"web_list"})
+			try:
+				toonview_list = soup2.findAll("tr",{"class":"tborder"})
+				for post in toonview_list:
+					post = post.find("td",{"class":"content__title"})
+					title = post.get_text().lstrip()
+					url3 = post.attrs['data-role']
+					wat = url3.replace("/", "")
+					title = wat.replace(".html", "")
+					urltitle.append(url3)
+					subtitle.append(title)	
+					maintitle2.append(mainurl)
+					#print(title)
+					#print(url3)
+					#print(mainurl)					
+			except:
+				pass
 		
+		#앞에서 크롤링한 정보를 DB에 저장한다.
+		for a,b,c in zip(maintitle2,subtitle,urltitle):
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+			print(packege, a, b , c ,d)
+			con = sqlite3.connect('./webtoon.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from database2 where urltitle = ?"
+			cur.execute(sql, (c,))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+				con.commit()
+		con.close()	
+		
+def exec_start3(t_main,code,packege,genre):
+	packege = 'newtoki'
+	main_list = [] #url 주소를 만든다.
+	maintitle = [] #대제목이 저장된다
+	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
+	subtitle = [] #소제목이 저장된다.
+	urltitle = []
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	with requests.Session() as s:
 		if code == 'all':
 			for page in range(1,11): 
 				main_url = t_main + '/webtoon/p' + str(page) + '?toon=' + genre
