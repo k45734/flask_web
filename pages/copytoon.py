@@ -157,7 +157,7 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 	print('{}  압축 완료'.format(parse))				
 
 def exec_start(t_main, code, packege):
-	#print(packege)
+	print("카피툰시작")
 	maintitle = []
 	subtitle = []
 	urltitle = []
@@ -228,6 +228,7 @@ def exec_start(t_main, code, packege):
 		con.close()
 
 def exec_start2(t_main, code, packege):
+	print("툰코시작")
 	maintitle = []
 	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
 	subtitle = []
@@ -295,6 +296,7 @@ def exec_start2(t_main, code, packege):
 		con.close()	
 		
 def exec_start3(t_main,code,packege,genre):
+	print("뉴토끼시작")
 	packege = 'newtoki'
 	main_list = [] #url 주소를 만든다.
 	maintitle = [] #대제목이 저장된다
@@ -375,6 +377,7 @@ def exec_start3(t_main,code,packege,genre):
 		con.close()	
 		
 def exec_start4(code,packege):
+	print("네이버웹툰시작")
 	packege = 'naver'
 	maintitle = []
 	subtitle = []
@@ -464,6 +467,7 @@ def exec_start4(code,packege):
 		con.close()	
 	
 def exec_start5(code,packege):
+	print("다음웹툰시작")
 	packege = 'daum'
 	maintitle = []
 	subtitle = []
