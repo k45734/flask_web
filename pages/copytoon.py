@@ -241,9 +241,10 @@ def exec_start2(t_main, code, packege):
 			html = response.text
 			soup = bs(html, "html.parser").findAll("a",{"id":"title"})
 			for tag in soup:
-				latest = tag.text
-				test1 = latest.lstrip()
-				maintitle.append(test1)
+				#latest = tag.text
+				latest = tag['href']
+				#test1 = latest.lstrip()
+				maintitle.append(latest)
 				#print(test1)
 		else:
 			allcode = code.split('|')
