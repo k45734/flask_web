@@ -525,8 +525,8 @@ def exec_start5(code,packege):
 					urltitle.append(tt)
 					#print('{} 의 {}'.format(test,sub))
 			else:
-				print("test1")
-				pass
+				print("유료다")
+				continue
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
