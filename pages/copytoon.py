@@ -497,7 +497,10 @@ def exec_start5(code,packege):
 		for i in titleid:
 			time.sleep(random.uniform(2,10)) 
 			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
-			data = requests.get(url,headers=headers).json()
+			try:
+				data = requests.get(url,headers=headers).json()
+			except:
+				data = requests.get(url,headers=headers).json()
 			status = data['result']['status']
 			ass = data['result']['message']
 			#print(ass)
