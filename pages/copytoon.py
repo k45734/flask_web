@@ -321,8 +321,9 @@ def exec_start3(t_main,code,packege,genre):
 				else:	
 					for i in posts:
 						a_link = i('a')
-						a_href = a_link[1]['href']
-						main_list.append(a_href)
+						a_href = a_link[1]['href'].split('webtoon/')[1].split('/')[0]
+						main_url = t_main + '/webtoon/' + a_href
+						main_list.append(main_url)
 						#print(a_href)
 
 		else:	
