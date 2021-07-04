@@ -243,8 +243,9 @@ def exec_start2(t_main, code, packege):
 			for tag in soup:
 				#latest = tag.text
 				latest = tag['href']
+				aa = latest.replace("/", "")
 				#test1 = latest.lstrip()
-				maintitle.append(latest)
+				maintitle.append(aa)
 				#print(test1)
 		else:
 			allcode = code.split('|')
@@ -255,7 +256,7 @@ def exec_start2(t_main, code, packege):
 				#print(t_maincode)
 				maintitle.append(i)
 				
-		for mainurl in maintitle:	
+		for mainurl in maintitle:
 			test = mainurl
 			all = t_main + '/' + test
 			print(packege, all)
