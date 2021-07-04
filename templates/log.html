@@ -9,9 +9,13 @@
     </head>
     <body>
         <center>
-		{%for ml in tltl %}
-   <p>{{ ml }} </p>
-		{% endfor %}
+		
+   <p><textarea cols="100" rows="50">
+   {%for ml in tltl %}
+   {{ ml }}
+   {% endfor %}
+   </textarea></p>
+		
 {{testDataHtml}}</center>
     </body>
 </html>
