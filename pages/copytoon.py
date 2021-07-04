@@ -310,7 +310,7 @@ def exec_start3(t_main,code,packege,genre):
 		if code == 'all':
 			for page in range(1,11): 
 				main_url = t_main + '/webtoon/p' + str(page) + '?toon=' + genre
-				time.sleep(random.uniform(2,5)) 
+				time.sleep(random.uniform(2,10)) 
 				req = s.get(main_url)	
 				html = req.text
 				gogo = bs(html, "html.parser")
@@ -331,16 +331,10 @@ def exec_start3(t_main,code,packege,genre):
 			for i in allcode:
 				main_url = t_main + '/webtoon/' + i	
 				main_list.append(main_url)
-				#print(i)
-				#t_maincode = t_main + i
-				#print(t_maincode)
-				#maintitle.append(i)
-				
-			
-			
+		
 		for a in main_list :
 			print(packege, a)
-			time.sleep(random.uniform(2,5)) 
+			time.sleep(random.uniform(2,10)) 
 			try:
 				req = s.get(a,headers=header)
 			except:
