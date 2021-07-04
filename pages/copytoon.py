@@ -214,7 +214,7 @@ def exec_start(t_main, code, packege):
 		wat = wkt.replace("/", "")
 		b = wat.replace(".html", "") #소제목이다.
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-		#print(a, b , c ,d)
+		print(packege, a, b , c ,d)
 		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database where urltitle = ?"
@@ -282,7 +282,7 @@ def exec_start2(t_main, code, packege):
 	#앞에서 크롤링한 정보를 DB에 저장한다.
 	for a,b,c in zip(maintitle2,subtitle,urltitle):
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-		#print(a, b , c ,d)
+		print(packege, a, b , c ,d)
 		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database2 where urltitle = ?"
@@ -358,7 +358,7 @@ def exec_start3(t_main,code,packege,genre):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			#print(a, b , c ,d)
+			print(packege, a, b , c ,d)
 			con = sqlite3.connect('./webtoon.db',timeout=60)
 			cur = con.cursor()
 			sql = "select * from database3 where urltitle = ?"
@@ -447,7 +447,7 @@ def exec_start4(code,packege):
 	#앞에서 크롤링한 정보를 DB에 저장한다.
 	for a,b,c in zip(maintitle,subtitle,urltitle):
 		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-		#print(a, b , c ,d)
+		print(packege, a, b , c ,d)
 		con = sqlite3.connect('./webtoon.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from database4 where urltitle = ?"
@@ -520,7 +520,7 @@ def exec_start5(code,packege):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			#print(a, b , c)
+			print(packege, a, b , c ,d)
 			con = sqlite3.connect('./webtoon.db',timeout=60)
 			cur = con.cursor()
 			sql = "select * from database4 where urltitle = ?"
