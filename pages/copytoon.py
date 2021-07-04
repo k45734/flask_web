@@ -342,6 +342,9 @@ def exec_start3(t_main,code,packege,genre):
 			html = req.text
 			gogo = bs(html, "html.parser")
 			title = gogo.find(attrs={'class':'page-desc'})
+			cacha = gogo.find("div",{"class":"form-header"})
+			print(cacha)
+			#if cacha:
 			data_tmp = title.text.lstrip() #대제목	
 			posts_list = gogo.find_all(attrs = {'class':'item-subject'})
 			for b in posts_list:
