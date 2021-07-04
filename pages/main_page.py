@@ -182,7 +182,7 @@ def log():
 					line = fp.readline()
 					tltl.append(test)
 					cnt += 1
-		return render_template('log.html', tltl=tltl , tltl=tltl2)	
+		return render_template('log.html', tltl=tltl , tltl2=tltl2)	
 
 @bp.route("update")
 def update(file_name = None):
