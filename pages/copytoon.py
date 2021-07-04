@@ -380,10 +380,10 @@ def exec_start4(code,packege):
 	subtitle = []
 	urltitle = []
 	titleid = []
-
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:
 		url = 'https://comic.naver.com/webtoon/weekday.nhn'
-		response = s.get(url)
+		response = s.get(url,headers=header)
 		html = response.text
 		soup = bs(html, "html.parser")
 		tags = soup.findAll("div",{"class":"thumb"})
@@ -405,7 +405,7 @@ def exec_start4(code,packege):
 		for i in titleid:
 			print(packege, i)
 			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
-			response = s.get(suburl)
+			response = s.get(suburl,headers=header)
 			html = response.text
 			soup = bs(html, "html.parser")
 			#대제목을 가져온다.
@@ -421,7 +421,7 @@ def exec_start4(code,packege):
 			tt2 = tt2.replace("]", "")
 			for p in range(1, 1001):
 				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
-				response = s.get(pageurl)
+				response = s.get(pageurl,headers=header)
 				html = response.text
 				soup = bs(html, "html.parser")
 				sublist = soup.findAll("td",{"class":"title"})
@@ -447,21 +447,21 @@ def exec_start4(code,packege):
 						#print('{} {} {}'.format(tt2,test2,test))
 					break
 				
-	#앞에서 크롤링한 정보를 DB에 저장한다.
-	for a,b,c in zip(maintitle,subtitle,urltitle):
-		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-		print(packege, a, b , c ,d)
-		con = sqlite3.connect('./webtoon.db',timeout=60)
-		cur = con.cursor()
-		sql = "select * from database4 where urltitle = ?"
-		cur.execute(sql, (c,))
-		row = cur.fetchone()
-		if row != None:
-			pass
-		else:
-			cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			con.commit()
-	con.close()	
+		#앞에서 크롤링한 정보를 DB에 저장한다.
+		for a,b,c in zip(maintitle,subtitle,urltitle):
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+			print(packege, a, b , c ,d)
+			con = sqlite3.connect('./webtoon.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from database4 where urltitle = ?"
+			cur.execute(sql, (c,))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+				con.commit()
+		con.close()	
 	
 def exec_start5(code,packege):
 	packege = 'daum'
