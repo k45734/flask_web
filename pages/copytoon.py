@@ -104,7 +104,7 @@ def cleanText(readData):
 	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
 	#text = re.sub('[-_\/:*?"<>|]', '', readData)
 	text = readData.replace('/', '')
-	text = re.sub('[\\/:*?\"<>|]', '', text).strip()
+	text = re.sub('[-\\/:*?\"<>|]', '', text).strip()
 	text = re.sub("\s{2,}", ' ', text)
 	return text	
 
