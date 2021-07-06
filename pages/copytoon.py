@@ -357,13 +357,14 @@ def exec_start3(t_main,code,packege,genre):
 			gogo = bs(html, "html.parser")
 			title = gogo.find(attrs={'class':'page-desc'})
 			cacha = gogo.find("div",{"class":"form-header"})
+			data_tmp = title.text.lstrip() #대제목	
+			posts_list = gogo.find_all(attrs = {'class':'item-subject'})
+			count = []
+				
 			if cacha:
 				print("캡챠있다.")
 				continue
 			else:
-				data_tmp = title.text.lstrip() #대제목	
-				posts_list = gogo.find_all(attrs = {'class':'item-subject'})
-				count = []
 				for b in posts_list:
 					a_link = b['href']
 					count.append(a_link)
@@ -442,24 +443,24 @@ def exec_start4(code,packege):
 			tt2 = re.sub(pattern, '', tt2)
 			tt2 = tt2.replace("[", "")
 			tt2 = tt2.replace("]", "")
-			count = []
-			for p in range(1, 1001):
-				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
-				response = s.get(pageurl,headers=header)
-				html = response.text
-				soup = bs(html, "html.parser")
-				sublist = soup.findAll("td",{"class":"title"})
-				pageend = soup.find("a",{"class":"next"})
+			#count = []
+			#for p in range(1, 1001):
+			#	pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
+			#	response = s.get(pageurl,headers=header)
+			#	html = response.text
+			#	soup = bs(html, "html.parser")
+			#	sublist = soup.findAll("td",{"class":"title"})
+			#	pageend = soup.find("a",{"class":"next"})
 				
-				if pageend:
-					for ii in sublist:
-						test = ii.find('a')['href']
-						count.append(test)
-				else:
-					for ii in sublist:
-						test = ii.find('a')['href']
-						count.append(test)
-					break
+			#	if pageend:
+			#		for ii in sublist:
+			#			test = ii.find('a')['href']
+			#			count.append(test)
+			#	else:
+			#		for ii in sublist:
+			#			test = ii.find('a')['href']
+			#			count.append(test)
+			#		break
 					
 			for p in range(1, 1001):
 				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
@@ -470,25 +471,27 @@ def exec_start4(code,packege):
 				pageend = soup.find("a",{"class":"next"})		
 				
 				if pageend:
-					test22 = len(count)
-					cc = int(test22)
+					#test22 = len(count)
+					#cc = int(test22)
 					for ii in sublist:
 						test = ii.find('a')['href']
+						cc = test.split('no=')[1].split('&')[0].strip()
 						test2 = '{}화'.format(cc)
 						maintitle.append(tt2)
 						subtitle.append(test2)
 						urltitle.append(test)
-						cc -= 1
+						#cc -= 1
 				else:
-					test22 = len(count)
-					cc = int(test22)
+					#test22 = len(count)
+					#cc = int(test22)
 					for ii in sublist:
 						test = ii.find('a')['href']
+						cc = test.split('no=')[1].split('&')[0].strip()
 						test2 = '{}화'.format(cc)
 						maintitle.append(tt2)
 						subtitle.append(test2)
 						urltitle.append(test)
-						cc -= 1	
+						#cc -= 1	
 					break				
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
