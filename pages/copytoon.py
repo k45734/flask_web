@@ -159,6 +159,7 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 def exec_start(t_main, code, packege):
 	print("카피툰시작")
 	maintitle = []
+	maintitle2 = []
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
@@ -198,21 +199,25 @@ def exec_start(t_main, code, packege):
 			mm = soup.find("div",{"class":"contents-list"})
 			try:
 				toonlist = mm.findAll('a')
+				count = []
+				for post in toonlist:
+					count.append(post["href"])
+				test22 = len(count)
+				cc = int(test22)
 				for post in toonlist:
 					urltitle.append(post["href"])
-					subtitle.append(title)
+					sub = '{}화'.format(cc)
+					maintitle2.append(title)
+					subtitle.append(sub)
+					cc -= 1
 			except:
 				pass
 		#print(subtitle) #소제목
 		#print(urltitle) #웹툰주소
 		#print(maintitle) #대제목
 		#대제목 소제목 다운로드url 주소를 DB에 저장한다.
-		for a,c in zip(subtitle,urltitle):
-			#subtitle 대제목으로 바뀌었다. a 대제목
-			#urltitle 이곳에서 소제목을 뺀다. c url주소
-			wkt = c #이곳부터 c url 주소에서 소제목을 만들다.
-			wat = wkt.replace("/", "")
-			b = wat.replace(".html", "") #소제목이다.
+		#for a,c in zip(subtitle,urltitle):
+		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			print(packege, a, b , c ,d)
 			con = sqlite3.connect('./webtoon.db',timeout=60)
@@ -266,15 +271,22 @@ def exec_start2(t_main, code, packege):
 			soup2 = bs(html, "html.parser").find("table",{"class":"web_list"})
 			try:
 				toonview_list = soup2.findAll("tr",{"class":"tborder"})
+				count = []
+				for post in toonview_list:
+					post = post.find("td",{"class":"content__title"})
+					url3 = post.attrs['data-role']
+					count.append(url3)
+				test22 = len(count)
+				cc = int(test22)
 				for post in toonview_list:
 					post = post.find("td",{"class":"content__title"})
 					title = post.get_text().lstrip()
 					url3 = post.attrs['data-role']
-					wat = url3.replace("/", "")
-					title = wat.replace(".html", "")
+					title = '{}화'.format(cc)
 					urltitle.append(url3)
 					subtitle.append(title)	
 					maintitle2.append(mainurl)
+					cc -= 1
 					#print(title)
 					#print(url3)
 					#print(mainurl)					
@@ -351,18 +363,23 @@ def exec_start3(t_main,code,packege,genre):
 			else:
 				data_tmp = title.text.lstrip() #대제목	
 				posts_list = gogo.find_all(attrs = {'class':'item-subject'})
+				count = []
+				for b in posts_list:
+					a_link = b['href']
+					count.append(a_link)
+				test22 = len(count)
+				cc = int(test22)
 				for b in posts_list:
 					aa = b.find('b')
 					a_link = b['href']
-					a_text = b.text
-					sub = a_text.strip()
-					pattern = re.compile(r'\s\s+')
-					aa_tmp = re.sub(pattern, ' ', sub)			
+					a_link2 = a_link.replace(t_main,'')
+					aa_tmp = '{}화'.format(cc)
 					maintitle.append(data_tmp) #대제목이다.
 					subtitle.append(aa_tmp) #소제목이다.
-					urltitle.append(a_link) #URL 주소가 저장된다.
+					urltitle.append(a_link2) #URL 주소가 저장된다.
+					cc -= 1
 					#print('{} | {} | {}'.format(data_tmp,aa_tmp,a_link)) #대제목 , 소제목
-
+				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
@@ -425,6 +442,7 @@ def exec_start4(code,packege):
 			tt2 = re.sub(pattern, '', tt2)
 			tt2 = tt2.replace("[", "")
 			tt2 = tt2.replace("]", "")
+			count = []
 			for p in range(1, 1001):
 				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
 				response = s.get(pageurl,headers=header)
@@ -432,26 +450,46 @@ def exec_start4(code,packege):
 				soup = bs(html, "html.parser")
 				sublist = soup.findAll("td",{"class":"title"})
 				pageend = soup.find("a",{"class":"next"})
-	
+				
 				if pageend:
 					for ii in sublist:
 						test = ii.find('a')['href']
-						tests = ii.text
-						test2 = tests.strip()
-						maintitle.append(tt2)
-						subtitle.append(test2)
-						urltitle.append(test)
-						#print('{} {} {}'.format(tt2,test2,test))
+						count.append(test)
 				else:
 					for ii in sublist:
 						test = ii.find('a')['href']
-						tests = ii.text
-						test2 = tests.strip()
+						count.append(test)
+					break
+					
+			for p in range(1, 1001):
+				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
+				response = s.get(pageurl,headers=header)
+				html = response.text
+				soup = bs(html, "html.parser")
+				sublist = soup.findAll("td",{"class":"title"})
+				pageend = soup.find("a",{"class":"next"})		
+				
+				if pageend:
+					test22 = len(count)
+					cc = int(test22)
+					for ii in sublist:
+						test = ii.find('a')['href']
+						test2 = '{}화'.format(cc)
 						maintitle.append(tt2)
 						subtitle.append(test2)
 						urltitle.append(test)
-						#print('{} {} {}'.format(tt2,test2,test))
-					break
+						cc -= 1
+				else:
+					test22 = len(count)
+					cc = int(test22)
+					for ii in sublist:
+						test = ii.find('a')['href']
+						test2 = '{}화'.format(cc)
+						maintitle.append(tt2)
+						subtitle.append(test2)
+						urltitle.append(test)
+						cc -= 1	
+					break				
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
@@ -514,16 +552,22 @@ def exec_start5(code,packege):
 				data = requests.get(url,headers=headers).json()
 			status = data['result']['status']
 			ass = data['result']['message']
-			#print(ass)
 			if ass != 'you are not login':
+				count = []
 				test = data['data']['webtoon']['title']
 				for epi in data['data']['webtoon']['webtoonEpisodes']:
 					tt = epi['id']
 					sub = epi['title']
+					count.append(sub)
+				test22 = len(count)
+				cc = int(test22)
+				for epi in data['data']['webtoon']['webtoonEpisodes']:
+					tt = epi['id']
+					sub = '{}화'.format(cc)
 					maintitle.append(test)
 					subtitle.append(sub)
 					urltitle.append(tt)
-					#print('{} 의 {}'.format(test,sub))
+					cc -= 1
 			else:
 				print("유료다")
 				continue
@@ -583,6 +627,7 @@ def godown(t_main, compress, cbz, packege):
 		if complte == 'True':
 			continue
 		else:
+			print(wwwkt)
 			if packege != 'daum':
 				response1 = session2.get(wwwkt,headers=header)
 				html = response1.text
@@ -596,14 +641,14 @@ def godown(t_main, compress, cbz, packege):
 					data = requests.get(wwwkt,headers=header).json()
 					ass = data['result']['message']
 					status = data['result']['status']				
-			print("{} 웹툰 {} {} 을 시작합니다.\n".format(packege, title, subtitle))
+			print("{} 의 {} 을 시작합니다".format(title, subtitle))
 			if packege == 'toonkor':
 				tt = re.search(r'var toon_img = (.*?);', html, re.S)
 				json_string = tt.group(1)
 				obj = str(base64.b64decode(json_string), encoding='utf-8')
 				taglist = re.compile(r'src="(.*?)"').findall(obj)
 			elif packege == 'newtoki':
-				tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
+				tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(data))
 				html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 				#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
