@@ -575,7 +575,11 @@ def godown(t_main, compress, cbz, packege):
 			time.sleep(random.uniform(2,10)) 
 			wwwkt = 'http://webtoon.daum.net/data/pc/webtoon/viewer_images/%s' % (url)
 		else:
-			wwwkt = t_main + url
+			try:
+				test = url.replace(t_main,'')
+				wwwkt = t_main + test
+			except:
+				wwwkt = t_main + url
 		if complte == 'True':
 			continue
 		else:
@@ -592,7 +596,7 @@ def godown(t_main, compress, cbz, packege):
 					data = requests.get(wwwkt,headers=header).json()
 					ass = data['result']['message']
 					status = data['result']['status']				
-			print("{} 의 {} 을 시작합니다".format(title, subtitle))
+			print("{} 웹툰 {} {} 을 시작합니다.\n".format(packege, title, subtitle))
 			if packege == 'toonkor':
 				tt = re.search(r'var toon_img = (.*?);', html, re.S)
 				json_string = tt.group(1)
