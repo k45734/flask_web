@@ -51,7 +51,7 @@ from apscheduler.jobstores.base import BaseJobStore, JobLookupError, Conflicting
 from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
+now = datetime.now().time()
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
@@ -191,7 +191,7 @@ def exec_start(t_main, code, packege):
 				all = t_main + url
 			else:
 				all = t_main + '/' + url
-			print(packege, all)
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, now))
 			response1 = s.get(all,headers=header)
 			html = response1.text
 			soup = bs(html, "html.parser")
@@ -264,7 +264,7 @@ def exec_start2(t_main, code, packege):
 		for mainurl in maintitle:
 			test = mainurl
 			all = t_main + '/' + test
-			print(packege, all)
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, now))
 			response1 = s.get(all,headers=header)
 			time.sleep(random.uniform(2,5)) 
 			html = response1.text
@@ -346,7 +346,7 @@ def exec_start3(t_main,code,packege,genre):
 				main_list.append(main_url)
 		
 		for a in main_list :
-			print(packege, a)
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, now))
 			time.sleep(random.uniform(2,10)) 
 			try:
 				req = s.get(a,headers=header)
@@ -427,7 +427,7 @@ def exec_start4(code,packege):
 				titleid.append(i)			
 
 		for i in titleid:
-			print(packege, i)
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, now))
 			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
 			response = s.get(suburl,headers=header)
 			html = response.text
@@ -546,7 +546,7 @@ def exec_start5(code,packege):
 				titleid.append(i)
 				
 		for i in titleid:
-			print(packege, i)
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, now))
 			time.sleep(random.uniform(2,10)) 
 			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
 			try:
