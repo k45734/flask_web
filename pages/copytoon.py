@@ -228,8 +228,12 @@ def exec_start(t_main, code, packege):
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-				con.commit()
+				try:
+					cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+					con.commit()
+				except:
+					con.rollback()
+				
 		con.close()
 
 def exec_start2(t_main, code, packege):
@@ -305,8 +309,11 @@ def exec_start2(t_main, code, packege):
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-				con.commit()
+				try:
+					cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+					con.commit()
+				except:
+					con.rollback()
 		con.close()	
 		
 def exec_start3(t_main,code,packege,genre):
@@ -393,8 +400,11 @@ def exec_start3(t_main,code,packege,genre):
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-				con.commit()
+				try:
+					cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+					con.commit()
+				except:
+					con.rollback()
 		con.close()	
 		
 def exec_start4(code,packege):
@@ -506,8 +516,11 @@ def exec_start4(code,packege):
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-				con.commit()
+				try:
+					cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+					con.commit()
+				except:
+					con.rollback()
 		con.close()	
 	
 def exec_start5(code,packege):
@@ -587,8 +600,11 @@ def exec_start5(code,packege):
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-				con.commit()
+				try:
+					cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+					con.commit()
+				except:
+					con.rollback()
 		con.close()		
 		
 #공통 다운로드	
@@ -726,8 +742,11 @@ def godown(t_main, compress, cbz, packege):
 					sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
 				else:
 					sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
-				cur.execute(sql,('True',subtitle))
-				con.commit()
+				try:
+					cur.execute(sql,('True',subtitle))
+					con.commit()
+				except:
+					con.rollback()
 					
 			con.close()
 
