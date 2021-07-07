@@ -118,16 +118,15 @@ section {
       </ul>
     </li>
 	{% if session.get('logFlag') %}
-    <li><a href="#">관리 메뉴</a>
+    <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a>
       <ul id="sub-menu">     
         <li><a href="{{ url_for('sub3.second') }}" aria-label="subemnu">프로그램</a></li>
         <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
         <li><a href="{{ url_for('main.log') }}" aria-label="subemnu">로그</a></li>
       <li><a href="{{ url_for('main.update') }}" aria-label="subemnu">업데이트</a></li>
-	  <li><a href="#">Ver 1.1</a></li>
+	  <li><a href="#">Ver 1.2</a></li>
       </ul>
-    </li>   
-    <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
+    </li>
     <li><a href="/logout">로그아웃</a></li>
 	{% else %}
     <li><a href="/login">로그인</a></li>
