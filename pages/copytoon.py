@@ -312,10 +312,10 @@ def exec_start2(t_main, code, packege):
 				else:
 					cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
-				except:
-					con.rollback()
-				finally:	
-					con.close()	
+			except:
+				con.rollback()
+			finally:	
+				con.close()	
 		
 def exec_start3(t_main,code,packege,genre):
 	print("뉴토끼시작")
