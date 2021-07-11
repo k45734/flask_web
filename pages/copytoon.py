@@ -729,26 +729,27 @@ def godown(t_main, compress, cbz, packege):
 			except:
 				print("종료")
 			else:
-				#마지막 실행까지 작업안했던 결과물 저장
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				if packege == 'toonkor':
-					sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
-				elif packege == 'newtoki':
-					sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
-				elif packege == 'naver':
-					sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
-				elif packege == 'daum':
-					sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
-				else:
-					sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
 				try:
+					#마지막 실행까지 작업안했던 결과물 저장
+					con = sqlite3.connect('./webtoon.db',timeout=60)
+					cur = con.cursor()
+					if packege == 'toonkor':
+						sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+					elif packege == 'newtoki':
+						sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
+					elif packege == 'naver':
+						sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
+					elif packege == 'daum':
+						sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
+					else:
+						sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
+					
 					cur.execute(sql,('True',subtitle))
 					con.commit()
 				except:
 					con.rollback()
-					
-			con.close()
+				finally:	
+					con.close()
 
 @webtoon.route('daum_list', methods=['POST'])
 def daum_list():
