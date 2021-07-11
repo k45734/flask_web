@@ -220,21 +220,21 @@ def exec_start(t_main, code, packege):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			print(packege, a, b , c ,d)
-			con = sqlite3.connect('./webtoon.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from database where urltitle = ?"
-			cur.execute(sql, (c,))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
+			try:
+				con = sqlite3.connect('./webtoon.db',timeout=60)
+				cur = con.cursor()
+				sql = "select * from database where urltitle = ?"
+				cur.execute(sql, (c,))
+				row = cur.fetchone()
+				if row != None:
+					pass
+				else:
 					cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
-				except:
-					con.rollback()
-				
-		con.close()
+			except:
+				con.rollback()
+			finally:		
+				con.close()
 
 def exec_start2(t_main, code, packege):
 	print("툰코시작")
@@ -301,20 +301,21 @@ def exec_start2(t_main, code, packege):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			print(packege, a, b , c ,d)
-			con = sqlite3.connect('./webtoon.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from database2 where urltitle = ?"
-			cur.execute(sql, (c,))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
+			try:
+				con = sqlite3.connect('./webtoon.db',timeout=60)
+				cur = con.cursor()
+				sql = "select * from database2 where urltitle = ?"
+				cur.execute(sql, (c,))
+				row = cur.fetchone()
+				if row != None:
+					pass
+				else:
 					cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
 				except:
 					con.rollback()
-		con.close()	
+				finally:	
+					con.close()	
 		
 def exec_start3(t_main,code,packege,genre):
 	print("뉴토끼시작")
@@ -392,20 +393,21 @@ def exec_start3(t_main,code,packege,genre):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			print(packege, a, b , c ,d)
-			con = sqlite3.connect('./webtoon.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from database3 where urltitle = ?"
-			cur.execute(sql, (c,))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
+			try:
+				con = sqlite3.connect('./webtoon.db',timeout=60)
+				cur = con.cursor()
+				sql = "select * from database3 where urltitle = ?"
+				cur.execute(sql, (c,))
+				row = cur.fetchone()
+				if row != None:
+					pass
+				else:
 					cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
-				except:
-					con.rollback()
-		con.close()	
+			except:
+				con.rollback()
+			finally:
+				con.close()	
 		
 def exec_start4(code,packege):
 	print("네이버웹툰시작")
@@ -508,20 +510,21 @@ def exec_start4(code,packege):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			print(packege, a, b , c ,d)
-			con = sqlite3.connect('./webtoon.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from database4 where urltitle = ?"
-			cur.execute(sql, (c,))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
+			try:
+				con = sqlite3.connect('./webtoon.db',timeout=60)
+				cur = con.cursor()
+				sql = "select * from database4 where urltitle = ?"
+				cur.execute(sql, (c,))
+				row = cur.fetchone()
+				if row != None:
+					pass
+				else:					
 					cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
-				except:
-					con.rollback()
-		con.close()	
+			except:
+				con.rollback()
+			finally:
+				con.close()	
 	
 def exec_start5(code,packege):
 	print("다음웹툰시작")
@@ -592,20 +595,21 @@ def exec_start5(code,packege):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			print(packege, a, b , c ,d)
-			con = sqlite3.connect('./webtoon.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from database5 where urltitle = ?"
-			cur.execute(sql, (c,))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
+			try:
+				con = sqlite3.connect('./webtoon.db',timeout=60)
+				cur = con.cursor()
+				sql = "select * from database5 where urltitle = ?"
+				cur.execute(sql, (c,))
+				row = cur.fetchone()
+				if row != None:
+					pass
+				else:	
 					cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 					con.commit()
-				except:
-					con.rollback()
-		con.close()		
+			except:
+				con.rollback()
+			finally:
+				con.close()		
 		
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege):	
