@@ -157,6 +157,31 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
 	print('{}  압축 완료'.format(parse))				
 
+
+def db_reset(packege):
+	try:
+		time.sleep(random.uniform(2,10)) 
+		print(packege, a, b , c ,d)
+		con = sqlite3.connect('./webtoon.db')
+		cur = con.cursor()
+		if packege == 'copytoon':
+			cur.execute("delete from database")
+		elif packege == 'toonkor':
+			cur.execute("delete from database2")
+		elif packege == 'newtoki':
+			cur.execute("delete from database3")
+		elif packege == 'naver':
+			cur.execute("delete from database4")
+		elif packege == 'daum':
+			cur.execute("delete from database5")
+		else:
+			print("데이터가 넘어오지 않았습니다")
+		con.commit()
+	except:
+		con.rollback()
+	finally:		
+		con.close()
+
 def add_c(packege, a, b, c, d):
 	try:
 		time.sleep(random.uniform(2,10)) 
