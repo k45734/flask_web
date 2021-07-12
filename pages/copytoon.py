@@ -156,6 +156,73 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
 	print('{}  압축 완료'.format(parse))				
 
+def add_c(packege, a, b, c, d):
+	try:
+		time.sleep(random.uniform(2,10)) 
+		print(packege, a, b , c ,d)
+		con = sqlite3.connect('./webtoon.db',timeout=60)
+		cur = con.cursor()
+		if packege == 'copytoon':
+			sql = "select * from database where urltitle = ?"
+		elif packege == 'toonkor':
+			sql = "select * from database2 where urltitle = ?"
+		elif packege == 'newtoki':
+			sql = "select * from database3 where urltitle = ?"
+		elif packege == 'naver':
+			sql = "select * from database4 where urltitle = ?"
+		elif packege == 'daum':
+			sql = "select * from database5 where urltitle = ?"
+		else:
+			print("데이터가 넘어오지 않았습니다")
+		cur.execute(sql, (c,))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			if packege == 'copytoon':
+				cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			elif packege == 'toonkor':
+				cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			elif packege == 'newtoki':
+				cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			elif packege == 'naver':
+				cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			elif packege == 'daum':
+				cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			else:
+				print("데이터가 넘어오지 않았습니다")
+			con.commit()
+	except:
+		con.rollback()
+	finally:		
+		con.close()
+
+def add_d(packege,subtitle):
+	try:
+		time.sleep(random.uniform(2,10)) 
+		print(packege, subtitle)
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect('./webtoon.db',timeout=60)
+		cur = con.cursor()
+		if packege == 'toonkor':
+			sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+		elif packege == 'newtoki':
+			sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
+		elif packege == 'naver':
+			sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
+		elif packege == 'daum':
+			sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
+		elif packege == 'copytoon':
+			sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
+		else:
+			print("정보가 없습니다.")			
+		cur.execute(sql,('True',subtitle))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()	
+		
 def exec_start(t_main, code, packege):
 	print("카피툰시작")
 	maintitle = []
@@ -219,22 +286,7 @@ def exec_start(t_main, code, packege):
 		#for a,c in zip(subtitle,urltitle):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			print(packege, a, b , c ,d)
-			try:
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				sql = "select * from database where urltitle = ?"
-				cur.execute(sql, (c,))
-				row = cur.fetchone()
-				if row != None:
-					pass
-				else:
-					cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-					con.commit()
-			except:
-				con.rollback()
-			finally:		
-				con.close()
+			add_c(packege, a,b,c,d)
 
 def exec_start2(t_main, code, packege):
 	print("툰코시작")
@@ -300,22 +352,7 @@ def exec_start2(t_main, code, packege):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			print(packege, a, b , c ,d)
-			try:
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				sql = "select * from database2 where urltitle = ?"
-				cur.execute(sql, (c,))
-				row = cur.fetchone()
-				if row != None:
-					pass
-				else:
-					cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-					con.commit()
-			except:
-				con.rollback()
-			finally:	
-				con.close()	
+			add_c(packege, a,b,c,d)
 		
 def exec_start3(t_main,code,packege,genre):
 	print("뉴토끼시작")
@@ -391,23 +428,8 @@ def exec_start3(t_main,code,packege,genre):
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			print(packege, a, b , c ,d)
-			try:
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				sql = "select * from database3 where urltitle = ?"
-				cur.execute(sql, (c,))
-				row = cur.fetchone()
-				if row != None:
-					pass
-				else:
-					cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-					con.commit()
-			except:
-				con.rollback()
-			finally:
-				con.close()	
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
+			add_c(packege, a,b,c,d)
 		
 def exec_start4(code,packege):
 	print("네이버웹툰시작")
@@ -509,22 +531,7 @@ def exec_start4(code,packege):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			print(packege, a, b , c ,d)
-			try:
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				sql = "select * from database4 where urltitle = ?"
-				cur.execute(sql, (c,))
-				row = cur.fetchone()
-				if row != None:
-					pass
-				else:					
-					cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-					con.commit()
-			except:
-				con.rollback()
-			finally:
-				con.close()	
+			add_c(packege, a,b,c,d)
 	
 def exec_start5(code,packege):
 	print("다음웹툰시작")
@@ -593,23 +600,8 @@ def exec_start5(code,packege):
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			print(packege, a, b , c ,d)
-			try:
-				con = sqlite3.connect('./webtoon.db',timeout=60)
-				cur = con.cursor()
-				sql = "select * from database5 where urltitle = ?"
-				cur.execute(sql, (c,))
-				row = cur.fetchone()
-				if row != None:
-					pass
-				else:	
-					cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-					con.commit()
-			except:
-				con.rollback()
-			finally:
-				con.close()		
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
+			add_c(packege, a,b,c,d)		
 		
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege):	
@@ -733,27 +725,7 @@ def godown(t_main, compress, cbz, packege):
 			except:
 				print("종료")
 			else:
-				try:
-					#마지막 실행까지 작업안했던 결과물 저장
-					con = sqlite3.connect('./webtoon.db',timeout=60)
-					cur = con.cursor()
-					if packege == 'toonkor':
-						sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
-					elif packege == 'newtoki':
-						sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
-					elif packege == 'naver':
-						sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
-					elif packege == 'daum':
-						sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
-					else:
-						sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
-					
-					cur.execute(sql,('True',subtitle))
-					con.commit()
-				except:
-					con.rollback()
-				finally:	
-					con.close()
+				add_d(packege, subtitle)
 
 @webtoon.route('daum_list', methods=['POST'])
 def daum_list():
