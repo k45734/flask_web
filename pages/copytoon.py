@@ -158,10 +158,11 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 	print('{}  압축 완료'.format(parse))				
 
 @webtoon.route('db_reset', methods=['POST'])
-def db_reset(packege):
+def db_reset():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		packege = request.form['packege']
 		try:
 			time.sleep(random.uniform(2,10)) 
 			con = sqlite3.connect('./webtoon.db')
@@ -767,7 +768,8 @@ def daum_list():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'daum'
+		packege = request.form['packege']
+		#packege = 'daum'
 		code = request.form['code']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -787,7 +789,8 @@ def daum_down():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'daum'
+		packege = request.form['packege']
+		#packege = 'daum'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -808,7 +811,8 @@ def naver_list():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'naver'
+		packege = request.form['packege']
+		#packege = 'naver'
 		code = request.form['code']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -828,7 +832,8 @@ def naver_down():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'naver'
+		packege = request.form['packege']
+		#packege = 'naver'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -849,7 +854,8 @@ def newtoki_list():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'newtoki'
+		packege = request.form['packege']
+		#packege = 'newtoki'
 		t_main = request.form['t_main']
 		genre = request.form['genre']
 		code = request.form['code']
@@ -871,7 +877,8 @@ def newtoki_down():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'newtoki'
+		packege = request.form['packege']
+		#packege = 'newtoki'
 		t_main = request.form['t_main']
 		genre = request.form['genre']
 		compress = request.form['compress']
@@ -893,7 +900,8 @@ def copytoon_list():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'copytoon'
+		packege = request.form['packege']
+		#packege = 'copytoon'
 		t_main = request.form['t_main']
 		code = request.form['code']
 		compress = request.form['compress']
@@ -914,7 +922,8 @@ def copytoon_down():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'copytoon'
+		packege = request.form['packege']
+		#packege = 'copytoon'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -935,7 +944,8 @@ def toonkor_list():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'toonkor'
+		packege = request.form['packege']
+		#packege = 'toonkor'
 		t_main = request.form['t_main']
 		code = request.form['code']
 		compress = request.form['compress']
@@ -956,7 +966,8 @@ def toonkor_down():
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
-		packege = 'toonkor'
+		packege = request.form['packege']
+		#packege = 'toonkor'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
