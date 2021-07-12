@@ -51,7 +51,8 @@ from apscheduler.jobstores.base import BaseJobStore, JobLookupError, Conflicting
 from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-now = datetime.now().time()
+nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+#now = datetime.now()#.time()
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
@@ -160,7 +161,7 @@ def add_c(packege, a, b, c, d):
 	try:
 		time.sleep(random.uniform(2,10)) 
 		print(packege, a, b , c ,d)
-		con = sqlite3.connect('./webtoon.db',timeout=60)
+		con = sqlite3.connect('./webtoon.db')
 		cur = con.cursor()
 		if packege == 'copytoon':
 			sql = "select * from database where urltitle = ?"
@@ -197,26 +198,26 @@ def add_c(packege, a, b, c, d):
 	finally:		
 		con.close()
 
-def add_d(packege,subtitle):
+def add_d(packege, subtitle, title):
 	try:
 		time.sleep(random.uniform(2,10)) 
 		print(packege, subtitle)
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./webtoon.db',timeout=60)
+		con = sqlite3.connect('./webtoon.db')
 		cur = con.cursor()
 		if packege == 'toonkor':
-			sql = "UPDATE database2 SET complte = ? WHERE subtitle = ?"
+			sql = "UPDATE database2 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'newtoki':
-			sql = "UPDATE database3 SET complte = ? WHERE subtitle = ?"
+			sql = "UPDATE database3 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'naver':
-			sql = "UPDATE database4 SET complte = ? WHERE subtitle = ?"
+			sql = "UPDATE database4 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'daum':
-			sql = "UPDATE database5 SET complte = ? WHERE subtitle = ?"
+			sql = "UPDATE database5 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'copytoon':
-			sql = "UPDATE database SET complte = ? WHERE subtitle = ?"
+			sql = "UPDATE database SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		else:
 			print("정보가 없습니다.")			
-		cur.execute(sql,('True',subtitle))
+		cur.execute(sql,('True',subtitle, title))
 		con.commit()
 	except:
 		con.rollback()
@@ -258,7 +259,7 @@ def exec_start(t_main, code, packege):
 				all = t_main + url
 			else:
 				all = t_main + '/' + url
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, now))
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			response1 = s.get(all,headers=header)
 			html = response1.text
 			soup = bs(html, "html.parser")
@@ -320,7 +321,7 @@ def exec_start2(t_main, code, packege):
 		for mainurl in maintitle:
 			test = mainurl
 			all = t_main + '/' + test
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, now))
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			response1 = s.get(all,headers=header)
 			time.sleep(random.uniform(2,5)) 
 			html = response1.text
@@ -391,7 +392,7 @@ def exec_start3(t_main,code,packege,genre):
 				main_list.append(main_url)
 		
 		for a in main_list :
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, now))
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, nowDatetime))
 			time.sleep(random.uniform(2,10)) 
 			try:
 				req = s.get(a,headers=header)
@@ -461,7 +462,7 @@ def exec_start4(code,packege):
 				titleid.append(i)			
 
 		for i in titleid:
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, now))
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, nowDatetime))
 			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
 			response = s.get(suburl,headers=header)
 			html = response.text
@@ -569,7 +570,7 @@ def exec_start5(code,packege):
 				titleid.append(i)
 				
 		for i in titleid:
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, now))
+			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, nowDatetime))
 			time.sleep(random.uniform(2,10)) 
 			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
 			try:
@@ -725,7 +726,7 @@ def godown(t_main, compress, cbz, packege):
 			except:
 				print("종료")
 			else:
-				add_d(packege, subtitle)
+				add_d(packege, subtitle, title)
 
 @webtoon.route('daum_list', methods=['POST'])
 def daum_list():
