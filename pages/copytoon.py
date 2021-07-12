@@ -187,6 +187,36 @@ def db_reset():
 
 		return redirect(url_for('main.index'))
 
+@webtoon.route('db_redown', methods=['POST'])
+def db_redown():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		packege = request.form['packege']
+		try:
+			time.sleep(random.uniform(2,10)) 
+			con = sqlite3.connect('./webtoon.db')
+			cur = con.cursor()
+			if packege == 'toonkor':
+				sql = "UPDATE database2 SET complte = ?"
+			elif packege == 'newtoki':
+				sql = "UPDATE database3 SET complte = ?"
+			elif packege == 'naver':
+				sql = "UPDATE database4 SET complte = ?"
+			elif packege == 'daum':
+				sql = "UPDATE database5 SET complte = ?"
+			elif packege == 'copytoon':
+				sql = "UPDATE database SET complte = ?"
+			else:
+				print("정보가 없습니다.")			
+			cur.execute(sql,('False',))
+			con.commit()
+		except:
+			con.rollback()
+		finally:		
+			con.close()
+
+		return redirect(url_for('main.index'))
 
 def add_c(packege, a, b, c, d):
 	try:
