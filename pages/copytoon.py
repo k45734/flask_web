@@ -720,10 +720,13 @@ def godown(t_main, compress, cbz, packege):
 					status = data['result']['status']				
 			print("{} 의 {} 을 시작합니다".format(title, subtitle))
 			if packege == 'toonkor':
-				tt = re.search(r'var toon_img = (.*?);', html, re.S)
-				json_string = tt.group(1)
-				obj = str(base64.b64decode(json_string), encoding='utf-8')
-				taglist = re.compile(r'src="(.*?)"').findall(obj)
+				try:
+					tt = re.search(r'var toon_img = (.*?);', html, re.S)
+					json_string = tt.group(1)
+					obj = str(base64.b64decode(json_string), encoding='utf-8')
+					taglist = re.compile(r'src="(.*?)"').findall(obj)
+				except:
+					continue
 			elif packege == 'newtoki':
 				try:
 					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
