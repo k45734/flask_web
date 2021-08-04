@@ -759,6 +759,8 @@ def godown(t_main, compress, cbz, packege):
 					elif packege == 'naver':
 						#print(img['src'])
 						urls.append(img['src'])
+					elif packege == 'copytoon':
+						urls.append(img['src'])
 					else:
 						if img["src"].endswith("jpg"):
 							urls.append(str(img["src"]))
