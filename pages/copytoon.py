@@ -746,7 +746,11 @@ def godown(t_main, compress, cbz, packege):
 					elif packege == 'newtoki':
 						urls.append(img)
 					elif packege == 'naver':
-						urls.append(img['src'])
+						try:
+							urls.append(img['src'])
+						except:
+							if img["src"].endswith("jpg"):
+								urls.append(str(img["src"]))
 					else:
 						if img["src"].endswith("jpg"):
 							urls.append(str(img["src"]))
