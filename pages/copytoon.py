@@ -730,8 +730,12 @@ def godown(t_main, compress, cbz, packege):
 				#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 			elif packege == 'naver':
-				obj = soup.find("div",{"class":"wt_viewer"})
-				taglist = obj.findAll("img")
+				try:
+					obj = soup.find("div",{"class":"wt_viewer"})
+					taglist = obj.findAll("img")
+				except:
+					continue
+				#print(taglist)
 			elif packege == 'daum':
 				pass
 			else:
@@ -741,20 +745,18 @@ def godown(t_main, compress, cbz, packege):
 			if packege != 'daum':	
 				#print(taglist)
 				for img in taglist:
+					#print(taglist)
 					if packege == 'toonkor':
 						urls.append(img)
 					elif packege == 'newtoki':
 						urls.append(img)
 					elif packege == 'naver':
-						try:
-							urls.append(img['src'])
-						except:
-							if img["src"].endswith("jpg"):
-								urls.append(str(img["src"]))
+						#print(img['src'])
+						urls.append(img['src'])
 					else:
 						if img["src"].endswith("jpg"):
 							urls.append(str(img["src"]))
-							#print(img["src"])
+							print(img["src"])
 				
 			else:
 				if ass != 'you are not login':
