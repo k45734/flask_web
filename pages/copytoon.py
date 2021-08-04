@@ -725,10 +725,13 @@ def godown(t_main, compress, cbz, packege):
 				obj = str(base64.b64decode(json_string), encoding='utf-8')
 				taglist = re.compile(r'src="(.*?)"').findall(obj)
 			elif packege == 'newtoki':
-				tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
-				html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
-				#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
-				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
+				try:
+					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
+					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
+					#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
+					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
+				except:
+					continue
 			elif packege == 'naver':
 				try:
 					obj = soup.find("div",{"class":"wt_viewer"})
@@ -756,7 +759,7 @@ def godown(t_main, compress, cbz, packege):
 					else:
 						if img["src"].endswith("jpg"):
 							urls.append(str(img["src"]))
-							print(img["src"])
+							#print(img["src"])
 				
 			else:
 				if ass != 'you are not login':
