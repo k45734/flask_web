@@ -745,8 +745,11 @@ def godown(t_main, compress, cbz, packege):
 			elif packege == 'daum':
 				pass
 			else:
-				obj = soup.find("div",{"id":"bo_v_con"})
-				taglist = obj.findAll("img")
+				try:
+					obj = soup.find("div",{"id":"bo_v_con"})
+					taglist = obj.findAll("img")
+				except:
+					continue
 			urls = []
 			if packege != 'daum':	
 				#print(taglist)
