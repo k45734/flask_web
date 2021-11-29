@@ -6,7 +6,7 @@ try:
 except:
 	pass
 import requests
-import os, io, re, zipfile, shutil, json, time, random, base64
+import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request
 import urllib.request as urllib2
 try:
 	import argparse
@@ -285,14 +285,45 @@ def add_d(packege, subtitle, title):
 	finally:	
 		con.close()	
 		
+def checkURL(url2):
+	user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
+	headers={'User-Agent':user_agent,} 
+	try:
+		 request=urllib.request.Request(url2,None,headers) #The assembled request
+		 response = urllib.request.urlopen(request,timeout=3)
+	except:
+		print('The server couldn\'t fulfill the request. %s'% url2)     
+	else:
+		data = response.read()
+		#print(html)
+		data = data.decode()     
+		result = 0
+		result = data.find("카피툰")     
+		if result > 0:
+			print ("Website is working fine %s "% url2)
+			return 9999       
+		return response.status		
+		
 def exec_start(t_main, code, packege):
 	print("카피툰시작")
+	newURL = t_main
 	maintitle = []
 	maintitle2 = []
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	for i in range(221,300):
+		url2 = ("https://copytoon%s.com" % (i))
+		time.sleep(2)
+		result = checkURL(url2)
+		if result == 9999:
+			newURL = url2
+			print("new url : " + url2)
+			break
+			
 	with requests.Session() as s:
+		t_main = url2
+		print(url2)
 		if code == 'all':
 			response = s.get(t_main,headers=header)
 			html = response.text
