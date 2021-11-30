@@ -711,7 +711,12 @@ def godown(t_main, compress, cbz, packege):
 		sql = "select * from database5"
 	else:
 		sql = "select * from database"
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	cur.execute(sql)
+	row = cur.fetchall()
+	session2 = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	
+	if packege == 'copytoon':
 		for i in range(221,300):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
@@ -722,10 +727,9 @@ def godown(t_main, compress, cbz, packege):
 				break
 		t_main = url2
 		print(t_main)
-	cur.execute(sql)
-	row = cur.fetchall()
-	session2 = requests.Session()
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	else:
+		print(t_main)
+		pass
 	for i in row:
 		title = i[0]
 		subtitle = i[1]
