@@ -389,16 +389,14 @@ def exec_start2(t_main, code, packege):
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:
-		url2 = 'https://linkman03.com/view/linkfind/e812d5f6-d6f8-411e-ab4c-6cbcc0e26682'
+		url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
 		req = s.get(url2)
 		html = req.text
-		gogo = bs(html, "html.parser").findAll("div",{"class":"GaeAREA"})
-		#toourl = gogo[6].a
-		toourl = gogo[0].a
-		t_main = toourl.text
-		#print(gogo[0].a)
-		main_url = t_main
-		print(main_url)
+		gogo = bs(html, "html.parser")
+		tt2 = gogo.findAll('a')[24].text
+		main_url = 'https://' + tt2
+		t_main = main_url
+		print(t_main)
 		if code == 'all':
 			response = s.get(t_main,headers=header)
 			time.sleep(random.uniform(2,5)) 	
@@ -739,16 +737,14 @@ def godown(t_main, compress, cbz, packege):
 		print(t_main)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
-			url2 = 'https://linkman03.com/view/linkfind/e812d5f6-d6f8-411e-ab4c-6cbcc0e26682'
+			url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
 			req = s.get(url2)
 			html = req.text
-			gogo = bs(html, "html.parser").findAll("div",{"class":"GaeAREA"})
-			#toourl = gogo[6].a
-			toourl = gogo[0].a
-			t_main = toourl.text
-			#print(gogo[0].a)
-		main_url = t_main
-		print(main_url)
+			gogo = bs(html, "html.parser")
+			tt2 = gogo.findAll('a')[24].text
+			main_url = 'https://' + tt2
+			t_main = main_url
+		print(t_main)
 	else:
 		print(t_main)
 		pass
