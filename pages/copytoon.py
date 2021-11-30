@@ -711,9 +711,19 @@ def godown(t_main, compress, cbz, packege):
 		sql = "select * from database5"
 	else:
 		sql = "select * from database"
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		for i in range(221,300):
+			url2 = ("https://copytoon%s.com" % (i))
+			time.sleep(2)
+			result = checkURL(url2)
+			if result == 9999:
+				newURL = url2
+				print("new url : " + url2)
+				break
+		t_main = url2
+		print(t_main)
 	cur.execute(sql)
 	row = cur.fetchall()
-	
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	for i in row:
