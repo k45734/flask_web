@@ -389,13 +389,25 @@ def exec_start2(t_main, code, packege):
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:
-		url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+		#url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+		#req = s.get(url2)
+		#html = req.text
+		#gogo = bs(html, "html.parser")
+		#tt2 = gogo.findAll('a')[24].text
+		#main_url = 'https://' + tt2
+		url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
 		req = s.get(url2)
 		html = req.text
 		gogo = bs(html, "html.parser")
-		tt2 = gogo.findAll('a')[24].text
-		main_url = 'https://' + tt2
-		t_main = main_url
+		
+		test = gogo.findAll("div",{"class":"view-content"})
+		for i in test:
+			url = i.findAll('strong')
+			tt = url[3].text
+			te = tt.lstrip()
+			final_str=te[:-1]
+			#print(final_str)
+		t_main = final_str
 		print(t_main)
 		if code == 'all':
 			response = s.get(t_main,headers=header)
@@ -737,13 +749,26 @@ def godown(t_main, compress, cbz, packege):
 		print(t_main)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
-			url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+			#url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+			#req = s.get(url2)
+			#html = req.text
+			#gogo = bs(html, "html.parser")
+			#tt2 = gogo.findAll('a')[24].text
+			#main_url = 'https://' + tt2
+			url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
 			req = s.get(url2)
 			html = req.text
 			gogo = bs(html, "html.parser")
-			tt2 = gogo.findAll('a')[24].text
-			main_url = 'https://' + tt2
-			t_main = main_url
+		
+			test = gogo.findAll("div",{"class":"view-content"})
+			for i in test:
+				url = i.findAll('strong')
+				tt = url[3].text
+				te = tt.lstrip()
+				final_str=te[:-1]
+				t_main = final_str
+			#print(t_main)
+			#t_main = main_url
 		print(t_main)
 	else:
 		print(t_main)
