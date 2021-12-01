@@ -118,6 +118,7 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 		except:
 			time.sleep(random.uniform(2,5)) 
 			req = s.get(url,headers=header)	
+	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	#parse = re.sub('[-_\/:*?"<>|]', '', title2)
@@ -480,7 +481,7 @@ def exec_start3(t_main,code,packege,genre):
 		if code == 'all':
 			for page in range(1,11): 
 				main_url = t_main + '/webtoon/p' + str(page) + '?toon=' + genre
-				time.sleep(random.uniform(2,10)) 
+				time.sleep(random.uniform(30,60)) 
 				req = s.get(main_url)	
 				html = req.text
 				gogo = bs(html, "html.parser")
@@ -505,7 +506,7 @@ def exec_start3(t_main,code,packege,genre):
 		
 		for a in main_list :
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, nowDatetime))
-			time.sleep(random.uniform(2,10)) 
+			time.sleep(random.uniform(30,60))
 			try:
 				req = s.get(a,headers=header)
 			except:
@@ -817,6 +818,7 @@ def godown(t_main, compress, cbz, packege):
 					continue
 			elif packege == 'newtoki':
 				try:
+					time.sleep(random.uniform(30,60))
 					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 					#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
