@@ -795,9 +795,12 @@ def godown(t_main, compress, cbz, packege):
 		else:
 			print(wwwkt)
 			if packege != 'daum':
-				response1 = session2.get(wwwkt,headers=header)
-				html = response1.text
-				soup = bs(html, "html.parser")					
+				try:
+					response1 = session2.get(wwwkt,headers=header)
+					html = response1.text
+					soup = bs(html, "html.parser")	
+				except:
+					continue
 			else:
 				try:
 					data = requests.get(wwwkt,headers=header).json()
