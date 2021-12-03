@@ -807,9 +807,7 @@ def godown(t_main, compress, cbz, packege):
 					ass = data['result']['message']
 					status = data['result']['status']
 				except:
-					data = requests.get(wwwkt,headers=header).json()
-					ass = data['result']['message']
-					status = data['result']['status']				
+					continue				
 			print("{} 의 {} 을 시작합니다".format(title, subtitle))
 			if packege == 'toonkor':
 				try:
