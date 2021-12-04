@@ -313,7 +313,7 @@ def exec_start(t_main, code, packege):
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	for i in range(221,300):
+	for i in range(224,500):
 		url2 = ("https://copytoon%s.com" % (i))
 		time.sleep(2)
 		result = checkURL(url2)
@@ -738,7 +738,7 @@ def godown(t_main, compress, cbz, packege):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	
 	if packege == 'copytoon':
-		for i in range(221,300):
+		for i in range(224,500):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
 			result = checkURL(url2)
