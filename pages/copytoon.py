@@ -406,30 +406,27 @@ def exec_start2(t_main, code, packege):
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:
-		#url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+	with requests.Session() as s:		
+		#url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
 		#req = s.get(url2)
 		#html = req.text
 		#gogo = bs(html, "html.parser")
-		#tt2 = gogo.findAll('a')[24].text
-		#main_url = 'https://' + tt2
-		url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
+		
+		#test = gogo.findAll("div",{"class":"view-content"})
+		#for i in test:
+		#	url = i.findAll('strong')
+		#	tt = url[3].text
+		#	te = tt.lstrip()
+		#	final_str=te[:-1]
+		url2 = 'https://t.me/s/new_toonkor'
 		req = s.get(url2)
 		html = req.text
-		gogo = bs(html, "html.parser")
-		
-		test = gogo.findAll("div",{"class":"view-content"})
-		for i in test:
-			url = i.findAll('strong')
-			tt = url[3].text
-			te = tt.lstrip()
-			final_str=te[:-1]
-			#print(final_str)
-		
+		ttt = re.compile(r'<a href="(.*?)"').findall(html)
+		n = len(ttt)
+		final_str = ttt[n-2]
 		text_file_path = os.getcwd() + '/templates/toonkor.html'
 		new_text_content = ''
 		target_word = t_main
-		#new_word = '사랑'
 				
 		with open(text_file_path,'r',encoding='utf-8') as f:
 			lines = f.readlines()
@@ -449,19 +446,13 @@ def exec_start2(t_main, code, packege):
 			html = response.text
 			soup = bs(html, "html.parser").findAll("a",{"id":"title"})
 			for tag in soup:
-				#latest = tag.text
 				latest = tag['href']
 				aa = latest.replace("/", "")
-				#test1 = latest.lstrip()
 				maintitle.append(aa)
-				#print(test1)
 		else:
 			allcode = code.split('|')
-			#print(allcode)
 			for i in allcode:
-				#print(i)
 				t_maincode = t_main + i
-				#print(t_maincode)
 				maintitle.append(i)
 				
 		for mainurl in maintitle:
@@ -532,7 +523,6 @@ def exec_start3(t_main,code,packege,genre):
 
 		else:	
 			allcode = code.split('|')
-			#print(allcode)
 			for i in allcode:
 				main_url = t_main + '/webtoon/' + i	
 				main_list.append(main_url)
@@ -600,11 +590,8 @@ def exec_start4(code,packege):
 				titleid.append(title_id)
 		else:
 			allcode = code.split('|')
-			#print(allcode)
 			for i in allcode:
-				#print(i)
 				t_maincode = i
-				#print(t_maincode)
 				titleid.append(i)			
 
 		for i in titleid:
@@ -624,24 +611,6 @@ def exec_start4(code,packege):
 			tt2 = re.sub(pattern, '', tt2)
 			tt2 = tt2.replace("[", "")
 			tt2 = tt2.replace("]", "")
-			#count = []
-			#for p in range(1, 1001):
-			#	pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
-			#	response = s.get(pageurl,headers=header)
-			#	html = response.text
-			#	soup = bs(html, "html.parser")
-			#	sublist = soup.findAll("td",{"class":"title"})
-			#	pageend = soup.find("a",{"class":"next"})
-				
-			#	if pageend:
-			#		for ii in sublist:
-			#			test = ii.find('a')['href']
-			#			count.append(test)
-			#	else:
-			#		for ii in sublist:
-			#			test = ii.find('a')['href']
-			#			count.append(test)
-			#		break
 					
 			for p in range(1, 1001):
 				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
@@ -801,42 +770,41 @@ def godown(t_main, compress, cbz, packege):
 		print(t_main)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
-			#url2 = 'https://www.google.com/search?q=%ED%88%B0%EC%BD%94'
+			#url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
 			#req = s.get(url2)
 			#html = req.text
 			#gogo = bs(html, "html.parser")
-			#tt2 = gogo.findAll('a')[24].text
-			#main_url = 'https://' + tt2
-			url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
+		
+			#test = gogo.findAll("div",{"class":"view-content"})
+			#for i in test:
+			#	url = i.findAll('strong')
+			#	tt = url[3].text
+			#	te = tt.lstrip()
+			#	final_str=te[:-1]
+			url2 = 'https://t.me/s/new_toonkor'
 			req = s.get(url2)
 			html = req.text
-			gogo = bs(html, "html.parser")
-		
-			test = gogo.findAll("div",{"class":"view-content"})
-			for i in test:
-				url = i.findAll('strong')
-				tt = url[3].text
-				te = tt.lstrip()
-				final_str=te[:-1]
-				
-				text_file_path = os.getcwd() + '/templates/toonkor.html'
-				new_text_content = ''
-				target_word = t_main
-				#new_word = '사랑'
-						
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,final_str)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)	
-				#print(t_main)
-				#t_main = main_url
-				t_main = final_str
+			ttt = re.compile(r'<a href="(.*?)"').findall(html)
+			n = len(ttt)
+			final_str = ttt[n-2]
+			text_file_path = os.getcwd() + '/templates/toonkor.html'
+			new_text_content = ''
+			target_word = t_main
+			#new_word = '사랑'
+			
+			with open(text_file_path,'r',encoding='utf-8') as f:
+				lines = f.readlines()
+				for i, l in enumerate(lines):
+					new_string = l.strip().replace(target_word,final_str)
+					if new_string:
+						new_text_content += new_string + '\n'
+					else:
+						new_text_content += '\n'
+			with open(text_file_path,'w',encoding='utf-8') as f:
+				f.write(new_text_content)	
+			#print(t_main)
+			#t_main = main_url
+			t_main = final_str
 		print(t_main)
 	else:
 		print(t_main)
