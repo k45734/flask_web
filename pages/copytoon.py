@@ -299,7 +299,7 @@ def checkURL(url2):
 		#print(html)
 		data = data.decode()     
 		result = 0
-		result = data.find("카피툰")     
+		result = data.find(url2)     
 		if result > 0:
 			print ("Website is working fine %s "% url2)
 			return 9999       
@@ -317,11 +317,28 @@ def exec_start(t_main, code, packege):
 		url2 = ("https://copytoon%s.com" % (i))
 		time.sleep(2)
 		result = checkURL(url2)
+		
+		text_file_path = os.getcwd() + '/templates/copytoon.html'
+		new_text_content = ''
+		target_word = t_main
+		#new_word = '사랑'
+		
 		if result == 9999:
-			newURL = url2
-			print("new url : " + url2)
-			break
 			
+			print("new url : " + url2)
+			print(text_file_path)
+			with open(text_file_path,'r',encoding='utf-8') as f:
+				lines = f.readlines()
+				for i, l in enumerate(lines):
+					new_string = l.strip().replace(target_word,url2)
+					if new_string:
+						new_text_content += new_string + '\n'
+					else:
+						new_text_content += '\n'
+			with open(text_file_path,'w',encoding='utf-8') as f:
+				f.write(new_text_content)
+			break
+	#print(os.getcwd())		
 	with requests.Session() as s:
 		t_main = url2
 		print(url2)
@@ -408,6 +425,22 @@ def exec_start2(t_main, code, packege):
 			te = tt.lstrip()
 			final_str=te[:-1]
 			#print(final_str)
+		
+		text_file_path = os.getcwd() + '/templates/toonkor.html'
+		new_text_content = ''
+		target_word = t_main
+		#new_word = '사랑'
+				
+		with open(text_file_path,'r',encoding='utf-8') as f:
+			lines = f.readlines()
+			for i, l in enumerate(lines):
+				new_string = l.strip().replace(target_word,final_str)
+				if new_string:
+					new_text_content += new_string + '\n'
+				else:
+					new_text_content += '\n'
+		with open(text_file_path,'w',encoding='utf-8') as f:
+			f.write(new_text_content)
 		t_main = final_str
 		print(t_main)
 		if code == 'all':
@@ -738,13 +771,31 @@ def godown(t_main, compress, cbz, packege):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	
 	if packege == 'copytoon':
+
 		for i in range(231,500):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
 			result = checkURL(url2)
+			
+			text_file_path = os.getcwd() + '/templates/copytoon.html'
+			new_text_content = ''
+			target_word = t_main
+			#new_word = '사랑'
+			
 			if result == 9999:
-				newURL = url2
-				print("new url : " + url2)
+				
+				print("new down url : " + url2)
+				print(text_file_path)
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
 				break
 		t_main = url2
 		print(t_main)
@@ -767,9 +818,25 @@ def godown(t_main, compress, cbz, packege):
 				tt = url[3].text
 				te = tt.lstrip()
 				final_str=te[:-1]
+				
+				text_file_path = os.getcwd() + '/templates/toonkor.html'
+				new_text_content = ''
+				target_word = t_main
+				#new_word = '사랑'
+						
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,final_str)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)	
+				#print(t_main)
+				#t_main = main_url
 				t_main = final_str
-			#print(t_main)
-			#t_main = main_url
 		print(t_main)
 	else:
 		print(t_main)
