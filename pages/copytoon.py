@@ -6,6 +6,7 @@ try:
 except:
 	pass
 import requests
+import logging
 import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request
 import urllib.request as urllib2
 try:
@@ -57,6 +58,10 @@ webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
+f = open('./log/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+logging.basicConfig(level=logging.ERROR,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
+logger = logging.getLogger()
 schedulerc.start()
 
 @webtoon.route('/')
@@ -157,7 +162,8 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 		fantasy_zip.close()
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
 	print('{}  압축 완료'.format(parse))				
-
+	logger.debug('%s   압축 완료', parse)
+	
 @webtoon.route('db_reset', methods=['POST'])
 def db_reset():
 	if not session.get('logFlag'):
@@ -180,6 +186,7 @@ def db_reset():
 				cur.execute("delete from database5")
 			else:
 				print("데이터가 넘어오지 않았습니다")
+				logger.debug('데이터가 넘어오지 않았습니다.')
 			con.commit()
 		except:
 			con.rollback()
@@ -209,7 +216,8 @@ def db_redown():
 			elif packege == 'copytoon':
 				sql = "UPDATE database SET complte = ?"
 			else:
-				print("정보가 없습니다.")			
+				print("정보가 없습니다.")	
+				logger.debug('정보가 없습니다.')
 			cur.execute(sql,('False',))
 			con.commit()
 		except:
@@ -237,6 +245,7 @@ def add_c(packege, a, b, c, d):
 			sql = "select * from database5 where urltitle = ?"
 		else:
 			print("데이터가 넘어오지 않았습니다")
+			logger.debug('데이터가 넘어오지 않았습니다.')
 		cur.execute(sql, (c,))
 		row = cur.fetchone()
 		if row != None:
@@ -254,6 +263,7 @@ def add_c(packege, a, b, c, d):
 				cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			else:
 				print("데이터가 넘어오지 않았습니다")
+				logger.debug('데이터가 넘어오지 않았습니다.')
 			con.commit()
 	except:
 		con.rollback()
@@ -278,7 +288,8 @@ def add_d(packege, subtitle, title):
 		elif packege == 'copytoon':
 			sql = "UPDATE database SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		else:
-			print("정보가 없습니다.")			
+			print("정보가 없습니다.")	
+			logger.debug('정보가 없습니다.')
 		cur.execute(sql,('True',subtitle, title))
 		con.commit()
 	except:
@@ -307,6 +318,7 @@ def checkURL(url2):
 		
 def exec_start(t_main, code, packege):
 	print("카피툰시작")
+	logger.debug('카피툰시작')
 	newURL = t_main
 	maintitle = []
 	maintitle2 = []
@@ -370,6 +382,7 @@ def exec_start(t_main, code, packege):
 			else:
 				all = t_main + '/' + url
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
+			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
 			response1 = s.get(all,headers=header)
 			html = response1.text
 			soup = bs(html, "html.parser")
@@ -401,6 +414,7 @@ def exec_start(t_main, code, packege):
 
 def exec_start2(t_main, code, packege):
 	print("툰코시작")
+	logger.debug('툰코시작')
 	maintitle = []
 	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
 	subtitle = []
@@ -459,6 +473,7 @@ def exec_start2(t_main, code, packege):
 			test = mainurl
 			all = t_main + '/' + test
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
+			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
 			response1 = s.get(all,headers=header)
 			time.sleep(random.uniform(2,5)) 
 			html = response1.text
@@ -494,6 +509,7 @@ def exec_start2(t_main, code, packege):
 		
 def exec_start3(t_main,code,packege,genre):
 	print("뉴토끼시작")
+	logger.debug('뉴토끼시작')
 	packege = 'newtoki'
 	main_list = [] #url 주소를 만든다.
 	maintitle = [] #대제목이 저장된다
@@ -529,11 +545,13 @@ def exec_start3(t_main,code,packege,genre):
 		
 		for a in main_list :
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, nowDatetime))
+			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
 			time.sleep(random.uniform(30,60))
 			try:
 				req = s.get(a,headers=header)
 			except:
 				print("캡챠있다.")
+				logger.debug('캡챠있다')
 				continue
 			html = req.text
 			gogo = bs(html, "html.parser")
@@ -570,6 +588,7 @@ def exec_start3(t_main,code,packege,genre):
 		
 def exec_start4(code,packege):
 	print("네이버웹툰시작")
+	logger.debug('네이버웹툰시작')
 	packege = 'naver'
 	maintitle = []
 	subtitle = []
@@ -596,6 +615,7 @@ def exec_start4(code,packege):
 
 		for i in titleid:
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, nowDatetime))
+			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, i, nowDatetime)
 			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
 			response = s.get(suburl,headers=header)
 			html = response.text
@@ -806,8 +826,10 @@ def godown(t_main, compress, cbz, packege):
 			#t_main = main_url
 			t_main = final_str
 		print(t_main)
+		logger.debug('%s',t_main)
 	else:
 		print(t_main)
+		logger.debug('%s', t_main)
 		pass
 	for i in row:
 		title = i[0]
@@ -829,6 +851,7 @@ def godown(t_main, compress, cbz, packege):
 			continue
 		else:
 			print(wwwkt)
+			logger.debug('%s', wwwkt)
 			if packege != 'daum':
 				try:
 					response1 = session2.get(wwwkt,headers=header)
@@ -844,6 +867,7 @@ def godown(t_main, compress, cbz, packege):
 				except:
 					continue				
 			print("{} 의 {} 을 시작합니다".format(title, subtitle))
+			logger.debug('%s 의 %s 을 시작합니다', title, subtitle)
 			if packege == 'toonkor':
 				try:
 					tt = re.search(r'var toon_img = (.*?);', html, re.S)
@@ -903,6 +927,7 @@ def godown(t_main, compress, cbz, packege):
 						urls.append(img)
 				else:
 					print("유료")
+					logger.debug('유료')
 					continue
 			jpeg_no = 00
 				
@@ -931,6 +956,7 @@ def godown(t_main, compress, cbz, packege):
 					pass
 			except:
 				print("종료")
+				logger.debug('종료')
 			else:
 				add_d(packege, subtitle, title)
 
