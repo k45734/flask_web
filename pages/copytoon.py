@@ -545,7 +545,7 @@ def exec_start3(t_main,code,packege,genre):
 		
 		for a in main_list :
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, nowDatetime))
-			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
+			logger.debug('%s 의 %s 을 찾았습니다. %s', packege, a, nowDatetime)
 			time.sleep(random.uniform(30,60))
 			try:
 				req = s.get(a,headers=header)
