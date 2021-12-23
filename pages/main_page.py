@@ -150,39 +150,31 @@ def log():
 	else:
 		if platform.system() == 'Windows':
 			filepath = './log/flask.log'
-			tltl2 = '도커에서만 보입니다.'
+			tltl = []
 			with open(filepath, 'rt', encoding='cp949') as fp:
-				line = fp.readline()
-				cnt = 1
-				tltl = []
-				while line:
-					test = line.strip()
-					line = fp.readline()
-					tltl.append(test)
-					cnt += 1
+				fp.seek (0, 2)
+				fsize = fp.tell()
+				fp.seek (max (fsize-1024, 0), 0)
+				lines = fp.readlines()
+			lines = lines[-10:]
+			for i in lines:
+				test = i.strip()
+				tltl.append(test)
 					
 		else:
 			filepath = './log/flask.log'
+			tltl = []
 			with open(filepath, 'rt', encoding='utf-8') as fp:
-				line = fp.readline()
-				cnt = 1
-				tltl = []
-				while line:
-					test = line.strip()
-					line = fp.readline()
-					tltl.append(test)
-					cnt += 1
-			filepath2 = './log/flaskweb.log'
-			with open(filepath2, 'rt', encoding='utf-8') as fp:
-				line = fp.readline()
-				cnt = 1
-				tltl2 = []
-				while line:
-					test = line.strip()
-					line = fp.readline()
-					tltl2.append(test)
-					cnt += 1
-		return render_template('log.html', tltl=tltl , tltl2=tltl2)	
+				fp.seek (0, 2)
+				fsize = fp.tell()
+				fp.seek (max (fsize-1024, 0), 0)
+				lines = fp.readlines()
+			lines = lines[-10:]
+			for i in lines:
+				test = i.strip()
+				tltl.append(test)
+
+		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
 def update(file_name = None):
