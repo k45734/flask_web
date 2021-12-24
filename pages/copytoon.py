@@ -863,7 +863,7 @@ def godown(t_main, compress, cbz, packege):
 			t_main = final_str
 		print(t_main)
 		logger.debug('%s',t_main)
-	elif packege == 'toonkor':	
+	elif packege == 'newtoki':	
 		for i in range(116,500):
 			url2 = ("https://newtoki%s.com" % (i))
 			time.sleep(2)
@@ -927,8 +927,8 @@ def godown(t_main, compress, cbz, packege):
 					status = data['result']['status']
 				except:
 					continue				
-			print("{} 의 {} 을 시작합니다".format(title, subtitle))
-			logger.debug('%s 의 %s 을 시작합니다', title, subtitle)
+			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
+			logger.debug('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
 			if packege == 'toonkor':
 				try:
 					tt = re.search(r'var toon_img = (.*?);', html, re.S)
