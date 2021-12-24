@@ -171,8 +171,7 @@ def log():
 				try:
 					lines = fp.readlines()
 				except:
-					time.sleep(1)
-					lines = fp.readlines()
+					continue
 			lines = lines[-10:]
 			for i in lines:
 				test = i.strip()
