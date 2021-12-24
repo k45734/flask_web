@@ -437,7 +437,12 @@ def exec_start2(t_main, code, packege):
 		html = req.text
 		ttt = re.compile(r'<a href="(.*?)"').findall(html)
 		n = len(ttt)
-		final_str = ttt[n-2]
+		if ttt[n-2] == 'https://t.me/new_toonkor':
+			tta = ttt[n-1]
+		else:
+			tta = ttt[n-2]
+		final_str = tta
+		logger.debug(final_str)
 		text_file_path = os.getcwd() + '/templates/toonkor.html'
 		new_text_content = ''
 		target_word = t_main
@@ -832,7 +837,12 @@ def godown(t_main, compress, cbz, packege):
 			html = req.text
 			ttt = re.compile(r'<a href="(.*?)"').findall(html)
 			n = len(ttt)
-			final_str = ttt[n-2]
+			if ttt[n-2] == 'https://t.me/new_toonkor':
+				tta = ttt[n-1]
+			else:
+				tta = ttt[n-2]
+			final_str = tta
+			logger.debug(final_str)
 			text_file_path = os.getcwd() + '/templates/toonkor.html'
 			new_text_content = ''
 			target_word = t_main
