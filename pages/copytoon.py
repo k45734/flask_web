@@ -517,6 +517,31 @@ def exec_start3(t_main,code,packege,genre):
 	subtitle = [] #소제목이 저장된다.
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	for i in range(116,500):
+		url2 = ("https://newtoki%s.com" % (i))
+		time.sleep(2)
+		result = checkURL(url2)
+		
+		text_file_path = os.getcwd() + '/templates/newtoki.html'
+		new_text_content = ''
+		target_word = t_main
+		#new_word = '사랑'
+		
+		if result == 9999:
+			
+			print("new url : " + url2)
+			print(text_file_path)
+			with open(text_file_path,'r',encoding='utf-8') as f:
+				lines = f.readlines()
+				for i, l in enumerate(lines):
+					new_string = l.strip().replace(target_word,url2)
+					if new_string:
+						new_text_content += new_string + '\n'
+					else:
+						new_text_content += '\n'
+			with open(text_file_path,'w',encoding='utf-8') as f:
+				f.write(new_text_content)
+			break
 	with requests.Session() as s:
 		if code == 'all':
 			for page in range(1,11): 
@@ -788,6 +813,7 @@ def godown(t_main, compress, cbz, packege):
 				break
 		t_main = url2
 		print(t_main)
+		logger.debug('%s',t_main)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
 			#url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
@@ -825,6 +851,31 @@ def godown(t_main, compress, cbz, packege):
 			#print(t_main)
 			#t_main = main_url
 			t_main = final_str
+		print(t_main)
+		logger.debug('%s',t_main)
+	elif packege == 'toonkor':	
+		for i in range(116,500):
+			url2 = ("https://newtoki%s.com" % (i))
+			time.sleep(2)
+			result = checkURL(url2)			
+			text_file_path = os.getcwd() + '/templates/newtoki.html'
+			new_text_content = ''
+			target_word = t_main	
+			if result == 9999:			
+				print("new url : " + url2)
+				print(text_file_path)
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
+				break
+		t_main = url2
 		print(t_main)
 		logger.debug('%s',t_main)
 	else:
