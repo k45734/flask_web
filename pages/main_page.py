@@ -155,7 +155,11 @@ def log():
 				fp.seek (0, 2)
 				fsize = fp.tell()
 				fp.seek (max (fsize-1024, 0), 0)
-				lines = fp.readlines()
+				try:
+					lines = fp.readlines()
+				except:
+					time.sleep(1)
+					lines = fp.readlines()
 			lines = lines[-10:]
 			for i in lines:
 				test = i.strip()
@@ -171,7 +175,8 @@ def log():
 				try:
 					lines = fp.readlines()
 				except:
-					continue
+					time.sleep(1)
+					lines = fp.readlines()
 			lines = lines[-10:]
 			for i in lines:
 				test = i.strip()
