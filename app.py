@@ -40,7 +40,7 @@ def create_app():
 	if not os.path.isfile(filepath):
 		f = open('./log/flask.log','a', encoding='utf-8')
 	rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
-	logging.basicConfig(level=logging.DEBUG,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
+	logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 	logger = logging.getLogger()
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
