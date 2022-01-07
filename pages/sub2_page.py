@@ -487,7 +487,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 
 	auth = 'http://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
-	rs = requests.get(auth,headers=header)
+	rs = requests.get(auth,headers=header,verify=False)
 	bs0bj = bs(rs.content.decode('utf-8','replace'),'lxml')
 	posts = bs0bj.findAll("div",{"class":"ani_result"})
 	for i in posts:
