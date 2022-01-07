@@ -1246,9 +1246,13 @@ def sch_del():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		count = 0
 		startname = request.form['startname']
-		try:
-			schedulerc.remove_job(startname)
-		except:
-			pass
+		count = count + 1
+		if count == 5:
+			try:
+				schedulerc.remove_job(startname)
+			except:
+				logger.info('%s의 스케줄러를 종료합니다.', startname)
+				pass
 		return redirect(url_for('main.index'))
