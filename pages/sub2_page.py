@@ -10,6 +10,7 @@ import re
 import time
 from datetime import datetime
 import io
+import logging
 try:
 	import requests
 except ImportError:
@@ -66,6 +67,10 @@ conn.close()
 job_defaults = { 'max_instances': 1 }
 scheduler2 = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
+f = open('./log/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
+logger = logging.getLogger()
 scheduler2.start()
 
 @bp2.route('/')
@@ -633,6 +638,8 @@ def news_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
 			pass
 		return render_template('news.html')
@@ -690,8 +697,10 @@ def unse_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
-				pass
+			pass
 		return render_template('unse.html')
 		
 @bp2.route('sch_del', methods=['POST'])
@@ -702,7 +711,11 @@ def sch_del():
 		startname = request.form['startname']
 		try:
 			scheduler2.remove_job(startname)
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 			pass
 		return redirect(url_for('main.index'))
 		
@@ -761,7 +774,7 @@ def weather_ok():
 		try:
 			scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
 		except:
-				pass
+			pass
 		return render_template('weather.html')
 		
 @bp2.route('tracking')
@@ -819,6 +832,8 @@ def tracking_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
 			pass
 		return render_template('tracking.html')
@@ -839,6 +854,8 @@ def funmom_ok():
 		startname = request.form['startname']
 		try:
 			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
 			pass
 		return render_template('funmom.html')
@@ -907,11 +924,15 @@ def board():
 		if choice == 'a':
 			try:
 				scheduler2.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
+				test = scheduler2.print_jobs()
+				logger.info('%s', test)
 			except:
 				pass
 		if choice == 'b':
 			try:
 				scheduler2.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
+				test = scheduler2.print_jobs()
+				logger.info('%s', test)
 			except:
 				pass
 		return render_template('board.html')
