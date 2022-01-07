@@ -772,7 +772,9 @@ def weather_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler2.print_jobs()
+			logger.info('%s', test)
 		except:
 			pass
 		return render_template('weather.html')
