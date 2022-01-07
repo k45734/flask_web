@@ -316,7 +316,7 @@ def checkURL(url2):
 			return 9999       
 		return response.status		
 		
-def exec_start(t_main, code, packege):
+def exec_start(t_main, code, packege,startname):
 	print("카피툰시작")
 	logger.info('카피툰시작')
 	newURL = t_main
@@ -412,7 +412,7 @@ def exec_start(t_main, code, packege):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
 
-def exec_start2(t_main, code, packege):
+def exec_start2(t_main, code, packege,startname):
 	print("툰코시작")
 	logger.info('툰코시작')
 	maintitle = []
@@ -512,7 +512,7 @@ def exec_start2(t_main, code, packege):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
 		
-def exec_start3(t_main,code,packege,genre):
+def exec_start3(t_main,code,packege,genre,startname):
 	print("뉴토끼시작")
 	logger.info('뉴토끼시작')
 	packege = 'newtoki'
@@ -616,7 +616,7 @@ def exec_start3(t_main,code,packege,genre):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
 		
-def exec_start4(code,packege):
+def exec_start4(code,packege,startname):
 	print("네이버웹툰시작")
 	logger.info('네이버웹툰시작')
 	packege = 'naver'
@@ -699,7 +699,7 @@ def exec_start4(code,packege):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
 	
-def exec_start5(code,packege):
+def exec_start5(code,packege,startname):
 	print("다음웹툰시작")
 	packege = 'daum'
 	maintitle = []
@@ -770,7 +770,7 @@ def exec_start5(code,packege):
 			add_c(packege, a,b,c,d)		
 		
 #공통 다운로드	
-def godown(t_main, compress, cbz, packege):	
+def godown(t_main, compress, cbz, packege , startname):	
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect('./webtoon.db',timeout=60)
 	cur = con.cursor()
@@ -1038,7 +1038,9 @@ def daum_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1059,7 +1061,9 @@ def daum_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1081,7 +1085,9 @@ def naver_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege] )
+			schedulerc.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1102,7 +1108,9 @@ def naver_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:	
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1126,7 +1134,9 @@ def newtoki_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,genre] )
+			schedulerc.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,genre,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:	
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1148,7 +1158,9 @@ def newtoki_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:	
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1171,7 +1183,9 @@ def copytoon_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
+			schedulerc.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:	
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1192,9 +1206,13 @@ def copytoon_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			logger.info('%s의 스케줄러를 시작합니다.', startname)
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:	
 			schedulerc.modify_job(startname)
+			logger.info('%s의 스케줄러를 수정합니다.', startname)
 		return redirect(url_for('main.index'))
 
 @webtoon.route('toonkor_list', methods=['POST'])
@@ -1215,7 +1233,9 @@ def toonkor_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege] )
+			schedulerc.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1236,7 +1256,9 @@ def toonkor_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege] )
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
 		except ConflictingIdError:
 			schedulerc.modify_job(startname)
 		return redirect(url_for('main.index'))
@@ -1246,13 +1268,17 @@ def sch_del():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		count = 0
+		#count = 0
 		startname = request.form['startname']
-		count = count + 1
-		if count == 5:
-			try:
-				schedulerc.remove_job(startname)
-			except:
-				logger.info('%s의 스케줄러를 종료합니다.', startname)
-				pass
+		#count = count + 1
+		#if count == 5:
+		try:
+			schedulerc.remove_job(startname)
+			#remove_job
+			logger.info('%s의 스케줄러를 종료합니다.', startname)
+			test = schedulerc.print_jobs()
+			logger.info('%s', test)
+		except:
+			logger.info('%s의 스케줄러를 종료가 되지 않았습니다.', startname)
+			pass
 		return redirect(url_for('main.index'))

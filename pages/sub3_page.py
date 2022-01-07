@@ -154,6 +154,8 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		if test == 0:
 			print(parse_start)
 			scheduler3.remove_job(FLASKAPPSNAME)
+			test = scheduler3.print_jobs()
+			logger.info('%s', test)
 			break
 		#time.sleep(int(FLASKTIME))
 		print(parse_start)
@@ -177,6 +179,8 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
 		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+		test = scheduler3.print_jobs()
+		logger.info('%s', test)
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
