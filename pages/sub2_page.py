@@ -341,7 +341,7 @@ def exec_start3():
 				
 			con = sqlite3.connect('./funmom.db',timeout=60)
 			cur = con.cursor()
-			sql = "select * from test"
+			sql = "select * from funmom"
 			cur.execute(sql)
 			row = cur.fetchall()	
 			for i in row:			
