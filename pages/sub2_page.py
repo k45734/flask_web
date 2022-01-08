@@ -130,7 +130,36 @@ def url_to_image(s, thisdata, url, dfolder2, filename):
 		os.makedirs('{}/{}'.format(dfolder2,thisdata))
 	with open(fifi, 'wb') as code:
 		code.write(req.content)
+def add_d(id, go, complte):
+	try:
+		#print(a,b)
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect('./funmom.db',timeout=60)
+		cur = con.cursor()
+		sql = "UPDATE funmom SET complte = ? WHERE urltitle = ? AND ID = ?"
+		cur.execute(sql,('True',go,id))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()	
 		
+def add_c(a, b,tt):
+	try:
+		con = sqlite3.connect('./funmom.db',timeout=60)
+		cur = con.cursor()
+		sql = "select * from funmom where urltitle = ?"
+		cur.execute(sql, (a,))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			cur.execute("INSERT OR REPLACE INTO funmom (ID, urltitle, complte) VALUES (?, ?, ?)", (tt,a,b))
+			con.commit()
+	except:
+		con.rollback()
+	finally:		
+		con.close()		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
@@ -274,6 +303,9 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 				f_write.close()
 				
 def exec_start3():
+	conn = sqlite3.connect('./funmom.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, urltitle TEXT, complte TEXT)')
+	conn.close()
 	with requests.Session() as s:
 		gogo = 1
 		timestr = time.strftime("%Y%m%d-%H%M%S-")
@@ -301,35 +333,53 @@ def exec_start3():
 				hrefs.append(str(t))
 				#print(t)
 				
-			for go in hrefs:
-				dd = 'https://funmom.tistory.com' + go
-				#login = s.get(dd, timeout=sleep)
-				#print(dd)
-				login = s.get(dd,headers=header)
-				#time.sleep(60) #배포용 기능 제한
-				html = login.text
-				soup = bs(html, 'html.parser')
-				menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
-				test = menu.find('h4')
-				#print(test)
-				ttt = test('a')
-				category = ttt[0].text
-				category2 = ttt[1].text
-				dfolder2 = os.path.dirname(os.path.abspath(__file__)) + '/funmom/' + category + '/' + category2
-				title = soup.find('title')	
-				thisdata = cleanText(title.text)
-				ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-				urls = []
+			tt = 0
+			for a in hrefs:
+				b = "False" #처음에 등록할때 무조건 False 로 등록한다.
+				add_c(a,b,tt)
+				tt += 1
+				
+			con = sqlite3.connect('./funmom.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from test"
+			cur.execute(sql)
+			row = cur.fetchall()	
+			for i in row:			
+				id = i[0]
+				go = i[1]
+				complte = i[2]
+				if complte == 'True':
+					continue
+				else:
+					dd = 'https://funmom.tistory.com' + go
+					#login = s.get(dd, timeout=sleep)
+					#print(dd)
+					login = s.get(dd,headers=header)
+					#time.sleep(60) #배포용 기능 제한
+					html = login.text
+					soup = bs(html, 'html.parser')
+					menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
+					test = menu.find('h4')
+					#print(test)
+					ttt = test('a')
+					category = ttt[0].text
+					category2 = ttt[1].text
+					dfolder2 = os.path.dirname(os.path.abspath(__file__)) + '/funmom/' + category + '/' + category2
+					title = soup.find('title')	
+					thisdata = cleanText(title.text)
+					ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+					urls = []
 
-				for img in ex_id_divs:
-					img_url = img.find("img")
-					urls.append(str(img_url["src"]))		
-				jpeg_no = 00
-				for url in urls:
-					#print(url)
-					filename="funmom-" + str(jpeg_no) + ".jpg"
-					url_to_image(s, thisdata, url, dfolder2, filename="funmom-" + str(jpeg_no) + ".jpg")
-					jpeg_no += 1
+					for img in ex_id_divs:
+						img_url = img.find("img")
+						urls.append(str(img_url["src"]))		
+					jpeg_no = 00
+					for url in urls:
+						#print(url)
+						filename="funmom-" + str(jpeg_no) + ".jpg"
+						url_to_image(s, thisdata, url, dfolder2, filename="funmom-" + str(jpeg_no) + ".jpg")
+						jpeg_no += 1
+					add_d(id, go, complte)
 			print("{} 페이지가 완료되었습니다.".format(gogo))
 			gogo += 1
 
