@@ -13,6 +13,7 @@ import sqlite3
 import threading
 import telegram
 import time
+import logging
 import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
@@ -29,6 +30,10 @@ conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAP
 conn.close()
 job_defaults = { 'max_instances': 1 }
 scheduler3 = BackgroundScheduler(job_defaults=job_defaults)
+f = open('./log/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
+logger = logging.getLogger()
 scheduler3.start()
 
 @bp3.route('/')
