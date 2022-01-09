@@ -130,7 +130,8 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	i = 0
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
-	print(FLASKAPPS)
+	#print(FLASKAPPS)
+	logger.info('%s', FLASKAPPSNAME)
 	#print(tee)
 	#print(scheduler.get_jobs())
 	while True:
@@ -158,12 +159,14 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 			subprocess.call(FLASKAPPS, shell=True)
 		if test == 0:
 			print(parse_start)
+			logger.info('%s', parse_start)
 			scheduler3.remove_job(FLASKAPPSNAME)
 			test = scheduler3.print_jobs()
 			logger.info('%s', test)
 			break
 		#time.sleep(int(FLASKTIME))
 		print(parse_start)
+		logger.info('%s', parse_start)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
