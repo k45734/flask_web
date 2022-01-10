@@ -28,7 +28,7 @@ conn = sqlite3.connect('database.db')
 conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 #print ("Table created successfully")
 conn.close()
-job_defaults = { 'coalesce': False, 'max_instances': 3 }
+job_defaults = { 'coalesce': False, 'max_instances': 1 }
 sub3_page = BackgroundScheduler(job_defaults=job_defaults)
 f = open('./log/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
