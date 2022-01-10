@@ -185,8 +185,9 @@ def ok(FLASKAPPSNAME):
 		FLASKALIM = row[7]
 		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 		test22 = scheduler3.print_jobs()
-		time.sleep(1)
-		logger.info('%s', test22)
+		time.sleep(3)
+		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
+		logger.info('%s', FLASKAPPSNAME)
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
