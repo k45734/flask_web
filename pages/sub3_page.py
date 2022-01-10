@@ -184,8 +184,8 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
 		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		test = scheduler3.print_jobs()
-		logger.info('%s', test)
+		#test = scheduler3.print_jobs()
+		logger.info('%s', FLASKAPPSNAME)
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
