@@ -55,6 +55,9 @@ def second():
 		cur = con.cursor()
 		cur.execute("select * from database")
 		rows = cur.fetchall()
+		test22 = scheduler3.print_jobs()
+		time.sleep(3)
+		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
 		#return 'Hello, python !<br>Flask TEST PAGE 3!'
 		return render_template('program.html', rows = rows)
 		
@@ -184,9 +187,6 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
 		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		test22 = scheduler3.print_jobs()
-		time.sleep(3)
-		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
 		logger.info('%s', FLASKAPPSNAME)
 		return redirect(url_for('sub3.second'))
 	
