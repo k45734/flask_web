@@ -55,10 +55,6 @@ def second():
 		cur = con.cursor()
 		cur.execute("select * from database")
 		rows = cur.fetchall()
-		test22 = scheduler3.print_jobs()
-		time.sleep(3)
-		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
-		#return 'Hello, python !<br>Flask TEST PAGE 3!'
 		return render_template('program.html', rows = rows)
 		
 @bp3.route("edit/<FLASKAPPSNAME>", methods=['GET'])
@@ -114,13 +110,10 @@ def databasedel(FLASKAPPSNAME):
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKAPPSNAME)
-		#sql = "DELETE FROM database where title_name=%s"
 		cur.execute(sql)
 		cur.execute("select * from database")
 		con.commit()
 		rows = cur.fetchall()
-		#print("DB:")
-		#print(rows)
 		return redirect(url_for('sub3.second'))
 		
 def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
@@ -133,10 +126,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	i = 0
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
-	#print(FLASKAPPS)
 	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
-	#print(tee)
-	#print(scheduler.get_jobs())
 	while True:
 		cnt += 1
 		test -= 1
@@ -162,8 +152,6 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		else :
 			subprocess.call(FLASKAPPS, shell=True)
 		if test == 0:
-			scheduler3.remove_job(FLASKAPPSNAME)
-			test2 = scheduler3.print_jobs()
 			logger.info('%s', test2)
 			break
 		logger.info('%s', parse_stop)
@@ -188,6 +176,9 @@ def ok(FLASKAPPSNAME):
 		FLASKALIM = row[7]
 		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 		logger.info('%s', FLASKAPPSNAME)
+		test22 = scheduler3.print_jobs()
+		time.sleep(1)
+		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
 		return redirect(url_for('sub3.second'))
 	
 @bp3.route("start", methods=['POST','GET'])
