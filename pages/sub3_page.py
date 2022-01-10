@@ -29,12 +29,12 @@ conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAP
 #print ("Table created successfully")
 conn.close()
 job_defaults = { 'max_instances': 1 }
-scheduler3 = BackgroundScheduler(job_defaults=job_defaults)
+sub3_page = BackgroundScheduler(job_defaults=job_defaults)
 f = open('./log/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
-scheduler3.start()
+sub3_page.start()
 
 @bp3.route('/')
 @bp3.route('index')
@@ -174,9 +174,9 @@ def ok(FLASKAPPSNAME):
 		FLASKTOKEN = row[5]
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
-		scheduler3.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+		sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 		logger.info('%s', FLASKAPPSNAME)
-		test22 = scheduler3.print_jobs()
+		test22 = sub3_page.print_jobs()
 		time.sleep(1)
 		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
 		return redirect(url_for('sub3.second'))
