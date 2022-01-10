@@ -131,7 +131,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
 	#print(FLASKAPPS)
-	logger.info('%s', FLASKAPPSNAME)
+	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
 	#print(tee)
 	#print(scheduler.get_jobs())
 	while True:
@@ -143,6 +143,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		cur.execute("select * from database")
 		rows = cur.fetchall()	
 		parse_start = '{} 를 {} 시작합니다.'.format(FLASKAPPSNAME, int(cnt))
+		logger.info('%s', parse_start)
 		parse_stop = '{} 를 {} 종료되었습니다.'.format(FLASKAPPSNAME, int(cnt))
 		if FLASKTELGM == '0' :
 			if FLASKALIM == '0' :
@@ -158,15 +159,11 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		else :
 			subprocess.call(FLASKAPPS, shell=True)
 		if test == 0:
-			print(parse_start)
-			logger.info('%s', parse_start)
 			scheduler3.remove_job(FLASKAPPSNAME)
-			test = scheduler3.print_jobs()
-			logger.info('%s', test)
+			test2 = scheduler3.print_jobs()
+			logger.info('%s', test2)
 			break
-		#time.sleep(int(FLASKTIME))
-		print(parse_start)
-		logger.info('%s', parse_start)
+		logger.info('%s', parse_stop)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
