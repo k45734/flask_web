@@ -127,14 +127,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
 	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
-	while True:
-		cnt += 1
-		test -= 1
-		con = sqlite3.connect("./database.db")
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		cur.execute("select * from database")
-		rows = cur.fetchall()	
+	for ii in range(test):
 		parse_start = '{} 를 {} 시작합니다.'.format(FLASKAPPSNAME, int(cnt))
 		logger.info('%s', parse_start)
 		parse_stop = '{} 를 {} 종료되었습니다.'.format(FLASKAPPSNAME, int(cnt))
@@ -151,10 +144,12 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 					
 		else :
 			subprocess.call(FLASKAPPS, shell=True)
-		if test == 0:
-			logger.info('%s', test2)
-			break
-		logger.info('%s', parse_stop)
+		
+	logger.info('%s', parse_stop)
+	sub3_page.remove_job(FLASKAPPSNAME)
+	logger.info('%s의 스케줄러를 종료합니다.', FLASKAPPSNAME)
+	test = sub3_page.print_jobs()
+	logger.info('%s', test)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
@@ -180,7 +175,20 @@ def ok(FLASKAPPSNAME):
 		time.sleep(1)
 		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
 		return redirect(url_for('sub3.second'))
-	
+
+@bp3.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
+def cancle(FLASKAPPSNAME):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		
+		test2 = sub3_page.print_jobs()
+		logger.info('%s가 스케줄러에 있습니다.', test2)
+		sub3_page.remove_job(FLASKAPPSNAME)
+		test = sub3_page.print_jobs()
+		logger.info('%s', test)
+		return redirect(url_for('sub3.second'))
+		
 @bp3.route("start", methods=['POST','GET'])
 def start():
 	if request.method == 'POST':
