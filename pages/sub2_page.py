@@ -119,7 +119,7 @@ def url_to_image(url, dfolder, category, category2, filename):
 	with requests.Session() as s:
 		req = s.get(url,headers=header)
 		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
-		print(fifi)
+		#print(fifi)
 		if not os.path.exists('{}'.format(dfolder)):
 			os.makedirs('{}'.format(dfolder))
 		if not os.path.exists('{}/{}'.format(dfolder,category)):
@@ -317,16 +317,12 @@ def exec_start3(startname):
 			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
 			if list_test == None:
 				print("마지막 페이지입니다.\n종료합니다.")
-				#scheduler2.remove_job(startname)
-				#test = scheduler2.print_jobs()
-				#logger.info('%s', test)
 				break
 			
 			hrefs = []
 			for href in list:
 				t = href.find("a")["href"]
 				hrefs.append(str(t))
-				#print(t)
 				
 			tt = 0
 			for a in hrefs:
