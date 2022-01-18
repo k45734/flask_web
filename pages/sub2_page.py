@@ -52,7 +52,7 @@ import sqlite3
 import threading
 import telegram
 import time
-import subprocess
+import subprocess, platform
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
