@@ -7,7 +7,7 @@ except:
 	pass
 import requests
 import logging
-import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request
+import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform
 import urllib.request as urllib2
 try:
 	import argparse
@@ -995,7 +995,13 @@ def godown(t_main, compress, cbz, packege , startname):
 			timestr = time.strftime("%Y%m%d-%H%M%S-")
 			parse2 = re.sub('[-=.#/?:$}]', '', title)
 			parse = cleanText(parse2)
-			dfolder = os.path.dirname(os.path.abspath(__file__)) + '/' + packege
+			if platform.system() == 'Windows':
+				s = os.path.splitdrive(os.getcwd())
+				root = s[0]
+			else:
+				root = '/data'
+			
+			dfolder = root + '/' + packege
 			for url in urls:
 				#print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
