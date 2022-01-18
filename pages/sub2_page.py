@@ -364,7 +364,13 @@ def exec_start3():
 					ttt = test('a')
 					category = ttt[0].text
 					category2 = ttt[1].text
-					dfolder2 = os.path.dirname(os.path.abspath(__file__)) + '/funmom/' + category + '/' + category2
+					if platform.system() == 'Windows':
+						s = os.path.splitdrive(os.getcwd())
+						root = s[0]
+					else:
+						root = '/data'
+			
+					dfolder2 = root + '/funmom/' + category + '/' + category2
 					title = soup.find('title')	
 					thisdata = cleanText(title.text)
 					ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
