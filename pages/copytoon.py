@@ -996,8 +996,8 @@ def godown(t_main, compress, cbz, packege , startname):
 			parse2 = re.sub('[-=.#/?:$}]', '', title)
 			parse = cleanText(parse2)
 			if platform.system() == 'Windows':
-				s = os.path.splitdrive(os.getcwd())
-				root = s[0] + '/data'
+				at = os.path.splitdrive(os.getcwd())
+				root = at[0] + '/data'
 			else:
 				root = '/data'
 			

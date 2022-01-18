@@ -36,10 +36,11 @@ try: #python3
 	from urllib.request import urlopen
 except: #python2
 	from urllib2 import urlopen
-#from urllib.request import urlopen 
+	#from urllib.request import urlopen 
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from flask import Blueprint
+
 #여기서 필요한 모듈
 from datetime import datetime, timedelta
 import requests
@@ -47,12 +48,7 @@ from flask import Flask, flash, redirect, render_template, request, session, abo
 import os.path
 from flask_ipblock import IPBlock
 from flask_ipblock.documents import IPNetwork
-import random
-import sqlite3
-import threading
-import telegram
-import time
-import subprocess, platform
+import subprocess, platform, time, telegram,threading,sqlite3,random
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
@@ -93,20 +89,20 @@ def second():
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'	
 		return render_template('board.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
-	
+
 @bp2.route("lotto")
 def lotto():
 	num_range = range(1,46)
 	result=random.sample(num_range,6) 
 	final_result=sorted(result)
 	return render_template('start.html', testDataHtml=final_result)
-	
+
 @bp2.route("menu")
 def menu():
 	menu=["라면", "자장면", "짬뽕", "돈가스", "김치찌개", "부대찌게", "삼겹살", "오뎅국", "칼국수"]
 	choice = random.choice(menu)
 	return render_template('start.html', testDataHtml=choice)
-	
+
 # 3. /kospi 현재 네이버 기준
 @bp2.route("kospi")
 def kospi():
@@ -118,20 +114,21 @@ def kospi():
 	return render_template('start.html', testDataHtml=result)
 
 def url_to_image(url, dfolder, category, category2, filename):
-	#time.sleep(60) #배포용 기능 제한
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	req = requests.get(url,headers=header)
-	#with requests.Session() as s:
-	#req = s.get(url,headers=header)
-	fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
-	if not os.path.exists('{}'.format(dfolder)):
-		os.makedirs('{}'.format(dfolder))
-	if not os.path.exists('{}/{}'.format(dfolder,category)):
-		os.makedirs('{}/{}'.format(dfolder,category))
-	if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
-		os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
-	with open(fifi, 'wb') as code:
-		code.write(req.content)
+	#req = requests.get(url,headers=header)
+	with requests.Session() as s:
+		req = s.get(url,headers=header)
+		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
+		print(fifi)
+		if not os.path.exists('{}'.format(dfolder)):
+			os.makedirs('{}'.format(dfolder))
+		if not os.path.exists('{}/{}'.format(dfolder,category)):
+			os.makedirs('{}/{}'.format(dfolder,category))
+		if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
+			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
+		with open(fifi, 'wb') as code:
+			code.write(req.content)
+		
 def add_d(id, go, complte):
 	try:
 		#print(a,b)
@@ -145,7 +142,7 @@ def add_d(id, go, complte):
 		con.rollback()
 	finally:	
 		con.close()	
-		
+	
 def add_c(a, b,tt):
 	try:
 		con = sqlite3.connect('./funmom.db',timeout=60)
@@ -162,11 +159,12 @@ def add_c(a, b,tt):
 		con.rollback()
 	finally:		
 		con.close()		
+		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
 	return text	
-	
+
 #일반게시판의 새로운 글 알림
 def exec_start(t_main,sel,selnum,telgm,telgm_alim,telgm_token,telgm_botid):
 	with requests.Session() as s:
@@ -218,7 +216,7 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 				'x-xss-protection' : '1; mode=block',
 				'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
 				} 
-	
+
 
 	adapter = HTTPAdapter(max_retries=10)
 	with requests.Session() as s:
@@ -264,7 +262,7 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 		print("게시물번호 {}".format(board_num_t))
 		board_ff = board_f.find('a')['href']
 		#print(board_ff)
-	
+
 		#게시물의 내용을 가져온다
 		mb_url = main_url + board_ff
 		ll = {'clubid':clubidts,
@@ -303,30 +301,25 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 			with io.open(file, 'w+' ,-1, "utf-8") as f_write:
 				f_write.write(message)
 				f_write.close()
-				
-def exec_start3():
+			
+def exec_start3(startname):
 	conn = sqlite3.connect('./funmom.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
 	with requests.Session() as s:
-		gogo = 1
-		timestr = time.strftime("%Y%m%d-%H%M%S-")
-		timestr2 = time.strftime("%Y%m%d-%H%M%S")
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		while True:
-			print("{} 페이지가 시작되었습니다.".format(gogo))
+		for gogo in range(99999):
 			dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
-			#login = s.get(dd, timeout=sleep)
 			login = s.get(dd,headers=header)
-			#time.sleep(60) #배포용 기능 제한		
 			html = login.text
 			soup = bs(html, 'html.parser')
 			list_test = soup.find(attrs={'class' :'jb-index-title jb-index-title-front'}) #목록이 있나 없나 확인
 			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
-			#print(list)
-			#print(list_test)
 			if list_test == None:
 				print("마지막 페이지입니다.\n종료합니다.")
+				#scheduler2.remove_job(startname)
+				#test = scheduler2.print_jobs()
+				#logger.info('%s', test)
 				break
 			
 			hrefs = []
@@ -340,55 +333,54 @@ def exec_start3():
 				b = "False" #처음에 등록할때 무조건 False 로 등록한다.
 				add_c(a,b,tt)
 				tt += 1
-			print("{} 페이지가 완료되었습니다.".format(gogo))
-			gogo += 1
-				
-		con = sqlite3.connect('./funmom.db',timeout=60)
-		cur = con.cursor()
-		sql = "select * from funmom"
-		cur.execute(sql)
-		row = cur.fetchall()	
-		for i in row:			
-			id = i[0]
-			go = i[1]
-			complte = i[2]
-			if complte == 'True':
-				continue
-			else:
-				dd2 = 'https://funmom.tistory.com' + go
-				#login = s.get(dd, timeout=sleep)
-				#print(dd)
-				login = s.get(dd2,headers=header)
-				#time.sleep(60) #배포용 기능 제한
-				html = login.text
-				soup = bs(html, 'html.parser')
-				menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
-				test = menu.find('h4')
-				#print(test)
-				ttt = test('a')
-				category = ttt[0].text
-				category2 = ttt[1].text
-				if platform.system() == 'Windows':
-					s = os.path.splitdrive(os.getcwd())
-					root = s[0] + '/data'
+		print('목록을 전부 만들었습니다.')		
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		for ii in range(99999):
+			print('다운로드를 시작합니다. {} 번째'.format(ii))
+			con = sqlite3.connect('./funmom.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from funmom"
+			cur.execute(sql)
+			row = cur.fetchall()	
+			for i in row:			
+				id = i[0]
+				go = i[1]
+				complte = i[2]
+				if complte == 'True':
+					continue
 				else:
-					root = '/data'
-	
-				dfolder = root + '/funmom'# + category + '/' + category2
-				title = soup.find('title')	
-				thisdata = cleanText(title.text)
-				ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-				urls = []
-				for img in ex_id_divs:
-					img_url = img.find("img")
-					urls.append(str(img_url["src"]))		
-				jpeg_no = 00
-				for url in urls:
-					filename="funmom-" + str(jpeg_no) + ".jpg"
-					url_to_image(url, dfolder, category, category2, filename)
-					jpeg_no += 1
-				add_d(id, go, complte)
-			
+					dd2 = 'https://funmom.tistory.com' + go
+					print(dd2)
+					login2 = s.get(dd2,headers=header)
+					html = login2.text
+					soup = bs(html, 'html.parser')
+					menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
+					test = menu.find('h4')
+					ttt = test('a')
+					category = ttt[0].text
+					category2 = ttt[1].text
+					if platform.system() == 'Windows':
+						at = os.path.splitdrive(os.getcwd())
+						root = at[0] + '/data'
+					else:
+						root = '/data'
+
+					dfolder = root + '/funmom'# + category + '/' + category2
+					title = soup.find('title')	
+					thisdata = cleanText(title.text)
+					ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+					urls = []
+					for img in ex_id_divs:
+						img_url = img.find("img")
+						urls.append(str(img_url["src"]))		
+					jpeg_no = 00
+					for url in urls:
+						filename="funmom-" + str(jpeg_no) + ".jpg"
+						url_to_image(url, dfolder, category, category2, filename)
+						jpeg_no += 1
+					add_d(id, go, complte)
+				
 
 def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	code = { "DHL":"de.dhl",
@@ -854,7 +846,7 @@ def funmom_ok():
 		start_time = request.form['start_time']
 		startname = request.form['startname']
 		try:
-			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname)
+			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
 			test = scheduler2.print_jobs()
 			logger.info('%s', test)
 		except:
