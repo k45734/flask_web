@@ -223,8 +223,8 @@ def update(file_name = None):
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			os.system("cat /dev/null > /app/log/flask.log")
-			os.system("chmod 777 /app -R")
+			os.system("cat /dev/null > ./log/flask.log")
+			os.system("chmod 777 * -R")
 			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 		return redirect(url_for('main.index'))
 		
@@ -236,7 +236,7 @@ def restart():
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			os.system("cat /dev/null > /app/log/flask.log")
-			os.system("chmod 777 /app -R")
+			os.system("cat /dev/null > ./log/flask.log")
+			os.system("chmod 777 * -R")
 			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 		return redirect(url_for('main.index'))
