@@ -1,39 +1,20 @@
 #-*- coding: utf-8 -*-
+from flask import Blueprint
 import sys
 try:
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-
-from flask import Flask
-from flask import Blueprint
-import os
+import os, os.path, sqlite3, time , psutil, platform
 from datetime import datetime, timedelta
-import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-import os.path
-from flask_ipblock import IPBlock
-from flask_ipblock.documents import IPNetwork
-import sqlite3
-import time
-from flask_sqlalchemy import SQLAlchemy
-import psutil
-import platform
 from requests import get  
-import zipfile
-import os       
-import shutil
+import zipfile, shutil 
 from distutils.dir_util import copy_tree
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.base import JobLookupError
-from apscheduler.triggers.cron import CronTrigger
 
 bp = Blueprint('main', __name__, url_prefix='/')
-job_defaults = { 'max_instances': 1 }
-schedulerm = BackgroundScheduler(job_defaults=job_defaults)
-#scheduler = BackgroundScheduler()
-schedulerm.start()
+
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
 		if abs(num) < 1024.0:
@@ -225,7 +206,7 @@ def update(file_name = None):
 		else:
 			os.system("cat /dev/null > ./log/flask.log")
 			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep app.py|awk '{print $2}'`")
+			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 		return redirect(url_for('main.index'))
 		
 @bp.route("restart")
@@ -238,5 +219,5 @@ def restart():
 		else:
 			os.system("cat /dev/null > ./log/flask.log")
 			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep app.py|awk '{print $2}'`")
+			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
 		return redirect(url_for('main.index'))

@@ -1,51 +1,29 @@
-﻿#-*- coding: utf-8 -*-
+﻿from flask import Blueprint
+#-*- coding: utf-8 -*-
 import sys
 try:
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import requests
-import logging
-import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform
+import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess
 import urllib.request as urllib2
-try:
-	import argparse
-except ImportError:
-	os.system('pip install argparse')
-	import argparse	
+
 try:
 	from bs4 import BeautifulSoup as bs
 except ImportError:
 	os.system('pip install BeautifulSoup4')
 	from bs4 import BeautifulSoup as bs
-try:
-	import telepot
-except ImportError:
-	os.system('pip install telepot')
-	import telepot
 
 try:
 	import sqlite3
 except ImportError:
 	os.system('pip install sqlite3')
 	import sqlite3
-from flask import Blueprint
+
 #여기서 필요한 모듈
-import os
 from datetime import datetime, timedelta
-import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-import os.path
-from flask_ipblock import IPBlock
-from flask_ipblock.documents import IPNetwork
-import random
-import bs4
-import sqlite3
-import threading
-import telegram
-import time
-import subprocess
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError

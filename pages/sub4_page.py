@@ -1,34 +1,17 @@
 from flask import Blueprint
 #여기서 필요한 모듈
-import os
+import os, os.path, sqlite3, time
 from datetime import datetime, timedelta
 import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, send_file, send_from_directory
-import os.path
-from flask_ipblock import IPBlock
-from flask_ipblock.documents import IPNetwork
-import random
-import bs4
-import sqlite3
-import threading
-import telegram
-import time
-import subprocess
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.base import JobLookupError
 
 bp4 = Blueprint('sub4', __name__, url_prefix='/sub4')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 #데이타베이스 없으면 생성
 conn = sqlite3.connect('./database.db')
-#print ("Opened database successfully")
 conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
-#print ("Table created successfully")
 conn.close()
-job_defaults = { 'max_instances': 1 }
-scheduler = BackgroundScheduler(job_defaults=job_defaults)
-scheduler.start()
 
 @bp4.route('/')
 @bp4.route('index')

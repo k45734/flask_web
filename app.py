@@ -5,22 +5,9 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import random
-from flask import Flask
-import os
-import datetime
-import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-import os.path
-from flask_ipblock import IPBlock
-from flask_ipblock.documents import IPNetwork
-import logging
+import os.path, os, logging
 from logging.handlers import RotatingFileHandler
-from pytz import timezone
-import sqlite3
-import time
-from flask_sqlalchemy import SQLAlchemy
-import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger

@@ -5,22 +5,16 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import json, os
-import re
-import time
+from flask import Blueprint
+import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random
 from datetime import datetime
-import io
-import logging
+
 try:
 	import requests
 except ImportError:
 	os.system('pip install requests')
 	import requests
-try:
-	import argparse
-except ImportError:
-	os.system('pip install argparse')
-	import argparse	
+
 try:
 	from bs4 import BeautifulSoup as bs
 except ImportError:
@@ -39,16 +33,10 @@ except: #python2
 	#from urllib.request import urlopen 
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-from flask import Blueprint
 
 #여기서 필요한 모듈
 from datetime import datetime, timedelta
-import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-import os.path
-from flask_ipblock import IPBlock
-from flask_ipblock.documents import IPNetwork
-import subprocess, platform, time, telegram,threading,sqlite3,random
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
@@ -119,7 +107,7 @@ def url_to_image(url, dfolder, category, category2, filename):
 	with requests.Session() as s:
 		req = s.get(url,headers=header)
 		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
-		#print(fifi)
+		print(fifi)
 		if not os.path.exists('{}'.format(dfolder)):
 			os.makedirs('{}'.format(dfolder))
 		if not os.path.exists('{}/{}'.format(dfolder,category)):
@@ -317,12 +305,16 @@ def exec_start3(startname):
 			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
 			if list_test == None:
 				print("마지막 페이지입니다.\n종료합니다.")
+				#scheduler2.remove_job(startname)
+				#test = scheduler2.print_jobs()
+				#logger.info('%s', test)
 				break
 			
 			hrefs = []
 			for href in list:
 				t = href.find("a")["href"]
 				hrefs.append(str(t))
+				#print(t)
 				
 			tt = 0
 			for a in hrefs:
