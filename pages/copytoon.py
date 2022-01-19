@@ -632,13 +632,14 @@ def exec_start4(code,packege,startname):
 			tags = soup.find("div",{"class":"detail"})
 			#for i in tags:
 				#대제목을 찾는다.
-			test = tags('h2')
-			tt = re.sub('<span.*?>.*?</h2>', '', str(test), 0, re.I|re.S)
-			tt2 = re.sub('<h2>', '', str(tt), 0, re.I|re.S)
-			pattern = re.compile(r'\s+')
-			tt2 = re.sub(pattern, '', tt2)
-			tt2 = tt2.replace("[", "")
-			tt2 = tt2.replace("]", "")
+			#test = tags('h2')
+			#tt = re.sub('<span.*?>.*?</h2>', '', str(test), 0, re.I|re.S)
+			#tt2 = re.sub('<h2>', '', str(tt), 0, re.I|re.S)
+			#pattern = re.compile(r'\s+')
+			#tt2 = re.sub(pattern, '', tt2)
+			#tt2 = tt2.replace("[", "")
+			#tt2 = tt2.replace("]", "")
+			tt2 = tags.find('span',{'class':'title'}).text
 					
 			for p in range(1, 1001):
 				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
