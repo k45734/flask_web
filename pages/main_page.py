@@ -206,7 +206,7 @@ def update(file_name = None):
 		else:
 			os.system("cat /dev/null > ./log/flask.log")
 			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
+			os.system("kill -9 `ps -ef|grep app|awk '{print $2}'`")
 		return redirect(url_for('main.index'))
 		
 @bp.route("restart")
@@ -219,5 +219,5 @@ def restart():
 		else:
 			os.system("cat /dev/null > ./log/flask.log")
 			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep supervisor|awk '{print $2}'`")
+			os.system("kill -9 `ps -ef|grep app|awk '{print $2}'`")
 		return redirect(url_for('main.index'))
