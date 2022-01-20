@@ -166,8 +166,8 @@ def ok(FLASKAPPSNAME):
 			test2 = sub3_page.get_job(FLASKAPPSNAME).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		except ConflictingIdError:
-			test = sub3_page.get_job(startname).id
-			test2 = sub3_page.modify_job(startname)
+			test = sub3_page.get_job(FLASKAPPSNAME).id
+			test2 = sub3_page.modify_job(FLASKAPPSNAME)
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)			
 		return redirect(url_for('sub3.second'))
 
