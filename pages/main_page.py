@@ -200,13 +200,13 @@ def update(file_name = None):
 			os.remove('./main.zip')
 			shutil.rmtree ('./flask_web-main')
 		else:
-			pass
-		if platform.system() == 'Windows':
-			os.system("flask run --reload")
-		else:
-			os.system("cat /dev/null > ./log/flask.log")
-			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+			
+			if platform.system() == 'Windows':
+				os.system("flask run --reload")
+			else:
+				os.system("cat /dev/null > ./log/flask.log")
+				os.system("chmod 777 * -R")
+				os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
 		
 @bp.route("restart")
