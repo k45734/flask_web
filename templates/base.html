@@ -118,7 +118,7 @@ section {
       </ul>
     </li>
 	{% if session.get('logFlag') %}
-    <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a>
+    <li><a href="#">시스템 메뉴</a>
       <ul id="sub-menu">     
         <li><a href="{{ url_for('sub3.second') }}" aria-label="subemnu">프로그램</a></li>
         <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
@@ -128,7 +128,8 @@ section {
 	  <li><a href="#">Ver 1.6</a></li>
       </ul>
     </li>
-    <li><a href="/logout">로그아웃</a></li>
+    <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
+	<li><a href="/logout">로그아웃</a></li>
 	{% else %}
     <li><a href="/login">로그인</a></li>
 	{% endif %}
