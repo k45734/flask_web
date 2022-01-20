@@ -1028,7 +1028,7 @@ def daum_list():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1053,7 +1053,7 @@ def daum_down():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1079,7 +1079,7 @@ def naver_list():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1104,7 +1104,7 @@ def naver_down():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1132,7 +1132,7 @@ def newtoki_list():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1158,7 +1158,7 @@ def newtoki_down():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1185,7 +1185,7 @@ def copytoon_list():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1210,7 +1210,7 @@ def copytoon_down():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 
@@ -1237,7 +1237,7 @@ def toonkor_list():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
@@ -1262,7 +1262,7 @@ def toonkor_down():
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
 			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname)
+			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
