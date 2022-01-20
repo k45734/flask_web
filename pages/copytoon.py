@@ -1267,6 +1267,6 @@ def sch_del():
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		except:
-			logger.info('%s의 스케줄러를 종료가 되지 않았습니다.', startname)
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
 			pass
 		return redirect(url_for('main.index'))
