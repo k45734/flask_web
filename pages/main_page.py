@@ -194,13 +194,14 @@ def update(file_name = None):
 		os.remove('./main.zip')
 		shutil.rmtree ('./flask_web-main')
 		if os.path.exists(org):
+			print("파일있다")
 			shutil.copy(org, new)
 			copy_tree(org2, new2)
 			copy_tree(org3, new3)
 			os.remove('./main.zip')
 			shutil.rmtree ('./flask_web-main')
 		else:
-			
+			print("파일없다")
 			if platform.system() == 'Windows':
 				os.system("flask run --reload")
 			else:
