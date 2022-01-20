@@ -1027,7 +1027,9 @@ def daum_list():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('daum_down', methods=['POST'])
@@ -1050,7 +1052,9 @@ def daum_down():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('naver_list', methods=['POST'])
@@ -1074,7 +1078,9 @@ def naver_list():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('naver_down', methods=['POST'])
@@ -1097,7 +1103,9 @@ def naver_down():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('newtoki_list', methods=['POST'])
@@ -1123,7 +1131,9 @@ def newtoki_list():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('newtoki_down', methods=['POST'])
@@ -1147,7 +1157,9 @@ def newtoki_down():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('copytoon_list', methods=['POST'])
@@ -1172,7 +1184,9 @@ def copytoon_list():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('copytoon_down', methods=['POST'])
@@ -1195,8 +1209,9 @@ def copytoon_down():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:	
-			schedulerc.modify_job(startname)
-			logger.info('%s의 스케줄러를 수정합니다.', startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 
 @webtoon.route('toonkor_list', methods=['POST'])
@@ -1221,7 +1236,9 @@ def toonkor_list():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('toonkor_down', methods=['POST'])
@@ -1244,7 +1261,9 @@ def toonkor_down():
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			schedulerc.modify_job(startname)
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('main.index'))
 		
 @webtoon.route('sch_del', methods=['POST'])
@@ -1252,21 +1271,21 @@ def sch_del():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#count = 0
 		startname = request.form['startname']
-		#count = count + 1
-		#if count == 5:
 		try:
-			schedulerc.remove_job(startname)
-			#remove_job
-			logger.info('%s의 스케줄러를 종료합니다.', startname)
 			test = schedulerc.get_job(startname).id
-			logger.info('%s 스케줄러에 삭제하였습니다.', test)
-			test2 = sub3_page.get_jobs()
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			#remove_job
+			schedulerc.remove_job(startname)
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
 			for i in test2:
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
-		except:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-			pass
+		
 		return redirect(url_for('main.index'))

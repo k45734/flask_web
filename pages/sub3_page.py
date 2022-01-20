@@ -161,9 +161,14 @@ def ok(FLASKAPPSNAME):
 		FLASKTOKEN = row[5]
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
-		sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		test2 = sub3_page.get_job(FLASKAPPSNAME).id
-		logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
+		try:
+			sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+			test2 = sub3_page.get_job(FLASKAPPSNAME).id
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
+		except ConflictingIdError:
+			test = sub3_page.get_job(startname).id
+			test2 = sub3_page.modify_job(startname)
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)			
 		return redirect(url_for('sub3.second'))
 
 @bp3.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
@@ -171,14 +176,21 @@ def cancle(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		
-		test2 = sub3_page.get_job(FLASKAPPSNAME).id
-		logger.info('%s가 스케줄러에 있습니다.', test2)
 		try:
+			test = sub3_page.get_job(FLASKAPPSNAME).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
+		else:
 			sub3_page.remove_job(FLASKAPPSNAME)
-		except:
-			pass
-		test = sub3_page.get_job(FLASKAPPSNAME).id
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = sub3_page.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
+
 		logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 		return redirect(url_for('sub3.second'))
 		
