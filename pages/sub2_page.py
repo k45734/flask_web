@@ -59,6 +59,19 @@ scheduler2.start()
 
 @bp2.route('/')
 @bp2.route('index')
+def index():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		tltl = []
+		test2 = scheduler2.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		#t_main = request.form['t_main']
+		return render_template('sub2_index.html', tltl = tltl)
+
+@bp2.route("second")		
 def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -621,7 +634,7 @@ def news_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return render_template('news.html')
+		return redirect(url_for('sub2.index'))
 		
 @bp2.route('unse')
 def unse():
@@ -680,7 +693,7 @@ def unse_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return render_template('unse.html')
+		return redirect(url_for('sub2.index'))
 		
 @bp2.route('sch_del', methods=['POST'])
 def sch_del():
@@ -696,7 +709,7 @@ def sch_del():
 			test = scheduler2.print_jobs()
 			logger.info('%s', test)
 			pass
-		return redirect(url_for('main.index'))
+		return redirect(url_for('sub2.index'))
 		
 @bp2.route('weather')
 def weather():
@@ -756,7 +769,7 @@ def weather_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return render_template('weather.html')
+		return redirect(url_for('sub2.index'))
 		
 @bp2.route('tracking')
 def tracking():
@@ -817,7 +830,7 @@ def tracking_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return render_template('tracking.html')
+		return redirect(url_for('sub2.index'))
 		
 @bp2.route('funmom')
 def funmom():
@@ -839,7 +852,8 @@ def funmom_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return render_template('funmom.html')
+		
+		return redirect(url_for('sub2.index'))
 
 		
 @bp2.route('board', methods=['POST'])
@@ -916,4 +930,5 @@ def board():
 				logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 			except:
 				pass
-		return render_template('board.html')
+		#return render_template('board.html')
+		return redirect(url_for('sub2.index'))

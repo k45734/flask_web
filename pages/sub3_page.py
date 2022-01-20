@@ -44,7 +44,12 @@ def second():
 		cur = con.cursor()
 		cur.execute("select * from database")
 		rows = cur.fetchall()
-		return render_template('program.html', rows = rows)
+		tltl = []
+		test2 = sub3_page.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('program.html', rows = rows, tltl = tltl)
 		
 @bp3.route("edit/<FLASKAPPSNAME>", methods=['GET'])
 def edit(FLASKAPPSNAME):

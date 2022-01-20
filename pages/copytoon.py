@@ -44,44 +44,78 @@ schedulerc.start()
 
 @webtoon.route('/')
 @webtoon.route('index')
+def index():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		#t_main = request.form['t_main']
+		return render_template('webtoon_index.html', tltl = tltl)
+
+@webtoon.route('copytoon')
 def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
 		#t_main = request.form['t_main']
-		return render_template('copytoon.html')
+		return render_template('copytoon.html', tltl = tltl)
 
 @webtoon.route('toonkor')
 def second2():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#t_main = request.form['t_main']
-		return render_template('toonkor.html') 
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('toonkor.html', tltl = tltl) 
 
 @webtoon.route('newtoki')
 def second3():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#t_main = request.form['t_main']
-		return render_template('newtoki.html')
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('newtoki.html', tltl = tltl)
 
 @webtoon.route('naver')
 def second4():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#t_main = request.form['t_main']
-		return render_template('naver.html')
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('naver.html', tltl = tltl)
 
 @webtoon.route('daum')
 def second5():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#t_main = request.form['t_main']
-		return render_template('daum.html')
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('daum.html', tltl = tltl)
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -1030,7 +1064,7 @@ def daum_list():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('daum_down', methods=['POST'])
 def daum_down():
@@ -1055,7 +1089,7 @@ def daum_down():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
@@ -1081,7 +1115,7 @@ def naver_list():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('naver_down', methods=['POST'])
 def naver_down():
@@ -1106,7 +1140,7 @@ def naver_down():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('newtoki_list', methods=['POST'])
 def newtoki_list():
@@ -1134,7 +1168,7 @@ def newtoki_list():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('newtoki_down', methods=['POST'])
 def newtoki_down():
@@ -1160,7 +1194,7 @@ def newtoki_down():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('copytoon_list', methods=['POST'])
 def copytoon_list():
@@ -1187,7 +1221,7 @@ def copytoon_list():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('copytoon_down', methods=['POST'])
 def copytoon_down():
@@ -1212,7 +1246,7 @@ def copytoon_down():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 
 @webtoon.route('toonkor_list', methods=['POST'])
 def toonkor_list():
@@ -1239,7 +1273,7 @@ def toonkor_list():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('toonkor_down', methods=['POST'])
 def toonkor_down():
@@ -1264,7 +1298,7 @@ def toonkor_down():
 			test = schedulerc.get_job(startname).id
 			test2 = schedulerc.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('sch_del', methods=['POST'])
 def sch_del():
@@ -1288,4 +1322,4 @@ def sch_del():
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
-		return redirect(url_for('main.index'))
+		return redirect(url_for('webtoon.index'))

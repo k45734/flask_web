@@ -95,7 +95,7 @@ section {
 <nav role="navigation">
   <ul id="main-menu">
     <li><a href="{{ url_for('main.index') }}">홈</a></li>
-    <li><a href="#">일반 메뉴</a>
+    <li><a href="{{ url_for('sub2.index') }}">일반 메뉴</a>
       <ul id="sub-menu">
         <li><a href="{{ url_for('sub2.lotto') }}" aria-label="subemnu">로또번호</a></li>
         <li><a href="{{ url_for('sub2.menu') }}" aria-label="subemnu">점심메뉴</a></li>
@@ -108,7 +108,7 @@ section {
 <li><a href="{{ url_for('sub2.news') }}" aria-label="subemnu">뉴스알림서비스</a></li>				
       </ul>
     </li>
-	<li><a href="#">웹툰 메뉴</a>
+	<li><a href="{{ url_for('webtoon.index') }}">웹툰 메뉴</a>
       <ul id="sub-menu">
 		<li><a href="{{ url_for('webtoon.second') }}" aria-label="subemnu">카피툰</a></li>
 		<li><a href="{{ url_for('webtoon.second2') }}" aria-label="subemnu">툰코</a></li>
