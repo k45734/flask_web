@@ -162,7 +162,7 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
 		sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		test2 = sub3_page.get_job(FLASKAPPSNAME)
+		test2 = sub3_page.get_job(FLASKAPPSNAME).id
 		logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		return redirect(url_for('sub3.second'))
 
@@ -172,13 +172,13 @@ def cancle(FLASKAPPSNAME):
 		return redirect(url_for('main.index'))
 	else:
 		
-		test2 = sub3_page.get_job(FLASKAPPSNAME)
+		test2 = sub3_page.get_job(FLASKAPPSNAME).id
 		logger.info('%s가 스케줄러에 있습니다.', test2)
 		try:
 			sub3_page.remove_job(FLASKAPPSNAME)
 		except:
 			pass
-		test = sub3_page.get_job(FLASKAPPSNAME)
+		test = sub3_page.get_job(FLASKAPPSNAME).id
 		logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 		return redirect(url_for('sub3.second'))
 		
