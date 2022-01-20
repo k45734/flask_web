@@ -617,8 +617,8 @@ def news_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
+			test = scheduler2.get_job(startname)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return render_template('news.html')
@@ -676,8 +676,8 @@ def unse_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
+			test = scheduler2.get_job(startname)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return render_template('unse.html')
@@ -752,8 +752,8 @@ def weather_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
+			test = scheduler2.get_job(startname)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return render_template('weather.html')
@@ -813,8 +813,8 @@ def tracking_ok():
 		conn.close()
 		try:
 			scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
+			test = scheduler2.get_job(startname)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return render_template('tracking.html')
@@ -835,8 +835,8 @@ def funmom_ok():
 		startname = request.form['startname']
 		try:
 			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
+			test = scheduler2.get_job(startname)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return render_template('funmom.html')
@@ -905,15 +905,15 @@ def board():
 		if choice == 'a':
 			try:
 				scheduler2.add_job(exec_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main, sel, selnum, telgm, telgm_alim, telgm_token, telgm_botid] )
-				test = scheduler2.print_jobs()
-				logger.info('%s', test)
+				test = scheduler2.get_job(startname)
+				logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 			except:
 				pass
 		if choice == 'b':
 			try:
 				scheduler2.add_job(exec_start2, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[cafenum, cafe, num, cafemenu, cafeboard, boardpath, telgm, telgm_alim, telgm_token, telgm_botid] )
-				test = scheduler2.print_jobs()
-				logger.info('%s', test)
+				test = scheduler2.get_job(startname)
+				logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 			except:
 				pass
 		return render_template('board.html')

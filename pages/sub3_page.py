@@ -1,12 +1,12 @@
 from flask import Blueprint
 #여기서 필요한 모듈
 from datetime import datetime, timedelta 
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 import os.path, bs4, sqlite3, threading, telegram, time, logging, subprocess, requests, os
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.base import JobLookupError
-from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
+from apscheduler.triggers.cron import CronTrigger
 
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -85,9 +85,6 @@ def edit_result():
 		sql_update = "UPDATE database SET FLASKAPPSREPEAT=?, FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
 		db.execute(sql_update,(FLASKAPPSREPEAT, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
 		c.commit()
-		
-		#print(FLASKAPPS)
-		#print(tee)
 		return redirect(url_for('sub3.second'))
 		
 @bp3.route("databasedel/<FLASKAPPSNAME>", methods=["GET"])
@@ -135,10 +132,16 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 			subprocess.call(FLASKAPPS, shell=True)
 		
 	logger.info('%s', parse_stop)
-	sub3_page.remove_job(FLASKAPPSNAME)
+	try:
+		sub3_page.remove_job(FLASKAPPSNAME)
+	except:
+		pass
 	logger.info('%s의 스케줄러를 종료합니다.', FLASKAPPSNAME)
-	test = sub3_page.print_jobs()
-	logger.info('%s', test)
+	#test = sub3_page.print_jobs()
+	test2 = sub3_page.get_jobs()
+	for i in test2:
+		aa = i.id
+		logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
@@ -159,10 +162,8 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row[6]
 		FLASKALIM = row[7]
 		sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-		logger.info('%s', FLASKAPPSNAME)
-		test22 = sub3_page.print_jobs()
-		time.sleep(1)
-		logger.info('%s을 스케줄러에 등록하였습니다.', test22)
+		test2 = sub3_page.get_job(FLASKAPPSNAME)
+		logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		return redirect(url_for('sub3.second'))
 
 @bp3.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
@@ -171,11 +172,14 @@ def cancle(FLASKAPPSNAME):
 		return redirect(url_for('main.index'))
 	else:
 		
-		test2 = sub3_page.print_jobs()
+		test2 = sub3_page.get_job(FLASKAPPSNAME)
 		logger.info('%s가 스케줄러에 있습니다.', test2)
-		sub3_page.remove_job(FLASKAPPSNAME)
-		test = sub3_page.print_jobs()
-		logger.info('%s', test)
+		try:
+			sub3_page.remove_job(FLASKAPPSNAME)
+		except:
+			pass
+		test = sub3_page.get_job(FLASKAPPSNAME)
+		logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 		return redirect(url_for('sub3.second'))
 		
 @bp3.route("start", methods=['POST','GET'])
