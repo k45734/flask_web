@@ -711,7 +711,7 @@ def sch_del():
 		else:
 			#remove_job
 			scheduler2.remove_job(startname)
-			scheduler2.shutdown()
+			#scheduler2.shutdown()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = scheduler2.get_jobs()
 			for i in test2:

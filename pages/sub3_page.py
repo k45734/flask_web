@@ -147,7 +147,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	else:
 		#remove_job
 		sub3_page.remove_job(FLASKAPPSNAME)
-		sub3_page.shutdown()
+		#sub3_page.shutdown()
 		logger.info('%s 스케줄러를 삭제하였습니다.', test)
 		test2 = sub3_page.get_jobs()
 		for i in test2:
@@ -196,7 +196,7 @@ def cancle(FLASKAPPSNAME):
 			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
 		else:
 			sub3_page.remove_job(FLASKAPPSNAME)
-			sub3_page.shutdown()
+			#sub3_page.shutdown()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = sub3_page.get_jobs()
 			for i in test2:
