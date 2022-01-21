@@ -138,15 +138,22 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		
 	logger.info('%s', parse_stop)
 	try:
+		test = sub3_page.get_job(FLASKAPPSNAME).id
+		logger.info('%s가 스케줄러에 있습니다.', test)
+	except Exception as e:
+		test = None
+	if test == None:
+		logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
+	else:
 		sub3_page.remove_job(FLASKAPPSNAME)
-	except:
-		pass
-	logger.info('%s의 스케줄러를 종료합니다.', FLASKAPPSNAME)
-	#test = sub3_page.print_jobs()
-	test2 = sub3_page.get_jobs()
-	for i in test2:
-		aa = i.id
-		logger.info('%s 가 스케줄러가 있습니다.', aa)
+		sub3_page.shutdown()
+		logger.info('%s 스케줄러를 삭제하였습니다.', test)
+		test2 = sub3_page.get_jobs()
+		for i in test2:
+			aa = i.id
+			logger.info('%s 가 스케줄러가 있습니다.', aa)
+
+	logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
@@ -190,6 +197,7 @@ def cancle(FLASKAPPSNAME):
 			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
 		else:
 			sub3_page.remove_job(FLASKAPPSNAME)
+			sub3_page.shutdown()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = sub3_page.get_jobs()
 			for i in test2:
