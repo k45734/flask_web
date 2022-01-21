@@ -145,6 +145,7 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	if test == None:
 		logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
 	else:
+		#remove_job
 		sub3_page.remove_job(FLASKAPPSNAME)
 		sub3_page.shutdown()
 		logger.info('%s 스케줄러를 삭제하였습니다.', test)
@@ -152,8 +153,6 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 		for i in test2:
 			aa = i.id
 			logger.info('%s 가 스케줄러가 있습니다.', aa)
-
-	logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):

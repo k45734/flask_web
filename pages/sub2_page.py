@@ -702,13 +702,21 @@ def sch_del():
 	else:
 		startname = request.form['startname']
 		try:
+			test = scheduler2.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			#remove_job
 			scheduler2.remove_job(startname)
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
-		except:
-			test = scheduler2.print_jobs()
-			logger.info('%s', test)
-			pass
+			scheduler2.shutdown()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = scheduler2.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		return redirect(url_for('sub2.index'))
 		
 @bp2.route('weather')
