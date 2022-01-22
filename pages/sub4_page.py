@@ -4,7 +4,11 @@ import os, os.path, sqlite3, time
 from datetime import datetime, timedelta
 import requests
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, send_file, send_from_directory
-
+try:
+	from openpyxl import Workbook
+except ImportError:
+	os.system('pip install openpyxl')
+	from openpyxl import Workbook
 bp4 = Blueprint('sub4', __name__, url_prefix='/sub4')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
