@@ -423,7 +423,7 @@ def exec_start(t_main, code, packege,startname):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
-
+			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 def exec_start2(t_main, code, packege,startname):
 	print("툰코시작")
 	logger.info('툰코시작')
@@ -523,7 +523,8 @@ def exec_start2(t_main, code, packege,startname):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
-		
+			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+			
 def exec_start3(t_main,code,packege,genre,startname):
 	print("뉴토끼시작")
 	logger.info('뉴토끼시작')
@@ -627,6 +628,7 @@ def exec_start3(t_main,code,packege,genre,startname):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
+			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 		
 def exec_start4(code,packege,startname):
 	print("네이버웹툰시작")
@@ -711,6 +713,7 @@ def exec_start4(code,packege,startname):
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
+			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 	
 def exec_start5(code,packege,startname):
 	print("다음웹툰시작")
@@ -830,21 +833,9 @@ def godown(t_main, compress, cbz, packege , startname):
 					f.write(new_text_content)
 				break
 		t_main = url2
-		print(t_main)
 		logger.info('%s',t_main)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
-			#url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
-			#req = s.get(url2)
-			#html = req.text
-			#gogo = bs(html, "html.parser")
-		
-			#test = gogo.findAll("div",{"class":"view-content"})
-			#for i in test:
-			#	url = i.findAll('strong')
-			#	tt = url[3].text
-			#	te = tt.lstrip()
-			#	final_str=te[:-1]
 			url2 = 'https://t.me/s/new_toonkor'
 			req = s.get(url2)
 			html = req.text
@@ -859,7 +850,6 @@ def godown(t_main, compress, cbz, packege , startname):
 			text_file_path = os.getcwd() + '/templates/toonkor.html'
 			new_text_content = ''
 			target_word = t_main
-			#new_word = '사랑'
 			
 			with open(text_file_path,'r',encoding='utf-8') as f:
 				lines = f.readlines()
@@ -871,10 +861,7 @@ def godown(t_main, compress, cbz, packege , startname):
 						new_text_content += '\n'
 			with open(text_file_path,'w',encoding='utf-8') as f:
 				f.write(new_text_content)	
-			#print(t_main)
-			#t_main = main_url
 			t_main = final_str
-		print(t_main)
 		logger.info('%s',t_main)
 	elif packege == 'newtoki':	
 		for i in range(116,500):
@@ -899,10 +886,8 @@ def godown(t_main, compress, cbz, packege , startname):
 					f.write(new_text_content)
 				break
 		t_main = url2
-		print(t_main)
 		logger.info('%s',t_main)
 	else:
-		print(t_main)
 		logger.info('%s', t_main)
 		pass
 	for i in row:
@@ -1039,6 +1024,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				logger.info('종료')
 			else:
 				add_d(packege, subtitle, title)
+				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
 
 @webtoon.route('daum_list', methods=['POST'])
 def daum_list():
