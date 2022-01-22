@@ -113,15 +113,14 @@ def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM,
 	#텔레그램
 	if FLASKTELGM == '0' :
 		bot = telegram.Bot(token = FLASKTOKEN)
-	cnt = 0
-	i = 0
+
 	test = int(FLASKAPPSREPEAT)
 	tee = FLASKAPPS.replace("\\", "/")
 	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
-	for ii in range(test):
-		parse_start = '{} 를 {} 시작합니다.'.format(FLASKAPPSNAME, int(cnt))
+	for ii in range(1, test+1):
+		parse_start = '{} 를 {} 시작합니다.'.format(FLASKAPPSNAME, ii)
 		logger.info('%s', parse_start)
-		parse_stop = '{} 를 {} 종료되었습니다.'.format(FLASKAPPSNAME, int(cnt))
+		parse_stop = '{} 를 {} 종료되었습니다.'.format(FLASKAPPSNAME, ii)
 		if FLASKTELGM == '0' :
 			if FLASKALIM == '0' :
 				bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=True)
