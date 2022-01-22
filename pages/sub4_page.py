@@ -117,34 +117,50 @@ def ok():
 
 @bp4.route("csv_download")		
 def csv_download():
-	file_name = f"./database.csv"
+	file_name = f"./inventory.xlsx"
 	return send_file(file_name, 
-					mimetype='text/csv', 
-					attachment_filename='database.csv',# 다운받아지는 파일 이름. 
+					mimetype='application/vnd.ms-excel', 
+					attachment_filename='inventory.xlsx',# 다운받아지는 파일 이름. 
 					as_attachment=True)
 
 @bp4.route("csv_import")		
 def csv_import():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
-	else:	
+	else:
+		#workbook 생성하기(1개의 시트가 생성된 상태)
+		workbook = Workbook()
+		#현재 workbook의 활성화 된 Sheet 가져오기
+		sheet = workbook.active
+		sheet.title = "inventory" #해당 sheet의 sheet명 변경하기
+		# cell에 직접 데이터 입력하기
+		sheet['A1'] = "번호"
+		sheet['B1'] = "날짜"
+		sheet['C1'] = "물품명"
+		sheet['D1'] = "입고"
+		sheet['E1'] = "출고"
+		sheet['F1'] = "합계"
 		con = sqlite3.connect('./database.db')
 		cur = con.cursor()
 		bables = cur.execute('SELECT * FROM database2')
-		com_te=""
-		f=open("database.csv","w")
-		for table in bables:
-			com_te = str(table)+"\n"
-			print(com_te)
-			f.write(com_te)
-			#save_to_file(com_te)
-			f.close
+		rows = cur.fetchall()
+		nh_data = []
+		for table in rows:
+			a = table[0]
+			b = table[1]
+			c = table[2]
+			d = table[3]
+			e = table[4]
+			f = table[5]
+			nh_data.extend([[a,b,c,d,e,f]])
+			
 		con.close()
-		print("CSV file import done.")
-		#time.sleep(10)
-		#return send_file('database.csv' , mimetype='text/csv', attachment_filename = 'database.csv' ,as_attachment=True)
+
+		for i in nh_data:
+			sheet.append(i)
+		# 파일 저장하기
+		workbook.save("./inventory.xlsx")
 		return redirect(url_for('sub4.second'))
-		#return send_from_directory('./', "database.csv")
 	
 @bp4.route("start", methods=['POST','GET'])
 def start():
