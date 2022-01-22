@@ -424,6 +424,22 @@ def exec_start(t_main, code, packege,startname):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+		try:
+			test = schedulerc.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			schedulerc.remove_job(startname)
+			schedulerc.start()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
+			
 def exec_start2(t_main, code, packege,startname):
 	print("툰코시작")
 	logger.info('툰코시작')
@@ -524,6 +540,21 @@ def exec_start2(t_main, code, packege,startname):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+		try:
+			test = schedulerc.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			schedulerc.remove_job(startname)
+			schedulerc.start()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start3(t_main,code,packege,genre,startname):
 	print("뉴토끼시작")
@@ -629,6 +660,21 @@ def exec_start3(t_main,code,packege,genre,startname):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+		try:
+			test = schedulerc.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			schedulerc.remove_job(startname)
+			schedulerc.start()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
 def exec_start4(code,packege,startname):
 	print("네이버웹툰시작")
@@ -714,6 +760,21 @@ def exec_start4(code,packege,startname):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 			add_c(packege, a,b,c,d)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+		try:
+			test = schedulerc.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			schedulerc.remove_job(startname)
+			schedulerc.start()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
 	
 def exec_start5(code,packege,startname):
 	print("다음웹툰시작")
@@ -783,7 +844,22 @@ def exec_start5(code,packege,startname):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			add_c(packege, a,b,c,d)		
+			add_c(packege, a,b,c,d)
+		try:
+			test = schedulerc.get_job(startname).id
+			logger.info('%s가 스케줄러에 있습니다.', test)
+		except Exception as e:
+			test = None
+		if test == None:
+			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+		else:
+			schedulerc.remove_job(startname)
+			schedulerc.start()
+			logger.info('%s 스케줄러를 삭제하였습니다.', test)
+			test2 = schedulerc.get_jobs()
+			for i in test2:
+				aa = i.id
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
