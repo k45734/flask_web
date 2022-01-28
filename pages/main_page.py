@@ -45,10 +45,11 @@ def index():
 	verfile = './version.txt'
 	if platform.system() == 'Windows':
 		with open(verfile, 'rt', encoding='cp949') as fp:
-			lines = fp.readlines()
+			lines = fp.readline()
 	else:
 		with open(filepath, 'rt', encoding='utf-8') as fp:
-			lines = fp.readlines()
+			lines = fp.readline()
+			
 	#최신버젼
 	with requests.Session() as s:
 		url = 'https://raw.githubusercontent.com/k45734/flask_web/main/version.txt'
