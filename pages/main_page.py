@@ -199,12 +199,14 @@ def update(file_name = None):
 		org = './flask_web-main/app.py'
 		org2 = './flask_web-main/pages'
 		org3 = './flask_web-main/templates'
+		org4 = './flask_web-main/version.txt'
 		new = './'
 		new2 = './pages'
 		new3 = './templates'
 		shutil.copy(org, new)
 		copy_tree(org2, new2)
 		copy_tree(org3, new3)
+		shutil.copy(org4, new)
 		os.remove('./main.zip')
 		shutil.rmtree ('./flask_web-main')
 		if os.path.exists(org):
@@ -212,6 +214,7 @@ def update(file_name = None):
 			shutil.copy(org, new)
 			copy_tree(org2, new2)
 			copy_tree(org3, new3)
+			shutil.copy(org4, new)
 			os.remove('./main.zip')
 			shutil.rmtree ('./flask_web-main')
 		else:
