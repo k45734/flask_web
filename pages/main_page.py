@@ -47,7 +47,7 @@ def index():
 		with open(verfile, 'rt', encoding='cp949') as fp:
 			lines = fp.readline()
 	else:
-		with open(filepath, 'rt', encoding='utf-8') as fp:
+		with open(verfile, 'rt', encoding='utf-8') as fp:
 			lines = fp.readline()
 			
 	#최신버젼
