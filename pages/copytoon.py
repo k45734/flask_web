@@ -991,6 +991,8 @@ def godown(t_main, compress, cbz, packege , startname):
 				try:
 					response1 = session2.get(wwwkt,headers=header)
 					html = response1.text
+					st = response1.status_code
+					logger.info('%s', st)
 					soup = bs(html, "html.parser")	
 				except:
 					continue
