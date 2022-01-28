@@ -867,15 +867,15 @@ def godown(t_main, compress, cbz, packege , startname):
 	con = sqlite3.connect('./webtoon.db',timeout=60)
 	cur = con.cursor()
 	if packege == 'toonkor':
-		sql = "select * from database2"
+		sql = "select * from database2 where complte = 'False'"
 	elif packege == 'newtoki':
-		sql = "select * from database3"
+		sql = "select * from database3 where complte = 'False'"
 	elif packege == 'naver':
-		sql = "select * from database4"
+		sql = "select * from database4 where complte = 'False'"
 	elif packege == 'daum':
-		sql = "select * from database5"
+		sql = "select * from database5 where complte = 'False'"
 	else:
-		sql = "select * from database"
+		sql = "select * from database where complte = 'False'"
 	cur.execute(sql)
 	row = cur.fetchall()
 	session2 = requests.Session()
