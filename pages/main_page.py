@@ -41,6 +41,15 @@ def index():
 		root = s[0]
 	else:
 		root = '/'
+	#현재버젼
+	verfile = './version.txt'
+	if platform.system() == 'Windows':
+		with open(verfile, 'rt', encoding='cp949') as fp:
+			lines = fp.readlines()
+	else:
+		with open(filepath, 'rt', encoding='utf-8') as fp:
+			lines = fp.readlines()
+	#최신버젼
 	with requests.Session() as s:
 		url = 'https://raw.githubusercontent.com/k45734/flask_web/main/version.txt'
 		req1 = s.get(url)
@@ -52,7 +61,7 @@ def index():
 	mem_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%)' % (sizeof_fmt(tmp[0], suffix='B'), sizeof_fmt(tmp[3], suffix='B'), sizeof_fmt(tmp[1], suffix='B'), tmp[2])
 	disk_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%) - 드라이브 (%s)' % (sizeof_fmt(tmp2[0], suffix='B'), sizeof_fmt(tmp2[1], suffix='B'), sizeof_fmt(tmp2[2], suffix='B'), tmp2[3], root)
 	
-	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version)
+	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines)
 
 			
 @bp.route('login')
