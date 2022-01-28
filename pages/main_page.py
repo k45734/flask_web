@@ -9,7 +9,8 @@ except:
 import os, os.path, sqlite3, time , psutil, platform
 from datetime import datetime, timedelta
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-from requests import get  
+from requests import get
+import requests
 import zipfile, shutil 
 from distutils.dir_util import copy_tree
 
@@ -40,7 +41,10 @@ def index():
 		root = s[0]
 	else:
 		root = '/'
-	
+	with requests.Session() as s:
+		url = 'https://raw.githubusercontent.com/k45734/flask_web/main/version.txt'
+		req1 = s.get(url)
+		version = req1.text
 	tmp = psutil.virtual_memory()
 	tmp2 = psutil.disk_usage(root)
 	oos = platform.platform()
@@ -48,7 +52,7 @@ def index():
 	mem_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%)' % (sizeof_fmt(tmp[0], suffix='B'), sizeof_fmt(tmp[3], suffix='B'), sizeof_fmt(tmp[1], suffix='B'), tmp[2])
 	disk_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%) - 드라이브 (%s)' % (sizeof_fmt(tmp2[0], suffix='B'), sizeof_fmt(tmp2[1], suffix='B'), sizeof_fmt(tmp2[2], suffix='B'), tmp2[3], root)
 	
-	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent)
+	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version)
 
 			
 @bp.route('login')
