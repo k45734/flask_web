@@ -29,7 +29,7 @@ def second():
 		RECEIVING = request.args.get('RECEIVING')
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
-		con = sqlite3.connect("database.db")
+		con = sqlite3.connect("./database.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2")
@@ -173,7 +173,7 @@ def start():
 		PRODUCT_NAME = request.form['PRODUCT_NAME']
 		RECEIVING = request.form['RECEIVING']
 		SHIPPING = request.form['SHIPPING']
-		con = sqlite3.connect("database.db")	
+		con = sqlite3.connect("./database.db")	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2 WHERE PRODUCT_NAME = '{}' ORDER BY ROWID DESC LIMIT 1".format(PRODUCT_NAME))
@@ -188,7 +188,7 @@ def start():
 			con.close()
 			
 		try:
-			with sqlite3.connect("database.db")	as con:
+			with sqlite3.connect("./database.db") as con:
 				if session.get('logFlag'):
 					#print(SHIPPING)
 					print(a)
