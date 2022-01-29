@@ -506,13 +506,59 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		else:
 			print(a4)
 
-old_sbs = []
-def esbsnews(old_sbs = []):
+def addnews(a,b,c,d):
+	con = sqlite3.connect('./news.db',timeout=60)
+	cur = con.cursor()
+	sql = "select * from news where TITLE = ? and URL = ?"
+	cur.execute(sql, (b,c))
+	row = cur.fetchone()
+	if row != None:
+		pass
+	else:
+		cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, COMPLETE) VALUES (?,?,?,?)", (a,b,c,d))
+		con.commit()
+	
+		#con.rollback()
+	con.close()
+		
+def addnews_d(a, b, c, d):
+	try:
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect('./news.db')
+		cur = con.cursor()
+		sql = "UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?"
+		cur.execute(sql,('True',b, c))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()	
+
+def vietnews():
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	URL = 'https://www.vinatimes.net/news'
+	req = session.get(URL,headers=header)
+	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	posts = bs0bj.findAll("div",{"class":"list_title"})
+	vietnews = []
+	for test in posts:
+		title = test.text
+		a2 = "".join(title.split())
+		a3 = test.a['href']
+		a5 = "VIET"
+		keys = ['CAST','TITLE','URL']
+		values = [a5, a2, a3]
+		dt = dict(zip(keys, values))
+		vietnews.append(dt)
+	return vietnews	
+		
+def esbsnews():
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 	req = session.get(URL,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'lxml')
+	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.find("div",{"class":"w_news_list"})
 	lists = posts.findAll("a")
 	sbsnews = []
@@ -522,20 +568,19 @@ def esbsnews(old_sbs = []):
 		a2 = "".join(a5.split())
 		a3 = 'https://news.sbs.co.kr' + a1
 		a4 = "{} \n{}\n".format(a2, a3)
-		sbsnews.append(a4)
-		
-	sbsnews_new = []
-	for link in sbsnews:
-		if link not in old_sbs:
-			sbsnews_new.append(link)
-	return sbsnews_new		
-old_kbs = []
-def ekbsnews(old_kbs = []):
+		a5 = "SBS"
+		keys = ['CAST','TITLE','URL']
+		values = [a5, a2, a3]
+		dt = dict(zip(keys, values))
+		sbsnews.append(dt)
+	return sbsnews		
+
+def ekbsnews():
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'http://news.kbs.co.kr/common/main.html'
 	req = session.get(URL,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'lxml')
+	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 	lists = posts.findAll("a")
 	kbsnews = []
@@ -544,38 +589,92 @@ def ekbsnews(old_kbs = []):
 		a2 = i.text
 		a3 = 'http://news.kbs.co.kr' + a1
 		a4 = "{} \n{}\n".format(a2, a3)
-		kbsnews.append(a4)
-		
-	kbsnews_new = []
-	for link in kbsnews:
-		if link not in old_kbs:
-			kbsnews_new.append(link)
-	return kbsnews_new		
+		a5 = "KBS"
+		keys = ['CAST','TITLE','URL']
+		values = [a5, a2, a3]
+		dt = dict(zip(keys, values))
+		kbsnews.append(dt)
+	return kbsnews		
+	
+def ytnsnews():
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
+	req = session.get(URL,headers=header)
+	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	posts = bs0bj.findAll("div",{"class":"news-con"})	
+	ytnnews = []
+	for i in posts:
+		a1 = i.text
+		a2 = " ".join(a1.split())
+		a3 = 'https:' + i.find('a')['href']
+		a4 = "YTN"
+		keys = ['CAST','TITLE','URL']
+		values = [a4, a2, a3]
+		dt = dict(zip(keys, values))
+		ytnnews.append(dt)
+	return ytnnews	
+	
 	
 def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect('./news.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, COMPLETE TEXT)')	
+	conn.close()
 
-	global old_sbs
-	global old_kbs
-
-	sbsnews_new = esbsnews(old_sbs)
-	news = []
-	if sbsnews_new:
-		for link in sbsnews_new:
-			news.append(link)
-	kbsnews_new = ekbsnews(old_kbs)
-	if kbsnews_new:
-		for link in kbsnews_new:
-			news.append(link)
-	for i in news:
-		#test = i.decode('utf-8')
+	sbs = esbsnews()
+	kbs = ekbsnews()
+	viet = vietnews()
+	ytn = ytnsnews()
+	for i in sbs:
+		a = i['CAST']
+		b = i['TITLE']
+		c = i['URL']
+		d = 'False'
+		addnews(a,b,c,d)
+	for i in kbs:
+		a = i['CAST']
+		b = i['TITLE']
+		c = i['URL']
+		d = 'False'
+		addnews(a,b,c,d)
+	for i in viet:
+		a = i['CAST']
+		b = i['TITLE']
+		c = i['URL']
+		d = 'False'
+		addnews(a,b,c,d)
+	for i in ytn:
+		a = i['CAST']
+		b = i['TITLE']
+		c = i['URL']
+		d = 'False'
+		addnews(a,b,c,d)
+		
+	con = sqlite3.connect('./news.db',timeout=60)
+	cur = con.cursor()	
+	sql = "select * from news where COMPLETE = ?"
+	cur.execute(sql, ('False', ))
+	rows = cur.fetchall()
+	
+	#DB의 정보를 읽어옵니다.
+	for row in rows:
+		a = row[0]
+		b = row[1]
+		c = row[2]
+		d = row[3]
+		msg = '{}\n{}\n{}'.format(a,b,c)
 		if telgm == '0' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == '0':
-				bot.sendMessage(chat_id = telgm_botid, text=i, disable_notification=True)
-			else :		
-				bot.sendMessage(chat_id = telgm_botid, text=i, disable_notification=False)
+				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
+			else:		
+				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
+			time.sleep(10)
 		else:
-			print(i)
+			print(msg)
+		#중복 알림에거
+		addnews_d(a,b,c,d)
 
 @bp2.route('news')
 def news():
