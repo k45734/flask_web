@@ -129,7 +129,7 @@ def url_to_image(url, dfolder, category, category2, filename):
 			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
-		
+#펀맘 DB		
 def add_d(id, go, complte):
 	try:
 		#print(a,b)
@@ -143,7 +143,7 @@ def add_d(id, go, complte):
 		con.rollback()
 	finally:	
 		con.close()	
-	
+#펀맘 DB	
 def add_c(a, b,tt):
 	try:
 		con = sqlite3.connect('./funmom.db',timeout=60)
@@ -495,12 +495,6 @@ def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 
 	for x in refine:
 		data_list.append(x.get_text())
-	#print(Finallocation)
-	#print(f'현재온도: {data_list[0]}')
-	#print(f'현재날씨: {data_list[13]}')
-	#print(f'강수확률: {data_list[7]}')
-	#print(f'습도: {data_list[8]}')
-	#print(f'풍속: {data_list[10]}')
 
 	msg = Finallocation + ' ' + data_list[13] + '\n현재온도는 ' + data_list[0] + '\n강수확률은 ' + data_list[7] + '\n습도 : ' + data_list[8] + '\n풍속 : ' + data_list[10]
 	print(msg)
@@ -511,7 +505,6 @@ def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		else :
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
 		print(msg)
-		#sys.quit();
 	else:
 		print(msg)
 
