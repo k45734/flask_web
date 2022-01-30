@@ -160,6 +160,42 @@ def add_c(a, b,tt):
 		con.rollback()
 	finally:		
 		con.close()		
+#운세알리미 DB
+def add_unse(lastdate, zodiac, zodiac2, list, complte):
+	try:
+		con = sqlite3.connect('./unse.db',timeout=60)
+		cur = con.cursor()
+		sql = "select * from unse where DATE = ? AND ZODIAC2 = ? AND MEMO = ?"
+		cur.execute(sql, (lastdate, zodiac2, list))
+		row = cur.fetchone()
+		if row != None:
+			print("해당 내용은 DB에 있습니다.")
+		else:
+			cur.execute("INSERT OR REPLACE INTO unse (DATE, ZODIAC, ZODIAC2, MEMO, COMPLTE) VALUES (?,?,?,?,?)", (lastdate, zodiac, zodiac2, list, complte))
+			con.commit()
+	except:
+		con.rollback()	
+	finally:
+		con.close()
+#운세알리미 DB		
+def add_unse_d(a, b, c, d, e):
+	try:
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect('./unse.db',timeout=60)
+		cur = con.cursor()
+		sql = "select * from unse where DATE = ? AND ZODIAC2 = ? AND MEMO = ?"
+		cur.execute(sql, (a, c, d))
+		row = cur.fetchone()
+		if row == None:
+			print("해당 내용은 DB에 없습니다.")
+		else:
+			sql = "UPDATE unse SET COMPLTE = ? WHERE DATE = ? AND ZODIAC2 = ? AND MEMO = ?"	
+			cur.execute(sql,('True', a, c, d))
+			con.commit()
+	except:
+		con.rollback()	
+	finally:	
+		con.close()	
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -479,24 +515,52 @@ def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	else:
 		print(msg)
 
+#운세알리미
 def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect('./unse.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
+	conn.close()
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 
-	auth = 'http://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
+	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
 	rs = requests.get(auth,headers=header,verify=False)
-	bs0bj = bs(rs.content.decode('utf-8','replace'),'lxml')
+	bs0bj = BeautifulSoup(rs.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.findAll("div",{"class":"ani_result"})
+	dates = bs0bj.find('span',{'class':'cal'}).text
+	lastdate = " ".join(dates.split())
 	for i in posts:
 		a = i.text
 		test = i.find('dd')
 		title = test.text
 		a2 = " ".join(title.split())
+		aaa = a2.split(maxsplit=1)
+		zodiac = aaa[0]
+		zodiac2 = aaa[1]
 		name = i.find('ul')
-		list = name.text
-		now = time.localtime()
-		test = "{}년{}월{}일{}시{}분{}초".format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-		a4 = a2 + '\n' + list
+		li = name.text
+		list = " ".join(li.split())
+		#a4 = a2 + '\n' + list
+		a4 = zodiac + '\n' + zodiac2 + '\n' + list
+		complte = 'False'
+		add_unse(lastdate, zodiac, zodiac2, list, complte)
+		
+	#중복 알림 방지
+	con = sqlite3.connect('./unse.db',timeout=60)
+	cur = con.cursor()
+	sql = "select * from unse where COMPLTE = ?"
+	cur.execute(sql,('False',))
+	rows = cur.fetchall()
+	count = 0
+	for row in rows:
+		timestr = time.strftime("%Y%m%d")
+		a = row[0] #생성날짜
+		b = row[1] #띠
+		c = row[2] #띠별운세
+		d = row[3] #띠별상세운세
+		e = row[4] #완료여부
+		a4 = b + ' (' + c + ')\n' + d
 		if telgm == '0' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == '0':
@@ -505,6 +569,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=False)
 		else:
 			print(a4)
+		add_unse_d(a, b, c, d, e)
 
 def addnews(a,b,c,d):
 	con = sqlite3.connect('./news.db',timeout=60)
