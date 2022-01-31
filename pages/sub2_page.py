@@ -144,7 +144,7 @@ def add_d(id, go, complte):
 	finally:	
 		con.close()	
 #펀맘 DB	
-def add_c(a, b,tt):
+def add_c(a,b,c,d):
 	try:
 		con = sqlite3.connect('./funmom.db',timeout=60)
 		cur = con.cursor()
@@ -154,12 +154,13 @@ def add_c(a, b,tt):
 		if row != None:
 			pass
 		else:
-			cur.execute("INSERT OR REPLACE INTO funmom (ID, urltitle, complte) VALUES (?, ?, ?)", (tt,a,b))
+			cur.execute("INSERT OR REPLACE INTO funmom (ID, title, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			con.commit()
 	except:
 		con.rollback()
 	finally:		
-		con.close()		
+		con.close()
+		
 #운세알리미 DB
 def add_unse(lastdate, zodiac, zodiac2, list, complte):
 	try:
@@ -341,82 +342,79 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 			
 def exec_start3(startname):
 	conn = sqlite3.connect('./funmom.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, urltitle TEXT, complte TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		for gogo in range(99999):
+		gogo = 1
+		a = 1
+		while True:
 			dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
 			login = s.get(dd,headers=header)
 			html = login.text
 			soup = bs(html, 'html.parser')
-			list_test = soup.find(attrs={'class' :'jb-index-title jb-index-title-front'}) #목록이 있나 없나 확인
 			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
-			if list_test == None:
+			if len(list) == 0:
 				print("마지막 페이지입니다.\n종료합니다.")
-				#scheduler2.remove_job(startname)
-				#test = scheduler2.print_jobs()
-				#logger.info('%s', test)
 				break
 			
 			hrefs = []
+			title = []
 			for href in list:
 				t = href.find("a")["href"]
 				hrefs.append(str(t))
-				#print(t)
+				title.append(href.text)
 				
 			tt = 0
-			for a in hrefs:
-				b = "False" #처음에 등록할때 무조건 False 로 등록한다.
-				add_c(a,b,tt)
-				tt += 1
+			for c,b in zip(hrefs,title):
+				d = "False" #처음에 등록할때 무조건 False 로 등록한다.
+				add_c(a,b,c,d)
+				a += 1
+			gogo += 1
 		print('목록을 전부 만들었습니다.')		
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		for ii in range(99999):
-			print('다운로드를 시작합니다. {} 번째'.format(ii))
-			con = sqlite3.connect('./funmom.db',timeout=60)
-			cur = con.cursor()
-			sql = "select * from funmom"
-			cur.execute(sql)
-			row = cur.fetchall()	
-			for i in row:			
-				id = i[0]
-				go = i[1]
-				complte = i[2]
-				if complte == 'True':
-					continue
-				else:
-					dd2 = 'https://funmom.tistory.com' + go
-					print(dd2)
-					login2 = s.get(dd2,headers=header)
-					html = login2.text
-					soup = bs(html, 'html.parser')
-					menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
-					test = menu.find('h4')
-					ttt = test('a')
-					category = ttt[0].text
-					category2 = ttt[1].text
-					if platform.system() == 'Windows':
-						at = os.path.splitdrive(os.getcwd())
-						root = at[0] + '/data'
-					else:
-						root = '/data'
 
-					dfolder = root + '/funmom'# + category + '/' + category2
-					title = soup.find('title')	
-					thisdata = cleanText(title.text)
-					ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-					urls = []
-					for img in ex_id_divs:
-						img_url = img.find("img")
-						urls.append(str(img_url["src"]))		
-					jpeg_no = 00
-					for url in urls:
-						filename="funmom-" + str(jpeg_no) + ".jpg"
-						url_to_image(url, dfolder, category, category2, filename)
-						jpeg_no += 1
-					add_d(id, go, complte)
+		con = sqlite3.connect('./funmom.db',timeout=60)
+		cur = con.cursor()
+		sql = "select * from funmom where complte = ?"
+		cur.execute(sql,('False',))
+		row = cur.fetchall()	
+		for i in row:			
+			id = i[0] #숫자
+			ti = i[1] #제목
+			go = i[2] #url
+			complte = i[3] #완료여부
+			if complte == 'True':
+				continue
+			else:
+				dd2 = 'https://funmom.tistory.com' + go
+				login2 = s.get(dd2,headers=header)
+				html = login2.text
+				soup = bs(html, 'html.parser')
+				menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
+				test = menu.find('h4')
+				ttt = test('a')
+				category = ttt[0].text
+				category2 = ttt[1].text
+				if platform.system() == 'Windows':
+					at = os.path.splitdrive(os.getcwd())
+					root = at[0] + '/data'
+				else:
+					root = '/data'
+
+				dfolder = root + '/funmom'# + category + '/' + category2
+				title = soup.find('title')	
+				thisdata = cleanText(title.text)
+				ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+				urls = []
+				for img in ex_id_divs:
+					img_url = img.find("img")
+					urls.append(str(img_url["src"]))		
+				jpeg_no = 00
+				for url in urls:
+					filename="funmom-" + str(jpeg_no) + ".jpg"
+					url_to_image(url, dfolder, category, category2, filename)
+					jpeg_no += 1
+				add_d(id, go, complte)
 				
 
 def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
