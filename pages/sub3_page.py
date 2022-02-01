@@ -110,48 +110,30 @@ def databasedel(FLASKAPPSNAME):
 def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 	dfolder = os.path.dirname(os.path.abspath(__file__)) + '/apps'
-	#텔레그램
+	
+	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
+	parse_start = '{} 를 시작합니다.'.format(FLASKAPPSNAME)
+	logger.info('%s', parse_start)
+	parse_stop = '{} 를 종료되었습니다.'.format(FLASKAPPSNAME)
 	if FLASKTELGM == '0' :
 		bot = telegram.Bot(token = FLASKTOKEN)
-
-	test = int(FLASKAPPSREPEAT)
-	tee = FLASKAPPS.replace("\\", "/")
-	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
-	for ii in range(1, test+1):
-		parse_start = '{} 를 {} 시작합니다.'.format(FLASKAPPSNAME, ii)
-		logger.info('%s', parse_start)
-		parse_stop = '{} 를 {} 종료되었습니다.'.format(FLASKAPPSNAME, ii)
-		if FLASKTELGM == '0' :
-			if FLASKALIM == '0' :
-				bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=True)
-				subprocess.call(FLASKAPPS, shell=True)
-				bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=True)
-				
-			else :
-				bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=False)
-				subprocess.call(FLASKAPPS, shell=True)
-				bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=False)
-					
-		else :
+		if FLASKALIM == '0' :
+			bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=True)
 			subprocess.call(FLASKAPPS, shell=True)
-		
-	logger.info('%s', parse_stop)
-	try:
-		test = sub3_page.get_job(FLASKAPPSNAME).id
-		logger.info('%s가 스케줄러에 있습니다.', test)
-	except Exception as e:
-		test = None
-	if test == None:
-		logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
-	else:
-		#remove_job
-		sub3_page.remove_job(FLASKAPPSNAME)
-		#sub3_page.shutdown()
-		logger.info('%s 스케줄러를 삭제하였습니다.', test)
-		test2 = sub3_page.get_jobs()
-		for i in test2:
-			aa = i.id
-			logger.info('%s 가 스케줄러가 있습니다.', aa)
+			bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=True)
+			
+		else :
+			bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=False)
+			subprocess.call(FLASKAPPS, shell=True)
+			bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=False)
+					
+	else :
+		subprocess.call(FLASKAPPS, shell=True)
+		logger.info('%s', parse_stop)
+	test2 = sub3_page.get_jobs()
+	for i in test2:
+		aa = i.id
+		logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
