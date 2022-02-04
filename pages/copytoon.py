@@ -448,18 +448,7 @@ def exec_start2(t_main, code, packege,startname):
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:		
-		#url2 = 'https://alling3.com/bbs/board.php?bo_table=webtoon&wr_id=3'
-		#req = s.get(url2)
-		#html = req.text
-		#gogo = bs(html, "html.parser")
-		
-		#test = gogo.findAll("div",{"class":"view-content"})
-		#for i in test:
-		#	url = i.findAll('strong')
-		#	tt = url[3].text
-		#	te = tt.lstrip()
-		#	final_str=te[:-1]
+	with requests.Session() as s:
 		url2 = 'https://t.me/s/new_toonkor'
 		req = s.get(url2)
 		html = req.text
