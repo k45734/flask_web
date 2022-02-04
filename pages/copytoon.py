@@ -182,8 +182,6 @@ def db_reset():
 				cur.execute("delete from database3")
 			elif packege == 'naver':
 				cur.execute("delete from database4")
-			elif packege == 'daum':
-				cur.execute("delete from database5")
 			else:
 				print("데이터가 넘어오지 않았습니다")
 				logger.info('데이터가 넘어오지 않았습니다.')
@@ -211,8 +209,6 @@ def db_redown():
 				sql = "UPDATE database3 SET complte = ?"
 			elif packege == 'naver':
 				sql = "UPDATE database4 SET complte = ?"
-			elif packege == 'daum':
-				sql = "UPDATE database5 SET complte = ?"
 			elif packege == 'copytoon':
 				sql = "UPDATE database SET complte = ?"
 			else:
@@ -241,8 +237,6 @@ def add_c(packege, a, b, c, d):
 			sql = "select * from database3 where urltitle = ?"
 		elif packege == 'naver':
 			sql = "select * from database4 where urltitle = ?"
-		elif packege == 'daum':
-			sql = "select * from database5 where urltitle = ?"
 		else:
 			print("데이터가 넘어오지 않았습니다")
 			logger.info('데이터가 넘어오지 않았습니다.')
@@ -259,8 +253,6 @@ def add_c(packege, a, b, c, d):
 				cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			elif packege == 'naver':
 				cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			elif packege == 'daum':
-				cur.execute("INSERT OR REPLACE INTO database5 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
 			else:
 				print("데이터가 넘어오지 않았습니다")
 				logger.info('데이터가 넘어오지 않았습니다.')
@@ -283,8 +275,6 @@ def add_d(packege, subtitle, title):
 			sql = "UPDATE database3 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'naver':
 			sql = "UPDATE database4 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		elif packege == 'daum':
-			sql = "UPDATE database5 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		elif packege == 'copytoon':
 			sql = "UPDATE database SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		else:
@@ -963,7 +953,6 @@ def naver_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'naver'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -989,7 +978,6 @@ def newtoki_list():
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'newtoki'
 		t_main = request.form['t_main']
 		genre = request.form['genre']
 		code = request.form['code']
@@ -1016,7 +1004,6 @@ def newtoki_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'newtoki'
 		t_main = request.form['t_main']
 		genre = request.form['genre']
 		compress = request.form['compress']
@@ -1043,7 +1030,6 @@ def copytoon_list():
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'copytoon'
 		t_main = request.form['t_main']
 		code = request.form['code']
 		compress = request.form['compress']
@@ -1069,7 +1055,6 @@ def copytoon_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'copytoon'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -1095,7 +1080,6 @@ def toonkor_list():
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'toonkor'
 		t_main = request.form['t_main']
 		code = request.form['code']
 		compress = request.form['compress']
@@ -1121,7 +1105,6 @@ def toonkor_down():
 		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
 		conn.close()
 		packege = request.form['packege']
-		#packege = 'toonkor'
 		t_main = request.form['t_main']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
