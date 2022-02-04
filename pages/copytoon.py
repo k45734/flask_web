@@ -902,7 +902,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				response1 = session2.get(wwwkt,headers=header)
 				html = response1.text
 				st = response1.status_code
-				logger.info('%s', st)
+				logger.info('%s 의 상태는 %s', packege, st)
 				soup = bs(html, "html.parser")	
 			except:
 				continue			
