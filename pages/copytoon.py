@@ -778,7 +778,7 @@ def exec_start4(code,packege,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 #도지코믹스
-def exec_start5(code,packege,startname):
+def exec_start5(t_main, packege,startname):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	for i in range(30,500):
 		str_zoro = str(i).zfill(3)
@@ -1271,7 +1271,7 @@ def dozi_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,startname] )
+			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,packege,startname] )
 			test = schedulerc.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
