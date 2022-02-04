@@ -31,11 +31,9 @@ from apscheduler.triggers.cron import CronTrigger
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-#now = datetime.now()#.time()
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
-#scheduler = BackgroundScheduler()
 f = open('./log/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
@@ -53,7 +51,6 @@ def index():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
-		#t_main = request.form['t_main']
 		return render_template('webtoon_index.html', tltl = tltl)
 
 @webtoon.route('copytoon')
@@ -66,7 +63,6 @@ def second():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
-		#t_main = request.form['t_main']
 		return render_template('copytoon.html', tltl = tltl)
 
 @webtoon.route('toonkor')
@@ -118,9 +114,6 @@ def second5():
 		return render_template('daum.html', tltl = tltl)
 		
 def cleanText(readData):
-	#텍스트에 포함되어 있는 특수 문자 제거
-	#text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
-	#text = re.sub('[-_\/:*?"<>|]', '', readData)
 	text = readData.replace('/', '')
 	text = re.sub('[-\\/:*?\"<>|]', '', text).strip()
 	text = re.sub("\s{2,}", ' ', text)
@@ -138,12 +131,9 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
-	#parse = re.sub('[-_\/:*?"<>|]', '', title2)
-	#parse2 = re.sub('[-_\/:*?"<>|]', '', subtitle2)
 	parse = cleanText(title2)
 	parse2 = cleanText(subtitle2)
 	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
-	#print(fifi)
 	#폴더 없으면 만들다
 	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
 		os.makedirs('{}/{}/{}'.format(dfolder,parse,parse2))
@@ -158,8 +148,6 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 def manazip(subtitle, title ,filename , dfolder, cbz):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
-	#parse = re.sub('[\/:*?"<>|]', '', title2)
-	#parse2 = re.sub('[\/:*?"<>|]', '', subtitle2)
 	parse = cleanText(title2)
 	parse2 = cleanText(subtitle2)
 	if os.path.isdir(dfolder + '/{}/{}'.format(parse,parse2)):
@@ -319,7 +307,6 @@ def checkURL(url2):
 		print('The server couldn\'t fulfill the request. %s'% url2)     
 	else:
 		data = response.read()
-		#print(html)
 		data = data.decode()     
 		result = 0
 		result = data.find(url2)     
@@ -340,15 +327,11 @@ def exec_start(t_main, code, packege,startname):
 	for i in range(231,500):
 		url2 = ("https://copytoon%s.com" % (i))
 		time.sleep(2)
-		result = checkURL(url2)
-		
+		result = checkURL(url2)	
 		text_file_path = os.getcwd() + '/templates/copytoon.html'
 		new_text_content = ''
-		target_word = t_main
-		#new_word = '사랑'
-		
-		if result == 9999:
-			
+		target_word = t_main	
+		if result == 9999:			
 			print("new url : " + url2)
 			print(text_file_path)
 			with open(text_file_path,'r',encoding='utf-8') as f:
@@ -375,16 +358,11 @@ def exec_start(t_main, code, packege,startname):
 				maintitle.append(url["href"])
 		else:
 			allcode = code.split('|')
-			#print(allcode)
 			for i in allcode:
-				#aa = '/'+ i
-				#print(aa)
 				t_maincode = t_main + i
-				#print(t_maincode)
 				maintitle.append(i)
 				
 		for mainurl in maintitle:
-			#url = mainurl.strip()
 			url = mainurl.lstrip()
 			wkt = url
 			wat = wkt.replace("/", "")
@@ -419,7 +397,6 @@ def exec_start(t_main, code, packege,startname):
 		#print(urltitle) #웹툰주소
 		#print(maintitle) #대제목
 		#대제목 소제목 다운로드url 주소를 DB에 저장한다.
-		#for a,c in zip(subtitle,urltitle):
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
 			add_c(packege, a,b,c,d)
@@ -517,10 +494,7 @@ def exec_start2(t_main, code, packege,startname):
 					urltitle.append(url3)
 					subtitle.append(title)	
 					maintitle2.append(mainurl)
-					cc -= 1
-					#print(title)
-					#print(url3)
-					#print(mainurl)					
+					cc -= 1				
 			except:
 				pass
 		
@@ -701,15 +675,6 @@ def exec_start4(code,packege,startname):
 			soup = bs(html, "html.parser")
 			#대제목을 가져온다.
 			tags = soup.find("div",{"class":"detail"})
-			#for i in tags:
-				#대제목을 찾는다.
-			#test = tags('h2')
-			#tt = re.sub('<span.*?>.*?</h2>', '', str(test), 0, re.I|re.S)
-			#tt2 = re.sub('<h2>', '', str(tt), 0, re.I|re.S)
-			#pattern = re.compile(r'\s+')
-			#tt2 = re.sub(pattern, '', tt2)
-			#tt2 = tt2.replace("[", "")
-			#tt2 = tt2.replace("]", "")
 			tt2 = tags.find('span',{'class':'title'}).text
 					
 			for p in range(1, 1001):
@@ -764,91 +729,6 @@ def exec_start4(code,packege,startname):
 			for i in test2:
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
-	
-def exec_start5(code,packege,startname):
-	print("다음웹툰시작")
-	packege = 'daum'
-	maintitle = []
-	subtitle = []
-	urltitle = []
-	titleid = []
-	episode_id = []
-	headers = {
-				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
-				'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-				'Accept-Language' : 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-				'Referer' : ''
-				} 
-
-	with requests.Session() as s:
-		url = 'http://webtoon.daum.net/data/pc/webtoon/list_serialized/%s' % datetime.now().strftime('%A').lower()[0:3]
-		data = requests.get(url,headers=headers).json()
-		status = data['result']['status']
-		ass = data['result']['message']
-		#print(ass)
-		#전체 웹툰코드를 받아온다. 
-		if code == 'all':				
-			if ass != 'you are not login':
-				for item in data['data']:
-					nickname = item['nickname']
-					titleid.append(nickname)
-			else:
-				print("test")
-				pass
-		else:
-			allcode = code.split('|')
-			for i in allcode:
-				titleid.append(i)
-				
-		for i in titleid:
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, nowDatetime))
-			time.sleep(random.uniform(2,10)) 
-			url = 'http://webtoon.daum.net/data/pc/webtoon/view/%s' % (i)
-			try:
-				data = requests.get(url,headers=headers).json()
-			except:
-				data = requests.get(url,headers=headers).json()
-			status = data['result']['status']
-			ass = data['result']['message']
-			if ass != 'you are not login':
-				count = []
-				test = data['data']['webtoon']['title']
-				for epi in data['data']['webtoon']['webtoonEpisodes']:
-					tt = epi['id']
-					sub = epi['title']
-					count.append(sub)
-				test22 = len(count)
-				cc = int(test22)
-				for epi in data['data']['webtoon']['webtoonEpisodes']:
-					tt = epi['id']
-					sub = '{}화'.format(cc)
-					maintitle.append(test)
-					subtitle.append(sub)
-					urltitle.append(tt)
-					cc -= 1
-			else:
-				print("유료다")
-				continue
-				
-		#앞에서 크롤링한 정보를 DB에 저장한다.
-		for a,b,c in zip(maintitle,subtitle,urltitle):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			add_c(packege, a,b,c,d)
-		try:
-			test = schedulerc.get_job(startname).id
-			logger.info('%s가 스케줄러에 있습니다.', test)
-		except Exception as e:
-			test = None
-		if test == None:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-		else:
-			schedulerc.remove_job(startname)
-			schedulerc.start()
-			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = schedulerc.get_jobs()
-			for i in test2:
-				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
@@ -861,8 +741,6 @@ def godown(t_main, compress, cbz, packege , startname):
 		sql = "select * from database3 where complte = 'False'"
 	elif packege == 'naver':
 		sql = "select * from database4 where complte = 'False'"
-	elif packege == 'daum':
-		sql = "select * from database5 where complte = 'False'"
 	else:
 		sql = "select * from database where complte = 'False'"
 	cur.execute(sql)
@@ -871,7 +749,6 @@ def godown(t_main, compress, cbz, packege , startname):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	
 	if packege == 'copytoon':
-
 		for i in range(231,500):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
@@ -879,11 +756,8 @@ def godown(t_main, compress, cbz, packege , startname):
 			
 			text_file_path = os.getcwd() + '/templates/copytoon.html'
 			new_text_content = ''
-			target_word = t_main
-			#new_word = '사랑'
-			
-			if result == 9999:
-				
+			target_word = t_main		
+			if result == 9999:				
 				print("new down url : " + url2)
 				print(text_file_path)
 				with open(text_file_path,'r',encoding='utf-8') as f:
@@ -962,9 +836,6 @@ def godown(t_main, compress, cbz, packege , startname):
 		complte = i[3]
 		if packege == 'naver':
 			wwwkt = 'https://comic.naver.com' + url
-		elif packege == 'daum':
-			time.sleep(random.uniform(2,10)) 
-			wwwkt = 'http://webtoon.daum.net/data/pc/webtoon/viewer_images/%s' % (url)
 		else:
 			try:
 				test = url.replace(t_main,'')
@@ -976,22 +847,14 @@ def godown(t_main, compress, cbz, packege , startname):
 		else:
 			print(wwwkt)
 			logger.info('%s', wwwkt)
-			if packege != 'daum':
-				try:
-					response1 = session2.get(wwwkt,headers=header)
-					html = response1.text
-					st = response1.status_code
-					logger.info('%s', st)
-					soup = bs(html, "html.parser")	
-				except:
-					continue
-			else:
-				try:
-					data = requests.get(wwwkt,headers=header).json()
-					ass = data['result']['message']
-					status = data['result']['status']
-				except:
-					continue				
+			try:
+				response1 = session2.get(wwwkt,headers=header)
+				html = response1.text
+				st = response1.status_code
+				logger.info('%s', st)
+				soup = bs(html, "html.parser")	
+			except:
+				continue
 			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
 			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
 			if packege == 'toonkor':
@@ -1007,7 +870,6 @@ def godown(t_main, compress, cbz, packege , startname):
 					time.sleep(random.uniform(30,60))
 					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
-					#image_list = re.compile(r'img\ssrc="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				except:
 					continue
@@ -1017,9 +879,6 @@ def godown(t_main, compress, cbz, packege , startname):
 					taglist = obj.findAll("img")
 				except:
 					continue
-				#print(taglist)
-			elif packege == 'daum':
-				pass
 			else:
 				try:
 					obj = soup.find("div",{"id":"bo_v_con"})
@@ -1027,36 +886,12 @@ def godown(t_main, compress, cbz, packege , startname):
 				except:
 					continue
 			urls = []
-			if packege != 'daum':	
-				#print(taglist)
-				for img in taglist:
-					#print(taglist)
-					if packege == 'toonkor':
-						urls.append(img)
-					elif packege == 'newtoki':
-						urls.append(img)
-					elif packege == 'naver':
-						#print(img['src'])
-						urls.append(img['src'])
-					elif packege == 'copytoon':
-						urls.append(img['src'])
-					else:
-						if img["src"].endswith("jpg"):
-							urls.append(str(img["src"]))
-							#print(img["src"])
-				
-			else:
-				if ass != 'you are not login':
-					for w in data['data']:
-						img = w['url']
-						#print(img)
-						urls.append(img)
+			for img in taglist:
+				if packege == 'toonkor' or packege == 'newtoki':
+					urls.append(img)
 				else:
-					print("유료")
-					logger.info('유료')
-					continue
+					urls.append(img['src'])
 			jpeg_no = 00
-				
 			timestr = time.strftime("%Y%m%d-%H%M%S-")
 			parse2 = re.sub('[-=.#/?:$}]', '', title)
 			parse = cleanText(parse2)
@@ -1092,57 +927,6 @@ def godown(t_main, compress, cbz, packege , startname):
 			else:
 				add_d(packege, subtitle, title)
 				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
-
-@webtoon.route('daum_list', methods=['POST'])
-def daum_list():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
-		packege = request.form['packege']
-		#packege = 'daum'
-		code = request.form['code']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege,startname] )
-			test = schedulerc.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:
-			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
-		
-@webtoon.route('daum_down', methods=['POST'])
-def daum_down():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database5 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
-		packege = request.form['packege']
-		#packege = 'daum'
-		t_main = request.form['t_main']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
-			test = schedulerc.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:
-			test = schedulerc.get_job(startname).id
-			test2 = schedulerc.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
 		
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
