@@ -210,18 +210,6 @@ def second4():
 			aa = i.id
 			tltl.append(aa)
 		return render_template('naver.html', tltl = tltl)
-
-@webtoon.route('daum')
-def second5():
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		return render_template('daum.html', tltl = tltl)
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -318,7 +306,7 @@ def add_c(packege, a, b, c, d, atat):
 	try:
 		#데이타베이스 없으면 생성
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
@@ -331,7 +319,7 @@ def add_c(packege, a, b, c, d, atat):
 		if row != None:
 			pass
 		else:
-			cur.execute("INSERT OR REPLACE INTO " + packege + " (toon, maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?, ?)", (atat,a,b,c,d))
+			cur.execute("INSERT OR REPLACE INTO " + packege + " (maintitle, subtitle, urltitle, complte, toon) VALUES (?, ?, ?, ?, ?)", (a,b,c,d,atat))
 			con.commit()
 	except:
 		con.rollback()
@@ -342,7 +330,7 @@ def add_d(packege, subtitle, title):
 	try:
 		#데이타베이스 없으면 생성
 		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
@@ -789,7 +777,7 @@ def exec_start4(code,packege,startname):
 def godown(t_main, compress, cbz, packege , startname):	
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect('./webtoon.db',timeout=60)
-	sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+	sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 	conn.execute(sql)
 	conn.close()
 	#DB 목록을 받아와 다운로드를 진행한다.
