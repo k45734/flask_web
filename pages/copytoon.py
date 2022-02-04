@@ -834,6 +834,21 @@ def exec_start5(t_main, packege,startname):
 				print('{} {} {}\n{}'.format(atat, a, b, c))
 				add_c(packege, atat, a, b, c, d)
 				cc -= 1
+	try:
+		test = schedulerc.get_job(startname).id
+		logger.info('%s가 스케줄러에 있습니다.', test)
+	except Exception as e:
+		test = None
+	if test == None:
+		logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
+	else:
+		schedulerc.remove_job(startname)
+		schedulerc.start()
+		logger.info('%s 스케줄러를 삭제하였습니다.', test)
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			logger.info('%s 가 스케줄러가 있습니다.', aa)
 				
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
