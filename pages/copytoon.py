@@ -40,6 +40,114 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 schedulerc.start()
 
+try:
+	#DB 변경
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	#카피툰
+	cptoon = conn.cursor()
+	cptoon_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database')"
+	cptoon.execute(cptoon_sql)
+	#툰코
+	tnk = conn.cursor()
+	tnk_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database2')"
+	tnk.execute(tnk_sql)
+	#뉴토끼
+	ntoki = conn.cursor()
+	ntoki_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database3')"
+	ntoki.execute(ntoki_sql)
+	#네이버
+	nver = conn.cursor()
+	nver_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database4')"
+	nver.execute(nver_sql)
+
+	#다음
+	dum = conn.cursor()
+	dum_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database5')"
+	dum.execute(dum_sql)
+	row = cptoon.fetchone()
+	row2 = tnk.fetchone()
+	row3 = ntoki.fetchone()
+	row4 = nver.fetchone()
+	row5 = dum.fetchone()
+	if row[0] != 0:
+		#print('테이블이 있다')
+		conn.execute("ALTER TABLE database RENAME TO copytoon")
+	else:
+		print('테이블이 없다.')
+	if row2[0] != 0:
+		#print('테이블이 있다')
+		conn.execute("ALTER TABLE database2 RENAME TO toonkor")
+	else:
+		print('테이블이 없다.')
+	if row3[0] != 0:
+		#print('테이블이 있다')
+		conn.execute("ALTER TABLE database3 RENAME TO newtoki")
+	else:
+		print('테이블이 없다.')
+	if row4[0] != 0:
+		#print('테이블이 있다')
+		conn.execute("ALTER TABLE database4 RENAME TO naver")
+	else:
+		print('테이블이 없다.')
+
+	if row5[0] != 0:
+		#print('테이블이 있다')
+		conn.execute("DROP TABLE database5")
+	else:
+		print('테이블이 없다.')	
+
+	#DB컬럼 추가
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('copytoon') WHERE name='toon'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE copytoon ADD COLUMN toon TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('toonkor') WHERE name='toon'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE toonkor ADD COLUMN toon TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('newtoki') WHERE name='toon'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE newtoki ADD COLUMN toon TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('naver') WHERE name='toon'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE naver ADD COLUMN toon TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+except:
+	pass
+
+
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
@@ -51,6 +159,7 @@ def index():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
+		#t_main = request.form['t_main']
 		return render_template('webtoon_index.html', tltl = tltl)
 
 @webtoon.route('copytoon')
@@ -63,6 +172,7 @@ def second():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
+		#t_main = request.form['t_main']
 		return render_template('copytoon.html', tltl = tltl)
 
 @webtoon.route('toonkor')
@@ -114,6 +224,7 @@ def second5():
 		return render_template('daum.html', tltl = tltl)
 		
 def cleanText(readData):
+	#텍스트에 포함되어 있는 특수 문자 제거
 	text = readData.replace('/', '')
 	text = re.sub('[-\\/:*?\"<>|]', '', text).strip()
 	text = re.sub("\s{2,}", ' ', text)
@@ -174,17 +285,7 @@ def db_reset():
 			time.sleep(random.uniform(2,10)) 
 			con = sqlite3.connect('./webtoon.db')
 			cur = con.cursor()
-			if packege == 'copytoon':
-				cur.execute("delete from database")
-			elif packege == 'toonkor':
-				cur.execute("delete from database2")
-			elif packege == 'newtoki':
-				cur.execute("delete from database3")
-			elif packege == 'naver':
-				cur.execute("delete from database4")
-			else:
-				print("데이터가 넘어오지 않았습니다")
-				logger.info('데이터가 넘어오지 않았습니다.')
+			cur.execute("delete from "+ packege)
 			con.commit()
 		except:
 			con.rollback()
@@ -203,17 +304,7 @@ def db_redown():
 			time.sleep(random.uniform(2,10)) 
 			con = sqlite3.connect('./webtoon.db')
 			cur = con.cursor()
-			if packege == 'toonkor':
-				sql = "UPDATE database2 SET complte = ?"
-			elif packege == 'newtoki':
-				sql = "UPDATE database3 SET complte = ?"
-			elif packege == 'naver':
-				sql = "UPDATE database4 SET complte = ?"
-			elif packege == 'copytoon':
-				sql = "UPDATE database SET complte = ?"
-			else:
-				print("정보가 없습니다.")	
-				logger.info('정보가 없습니다.')
+			sql = "UPDATE " + packege + " SET complte = ?"
 			cur.execute(sql,('False',))
 			con.commit()
 		except:
@@ -222,40 +313,25 @@ def db_redown():
 			con.close()
 
 		return redirect(url_for('main.index'))
-
-def add_c(packege, a, b, c, d):
+def add_c(packege, a, b, c, d, atat):
+	print(packege, a, b , c ,d, atat)
 	try:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+		conn.execute(sql)
+		conn.close()
 		time.sleep(random.uniform(2,10)) 
-		print(packege, a, b , c ,d)
+		print(packege, a, b , c ,d, atat)
 		con = sqlite3.connect('./webtoon.db')
 		cur = con.cursor()
-		if packege == 'copytoon':
-			sql = "select * from database where urltitle = ?"
-		elif packege == 'toonkor':
-			sql = "select * from database2 where urltitle = ?"
-		elif packege == 'newtoki':
-			sql = "select * from database3 where urltitle = ?"
-		elif packege == 'naver':
-			sql = "select * from database4 where urltitle = ?"
-		else:
-			print("데이터가 넘어오지 않았습니다")
-			logger.info('데이터가 넘어오지 않았습니다.')
+		sql = "select * from " + packege + " where urltitle = ?"
 		cur.execute(sql, (c,))
 		row = cur.fetchone()
 		if row != None:
 			pass
 		else:
-			if packege == 'copytoon':
-				cur.execute("INSERT OR REPLACE INTO database (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			elif packege == 'toonkor':
-				cur.execute("INSERT OR REPLACE INTO database2 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			elif packege == 'newtoki':
-				cur.execute("INSERT OR REPLACE INTO database3 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			elif packege == 'naver':
-				cur.execute("INSERT OR REPLACE INTO database4 (maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
-			else:
-				print("데이터가 넘어오지 않았습니다")
-				logger.info('데이터가 넘어오지 않았습니다.')
+			cur.execute("INSERT OR REPLACE INTO " + packege + " (toon, maintitle, subtitle, urltitle, complte) VALUES (?, ?, ?, ?, ?)", (atat,a,b,c,d))
 			con.commit()
 	except:
 		con.rollback()
@@ -264,22 +340,16 @@ def add_c(packege, a, b, c, d):
 
 def add_d(packege, subtitle, title):
 	try:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+		conn.execute(sql)
+		conn.close()
 		time.sleep(random.uniform(2,10)) 
-		print(packege, subtitle)
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect('./webtoon.db')
 		cur = con.cursor()
-		if packege == 'toonkor':
-			sql = "UPDATE database2 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		elif packege == 'newtoki':
-			sql = "UPDATE database3 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		elif packege == 'naver':
-			sql = "UPDATE database4 SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		elif packege == 'copytoon':
-			sql = "UPDATE database SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		else:
-			print("정보가 없습니다.")	
-			logger.info('정보가 없습니다.')
+		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		cur.execute(sql,('True',subtitle, title))
 		con.commit()
 	except:
@@ -297,6 +367,7 @@ def checkURL(url2):
 		print('The server couldn\'t fulfill the request. %s'% url2)     
 	else:
 		data = response.read()
+		#print(html)
 		data = data.decode()     
 		result = 0
 		result = data.find(url2)     
@@ -314,14 +385,14 @@ def exec_start(t_main, code, packege,startname):
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	for i in range(231,500):
+	for i in range(245,500):
 		url2 = ("https://copytoon%s.com" % (i))
 		time.sleep(2)
-		result = checkURL(url2)	
+		result = checkURL(url2)
 		text_file_path = os.getcwd() + '/templates/copytoon.html'
 		new_text_content = ''
-		target_word = t_main	
-		if result == 9999:			
+		target_word = t_main
+		if result == 9999:
 			print("new url : " + url2)
 			print(text_file_path)
 			with open(text_file_path,'r',encoding='utf-8') as f:
@@ -334,8 +405,7 @@ def exec_start(t_main, code, packege,startname):
 						new_text_content += '\n'
 			with open(text_file_path,'w',encoding='utf-8') as f:
 				f.write(new_text_content)
-			break
-	#print(os.getcwd())		
+			break	
 	with requests.Session() as s:
 		t_main = url2
 		print(url2)
@@ -366,7 +436,6 @@ def exec_start(t_main, code, packege,startname):
 			response1 = s.get(all,headers=header)
 			html = response1.text
 			soup = bs(html, "html.parser")
-			#print(all)
 			mm = soup.find("div",{"class":"contents-list"})
 			try:
 				toonlist = mm.findAll('a')
@@ -389,7 +458,8 @@ def exec_start(t_main, code, packege,startname):
 		#대제목 소제목 다운로드url 주소를 DB에 저장한다.
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			add_c(packege, a,b,c,d)
+			atat = packege
+			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 		try:
 			test = schedulerc.get_job(startname).id
@@ -415,7 +485,7 @@ def exec_start2(t_main, code, packege,startname):
 	subtitle = []
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:
+	with requests.Session() as s:		
 		url2 = 'https://t.me/s/new_toonkor'
 		req = s.get(url2)
 		html = req.text
@@ -484,14 +554,15 @@ def exec_start2(t_main, code, packege,startname):
 					urltitle.append(url3)
 					subtitle.append(title)	
 					maintitle2.append(mainurl)
-					cc -= 1				
+					cc -= 1					
 			except:
 				pass
 		
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle2,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			add_c(packege, a,b,c,d)
+			atat = packege
+			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 		try:
 			test = schedulerc.get_job(startname).id
@@ -562,8 +633,6 @@ def exec_start3(t_main,code,packege,genre,startname):
 						a_href = a_link[1]['href'].split('webtoon/')[1].split('/')[0]
 						main_url = t_main + '/webtoon/' + a_href
 						main_list.append(main_url)
-						#print(a_href)
-
 		else:	
 			allcode = code.split('|')
 			for i in allcode:
@@ -606,12 +675,12 @@ def exec_start3(t_main,code,packege,genre,startname):
 					subtitle.append(aa_tmp) #소제목이다.
 					urltitle.append(a_link2) #URL 주소가 저장된다.
 					cc -= 1
-					#print('{} | {} | {}'.format(data_tmp,aa_tmp,a_link)) #대제목 , 소제목
 				
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			add_c(packege, a,b,c,d)
+			atat = packege
+			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 		try:
 			test = schedulerc.get_job(startname).id
@@ -676,8 +745,6 @@ def exec_start4(code,packege,startname):
 				pageend = soup.find("a",{"class":"next"})		
 				
 				if pageend:
-					#test22 = len(count)
-					#cc = int(test22)
 					for ii in sublist:
 						test = ii.find('a')['href']
 						cc = test.split('no=')[1].split('&')[0].strip()
@@ -687,8 +754,6 @@ def exec_start4(code,packege,startname):
 						urltitle.append(test)
 						#cc -= 1
 				else:
-					#test22 = len(count)
-					#cc = int(test22)
 					for ii in sublist:
 						test = ii.find('a')['href']
 						cc = test.split('no=')[1].split('&')[0].strip()
@@ -702,7 +767,8 @@ def exec_start4(code,packege,startname):
 		#앞에서 크롤링한 정보를 DB에 저장한다.
 		for a,b,c in zip(maintitle,subtitle,urltitle):
 			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			add_c(packege, a,b,c,d)
+			atat = packege
+			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 		try:
 			test = schedulerc.get_job(startname).id
@@ -718,32 +784,27 @@ def exec_start4(code,packege,startname):
 			test2 = schedulerc.get_jobs()
 			for i in test2:
 				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
-		
+				logger.info('%s 가 스케줄러가 있습니다.', aa)	
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	sql = "CREATE TABLE IF NOT EXISTS " + packege + " (toon TEXT, maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)"
+	conn.execute(sql)
+	conn.close()
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect('./webtoon.db',timeout=60)
 	cur = con.cursor()
-	if packege == 'toonkor':
-		sql = "select * from database2 where complte = 'False'"
-	elif packege == 'newtoki':
-		sql = "select * from database3 where complte = 'False'"
-	elif packege == 'naver':
-		sql = "select * from database4 where complte = 'False'"
-	else:
-		sql = "select * from database where complte = 'False'"
+	sql = "select * from " + packege + " where complte = 'False'"
 	cur.execute(sql)
 	row = cur.fetchall()
 	session2 = requests.Session()
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}	
 	if packege == 'copytoon':
-		for i in range(231,500):
+		for i in range(245,500):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
-			result = checkURL(url2)
-			
+			result = checkURL(url2)			
 			text_file_path = os.getcwd() + '/templates/copytoon.html'
 			new_text_content = ''
 			target_word = t_main		
@@ -844,7 +905,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				logger.info('%s', st)
 				soup = bs(html, "html.parser")	
 			except:
-				continue
+				continue			
 			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
 			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
 			if packege == 'toonkor':
@@ -876,12 +937,14 @@ def godown(t_main, compress, cbz, packege , startname):
 				except:
 					continue
 			urls = []
+			
 			for img in taglist:
 				if packege == 'toonkor' or packege == 'newtoki':
 					urls.append(img)
 				else:
 					urls.append(img['src'])
 			jpeg_no = 00
+				
 			timestr = time.strftime("%Y%m%d-%H%M%S-")
 			parse2 = re.sub('[-=.#/?:$}]', '', title)
 			parse = cleanText(parse2)
@@ -893,7 +956,6 @@ def godown(t_main, compress, cbz, packege , startname):
 			
 			dfolder = root + '/' + packege
 			for url in urls:
-				#print(url)
 				filename = str(jpeg_no+1).zfill(3) + ".jpg"
 				if 'https://' in url:
 					url_to_image(subtitle, title, url, filename, dfolder)
@@ -923,12 +985,7 @@ def naver_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
-		#packege = 'naver'
 		code = request.form['code']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
@@ -949,9 +1006,6 @@ def naver_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database4 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		compress = request.form['compress']
@@ -973,10 +1027,6 @@ def newtoki_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		genre = request.form['genre']
@@ -1000,9 +1050,6 @@ def newtoki_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database3 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		genre = request.form['genre']
@@ -1025,10 +1072,6 @@ def copytoon_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		code = request.form['code']
@@ -1051,9 +1094,6 @@ def copytoon_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		compress = request.form['compress']
@@ -1075,10 +1115,6 @@ def toonkor_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		code = request.form['code']
@@ -1101,9 +1137,6 @@ def toonkor_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS database2 (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT)')
-		conn.close()
 		packege = request.form['packege']
 		t_main = request.form['t_main']
 		compress = request.form['compress']
@@ -1134,10 +1167,7 @@ def sch_del():
 		if test == None:
 			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
 		else:
-			#remove_job
 			schedulerc.remove_job(startname)
-			#schedulerc.shutdown()
-			schedulerc.start()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = schedulerc.get_jobs()
 			for i in test2:
