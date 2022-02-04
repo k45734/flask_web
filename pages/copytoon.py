@@ -210,6 +210,18 @@ def second4():
 			aa = i.id
 			tltl.append(aa)
 		return render_template('naver.html', tltl = tltl)
+
+@webtoon.route('dozi')
+def second5():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		tltl = []
+		test2 = schedulerc.get_jobs()
+		for i in test2:
+			aa = i.id
+			tltl.append(aa)
+		return render_template('dozi.html', tltl = tltl)	
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -381,8 +393,6 @@ def exec_start(t_main, code, packege,startname):
 		new_text_content = ''
 		target_word = t_main
 		if result == 9999:
-			print("new url : " + url2)
-			print(text_file_path)
 			with open(text_file_path,'r',encoding='utf-8') as f:
 				lines = f.readlines()
 				for i, l in enumerate(lines):
@@ -488,7 +498,6 @@ def exec_start2(t_main, code, packege,startname):
 		text_file_path = os.getcwd() + '/templates/toonkor.html'
 		new_text_content = ''
 		target_word = t_main
-				
 		with open(text_file_path,'r',encoding='utf-8') as f:
 			lines = f.readlines()
 			for i, l in enumerate(lines):
@@ -582,16 +591,10 @@ def exec_start3(t_main,code,packege,genre,startname):
 		url2 = ("https://newtoki%s.com" % (i))
 		time.sleep(2)
 		result = checkURL(url2)
-		
 		text_file_path = os.getcwd() + '/templates/newtoki.html'
 		new_text_content = ''
 		target_word = t_main
-		#new_word = '사랑'
-		
 		if result == 9999:
-			
-			print("new url : " + url2)
-			print(text_file_path)
 			with open(text_file_path,'r',encoding='utf-8') as f:
 				lines = f.readlines()
 				for i, l in enumerate(lines):
@@ -772,7 +775,66 @@ def exec_start4(code,packege,startname):
 			test2 = schedulerc.get_jobs()
 			for i in test2:
 				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)	
+				logger.info('%s 가 스케줄러가 있습니다.', aa)
+
+#도지코믹스
+def exec_start5(code,packege,startname):
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	for i in range(30,500):
+		str_zoro = str(i).zfill(3)
+		url2 = ("https://dozi%s.com" % (str_zoro))		
+		time.sleep(2)
+		result = checkURL(url2)
+		text_file_path = os.getcwd() + '/templates/dozi.html'
+		new_text_content = ''
+		target_word = t_main
+		if result == 9999:
+			with open(text_file_path,'r',encoding='utf-8') as f:
+				lines = f.readlines()
+				for i, l in enumerate(lines):
+					new_string = l.strip().replace(target_word,url2)
+					if new_string:
+						new_text_content += new_string + '\n'
+					else:
+						new_text_content += '\n'
+			with open(text_file_path,'w',encoding='utf-8') as f:
+				f.write(new_text_content)
+			break
+	with requests.Session() as s:
+		t_main = url2 + '/%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8'		
+		response = s.get(t_main,headers=header)
+		html = response.text
+		soup = bs(html, "html.parser").findAll("div",{"class":"section-item-inner"})
+		for tag in soup:
+			#웹툰 소스
+			toon = tag.find('div',{'class':'toon-company'})
+			try:
+				mytoon = toon.find('img')['title']
+			except:
+				mytoon = '기타'
+				#URL 주소
+			urlfind = tag.find('a') 
+			url = urlfind['href']#메인 URL주소
+			title = urlfind['alt'] #대제목
+			#회차목록과 주소를 가져온다.
+			response1 = s.get(url,headers=header)
+			html = response1.text
+			soup = bs(html, "html.parser")
+			mm = soup.findAll("td",{"name":"view_list"})
+			sublist = len(mm)
+			cc = int(sublist)
+			for ii in mm:
+				test = ii['data-role'] #url subtitle
+				test2 = ii['alt'] #subtitle name
+				atat = mytoon
+				a = title
+				b = cc
+				c = test
+				d = 'False'
+				print('{} {} {}\n{}'.format(atat, a, b, c))
+				add_c(packege, atat, a, b, c, d)
+				cc -= 1
+				
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
 	#데이타베이스 없으면 생성
@@ -865,6 +927,29 @@ def godown(t_main, compress, cbz, packege , startname):
 				break
 		t_main = url2
 		logger.info('%s',t_main)
+	elif packege == 'dozi':	
+		for i in range(30,500):
+			str_zoro = str(i).zfill(3)
+			url2 = ("https://dozi%s.com" % (str_zoro))		
+			time.sleep(2)
+			result = checkURL(url2)
+			text_file_path = os.getcwd() + '/templates/dozi.html'
+			new_text_content = ''
+			target_word = t_main
+			if result == 9999:
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
+				break
+		t_main = url2
+		logger.info('%s',t_main)
 	else:
 		logger.info('%s', t_main)
 		pass
@@ -916,6 +1001,14 @@ def godown(t_main, compress, cbz, packege , startname):
 				try:
 					obj = soup.find("div",{"class":"wt_viewer"})
 					taglist = obj.findAll("img")
+				except:
+					continue
+			elif packege == 'dozi':
+				try:
+					tt = re.search(r'var tnimg = (.*?);', html, re.S) #툰코와 비슷함 이부분만 다름
+					json_string = tt.group(1)
+					obj = str(base64.b64decode(json_string), encoding='utf-8')
+					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
 					continue
 			else:
@@ -1162,4 +1255,48 @@ def sch_del():
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
+		return redirect(url_for('webtoon.index'))
+		
+#추가
+@webtoon.route('dozi_list', methods=['POST'])
+def dozi_list():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		packege = request.form['packege']
+		t_main = request.form['t_main']
+		code = request.form['code']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		try:
+			schedulerc.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,startname] )
+			test = schedulerc.get_job(startname).id
+			logger.info('%s 스케줄러에 등록하였습니다.', test)
+		except ConflictingIdError:
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname).id
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
+		return redirect(url_for('webtoon.index'))	
+		
+@webtoon.route('dozi_down', methods=['POST'])
+def dozi_down():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		packege = request.form['packege']
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		try:
+			schedulerc.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
+			test = schedulerc.get_job(startname).id
+			logger.info('%s 스케줄러에 등록하였습니다.', test)
+		except ConflictingIdError:
+			test = schedulerc.get_job(startname).id
+			test2 = schedulerc.modify_job(startname).id
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('webtoon.index'))
