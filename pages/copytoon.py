@@ -105,6 +105,7 @@ try:
 	row = cur.fetchone()
 	if row[0] == 0:
 		conn.execute("ALTER TABLE copytoon ADD COLUMN toon TEXT")
+		conn.execute("UPDATE copytoon SET toon = 'copytoon'")
 	else:
 		print('컬럼이 있습니다.')
 	conn.close()
@@ -117,6 +118,7 @@ try:
 	row = cur.fetchone()
 	if row[0] == 0:
 		conn.execute("ALTER TABLE toonkor ADD COLUMN toon TEXT")
+		conn.execute("UPDATE toonkor SET toon = 'toonkor'")
 	else:
 		print('컬럼이 있습니다.')
 	conn.close()
@@ -129,6 +131,7 @@ try:
 	row = cur.fetchone()
 	if row[0] == 0:
 		conn.execute("ALTER TABLE newtoki ADD COLUMN toon TEXT")
+		conn.execute("UPDATE newtoki SET toon = 'newtoki'")
 	else:
 		print('컬럼이 있습니다.')
 	conn.close()
@@ -141,6 +144,7 @@ try:
 	row = cur.fetchone()
 	if row[0] == 0:
 		conn.execute("ALTER TABLE naver ADD COLUMN toon TEXT")
+		conn.execute("UPDATE naver SET toon = 'naver'")
 	else:
 		print('컬럼이 있습니다.')
 	conn.close()
