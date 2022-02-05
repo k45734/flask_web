@@ -107,6 +107,7 @@ try:
 		conn.execute("ALTER TABLE copytoon ADD COLUMN toon TEXT")
 		conn.execute("UPDATE copytoon SET toon = 'copytoon'")
 	else:
+		conn.execute("UPDATE copytoon SET toon = 'copytoon'")
 		print('컬럼이 있습니다.')
 	conn.close()
 
@@ -120,6 +121,7 @@ try:
 		conn.execute("ALTER TABLE toonkor ADD COLUMN toon TEXT")
 		conn.execute("UPDATE toonkor SET toon = 'toonkor'")
 	else:
+		conn.execute("UPDATE toonkor SET toon = 'toonkor'")
 		print('컬럼이 있습니다.')
 	conn.close()
 
@@ -133,6 +135,7 @@ try:
 		conn.execute("ALTER TABLE newtoki ADD COLUMN toon TEXT")
 		conn.execute("UPDATE newtoki SET toon = 'newtoki'")
 	else:
+		conn.execute("UPDATE newtoki SET toon = 'newtoki'")
 		print('컬럼이 있습니다.')
 	conn.close()
 
@@ -146,6 +149,7 @@ try:
 		conn.execute("ALTER TABLE naver ADD COLUMN toon TEXT")
 		conn.execute("UPDATE naver SET toon = 'naver'")
 	else:
+		conn.execute("UPDATE naver SET toon = 'naver'")
 		print('컬럼이 있습니다.')
 	conn.close()
 except:
