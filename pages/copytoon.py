@@ -1011,7 +1011,7 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
-					break
+					continue
 			elif packege == 'newtoki':
 				try:
 					time.sleep(random.uniform(30,60))
@@ -1019,13 +1019,13 @@ def godown(t_main, compress, cbz, packege , startname):
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				except:
-					break
+					continue
 			elif packege == 'naver':
 				try:
 					obj = soup.find("div",{"class":"wt_viewer"})
 					taglist = obj.findAll("img")
 				except:
-					break
+					continue
 			elif packege == 'dozi':
 				try:
 					tt = re.search(r'var tnimg = (.*?);', html, re.S) #툰코와 비슷함 이부분만 다름
@@ -1033,13 +1033,13 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
-					break
+					continue
 			else:
 				try:
 					obj = soup.find("div",{"id":"bo_v_con"})
 					taglist = obj.findAll("img")
 				except:
-					break
+					continue
 			urls = []
 			
 			for img in taglist:
