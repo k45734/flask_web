@@ -175,12 +175,10 @@ def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		packege = request.form['packege']
-		#DB 목록을 받아와 다운로드를 진행한다.
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from "+ packege)
+		cur.execute("select * from copytoon")
 		rows = cur.fetchall()
 		return render_template('copytoon.html', rows = rows)
 
@@ -189,48 +187,48 @@ def second2():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		return render_template('toonkor.html', tltl = tltl) 
+		con = sqlite3.connect("./webtoon.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from toonkor")
+		rows = cur.fetchall()
+		return render_template('toonkor.html', rows = rows) 
 
 @webtoon.route('newtoki')
 def second3():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		return render_template('newtoki.html', tltl = tltl)
+		con = sqlite3.connect("./webtoon.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from newtoki")
+		rows = cur.fetchall()
+		return render_template('newtoki.html', rows = rows)
 
 @webtoon.route('naver')
 def second4():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		return render_template('naver.html', tltl = tltl)
+		con = sqlite3.connect("./webtoon.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from naver")
+		rows = cur.fetchall()
+		return render_template('naver.html', rows = rows)
 
 @webtoon.route('dozi')
 def second5():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		return render_template('dozi.html', tltl = tltl)	
+		con = sqlite3.connect("./webtoon.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from dozi")
+		rows = cur.fetchall()
+		return render_template('dozi.html', rows = rows)	
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거

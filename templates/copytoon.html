@@ -51,7 +51,6 @@
 <input type="submit" value="초기화" onclick="javascript: form.action='db_reset';">
 <input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
 </th>
-	<center><h4>재고현황</p>
 	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
 		<thead>		
   <tr>
@@ -68,6 +67,7 @@
     <td align="center" class="tg-0lax">{{ row["urltitle"] }}</td>
     <td align="center" class="tg-0lax">{{ row["complte"] }}</td>
     <td align="center" class="tg-0lax">{{ row["toon"] }}</td>
+	{% endfor %}
 </thead>
 </center>
 </tr>
