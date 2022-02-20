@@ -22,10 +22,10 @@ except ImportError:
 	from bs4 import BeautifulSoup as bs
 
 try:
-	import telepot
+	import telegram
 except ImportError:
-	os.system('pip install telepot')
-	import telepot
+	os.system('pip install python-telegram-bot')
+	import telegram
 try: #python3
 	from urllib.request import urlopen
 except: #python2
