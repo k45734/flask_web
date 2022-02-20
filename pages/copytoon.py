@@ -175,13 +175,14 @@ def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		tltl = []
-		test2 = schedulerc.get_jobs()
-		for i in test2:
-			aa = i.id
-			tltl.append(aa)
-		#t_main = request.form['t_main']
-		return render_template('copytoon.html', tltl = tltl)
+		packege = request.form['packege']
+		#DB 목록을 받아와 다운로드를 진행한다.
+		con = sqlite3.connect("./webtoon.db")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from "+ packege)
+		rows = cur.fetchall()
+		return render_template('copytoon.html', rows = rows)
 
 @webtoon.route('toonkor')
 def second2():
