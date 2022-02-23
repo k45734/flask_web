@@ -16,12 +16,6 @@
 <table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
 <center>
 <form action="start" method="POST">
-<tr>
-<th align="center" class="tg-baqh">현재 스케줄러에 있는 목록보기</td>
-</tr>
-<tr>
-<td align="center" class="tg-baqh">{% for row in tltl %} {{row}} <br> {% endfor %}</td>
-</tr>
 <thead>
   <tr>
     <th align="center" class="tg-baqh">프로그램명</td>
@@ -38,7 +32,7 @@
   </tr>
   <tr>
     <th align="center" class="tg-baqh">반복(기능없음)</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPSREPEAT" placeholder="FLASKAPPSREPEAT" style="width:100%; border: 0;" ></td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value="1" name="FLASKAPPSREPEAT" placeholder="FLASKAPPSREPEAT" style="width:100%; border: 0;" ></td>
   </tr>
   <tr>
     <th align="center" class="tg-baqh" rowspan="4">텔레그램</th>
