@@ -364,6 +364,24 @@ def add_d(packege, subtitle, title):
 	finally:	
 		con.close()	
 		
+def add_pass(packege, subtitle, title):
+	try:
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
+		conn.execute(sql)
+		conn.close()
+		time.sleep(random.uniform(2,10)) 
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect('./webtoon.db')
+		cur = con.cursor()
+		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
+		cur.execute(sql,('PASS',subtitle, title))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()			
 def checkURL(url2):
 	user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 	headers={'User-Agent':user_agent,} 
@@ -1000,6 +1018,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				logger.info('%s 의 상태는 %s', packege, st)
 				soup = bs(html, "html.parser")	
 			except:
+				add_pass(packege, subtitle, title)
 				continue			
 			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
 			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
@@ -1010,6 +1029,7 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
+					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'newtoki':
 				try:
@@ -1018,12 +1038,14 @@ def godown(t_main, compress, cbz, packege , startname):
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				except:
+					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'naver':
 				try:
 					obj = soup.find("div",{"class":"wt_viewer"})
 					taglist = obj.findAll("img")
 				except:
+					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'dozi':
 				try:
@@ -1032,12 +1054,14 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
+					add_pass(packege, subtitle, title)
 					continue
 			else:
 				try:
 					obj = soup.find("div",{"id":"bo_v_con"})
 					taglist = obj.findAll("img")
 				except:
+					add_pass(packege, subtitle, title)
 					continue
 			urls = []
 			
