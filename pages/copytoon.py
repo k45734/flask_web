@@ -1016,49 +1016,34 @@ def godown(t_main, compress, cbz, packege , startname):
 				html = response1.text
 				st = response1.status_code
 				logger.info('%s 의 상태는 %s', packege, st)
-				soup = bs(html, "html.parser")	
-			except:
-				add_pass(packege, subtitle, title)
-				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
-				continue			
-			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
-			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
-			if packege == 'toonkor':
-				try:
+				soup = bs(html, "html.parser")
+				print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
+				logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
+				if packege == 'toonkor':
 					tt = re.search(r'var toon_img = (.*?);', html, re.S)
 					json_string = tt.group(1)
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
-				except:
-					continue
-			elif packege == 'newtoki':
-				try:
+				elif packege == 'newtoki':
 					time.sleep(random.uniform(30,60))
 					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
-				except:
-					continue
-			elif packege == 'naver':
-				try:
+				elif packege == 'naver':
 					obj = soup.find("div",{"class":"wt_viewer"})
 					taglist = obj.findAll("img")
-				except:
-					continue
-			elif packege == 'dozi':
-				try:
+				elif packege == 'dozi':
 					tt = re.search(r'var tnimg = (.*?);', html, re.S) #툰코와 비슷함 이부분만 다름
 					json_string = tt.group(1)
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
-				except:
-					continue
-			else:
-				try:
+				else:
 					obj = soup.find("div",{"id":"bo_v_con"})
 					taglist = obj.findAll("img")
-				except:
-					continue
+			except:
+				add_pass(packege, subtitle, title)
+				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
+				continue
 			urls = []
 			
 			for img in taglist:
