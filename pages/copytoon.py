@@ -1019,6 +1019,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				soup = bs(html, "html.parser")	
 			except:
 				add_pass(packege, subtitle, title)
+				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
 				continue			
 			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
 			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
@@ -1029,7 +1030,6 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
-					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'newtoki':
 				try:
@@ -1038,14 +1038,12 @@ def godown(t_main, compress, cbz, packege , startname):
 					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
 					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
 				except:
-					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'naver':
 				try:
 					obj = soup.find("div",{"class":"wt_viewer"})
 					taglist = obj.findAll("img")
 				except:
-					add_pass(packege, subtitle, title)
 					continue
 			elif packege == 'dozi':
 				try:
@@ -1054,14 +1052,12 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = str(base64.b64decode(json_string), encoding='utf-8')
 					taglist = re.compile(r'src="(.*?)"').findall(obj)
 				except:
-					add_pass(packege, subtitle, title)
 					continue
 			else:
 				try:
 					obj = soup.find("div",{"id":"bo_v_con"})
 					taglist = obj.findAll("img")
 				except:
-					add_pass(packege, subtitle, title)
 					continue
 			urls = []
 			
