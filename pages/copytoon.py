@@ -1041,8 +1041,6 @@ def godown(t_main, compress, cbz, packege , startname):
 					obj = soup.find("div",{"id":"bo_v_con"})
 					taglist = obj.findAll("img")
 			except:
-				add_pass(packege, subtitle, title)
-				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
 				continue
 			urls = []
 			
@@ -1082,7 +1080,8 @@ def godown(t_main, compress, cbz, packege , startname):
 				else:
 					pass
 			except:
-				print("종료")
+				add_pass(packege, subtitle, title)
+				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
 				logger.info('종료')
 			else:
 				add_d(packege, subtitle, title)
