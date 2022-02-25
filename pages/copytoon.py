@@ -920,7 +920,7 @@ def godown(t_main, compress, cbz, packege , startname):
 			t_main = url2
 			logger.info('%s',t_main)
 		elif packege == 'naver':
-			wwwkt = 'https://comic.naver.com' + url
+			t_main = 'https://comic.naver.com'
 		elif packege == 'dozi':	
 			for i in range(30,500):
 				str_zoro = str(i).zfill(3)
