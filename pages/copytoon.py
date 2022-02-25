@@ -178,7 +178,7 @@ def second():
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from copytoon")
+		cur.execute("select * from copytoon where complte = 'False'")
 		rows = cur.fetchall()
 		return render_template('copytoon.html', rows = rows)
 
@@ -190,7 +190,7 @@ def second2():
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from toonkor")
+		cur.execute("select * from toonkor where complte = 'False'")
 		rows = cur.fetchall()
 		return render_template('toonkor.html', rows = rows) 
 
@@ -202,7 +202,7 @@ def second3():
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from newtoki")
+		cur.execute("select * from newtoki where complte = 'False'")
 		rows = cur.fetchall()
 		return render_template('newtoki.html', rows = rows)
 
@@ -214,7 +214,7 @@ def second4():
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from naver")
+		cur.execute("select * from naver where complte = 'False'")
 		rows = cur.fetchall()
 		return render_template('naver.html', rows = rows)
 
@@ -226,7 +226,7 @@ def second5():
 		con = sqlite3.connect("./webtoon.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from dozi")
+		cur.execute("select * from dozi where complte = 'False'")
 		rows = cur.fetchall()
 		return render_template('dozi.html', rows = rows)	
 		
