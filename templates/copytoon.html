@@ -11,7 +11,7 @@
 <thead>
 <tr>
 <th align="center" class="tg-baqh">카피툰주소</td>
-<td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://copytoon244.com" placeholder="https://copytoon244.com" style="width:100%; border: 0;" ><input type="hidden" id="packege" name="packege" value="copytoon"></td>
+<td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://copytoon248.com" placeholder="https://copytoon248.com" style="width:100%; border: 0;" ><input type="hidden" id="packege" name="packege" value="copytoon"></td>
 </tr>
 <tr>
 <th align="center" class="tg-baqh">만화목록</td>
@@ -51,23 +51,17 @@
 <input type="submit" value="초기화" onclick="javascript: form.action='db_reset';">
 <input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
 </th>
-	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
-		<thead>		
-  <tr>
-	<th align="center" class="tg-0lax">maintitle</th>
-    <th align="center" class="tg-0lax">subtitle</th>
-    <th align="center" class="tg-0lax">urltitle</th>
-    <th align="center" class="tg-0lax">complte</th>
-    <th align="center" class="tg-0lax">toon</th>
-  </tr>
-  {% for row in rows %}
-	<tr>
-	<td align="center" class="tg-0lax">{{ row["maintitle"] }}</td>
-	<td align="center" class="tg-0lax">{{ row["subtitle"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["urltitle"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["complte"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["toon"] }}</td>
-	{% endfor %}
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<thead>
+<tr>
+<th align="center" class="tg-0lax">다운실패</th>
+<th align="center" class="tg-0lax">다운패스</th>
+<th align="center" class="tg-0lax">다운완료</th>
+</tr>
+<tr>
+<td align="center" class="tg-0lax">{{ rows[0] }}</td>
+<td align="center" class="tg-0lax">{{ rows[1] }}</td>
+<td align="center" class="tg-0lax">{{ rows[2] }}</td>
 </thead>
 </center>
 </tr>

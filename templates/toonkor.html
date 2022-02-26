@@ -9,40 +9,40 @@
 <form method="POST">
 
 <thead>
-  <tr>
-    <th align="center" class="tg-baqh">툰코주소</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://tkor.coffee" placeholder="https://tkor.coffee" style="width:100%; border: 0;" > <input type="hidden" id="packege" name="packege" value="toonkor"></td>
-  </tr>
-   <tr>
-    <th align="center" class="tg-baqh">만화목록</td>
-    <td align="center" class="tg-baqh" colspan="2">
-	<input type="text" name="code" value="all" placeholder="전체다운로드시에는 all 입력하며 구분자는 |" style="width:100%; border: 0;" >
-	<p align="center"><font size="2px">전체다운로드시에는 all 입력</font></p>
-	<p align="center"><font size="2px">코드입력시에는 예) 나-혼자만-레벨업<font color='red'>|</font>귀환자의-마법은-특별해야-합니다 입력</font></p>
-	</td>
-  </tr>
- <tr>
-    <th align="center" class="tg-baqh">압축여부</td>
-    <td align="center" class="tg-baqh" colspan="2">
-  
-  <select name="compress">
-    <option value="0">사용</option>
-    <option value="1">안함</option></td></tr>
- <tr>
-    <th align="center" class="tg-baqh">CBZ사용압축여부</td>
-    <td align="center" class="tg-baqh" colspan="2">
-  
-  <select name="cbz">
-    <option value="0">사용</option>
-    <option value="1">안함</option></td></tr>
- <tr>
-    <th align="center" class="tg-baqh">스케줄이름</td>
-    <td align="center" class="tg-0lax"><input type="text" name="startname" value="toonkor" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <th align="center" class="tg-baqh">실행주기</td>
-    <td align="center" class="tg-0lax"><input type="text" name="start_time" value="*/1 * * * *" style="width:100%; border: 0;" ></td>
-  </tr>
+<tr>
+<th align="center" class="tg-baqh">툰코주소</td>
+<td align="center" class="tg-baqh" colspan="2"><input type="text" name="t_main" value="https://tkor.trade/" placeholder="https://tkor.trade/" style="width:100%; border: 0;" > <input type="hidden" id="packege" name="packege" value="toonkor"></td>
+</tr>
+<tr>
+<th align="center" class="tg-baqh">만화목록</td>
+<td align="center" class="tg-baqh" colspan="2">
+<input type="text" name="code" value="all" placeholder="전체다운로드시에는 all 입력하며 구분자는 |" style="width:100%; border: 0;" >
+<p align="center"><font size="2px">전체다운로드시에는 all 입력</font></p>
+<p align="center"><font size="2px">코드입력시에는 예) 나-혼자만-레벨업<font color='red'>|</font>귀환자의-마법은-특별해야-합니다 입력</font></p>
+</td>
+</tr>
+<tr>
+<th align="center" class="tg-baqh">압축여부</td>
+<td align="center" class="tg-baqh" colspan="2">
+
+<select name="compress">
+<option value="0">사용</option>
+<option value="1">안함</option></td></tr>
+<tr>
+<th align="center" class="tg-baqh">CBZ사용압축여부</td>
+<td align="center" class="tg-baqh" colspan="2">
+
+<select name="cbz">
+<option value="0">사용</option>
+<option value="1">안함</option></td></tr>
+<tr>
+<th align="center" class="tg-baqh">스케줄이름</td>
+<td align="center" class="tg-0lax"><input type="text" name="startname" value="toonkor" style="width:100%; border: 0;" ></td>
+</tr>
+<tr>
+<th align="center" class="tg-baqh">실행주기</td>
+<td align="center" class="tg-0lax"><input type="text" name="start_time" value="*/1 * * * *" style="width:100%; border: 0;" ></td>
+</tr>
 <tbody>
 <tr>
 <th align="center" colspan="8">
@@ -53,27 +53,21 @@
 <input type="submit" value="초기화" onclick="javascript: form.action='db_reset';">
 <input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
 </th>
-	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
-		<thead>		
-  <tr>
-	<th align="center" class="tg-0lax">maintitle</th>
-    <th align="center" class="tg-0lax">subtitle</th>
-    <th align="center" class="tg-0lax">urltitle</th>
-    <th align="center" class="tg-0lax">complte</th>
-    <th align="center" class="tg-0lax">toon</th>
-  </tr>
-  {% for row in rows %}
-	<tr>
-	<td align="center" class="tg-0lax">{{ row["maintitle"] }}</td>
-	<td align="center" class="tg-0lax">{{ row["subtitle"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["urltitle"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["complte"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["toon"] }}</td>
-	{% endfor %}
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<thead>
+<tr>
+<th align="center" class="tg-0lax">다운실패</th>
+<th align="center" class="tg-0lax">다운패스</th>
+<th align="center" class="tg-0lax">다운완료</th>
+</tr>
+<tr>
+<td align="center" class="tg-0lax">{{ rows[0] }}</td>
+<td align="center" class="tg-0lax">{{ rows[1] }}</td>
+<td align="center" class="tg-0lax">{{ rows[2] }}</td>
 </thead>
 </center>
 </tr>
 </form>
 </tbody>
-</table> 
+</table>
 {% endblock %}
