@@ -474,8 +474,8 @@ def db_repass():
 			cur.execute(sql, ('PASS',))
 			rows = cur.fetchall()
 			if row != None:
-				sql = "UPDATE " + packege + " SET complte = ?"
-				cur.execute(sql,('False',))
+				sql = "UPDATE " + packege + " SET complte = ? WHERE complte = ?"
+				cur.execute(sql,('False','PASS'))
 				con.commit()
 			else:
 				pass
