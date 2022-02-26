@@ -458,8 +458,33 @@ def db_redown():
 			con.rollback()
 		finally:		
 			con.close()
-
 		return redirect(url_for('main.index'))
+
+@webtoon.route('db_repass', methods=['POST'])
+def db_repass():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		packege = request.form['packege']
+		try:
+			time.sleep(random.uniform(2,10)) 
+			con = sqlite3.connect('./webtoon.db',timeout=60)
+			cur = con.cursor()
+			sql = "select * from " + packege + " where complte = ?"
+			cur.execute(sql, ('PASS',))
+			rows = cur.fetchall()
+			if row != None:
+				sql = "UPDATE " + packege + " SET complte = ?"
+				cur.execute(sql,('False',))
+				con.commit()
+			else:
+				pass
+		except:
+			con.rollback()
+		finally:		
+			con.close()
+		return redirect(url_for('main.index'))
+		
 def add_c(packege, a, b, c, d, atat):
 	print(packege, a, b , c ,d, atat)
 	try:
@@ -1040,7 +1065,6 @@ def new_url(packege, t_main):
 					f.write(new_text_content)
 				break
 		newurl = url2
-		logger.info('%s',newurl)
 	elif packege == 'naver':
 		newurl = 'https://comic.naver.com'
 	elif packege == 'dozi':	
@@ -1065,7 +1089,6 @@ def new_url(packege, t_main):
 					f.write(new_text_content)
 				break
 		newurl = url2
-		logger.info('%s',newurl)
 	elif packege == 'newtoki':	
 		for i in range(116,500):
 			url2 = ("https://newtoki%s.com" % (i))
@@ -1089,7 +1112,6 @@ def new_url(packege, t_main):
 					f.write(new_text_content)
 				break
 		newurl = url2
-		logger.info('%s',newurl)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
 			url2 = 'https://t.me/s/new_toonkor'
@@ -1101,8 +1123,7 @@ def new_url(packege, t_main):
 				tta = ttt[n-1]
 			else:
 				tta = ttt[n-2]
-			final_str = tta
-			logger.info(final_str)
+			final_str = tta[:-1]
 			text_file_path = os.getcwd() + '/templates/toonkor.html'
 			new_text_content = ''
 			target_word = t_main
@@ -1117,8 +1138,7 @@ def new_url(packege, t_main):
 						new_text_content += '\n'
 			with open(text_file_path,'w',encoding='utf-8') as f:
 				f.write(new_text_content)	
-			newurl = final_str
-		logger.info('%s',newurl)	
+			newurl = final_str	
 	return newurl
 	
 #공통 다운로드	
@@ -1144,51 +1164,42 @@ def godown(t_main, compress, cbz, packege , startname):
 		url = i[2]
 		complte = i[3]
 		newurl = new_url(packege, t_main)
+		wwwkt = newurl + url
+		logger.info('%s', wwwkt)
 		try:
-			test = url.replace(newurl,'')
-			wwwkt = newurl + test
-		except:
-			wwwkt = newurl + url
-		if complte == 'True':
-			continue
-		else:
-			logger.info('%s', wwwkt)
-			try:
-				response1 = session2.get(wwwkt,headers=header)
-				html = response1.text
-				st = response1.status_code
-				logger.info('%s 의 상태는 %s', packege, st)
-				soup = bs(html, "html.parser")
-				print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
-				logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
-				if packege == 'toonkor':
-					tt = re.search(r'var toon_img = (.*?);', html, re.S)
-					json_string = tt.group(1)
-					obj = str(base64.b64decode(json_string), encoding='utf-8')
-					taglist = re.compile(r'src="(.*?)"').findall(obj)
-				elif packege == 'newtoki':
-					time.sleep(random.uniform(30,60))
-					tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
-					html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
-					taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
-				elif packege == 'naver':
-					obj = soup.find("div",{"class":"wt_viewer"})
-					taglist = obj.findAll("img")
-				elif packege == 'dozi':
-					tt = re.search(r'var tnimg = (.*?);', html, re.S) #툰코와 비슷함 이부분만 다름
-					json_string = tt.group(1)
-					obj = str(base64.b64decode(json_string), encoding='utf-8')
-					taglist = re.compile(r'src="(.*?)"').findall(obj)
-				elif packege == 'copytoon':
-					obj = soup.find("div",{"id":"bo_v_con"})
-					taglist = obj.findAll("img")
-				else:
-					logger.info('%s',t_main)
-					continue
-			except:
-				add_pass(packege, subtitle, title)
-				logger.info('%s에서 %s 의 %s 을 링크가 없거나 권한이 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
+			response1 = session2.get(wwwkt,headers=header)
+			html = response1.text
+			st = response1.status_code
+			logger.info('%s 의 상태는 %s', packege, st)
+			soup = bs(html, "html.parser")
+			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
+			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
+			if packege == 'toonkor':
+				tt = re.search(r'var toon_img = (.*?);', html, re.S)
+				json_string = tt.group(1)
+				obj = str(base64.b64decode(json_string), encoding='utf-8')
+				taglist = re.compile(r'src="(.*?)"').findall(obj)
+				logger.info('%s', taglist)
+			elif packege == 'newtoki':
+				time.sleep(random.uniform(30,60))
+				tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
+				html = ''.join([chr(int(x, 16)) for x in tmp.rstrip('.').split('.')])
+				taglist = re.compile(r'src="/img/loading-image.gif"\sdata\-\w{11}="(.*?)"').findall(html)
+			elif packege == 'naver':
+				obj = soup.find("div",{"class":"wt_viewer"})
+				taglist = obj.findAll("img")
+			elif packege == 'dozi':
+				tt = re.search(r'var tnimg = (.*?);', html, re.S) #툰코와 비슷함 이부분만 다름
+				json_string = tt.group(1)
+				obj = str(base64.b64decode(json_string), encoding='utf-8')
+				taglist = re.compile(r'src="(.*?)"').findall(obj)
+			elif packege == 'copytoon':
+				obj = soup.find("div",{"id":"bo_v_con"})
+				taglist = obj.findAll("img")
+			else:
+				logger.info('%s',t_main)
 				continue
+
 			urls = []
 			
 			for img in taglist:
@@ -1218,17 +1229,17 @@ def godown(t_main, compress, cbz, packege , startname):
 					url_to_image(subtitle, title, domain, filename, dfolder)
 				
 				jpeg_no += 1
-			try:
+
 				if compress == '0':
 					manazip(subtitle, title, filename, dfolder, cbz)
 				else:
 					pass
-			except:
-				add_pass(packege, subtitle, title)
-				logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
-			else:
-				add_d(packege, subtitle, title)
-				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
+		except:
+			add_pass(packege, subtitle, title)
+			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
+		else:
+			add_d(packege, subtitle, title)
+			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
 		
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
