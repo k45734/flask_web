@@ -470,15 +470,9 @@ def db_repass():
 			time.sleep(random.uniform(2,10)) 
 			con = sqlite3.connect('./webtoon.db',timeout=60)
 			cur = con.cursor()
-			sql = "select * from " + packege + " where complte = ?"
-			cur.execute(sql, ('PASS',))
-			rows = cur.fetchall()
-			if row != None:
-				sql = "UPDATE " + packege + " SET complte = ? WHERE complte = ?"
-				cur.execute(sql,('False','PASS'))
-				con.commit()
-			else:
-				pass
+			sql = "UPDATE " + packege + " SET complte = ? WHERE complte = ?"
+			cur.execute(sql,('False','PASS'))
+			con.commit()
 		except:
 			con.rollback()
 		finally:		
