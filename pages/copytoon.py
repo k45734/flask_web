@@ -1046,6 +1046,8 @@ def godown(t_main, compress, cbz, packege , startname):
 					logger.info('%s',t_main)
 					continue
 			except:
+				add_pass(packege, subtitle, title)
+				logger.info('%s에서 %s 의 %s 을 링크가 없거나 권한이 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
 				continue
 			urls = []
 			
@@ -1083,8 +1085,7 @@ def godown(t_main, compress, cbz, packege , startname):
 					pass
 			except:
 				add_pass(packege, subtitle, title)
-				logger.info('%s에서 %s 의 %s 을 없습니다.', packege,title, subtitle)
-				logger.info('종료')
+				logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
 			else:
 				add_d(packege, subtitle, title)
 				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
