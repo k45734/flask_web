@@ -997,8 +997,10 @@ def godown(t_main, compress, cbz, packege , startname):
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}	
 	for i in row:
-		title = i[0]
-		subtitle = i[1]
+		title_old = i[0]
+		title = "".join(title_old.split())
+		title_old = i[1]
+		subtitle = "".join(title_old.split())
 		url = i[2]
 		complte = i[3]
 		newurl = new_url(packege, t_main)
@@ -1053,10 +1055,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				else:
 					urls.append(img['src'])
 			jpeg_no = 00
-				
-			timestr = time.strftime("%Y%m%d-%H%M%S-")
-			parse2 = re.sub('[-=.#/?:$}]', '', title)
-			parse = cleanText(parse2)
+			
 			if platform.system() == 'Windows':
 				at = os.path.splitdrive(os.getcwd())
 				root = at[0] + '/data'
