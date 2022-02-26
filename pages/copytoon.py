@@ -403,7 +403,7 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
 			
-def manazip(subtitle, title ,filename , dfolder, cbz):
+def manazip(subtitle, title, filename, dfolder, cbz, packege):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	parse = cleanText(title2)
@@ -420,7 +420,7 @@ def manazip(subtitle, title ,filename , dfolder, cbz):
 		fantasy_zip.close()
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
 	print('{}  압축 완료'.format(parse))				
-	logger.info('%s   압축 완료', parse)
+	logger.info('%s / %s / %s  압축 완료', packege, parse, parse2)
 	
 @webtoon.route('db_reset', methods=['POST'])
 def db_reset():
@@ -1224,10 +1224,10 @@ def godown(t_main, compress, cbz, packege , startname):
 				
 				jpeg_no += 1
 
-				if compress == '0':
-					manazip(subtitle, title, filename, dfolder, cbz)
-				else:
-					pass
+			if compress == '0':
+				manazip(subtitle, title, filename, dfolder, cbz, packege)
+			else:
+				pass
 		except:
 			add_pass(packege, subtitle, title)
 			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
