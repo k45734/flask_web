@@ -183,30 +183,34 @@ def second():
 			cur.execute("select * from copytoon where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
-			count2 = 1
-			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
 			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
 			cur.execute("select * from copytoon where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
 				i2 = count2
 				count2 += 1
 			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		try:
+			count3 = 1
 			cur.execute("select * from copytoon where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
 				i3 = count3
 				count3 += 1
 			rows.append(i3)
-		except:
-			i = '0'
-			i2 = '0'
+		except:	
 			i3 = '0'
-			rows.append(i)
-			rows.append(i2)
 			rows.append(i3)
 		return render_template('copytoon.html', rows = rows)
 
@@ -223,31 +227,36 @@ def second2():
 			cur.execute("select * from toonkor where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
-			count2 = 1
-			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
 			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
 			cur.execute("select * from toonkor where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
 				i2 = count2
 				count2 += 1
 			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		try:
+			count3 = 1
 			cur.execute("select * from toonkor where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
 				i3 = count3
 				count3 += 1
 			rows.append(i3)
-		except:
-			i = '0'
-			i2 = '0'
+		except:	
 			i3 = '0'
-			rows.append(i)
-			rows.append(i2)
 			rows.append(i3)
+
 		return render_template('toonkor.html', rows = rows) 
 
 @webtoon.route('newtoki')
@@ -263,31 +272,36 @@ def second3():
 			cur.execute("select * from newtoki where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
-			count2 = 1
-			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
 			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
 			cur.execute("select * from newtoki where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
 				i2 = count2
 				count2 += 1
 			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		try:
+			count3 = 1
 			cur.execute("select * from newtoki where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
 				i3 = count3
 				count3 += 1
 			rows.append(i3)
-		except:
-			i = '0'
-			i2 = '0'
+		except:	
 			i3 = '0'
-			rows.append(i)
-			rows.append(i2)
 			rows.append(i3)
+
 		return render_template('newtoki.html', rows = rows)
 
 @webtoon.route('naver')
@@ -303,31 +317,36 @@ def second4():
 			cur.execute("select * from naver where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
-			count2 = 1
-			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
 			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
 			cur.execute("select * from naver where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
 				i2 = count2
 				count2 += 1
 			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		try:
+			count3 = 1
 			cur.execute("select * from naver where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
 				i3 = count3
 				count3 += 1
 			rows.append(i3)
-		except:
-			i = '0'
-			i2 = '0'
+		except:	
 			i3 = '0'
-			rows.append(i)
-			rows.append(i2)
 			rows.append(i3)
+
 		return render_template('naver.html', rows = rows)
 
 @webtoon.route('dozi')
@@ -343,31 +362,36 @@ def second5():
 			cur.execute("select * from dozi where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
-			count2 = 1
-			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
 			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
 			cur.execute("select * from dozi where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
 				i2 = count2
 				count2 += 1
 			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		try:
+			count3 = 1
 			cur.execute("select * from dozi where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
 				i3 = count3
 				count3 += 1
 			rows.append(i3)
-		except:
-			i = '0'
-			i2 = '0'
+		except:	
 			i3 = '0'
-			rows.append(i)
-			rows.append(i2)
 			rows.append(i3)
+
 		return render_template('dozi.html', rows = rows)	
 		
 def cleanText(readData):
