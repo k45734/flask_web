@@ -876,7 +876,7 @@ def exec_start5(t_main, packege,startname):
 			logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 #새주소 받아오기
-def newurl(packege, t_main):
+def new_url(packege, t_main):
 	if packege == 'copytoon':
 		for i in range(245,500):
 			url2 = ("https://copytoon%s.com" % (i))
@@ -899,10 +899,10 @@ def newurl(packege, t_main):
 				with open(text_file_path,'w',encoding='utf-8') as f:
 					f.write(new_text_content)
 				break
-		t_main = url2
-		logger.info('%s',t_main)
+		newurl = url2
+		logger.info('%s',newurl)
 	elif packege == 'naver':
-		t_main = 'https://comic.naver.com'
+		newurl = 'https://comic.naver.com'
 	elif packege == 'dozi':	
 		for i in range(30,500):
 			str_zoro = str(i).zfill(3)
@@ -924,8 +924,8 @@ def newurl(packege, t_main):
 				with open(text_file_path,'w',encoding='utf-8') as f:
 					f.write(new_text_content)
 				break
-		t_main = url2
-		logger.info('%s',t_main)
+		newurl = url2
+		logger.info('%s',newurl)
 	elif packege == 'newtoki':	
 		for i in range(116,500):
 			url2 = ("https://newtoki%s.com" % (i))
@@ -948,8 +948,8 @@ def newurl(packege, t_main):
 				with open(text_file_path,'w',encoding='utf-8') as f:
 					f.write(new_text_content)
 				break
-		t_main = url2
-		logger.info('%s',t_main)
+		newurl = url2
+		logger.info('%s',newurl)
 	elif packege == 'toonkor':
 		with requests.Session() as s:
 			url2 = 'https://t.me/s/new_toonkor'
@@ -977,9 +977,9 @@ def newurl(packege, t_main):
 						new_text_content += '\n'
 			with open(text_file_path,'w',encoding='utf-8') as f:
 				f.write(new_text_content)	
-			t_main = final_str
-		logger.info('%s',t_main)	
-	return t_main
+			newurl = final_str
+		logger.info('%s',newurl)	
+	return newurl
 	
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
@@ -1001,12 +1001,12 @@ def godown(t_main, compress, cbz, packege , startname):
 		subtitle = i[1]
 		url = i[2]
 		complte = i[3]
-		newurl(packege, t_main)
+		newurl = new_url(packege, t_main)
 		try:
-			test = url.replace(t_main,'')
-			wwwkt = t_main + test
+			test = url.replace(newurl,'')
+			wwwkt = newurl + test
 		except:
-			wwwkt = t_main + url
+			wwwkt = newurl + url
 		if complte == 'True':
 			continue
 		else:
