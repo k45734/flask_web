@@ -183,6 +183,8 @@ def second():
 			cur.execute("select * from copytoon where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
+			count2 = 1
+			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
@@ -190,14 +192,14 @@ def second():
 			cur.execute("select * from copytoon where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
-				i2 = count
-				count += 1
+				i2 = count2
+				count2 += 1
 			rows.append(i2)
 			cur.execute("select * from copytoon where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
-				i3 = count
-				count += 1
+				i3 = count3
+				count3 += 1
 			rows.append(i3)
 		except:
 			i = '0'
@@ -221,6 +223,8 @@ def second2():
 			cur.execute("select * from toonkor where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
+			count2 = 1
+			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
@@ -228,14 +232,14 @@ def second2():
 			cur.execute("select * from toonkor where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
-				i2 = count
-				count += 1
+				i2 = count2
+				count2 += 1
 			rows.append(i2)
 			cur.execute("select * from toonkor where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
-				i3 = count
-				count += 1
+				i3 = count3
+				count3 += 1
 			rows.append(i3)
 		except:
 			i = '0'
@@ -259,6 +263,8 @@ def second3():
 			cur.execute("select * from newtoki where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
+			count2 = 1
+			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
@@ -266,14 +272,14 @@ def second3():
 			cur.execute("select * from newtoki where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
-				i2 = count
-				count += 1
+				i2 = count2
+				count2 += 1
 			rows.append(i2)
 			cur.execute("select * from newtoki where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
-				i3 = count
-				count += 1
+				i3 = count3
+				count3 += 1
 			rows.append(i3)
 		except:
 			i = '0'
@@ -297,6 +303,8 @@ def second4():
 			cur.execute("select * from naver where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
+			count2 = 1
+			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
@@ -304,14 +312,14 @@ def second4():
 			cur.execute("select * from naver where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
-				i2 = count
-				count += 1
+				i2 = count2
+				count2 += 1
 			rows.append(i2)
 			cur.execute("select * from naver where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
-				i3 = count
-				count += 1
+				i3 = count3
+				count3 += 1
 			rows.append(i3)
 		except:
 			i = '0'
@@ -335,6 +343,8 @@ def second5():
 			cur.execute("select * from dozi where complte = 'False'")
 			rows1 = cur.fetchall()
 			count = 1
+			count2 = 1
+			count3 = 1
 			for i in rows1:
 				i = count
 				count += 1
@@ -342,14 +352,14 @@ def second5():
 			cur.execute("select * from dozi where complte = 'PASS'")
 			rows2 = cur.fetchall()
 			for i2 in rows2:
-				i2 = count
-				count += 1
+				i2 = count2
+				count2 += 1
 			rows.append(i2)
 			cur.execute("select * from dozi where complte = 'True'")
 			rows3 = cur.fetchall()
 			for i3 in rows3:
-				i3 = count
-				count += 1
+				i3 = count3
+				count3 += 1
 			rows.append(i3)
 		except:
 			i = '0'
