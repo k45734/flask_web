@@ -7,7 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
-import platform, os
+import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
@@ -121,12 +121,7 @@ def databasedel(FLASKAPPSNAME):
 		return redirect(url_for('sub3.second'))
 		
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
-	if platform.system() == 'Windows':
-		pass
-	else:
-		root = '/data'
-		os.chdir(root)
-	msg = '루트 {} 에서 {}을 시작합니다. {}'.format(os.getcwd(),FLASKAPPSNAME, FLASKAPPS)
+	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	
 	if FLASKTELGM == '0' :
 		bot = telegram.Bot(token = FLASKTOKEN)
