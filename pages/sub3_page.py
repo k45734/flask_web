@@ -14,7 +14,7 @@ dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 #데이타베이스 없으면 생성
 conn = sqlite3.connect('database.db')
 #print ("Opened database successfully")
-conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSREPEAT TEXT, FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
+conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 #print ("Table created successfully")
 conn.close()
 job_defaults = { 'coalesce': False, 'max_instances': 1 }
@@ -38,7 +38,6 @@ def second():
 		FLASKTOKEN = request.args.get('FLASKTOKEN')
 		FLASKBOTID = request.args.get('FLASKBOTID')
 		FLASKALIM = request.args.get('FLASKALIM')
-		FLASKAPPSREPEAT = request.args.get('FLASKAPPSREPEAT')
 		con = sqlite3.connect("database.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
@@ -61,15 +60,14 @@ def edit(FLASKAPPSNAME):
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
-		FLASKAPPSREPEAT = row[0]
-		FLASKAPPSNAME = row[1]
-		FLASKAPPS = row[2]
-		FLASKTIME = row[3]
-		FLASKTELGM = row[4]
-		FLASKTOKEN = row[5]
-		FLASKBOTID = row[6]
-		FLASKALIM = row[7]
-		return render_template('edit.html', FLASKAPPSNAME=FLASKAPPSNAME, FLASKAPPSREPEAT=FLASKAPPSREPEAT,FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME)	
+		FLASKAPPSNAME = row[0]
+		FLASKAPPS = row[1]
+		FLASKTIME = row[2]
+		FLASKTELGM = row[3]
+		FLASKTOKEN = row[4]
+		FLASKBOTID = row[5]
+		FLASKALIM = row[6]
+		return render_template('edit.html', FLASKAPPSNAME=FLASKAPPSNAME, FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME)	
 
 @bp3.route("edit_result", methods=['POST'])
 def edit_result():
@@ -84,11 +82,10 @@ def edit_result():
 		FLASKTOKEN = request.form['FLASKTOKEN']
 		FLASKBOTID = request.form['FLASKBOTID']
 		FLASKALIM = request.form['FLASKALIM']
-		FLASKAPPSREPEAT = request.form['FLASKAPPSREPEAT']	
 		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
 		db = c.cursor()
-		sql_update = "UPDATE database SET FLASKAPPSREPEAT=?, FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
-		db.execute(sql_update,(FLASKAPPSREPEAT, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
+		sql_update = "UPDATE database SET FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
+		db.execute(sql_update,(FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
 		c.commit()
 		return redirect(url_for('sub3.second'))
 		
@@ -107,29 +104,22 @@ def databasedel(FLASKAPPSNAME):
 		rows = cur.fetchall()
 		return redirect(url_for('sub3.second'))
 		
-def exec_start(FLASKAPPSREPEAT, FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
+def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 	dfolder = os.path.dirname(os.path.abspath(__file__)) + '/apps'
+	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	
-	logger.info('%s을 시작합니다.', FLASKAPPSNAME)
-	parse_start = '{} 를 시작합니다.'.format(FLASKAPPSNAME)
-	logger.info('%s', parse_start)
-	parse_stop = '{} 를 종료되었습니다.'.format(FLASKAPPSNAME)
 	if FLASKTELGM == '0' :
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == '0' :
-			bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=True)
+			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
 			subprocess.call(FLASKAPPS, shell=True)
-			bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=True)
-			
 		else :
-			bot.sendMessage(chat_id = FLASKBOTID, text=parse_start, disable_notification=False)
+			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
 			subprocess.call(FLASKAPPS, shell=True)
-			bot.sendMessage(chat_id = FLASKBOTID, text=parse_stop, disable_notification=False)
-					
 	else :
+		logger.info(msg)
 		subprocess.call(FLASKAPPS, shell=True)
-		logger.info('%s', parse_stop)
 	test2 = sub3_page.get_jobs()
 	for i in test2:
 		aa = i.id
@@ -145,16 +135,15 @@ def ok(FLASKAPPSNAME):
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
-		FLASKAPPSREPEAT = row[0]
-		FLASKAPPSNAME = row[1]
-		FLASKAPPS = row[2]
-		FLASKTIME = row[3]
-		FLASKTELGM = row[4]
-		FLASKTOKEN = row[5]
-		FLASKBOTID = row[6]
-		FLASKALIM = row[7]
+		FLASKAPPSNAME = row[0]
+		FLASKAPPS = row[1]
+		FLASKTIME = row[2]
+		FLASKTELGM = row[3]
+		FLASKTOKEN = row[4]
+		FLASKBOTID = row[5]
+		FLASKALIM = row[6]
 		try:
-			sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[int(FLASKAPPSREPEAT), FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+			sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 			test2 = sub3_page.get_job(FLASKAPPSNAME).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		except ConflictingIdError:
@@ -198,14 +187,13 @@ def start():
 			FLASKTOKEN = request.form['FLASKTOKEN']
 			FLASKBOTID = request.form['FLASKBOTID']
 			FLASKALIM = request.form['FLASKALIM']
-			FLASKAPPSREPEAT = request.form['FLASKAPPSREPEAT']
 			FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
 			with sqlite3.connect("./database.db")	as con:
 				if session.get('logFlag'):
 					#print("OK")
 					con.row_factory = sqlite3.Row
 					cur = con.cursor()
-					cur.execute("INSERT INTO database (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSREPEAT) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSREPEAT))
+					cur.execute("INSERT INTO database (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM) VALUES (?, ?, ?, ?, ?, ?, ?)", (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
 					cur.execute("select * from database")
 					con.commit()
 					rows = cur.fetchall()
