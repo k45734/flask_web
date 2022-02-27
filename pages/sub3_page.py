@@ -7,16 +7,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
-
+import platform, os
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
-#데이타베이스 없으면 생성
-conn = sqlite3.connect('database.db')
-#print ("Opened database successfully")
-conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
-#print ("Table created successfully")
-conn.close()
+
 job_defaults = { 'coalesce': False, 'max_instances': 1 }
 sub3_page = BackgroundScheduler(job_defaults=job_defaults)
 f = open('./log/flask.log','a', encoding='utf-8')
@@ -34,7 +29,6 @@ try:
 	print(len(row))
 	if len(row) == 8:
 		cursor.execute("DROP TABLE database")
-		aaat.execute("DROP TABLE database")
 		con.commit()
 	else:
 		print(len(row))
@@ -44,6 +38,12 @@ except:
 @bp3.route('/')
 @bp3.route('index')
 def second():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect('database.db')
+	#print ("Opened database successfully")
+	conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
+	#print ("Table created successfully")
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -121,9 +121,12 @@ def databasedel(FLASKAPPSNAME):
 		return redirect(url_for('sub3.second'))
 		
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
-	BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-	dfolder = os.path.dirname(os.path.abspath(__file__)) + '/apps'
-	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
+	if platform.system() == 'Windows':
+		pass
+	else:
+		root = '/data'
+		os.chdir(root)
+	msg = '루트 {} 에서 {}을 시작합니다. {}'.format(os.getcwd(),FLASKAPPSNAME, FLASKAPPS)
 	
 	if FLASKTELGM == '0' :
 		bot = telegram.Bot(token = FLASKTOKEN)
