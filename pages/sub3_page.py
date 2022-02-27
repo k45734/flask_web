@@ -25,6 +25,22 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 sub3_page.start()
 
+try:
+	#DB 변경
+	conn = sqlite3.connect('./database.db')
+	cursor = conn.cursor()
+	cursor.execute("select * from database")
+	row = cursor.fetchone()
+	print(len(row))
+	if len(row) == 8:
+		cursor.execute("DROP TABLE database")
+		aaat.execute("DROP TABLE database")
+		con.commit()
+	else:
+		print(len(row))
+except:
+	pass
+	
 @bp3.route('/')
 @bp3.route('index')
 def second():
