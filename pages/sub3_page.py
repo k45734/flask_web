@@ -61,7 +61,7 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 @bp3.route('index')
 def second():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect('database.db')
+	conn = sqlite3.connect(sub3db)
 	#print ("Opened database successfully")
 	conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 	#print ("Table created successfully")
@@ -76,7 +76,7 @@ def second():
 		FLASKTOKEN = request.args.get('FLASKTOKEN')
 		FLASKBOTID = request.args.get('FLASKBOTID')
 		FLASKALIM = request.args.get('FLASKALIM')
-		con = sqlite3.connect("database.db")
+		con = sqlite3.connect(sub3db)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -132,7 +132,7 @@ def databasedel(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect("./database.db")	
+		con = sqlite3.connect(sub3db)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKAPPSNAME)
@@ -205,7 +205,7 @@ def start():
 			FLASKBOTID = request.form['FLASKBOTID']
 			FLASKALIM = request.form['FLASKALIM']
 			FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-			with sqlite3.connect("./database.db")	as con:
+			with sqlite3.connect(sub3db)	as con:
 				if session.get('logFlag'):
 					#print("OK")
 					con.row_factory = sqlite3.Row
