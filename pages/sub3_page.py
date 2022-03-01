@@ -25,7 +25,7 @@ else:
 	sub3db = '/data/database.db'
 try:
 	#DB 변경
-	conn = sqlite3.connect(sub3db)
+	conn = sqlite3.connect(sub3db,timeout=60)
 	cursor = conn.cursor()
 	cursor.execute("select * from database")
 	row = cursor.fetchone()
@@ -61,7 +61,7 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 @bp3.route('index')
 def second():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub3db)
+	conn = sqlite3.connect(sub3db,timeout=60)
 	#print ("Opened database successfully")
 	conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 	#print ("Table created successfully")
@@ -76,7 +76,7 @@ def second():
 		FLASKTOKEN = request.args.get('FLASKTOKEN')
 		FLASKBOTID = request.args.get('FLASKBOTID')
 		FLASKALIM = request.args.get('FLASKALIM')
-		con = sqlite3.connect(sub3db)
+		con = sqlite3.connect(sub3db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -93,7 +93,7 @@ def edit(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect(sub3db)
+		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
@@ -112,7 +112,7 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect(sub3db)
+		c = sqlite3.connect(sub3db,timeout=60)
 		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
 		FLASKAPPS = request.form['FLASKAPPS']
 		FLASKTIME = request.form['FLASKTIME']
@@ -132,7 +132,7 @@ def databasedel(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect(sub3db)	
+		con = sqlite3.connect(sub3db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKAPPSNAME)
@@ -147,7 +147,7 @@ def ok(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect(sub3db)
+		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
@@ -205,7 +205,7 @@ def start():
 			FLASKBOTID = request.form['FLASKBOTID']
 			FLASKALIM = request.form['FLASKALIM']
 			FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-			with sqlite3.connect(sub3db)	as con:
+			with sqlite3.connect(sub3db,timeout=60) as con:
 				if session.get('logFlag'):
 					#print("OK")
 					con.row_factory = sqlite3.Row

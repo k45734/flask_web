@@ -18,7 +18,7 @@ if platform.system() == 'Windows':
 else:
 	sub4db = '/data/database.db'
 #데이타베이스 없으면 생성
-conn = sqlite3.connect(sub4db)
+conn = sqlite3.connect(sub4db,timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
 conn.close()
 
@@ -34,7 +34,7 @@ def second():
 		RECEIVING = request.args.get('RECEIVING')
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
-		con = sqlite3.connect(sub4db)
+		con = sqlite3.connect(sub4db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2")
@@ -46,7 +46,7 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect(sub4db)
+		c = sqlite3.connect(sub4db,timeout=60)
 		idx = request.args.get('idx')
 		MY_DATE = request.args.get('MY_DATE')
 		PRODUCT_NAME = request.args.get('PRODUCT_NAME')
@@ -85,7 +85,7 @@ def edit():
 		test = int(a) + int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
 		#TOTAL = request.args.get('TOTAL')
-		c = sqlite3.connect(sub4db)
+		c = sqlite3.connect(sub4db,timeout=60)
 		db = c.cursor()
 		contents = "SELECT '{}' FROM database2 WHERE idx = '{}'".format(MY_DATE, idx) 
 		db.execute(contents)
@@ -96,7 +96,7 @@ def databasedel(idx):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect(sub4db)	
+		con = sqlite3.connect(sub4db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "DELETE FROM database2 WHERE idx = '{}'".format(idx)
@@ -117,7 +117,7 @@ def ok():
 		RECEIVING = request.args.get('RECEIVING')
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
-		con = sqlite3.connect(sub4db)
+		con = sqlite3.connect(sub4db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2")
@@ -149,7 +149,7 @@ def csv_import():
 		sheet['D1'] = "입고"
 		sheet['E1'] = "출고"
 		sheet['F1'] = "합계"
-		con = sqlite3.connect(sub4db)
+		con = sqlite3.connect(sub4db,timeout=60)
 		cur = con.cursor()
 		bables = cur.execute('SELECT * FROM database2')
 		rows = cur.fetchall()
@@ -178,7 +178,7 @@ def start():
 		PRODUCT_NAME = request.form['PRODUCT_NAME']
 		RECEIVING = request.form['RECEIVING']
 		SHIPPING = request.form['SHIPPING']
-		con = sqlite3.connect(sub4db)	
+		con = sqlite3.connect(sub4db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database2 WHERE PRODUCT_NAME = '{}' ORDER BY ROWID DESC LIMIT 1".format(PRODUCT_NAME))
@@ -193,7 +193,7 @@ def start():
 			con.close()
 			
 		try:
-			with sqlite3.connect(sub4db) as con:
+			with sqlite3.connect(sub4db,timeout=60) as con:
 				if session.get('logFlag'):
 					#print(SHIPPING)
 					print(a)

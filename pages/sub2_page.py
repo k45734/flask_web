@@ -59,7 +59,7 @@ else:
 	sub2db = '/data'
 	
 #데이타베이스 없으면 생성
-conn = sqlite3.connect(sub2db + '/telegram.db')
+conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
 conn.close()
 @bp2.route('/')
@@ -83,7 +83,7 @@ def second():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -585,7 +585,7 @@ def addnews(a,b,c,d):
 def addnews_d(a, b, c, d):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect(sub2db + '/news.db')
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?"
 		cur.execute(sql,('True',b, c))
@@ -744,7 +744,7 @@ def news():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -768,7 +768,7 @@ def news_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect(sub2db + '/telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -803,7 +803,7 @@ def unse():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -827,7 +827,7 @@ def unse_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect(sub2db + '/telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -886,7 +886,7 @@ def weather():
 	else:	
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -911,7 +911,7 @@ def weather_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect(sub2db + '/telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -946,7 +946,7 @@ def tracking():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -972,7 +972,7 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect(sub2db + '/telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -1051,7 +1051,7 @@ def board():
 		t_main = request.form['t_main']
 		sel = request.form['sel']
 		selnum = request.form['selnum']
-		conn = sqlite3.connect(sub2db + '/telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
