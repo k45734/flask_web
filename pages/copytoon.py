@@ -587,40 +587,121 @@ def checkURL(url2):
 			print ("Website is working fine %s "% url2)
 			return 9999       
 		return response.status		
-		
-def exec_start(t_main, code, packege,startname):
-	print("카피툰시작")
-	logger.info('카피툰시작')
-	newURL = t_main
-	maintitle = []
-	maintitle2 = []
-	subtitle = []
-	urltitle = []
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	for i in range(245,500):
-		url2 = ("https://copytoon%s.com" % (i))
-		time.sleep(2)
-		result = checkURL(url2)
-		text_file_path = os.getcwd() + '/templates/copytoon.html'
-		new_text_content = ''
-		target_word = t_main
-		if result == 9999:
+
+
+#새주소 받아오기
+def new_url(packege, t_main):
+	if packege == 'copytoon':
+		for i in range(245,500):
+			url2 = ("https://copytoon%s.com" % (i))
+			time.sleep(2)
+			result = checkURL(url2)			
+			text_file_path = os.getcwd() + '/templates/copytoon.html'
+			new_text_content = ''
+			target_word = t_main		
+			if result == 9999:				
+				print("new down url : " + url2)
+				print(text_file_path)
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
+				break
+		newurl = url2
+	elif packege == 'naver':
+		newurl = 'https://comic.naver.com'
+	elif packege == 'dozi':	
+		for i in range(30,500):
+			str_zoro = str(i).zfill(3)
+			url2 = ("https://dozi%s.com" % (str_zoro))		
+			time.sleep(2)
+			result = checkURL(url2)
+			text_file_path = os.getcwd() + '/templates/dozi.html'
+			new_text_content = ''
+			target_word = t_main
+			if result == 9999:
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
+				break
+		newurl = url2
+	elif packege == 'newtoki':	
+		for i in range(116,500):
+			url2 = ("https://newtoki%s.com" % (i))
+			time.sleep(2)
+			result = checkURL(url2)			
+			text_file_path = os.getcwd() + '/templates/newtoki.html'
+			new_text_content = ''
+			target_word = t_main	
+			if result == 9999:			
+				print("new url : " + url2)
+				print(text_file_path)
+				with open(text_file_path,'r',encoding='utf-8') as f:
+					lines = f.readlines()
+					for i, l in enumerate(lines):
+						new_string = l.strip().replace(target_word,url2)
+						if new_string:
+							new_text_content += new_string + '\n'
+						else:
+							new_text_content += '\n'
+				with open(text_file_path,'w',encoding='utf-8') as f:
+					f.write(new_text_content)
+				break
+		newurl = url2
+	elif packege == 'toonkor':
+		with requests.Session() as s:
+			url2 = 'https://t.me/s/new_toonkor'
+			req = s.get(url2)
+			html = req.text
+			ttt = re.compile(r'<a href="(.*?)"').findall(html)
+			n = len(ttt)
+			if ttt[n-2] == 'https://t.me/new_toonkor':
+				tta = ttt[n-1]
+			else:
+				tta = ttt[n-2]
+			final_str = tta[:-1]
+			text_file_path = os.getcwd() + '/templates/toonkor.html'
+			new_text_content = ''
+			target_word = t_main
+			
 			with open(text_file_path,'r',encoding='utf-8') as f:
 				lines = f.readlines()
 				for i, l in enumerate(lines):
-					new_string = l.strip().replace(target_word,url2)
+					new_string = l.strip().replace(target_word,final_str)
 					if new_string:
 						new_text_content += new_string + '\n'
 					else:
 						new_text_content += '\n'
 			with open(text_file_path,'w',encoding='utf-8') as f:
-				f.write(new_text_content)
-			break	
+				f.write(new_text_content)	
+			newurl = final_str	
+	return newurl
+	
+def exec_start(t_main, code, packege,startname):
+	print("카피툰시작")
+	logger.info('카피툰시작')
+	maintitle = []
+	maintitle2 = []
+	subtitle = []
+	urltitle = []
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
-		t_main = url2
-		print(url2)
 		if code == 'all':
-			response = s.get(t_main,headers=header)
+			response = s.get(newurl,headers=header)
 			html = response.text
 			soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
 			for tag in soup:
@@ -629,7 +710,7 @@ def exec_start(t_main, code, packege,startname):
 		else:
 			allcode = code.split('|')
 			for i in allcode:
-				t_maincode = t_main + i
+				t_maincode = newurl + i
 				maintitle.append(i)
 				
 		for mainurl in maintitle:
@@ -638,9 +719,9 @@ def exec_start(t_main, code, packege,startname):
 			wat = wkt.replace("/", "")
 			title = wat.replace(".html", "")
 			if code == 'all':
-				all = t_main + url
+				all = newurl + url
 			else:
-				all = t_main + '/' + url
+				all = newurl + '/' + url
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			logger.info('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
 			response1 = s.get(all,headers=header)
@@ -696,34 +777,9 @@ def exec_start2(t_main, code, packege,startname):
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	with requests.Session() as s:		
-		url2 = 'https://t.me/s/new_toonkor'
-		req = s.get(url2)
-		html = req.text
-		ttt = re.compile(r'<a href="(.*?)"').findall(html)
-		n = len(ttt)
-		if ttt[n-2] == 'https://t.me/new_toonkor':
-			tta = ttt[n-1]
-		else:
-			tta = ttt[n-2]
-		final_str = tta
-		logger.info(final_str)
-		text_file_path = os.getcwd() + '/templates/toonkor.html'
-		new_text_content = ''
-		target_word = t_main
-		with open(text_file_path,'r',encoding='utf-8') as f:
-			lines = f.readlines()
-			for i, l in enumerate(lines):
-				new_string = l.strip().replace(target_word,final_str)
-				if new_string:
-					new_text_content += new_string + '\n'
-				else:
-					new_text_content += '\n'
-		with open(text_file_path,'w',encoding='utf-8') as f:
-			f.write(new_text_content)
-		t_main = final_str
-		print(t_main)
+		newurl = new_url(packege, t_main)
 		if code == 'all':
-			response = s.get(t_main,headers=header)
+			response = s.get(newurl,headers=header)
 			time.sleep(random.uniform(2,5)) 	
 			html = response.text
 			soup = bs(html, "html.parser").findAll("a",{"id":"title"})
@@ -734,12 +790,12 @@ def exec_start2(t_main, code, packege,startname):
 		else:
 			allcode = code.split('|')
 			for i in allcode:
-				t_maincode = t_main + i
+				t_maincode = newurl + i
 				maintitle.append(i)
 				
 		for mainurl in maintitle:
 			test = mainurl
-			all = t_main + '/' + test
+			all = newurl + '/' + test
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			logger.info('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
 			response1 = s.get(all,headers=header)
@@ -799,29 +855,11 @@ def exec_start3(t_main,code,packege,genre,startname):
 	subtitle = [] #소제목이 저장된다.
 	urltitle = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	for i in range(116,500):
-		url2 = ("https://newtoki%s.com" % (i))
-		time.sleep(2)
-		result = checkURL(url2)
-		text_file_path = os.getcwd() + '/templates/newtoki.html'
-		new_text_content = ''
-		target_word = t_main
-		if result == 9999:
-			with open(text_file_path,'r',encoding='utf-8') as f:
-				lines = f.readlines()
-				for i, l in enumerate(lines):
-					new_string = l.strip().replace(target_word,url2)
-					if new_string:
-						new_text_content += new_string + '\n'
-					else:
-						new_text_content += '\n'
-			with open(text_file_path,'w',encoding='utf-8') as f:
-				f.write(new_text_content)
-			break
+	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
 		if code == 'all':
 			for page in range(1,11): 
-				main_url = t_main + '/webtoon/p' + str(page) + '?toon=' + genre
+				main_url = newurl + '/webtoon/p' + str(page) + '?toon=' + genre
 				time.sleep(random.uniform(30,60)) 
 				req = s.get(main_url)	
 				html = req.text
@@ -834,12 +872,12 @@ def exec_start3(t_main,code,packege,genre,startname):
 					for i in posts:
 						a_link = i('a')
 						a_href = a_link[1]['href'].split('webtoon/')[1].split('/')[0]
-						main_url = t_main + '/webtoon/' + a_href
+						main_url = newurl + '/webtoon/' + a_href
 						main_list.append(main_url)
 		else:	
 			allcode = code.split('|')
 			for i in allcode:
-				main_url = t_main + '/webtoon/' + i	
+				main_url = newurl + '/webtoon/' + i	
 				main_list.append(main_url)
 		
 		for a in main_list :
@@ -872,7 +910,7 @@ def exec_start3(t_main,code,packege,genre,startname):
 				for b in posts_list:
 					aa = b.find('b')
 					a_link = b['href']
-					a_link2 = a_link.replace(t_main,'')
+					a_link2 = a_link.replace(newurl,'')
 					aa_tmp = '{}화'.format(cc)
 					maintitle.append(data_tmp) #대제목이다.
 					subtitle.append(aa_tmp) #소제목이다.
@@ -992,28 +1030,9 @@ def exec_start4(code,packege,startname):
 #도지코믹스
 def exec_start5(t_main, packege,startname):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	for i in range(30,500):
-		str_zoro = str(i).zfill(3)
-		url2 = ("https://dozi%s.com" % (str_zoro))		
-		time.sleep(2)
-		result = checkURL(url2)
-		text_file_path = os.getcwd() + '/templates/dozi.html'
-		new_text_content = ''
-		target_word = t_main
-		if result == 9999:
-			with open(text_file_path,'r',encoding='utf-8') as f:
-				lines = f.readlines()
-				for i, l in enumerate(lines):
-					new_string = l.strip().replace(target_word,url2)
-					if new_string:
-						new_text_content += new_string + '\n'
-					else:
-						new_text_content += '\n'
-			with open(text_file_path,'w',encoding='utf-8') as f:
-				f.write(new_text_content)
-			break
+	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
-		t_main = url2 + '/%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8'		
+		t_main = newurl + '/%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8'		
 		response = s.get(t_main,headers=header)
 		html = response.text
 		soup = bs(html, "html.parser").findAll("div",{"class":"section-item-inner"})
@@ -1061,107 +1080,6 @@ def exec_start5(t_main, packege,startname):
 		for i in test2:
 			aa = i.id
 			logger.info('%s 가 스케줄러가 있습니다.', aa)
-
-#새주소 받아오기
-def new_url(packege, t_main):
-	if packege == 'copytoon':
-		for i in range(245,500):
-			url2 = ("https://copytoon%s.com" % (i))
-			time.sleep(2)
-			result = checkURL(url2)			
-			text_file_path = os.getcwd() + '/templates/copytoon.html'
-			new_text_content = ''
-			target_word = t_main		
-			if result == 9999:				
-				print("new down url : " + url2)
-				print(text_file_path)
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
-				break
-		newurl = url2
-	elif packege == 'naver':
-		newurl = 'https://comic.naver.com'
-	elif packege == 'dozi':	
-		for i in range(30,500):
-			str_zoro = str(i).zfill(3)
-			url2 = ("https://dozi%s.com" % (str_zoro))		
-			time.sleep(2)
-			result = checkURL(url2)
-			text_file_path = os.getcwd() + '/templates/dozi.html'
-			new_text_content = ''
-			target_word = t_main
-			if result == 9999:
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
-				break
-		newurl = url2
-	elif packege == 'newtoki':	
-		for i in range(116,500):
-			url2 = ("https://newtoki%s.com" % (i))
-			time.sleep(2)
-			result = checkURL(url2)			
-			text_file_path = os.getcwd() + '/templates/newtoki.html'
-			new_text_content = ''
-			target_word = t_main	
-			if result == 9999:			
-				print("new url : " + url2)
-				print(text_file_path)
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
-				break
-		newurl = url2
-	elif packege == 'toonkor':
-		with requests.Session() as s:
-			url2 = 'https://t.me/s/new_toonkor'
-			req = s.get(url2)
-			html = req.text
-			ttt = re.compile(r'<a href="(.*?)"').findall(html)
-			n = len(ttt)
-			if ttt[n-2] == 'https://t.me/new_toonkor':
-				tta = ttt[n-1]
-			else:
-				tta = ttt[n-2]
-			final_str = tta[:-1]
-			text_file_path = os.getcwd() + '/templates/toonkor.html'
-			new_text_content = ''
-			target_word = t_main
-			
-			with open(text_file_path,'r',encoding='utf-8') as f:
-				lines = f.readlines()
-				for i, l in enumerate(lines):
-					new_string = l.strip().replace(target_word,final_str)
-					if new_string:
-						new_text_content += new_string + '\n'
-					else:
-						new_text_content += '\n'
-			with open(text_file_path,'w',encoding='utf-8') as f:
-				f.write(new_text_content)	
-			newurl = final_str	
-	return newurl
 	
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
@@ -1219,7 +1137,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				obj = soup.find("div",{"id":"bo_v_con"})
 				taglist = obj.findAll("img")
 			else:
-				logger.info('%s',t_main)
+				logger.info('%s',newurl)
 				continue
 
 			urls = []
@@ -1247,7 +1165,7 @@ def godown(t_main, compress, cbz, packege , startname):
 				elif 'https://zerotoon.com/' in url:
 					pass
 				else:
-					domain = t_main + url
+					domain = newurl + url
 					url_to_image(subtitle, title, domain, filename, dfolder)
 				
 				jpeg_no += 1
