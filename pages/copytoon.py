@@ -46,7 +46,7 @@ else:
 	webtoondb = '/data/webtoon.db'
 try:
 	#DB 변경
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	#카피툰
 	cptoon = conn.cursor()
 	cptoon_sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database')"
