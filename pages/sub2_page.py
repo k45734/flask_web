@@ -744,7 +744,7 @@ def news():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db')
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -803,7 +803,7 @@ def unse():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db')
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -886,7 +886,7 @@ def weather():
 	else:	
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db')
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -946,7 +946,7 @@ def tracking():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db')
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
