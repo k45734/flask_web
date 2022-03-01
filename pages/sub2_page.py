@@ -44,10 +44,6 @@ from apscheduler.triggers.cron import CronTrigger
 
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#데이타베이스 없으면 생성
-conn = sqlite3.connect('./telegram.db')
-conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
-conn.close()
 job_defaults = { 'max_instances': 1 }
 scheduler2 = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
@@ -56,7 +52,16 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 scheduler2.start()
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	sub2db = at[0] + '/data'
+else:
+	sub2db = '/data'
+	
+#데이타베이스 없으면 생성
+conn = sqlite3.connect(sub2db + '/telegram.db')
+conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
+conn.close()
 @bp2.route('/')
 @bp2.route('index')
 def index():
@@ -78,7 +83,7 @@ def second():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect("./telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db')
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -134,7 +139,7 @@ def add_d(id, go, complte):
 	try:
 		#print(a,b)
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./funmom.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE funmom SET complte = ? WHERE urltitle = ? AND ID = ?"
 		cur.execute(sql,('True',go,id))
@@ -146,7 +151,7 @@ def add_d(id, go, complte):
 #펀맘 DB	
 def add_c(a,b,c,d):
 	try:
-		con = sqlite3.connect('./funmom.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from funmom where urltitle = ?"
 		cur.execute(sql, (a,))
@@ -164,7 +169,7 @@ def add_c(a,b,c,d):
 #운세알리미 DB
 def add_unse(lastdate, zodiac, zodiac2, list, complte):
 	try:
-		con = sqlite3.connect('./unse.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from unse where DATE = ? AND ZODIAC2 = ? AND MEMO = ?"
 		cur.execute(sql, (lastdate, zodiac2, list))
@@ -182,7 +187,7 @@ def add_unse(lastdate, zodiac, zodiac2, list, complte):
 def add_unse_d(a, b, c, d, e):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./unse.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from unse where DATE = ? AND ZODIAC2 = ? AND MEMO = ?"
 		cur.execute(sql, (a, c, d))
@@ -341,7 +346,7 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 				f_write.close()
 			
 def exec_start3(startname):
-	conn = sqlite3.connect('./funmom.db',timeout=60)
+	conn = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
 	with requests.Session() as s:
@@ -373,7 +378,7 @@ def exec_start3(startname):
 			gogo += 1
 		print('목록을 전부 만들었습니다.')		
 
-		con = sqlite3.connect('./funmom.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from funmom where complte = ?"
 		cur.execute(sql,('False',))
@@ -509,7 +514,7 @@ def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 #운세알리미
 def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect('./unse.db',timeout=60)
+	conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
 	conn.close()
 	session = requests.Session()
@@ -538,7 +543,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		add_unse(lastdate, zodiac, zodiac2, list, complte)
 		
 	#중복 알림 방지
-	con = sqlite3.connect('./unse.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 	cur = con.cursor()
 	sql = "select * from unse where COMPLTE = ?"
 	cur.execute(sql,('False',))
@@ -563,7 +568,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		add_unse_d(a, b, c, d, e)
 
 def addnews(a,b,c,d):
-	con = sqlite3.connect('./news.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()
 	sql = "select * from news where TITLE = ? and URL = ?"
 	cur.execute(sql, (b,c))
@@ -580,7 +585,7 @@ def addnews(a,b,c,d):
 def addnews_d(a, b, c, d):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./news.db')
+		con = sqlite3.connect(sub2db + '/news.db')
 		cur = con.cursor()
 		sql = "UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?"
 		cur.execute(sql,('True',b, c))
@@ -674,7 +679,7 @@ def ytnsnews():
 	
 def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect('./news.db',timeout=60)
+	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, COMPLETE TEXT)')	
 	conn.close()
 
@@ -707,7 +712,7 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = 'False'
 		addnews(a,b,c,d)
 		
-	con = sqlite3.connect('./news.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()	
 	sql = "select * from news where COMPLETE = ?"
 	cur.execute(sql, ('False', ))
@@ -739,7 +744,7 @@ def news():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect("./telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -763,7 +768,7 @@ def news_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect('./telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db')
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -798,7 +803,7 @@ def unse():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect("./telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -822,7 +827,7 @@ def unse_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect('./telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db')
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -881,7 +886,7 @@ def weather():
 	else:	
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect("./telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -906,7 +911,7 @@ def weather_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect('./telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db')
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -941,7 +946,7 @@ def tracking():
 	else:
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect("./telegram.db")
+		con = sqlite3.connect(sub2db + '/telegram.db")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from database")
@@ -967,7 +972,7 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
-		conn = sqlite3.connect('./telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db')
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()
@@ -1046,7 +1051,7 @@ def board():
 		t_main = request.form['t_main']
 		sel = request.form['sel']
 		selnum = request.form['selnum']
-		conn = sqlite3.connect('./telegram.db')
+		conn = sqlite3.connect(sub2db + '/telegram.db')
 		cursor = conn.cursor()
 		cursor.execute("select * from database")
 		rows = cursor.fetchone()

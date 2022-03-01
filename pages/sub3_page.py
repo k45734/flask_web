@@ -18,9 +18,14 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 sub3_page.start()
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	sub3db = at[0] + '/data/database.db'
+else:
+	sub3db = '/data/database.db'
 try:
 	#DB 변경
-	conn = sqlite3.connect('./database.db')
+	conn = sqlite3.connect(sub3db)
 	cursor = conn.cursor()
 	cursor.execute("select * from database")
 	row = cursor.fetchone()
@@ -88,7 +93,7 @@ def edit(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./database.db')
+		conn = sqlite3.connect(sub3db)
 		cursor = conn.cursor()
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
@@ -107,7 +112,7 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect('./database.db')
+		c = sqlite3.connect(sub3db)
 		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
 		FLASKAPPS = request.form['FLASKAPPS']
 		FLASKTIME = request.form['FLASKTIME']
@@ -142,7 +147,7 @@ def ok(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		conn = sqlite3.connect('./database.db')
+		conn = sqlite3.connect(sub3db)
 		cursor = conn.cursor()
 		sql = "select * from database where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))

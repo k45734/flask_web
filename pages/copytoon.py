@@ -39,7 +39,11 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 schedulerc.start()
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	webtoondb = at[0] + '/data/webtoon.db'
+else:
+	webtoondb = '/data/webtoon.db'
 try:
 	#DB 변경
 	conn = sqlite3.connect('./webtoon.db',timeout=60)
@@ -97,7 +101,7 @@ try:
 		print('테이블이 없다.')	
 
 	#DB컬럼 추가
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	cur = conn.cursor()
 	cur2 = conn.cursor()
 	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('copytoon') WHERE name='toon'"
@@ -111,7 +115,7 @@ try:
 		print('컬럼이 있습니다.')
 	conn.close()
 
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	cur = conn.cursor()
 	cur2 = conn.cursor()
 	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('toonkor') WHERE name='toon'"
@@ -125,7 +129,7 @@ try:
 		print('컬럼이 있습니다.')
 	conn.close()
 
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	cur = conn.cursor()
 	cur2 = conn.cursor()
 	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('newtoki') WHERE name='toon'"
@@ -139,7 +143,7 @@ try:
 		print('컬럼이 있습니다.')
 	conn.close()
 
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	cur = conn.cursor()
 	cur2 = conn.cursor()
 	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('naver') WHERE name='toon'"
@@ -176,7 +180,7 @@ def second():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
@@ -220,7 +224,7 @@ def second2():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
@@ -265,7 +269,7 @@ def second3():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
@@ -310,7 +314,7 @@ def second4():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
@@ -355,7 +359,7 @@ def second5():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		con = sqlite3.connect("./webtoon.db")
+		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
@@ -454,7 +458,7 @@ def db_reset():
 		packege = request.form['packege']
 		try:
 			time.sleep(random.uniform(2,10)) 
-			con = sqlite3.connect('./webtoon.db')
+			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
 			cur.execute("delete from "+ packege)
 			con.commit()
@@ -473,7 +477,7 @@ def db_redown():
 		packege = request.form['packege']
 		try:
 			time.sleep(random.uniform(2,10)) 
-			con = sqlite3.connect('./webtoon.db')
+			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
 			sql = "UPDATE " + packege + " SET complte = ?"
 			cur.execute(sql,('False',))
@@ -492,7 +496,7 @@ def db_repass():
 		packege = request.form['packege']
 		try:
 			time.sleep(random.uniform(2,10)) 
-			con = sqlite3.connect('./webtoon.db',timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
 			sql = "UPDATE " + packege + " SET complte = ? WHERE complte = ?"
 			cur.execute(sql,('False','PASS'))
@@ -507,13 +511,13 @@ def add_c(packege, a, b, c, d, atat):
 	print(packege, a, b , c ,d, atat)
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		conn = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
 		print(packege, a, b , c ,d, atat)
-		con = sqlite3.connect('./webtoon.db')
+		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "select * from " + packege + " where urltitle = ?"
 		cur.execute(sql, (c,))
@@ -531,13 +535,13 @@ def add_c(packege, a, b, c, d, atat):
 def add_d(packege, subtitle, title):
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		conn = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./webtoon.db')
+		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		cur.execute(sql,('True',subtitle, title))
@@ -550,13 +554,13 @@ def add_d(packege, subtitle, title):
 def add_pass(packege, subtitle, title):
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect('./webtoon.db',timeout=60)
+		conn = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect('./webtoon.db')
+		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
 		cur.execute(sql,('PASS',subtitle, title))
@@ -1162,12 +1166,12 @@ def new_url(packege, t_main):
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect('./webtoon.db',timeout=60)
+	conn = sqlite3.connect(webtoondb,timeout=60)
 	sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
 	conn.execute(sql)
 	conn.close()
 	#DB 목록을 받아와 다운로드를 진행한다.
-	con = sqlite3.connect('./webtoon.db',timeout=60)
+	con = sqlite3.connect(webtoondb,timeout=60)
 	cur = con.cursor()
 	sql = "select * from " + packege + " where complte = 'False'"
 	cur.execute(sql)
