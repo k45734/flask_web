@@ -11,7 +11,6 @@ import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, 
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
-
 job_defaults = { 'coalesce': False, 'max_instances': 1 }
 sub3_page = BackgroundScheduler(job_defaults=job_defaults)
 f = open('./log/flask.log','a', encoding='utf-8')
@@ -19,7 +18,25 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 sub3_page.start()
-
+		
+def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
+	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
+	
+	if FLASKTELGM == '0' :
+		bot = telegram.Bot(token = FLASKTOKEN)
+		if FLASKALIM == '0' :
+			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
+			subprocess.call(FLASKAPPS, shell=True)
+		else :
+			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
+			subprocess.call(FLASKAPPS, shell=True)
+	else :
+		logger.info(msg)
+		subprocess.call(FLASKAPPS, shell=True)
+	test2 = sub3_page.get_jobs()
+	for i in test2:
+		aa = i.id
+		logger.info('%s 가 스케줄러가 있습니다.', aa)
 try:
 	#DB 변경
 	conn = sqlite3.connect('./database.db')
@@ -34,7 +51,31 @@ try:
 		print(len(row))
 except:
 	pass
-	
+
+try:
+	#데이타 읽기
+	con = sqlite3.connect('database.db',timeout=60)
+	cur = con.cursor()
+	sql = "select * from database"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if rows == None:
+		pass
+	else:
+		for row in rows:
+			FLASKAPPSNAME = row[0]
+			FLASKAPPS = row[1]
+			FLASKTIME = row[2]
+			FLASKTELGM = row[3]
+			FLASKTOKEN = row[4]
+			FLASKBOTID = row[5]
+			FLASKALIM = row[6]
+			try:
+				sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+			except:
+				pass
+except:
+	pass
 @bp3.route('/')
 @bp3.route('index')
 def second():
@@ -119,25 +160,6 @@ def databasedel(FLASKAPPSNAME):
 		con.commit()
 		rows = cur.fetchall()
 		return redirect(url_for('sub3.second'))
-		
-def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
-	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
-	
-	if FLASKTELGM == '0' :
-		bot = telegram.Bot(token = FLASKTOKEN)
-		if FLASKALIM == '0' :
-			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
-			subprocess.call(FLASKAPPS, shell=True)
-		else :
-			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
-			subprocess.call(FLASKAPPS, shell=True)
-	else :
-		logger.info(msg)
-		subprocess.call(FLASKAPPS, shell=True)
-	test2 = sub3_page.get_jobs()
-	for i in test2:
-		aa = i.id
-		logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
 def ok(FLASKAPPSNAME):
