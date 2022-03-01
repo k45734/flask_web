@@ -18,6 +18,20 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 sub3_page.start()
+try:
+	#DB 변경
+	conn = sqlite3.connect('./database.db')
+	cursor = conn.cursor()
+	cursor.execute("select * from database")
+	row = cursor.fetchone()
+	print(len(row))
+	if len(row) == 8:
+		cursor.execute("DROP TABLE database")
+		con.commit()
+	else:
+		print(len(row))
+except:
+	pass
 		
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
@@ -37,45 +51,7 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 	for i in test2:
 		aa = i.id
 		logger.info('%s 가 스케줄러가 있습니다.', aa)
-try:
-	#DB 변경
-	conn = sqlite3.connect('./database.db')
-	cursor = conn.cursor()
-	cursor.execute("select * from database")
-	row = cursor.fetchone()
-	print(len(row))
-	if len(row) == 8:
-		cursor.execute("DROP TABLE database")
-		con.commit()
-	else:
-		print(len(row))
-except:
-	pass
 
-try:
-	#데이타 읽기
-	con = sqlite3.connect('database.db',timeout=60)
-	cur = con.cursor()
-	sql = "select * from database"
-	cur.execute(sql)
-	rows = cur.fetchall()
-	if rows == None:
-		pass
-	else:
-		for row in rows:
-			FLASKAPPSNAME = row[0]
-			FLASKAPPS = row[1]
-			FLASKTIME = row[2]
-			FLASKTELGM = row[3]
-			FLASKTOKEN = row[4]
-			FLASKBOTID = row[5]
-			FLASKALIM = row[6]
-			try:
-				sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
-			except:
-				pass
-except:
-	pass
 @bp3.route('/')
 @bp3.route('index')
 def second():
