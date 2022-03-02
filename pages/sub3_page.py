@@ -18,6 +18,7 @@ rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a',
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 sub3_page.start()
+
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub3db = at[0] + '/data/database.db'
@@ -29,7 +30,6 @@ try:
 	cursor = conn.cursor()
 	cursor.execute("select * from database")
 	row = cursor.fetchone()
-	print(len(row))
 	if len(row) == 8:
 		cursor.execute("DROP TABLE database")
 		con.commit()
@@ -62,9 +62,7 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 def second():
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect(sub3db,timeout=60)
-	#print ("Opened database successfully")
 	conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
-	#print ("Table created successfully")
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
