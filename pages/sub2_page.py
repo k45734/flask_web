@@ -41,23 +41,25 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	sub2db = at[0] + '/data'
+	logdata = at[0] + '/data/log'
+else:
+	sub2db = '/data'
+	logdata = '/data/log'
+	
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 job_defaults = { 'max_instances': 1 }
 scheduler2 = BackgroundScheduler(job_defaults=job_defaults)
 #scheduler = BackgroundScheduler()
-f = open('./log/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+f = open(logdata + '/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 scheduler2.start()
-if platform.system() == 'Windows':
-	at = os.path.splitdrive(os.getcwd())
-	sub2db = at[0] + '/data'
-else:
-	sub2db = '/data'
-	
+
 #데이타베이스 없으면 생성
 conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')

@@ -6,12 +6,17 @@ try:
 except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+import platform
 import os.path, os, logging
 from logging.handlers import RotatingFileHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	logdata = at[0] + '/data/log'
+else:
+	logdata = '/data/log'
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
@@ -22,11 +27,11 @@ def createFolder(directory):
 
 def create_app():
 #if __name__ == '__main__':
-	createFolder('./log')
-	filepath = './log/flask.log'
+	createFolder(logdata)
+	filepath = logdata + '/flask.log'
 	if not os.path.isfile(filepath):
-		f = open('./log/flask.log','a', encoding='utf-8')
-	rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+		f = open(logdata + '/flask.log','a', encoding='utf-8')
+	rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 	logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 	logger = logging.getLogger()
 	app = Flask(__name__)	

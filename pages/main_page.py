@@ -15,7 +15,11 @@ import zipfile, shutil
 from distutils.dir_util import copy_tree
 
 bp = Blueprint('main', __name__, url_prefix='/')
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	logdata = at[0] + '/data/log'
+else:
+	logdata = '/data/log'
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
 		if abs(num) < 1024.0:
@@ -133,18 +137,15 @@ def user_info_edit_proc():
 
 @bp.route("log")
 def log():
-	createFolder('./log')
-	filepath = './log/flask.log'
-	filepath2 = './log/flaskweb.log'
+	createFolder(logdata)
+	filepath = logdata + '/flask.log'
 	if not os.path.isfile(filepath):
 		f = open('./log/flask.log','a', encoding='utf-8')
-	if not os.path.isfile(filepath2):
-		f = open('./log/flaskweb.log','a', encoding='utf-8')
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
 		if platform.system() == 'Windows':
-			filepath = './log/flask.log'
+			filepath = logdata + '/flask.log'
 			tltl = []
 			with open(filepath, 'rt', encoding='cp949') as fp:
 				fp.seek (0, 2)
@@ -161,7 +162,7 @@ def log():
 				tltl.append(test)
 					
 		else:
-			filepath = './log/flask.log'
+			filepath = logdata + '/flask.log'
 			tltl = []
 			with open(filepath, 'rt', encoding='utf-8') as fp:
 				fp.seek (0, 2)
@@ -222,7 +223,7 @@ def update(file_name = None):
 			if platform.system() == 'Windows':
 				os.system("flask run --reload")
 			else:
-				os.system("cat /dev/null > ./log/flask.log")
+				os.system("cat /dev/null > " + logdata + "/flask.log")
 				os.system("chmod 777 * -R")
 				os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
@@ -235,7 +236,7 @@ def restart():
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			os.system("cat /dev/null > ./log/flask.log")
+			os.system("cat /dev/null > " + logdata + "/flask.log")
 			os.system("chmod 777 * -R")
 			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 		return redirect(url_for('main.index'))

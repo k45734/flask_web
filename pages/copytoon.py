@@ -28,22 +28,25 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
-
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	webtoondb = at[0] + '/data/webtoon.db'
+	logdata = at[0] + '/data/log'
+else:
+	webtoondb = '/data/webtoon.db'
+	logdata = '/data/log'
+	
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
-f = open('./log/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+f = open(logdata + '/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 schedulerc.start()
-if platform.system() == 'Windows':
-	at = os.path.splitdrive(os.getcwd())
-	webtoondb = at[0] + '/data/webtoon.db'
-else:
-	webtoondb = '/data/webtoon.db'
+
 try:
 	#DB 변경
 	conn = sqlite3.connect(webtoondb,timeout=60)

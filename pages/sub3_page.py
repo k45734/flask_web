@@ -8,22 +8,24 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
 import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess
+if platform.system() == 'Windows':
+	at = os.path.splitdrive(os.getcwd())
+	sub3db = at[0] + '/data/database.db'
+	logdata = at[0] + '/data/log'
+else:
+	sub3db = '/data/database.db'
+	logdata = '/data/log'
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 job_defaults = { 'coalesce': False, 'max_instances': 1 }
 sub3_page = BackgroundScheduler(job_defaults=job_defaults)
-f = open('./log/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename='./log/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+f = open(logdata + '/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 sub3_page.start()
 
-if platform.system() == 'Windows':
-	at = os.path.splitdrive(os.getcwd())
-	sub3db = at[0] + '/data/database.db'
-else:
-	sub3db = '/data/database.db'
 try:
 	#DB 변경
 	conn = sqlite3.connect(sub3db,timeout=60)
