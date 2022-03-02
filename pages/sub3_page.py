@@ -35,6 +35,7 @@ try:
 		con.commit()
 	else:
 		print(len(row))
+	logger.info(len(row))
 except:
 	pass
 		
