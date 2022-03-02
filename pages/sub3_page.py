@@ -168,6 +168,26 @@ def ok(FLASKAPPSNAME):
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)			
 		return redirect(url_for('sub3.second'))
 
+@bp3.route("now/<FLASKAPPSNAME>", methods=["GET"])
+def now(FLASKAPPSNAME):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		conn = sqlite3.connect(sub3db,timeout=60)
+		cursor = conn.cursor()
+		sql = "select * from database where FLASKAPPSNAME = ?"
+		cursor.execute(sql, (FLASKAPPSNAME,))
+		row = cursor.fetchone()
+		FLASKAPPSNAME = row[0]
+		FLASKAPPS = row[1]
+		FLASKTIME = row[2]
+		FLASKTELGM = row[3]
+		FLASKTOKEN = row[4]
+		FLASKBOTID = row[5]
+		FLASKALIM = row[6]
+		exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM)
+		return redirect(url_for('sub3.second'))
+		
 @bp3.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
 def cancle(FLASKAPPSNAME):
 	if not session.get('logFlag'):
