@@ -14,12 +14,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	sub4db = at[0] + '/data/database.db'
+	sub4db = at[0] + '/data/shop.db'
 else:
-	sub4db = '/data/database.db'
+	sub4db = '/data/shop.db'
 #데이타베이스 없으면 생성
 conn = sqlite3.connect(sub4db,timeout=60)
-conn.execute('CREATE TABLE IF NOT EXISTS database2 (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
+conn.execute('CREATE TABLE IF NOT EXISTS shop (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
 conn.close()
 
 @bp4.route('/')
@@ -37,7 +37,7 @@ def second():
 		con = sqlite3.connect(sub4db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database2")
+		cur.execute("select * from shop")
 		rows = cur.fetchall()
 		return render_template('stock.html', rows = rows)
 		
@@ -59,7 +59,7 @@ def edit_result():
 		TOTAL = test
 		#TOTAL = request.args.get('TOTAL')
 		db = c.cursor()
-		sql_update = "UPDATE database2 SET PRODUCT_NAME= ?, RECEIVING = ?, SHIPPING = ?, TOTAL = ?, MY_DATE = ? WHERE idx = ?"
+		sql_update = "UPDATE shop SET PRODUCT_NAME= ?, RECEIVING = ?, SHIPPING = ?, TOTAL = ?, MY_DATE = ? WHERE idx = ?"
 		db.execute(sql_update,(PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL, MY_DATE, idx))
 		c.commit()
 		return redirect(url_for('sub4.second'))
@@ -87,7 +87,7 @@ def edit():
 		#TOTAL = request.args.get('TOTAL')
 		c = sqlite3.connect(sub4db,timeout=60)
 		db = c.cursor()
-		contents = "SELECT '{}' FROM database2 WHERE idx = '{}'".format(MY_DATE, idx) 
+		contents = "SELECT '{}' FROM shop WHERE idx = '{}'".format(MY_DATE, idx) 
 		db.execute(contents)
 		return render_template('stock_edit.html',MY_DATE=MY_DATE,PRODUCT_NAME=PRODUCT_NAME,RECEIVING=RECEIVING,SHIPPING=SHIPPING,TOTAL=TOTAL,idx=idx)	
 	
@@ -99,9 +99,9 @@ def databasedel(idx):
 		con = sqlite3.connect(sub4db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "DELETE FROM database2 WHERE idx = '{}'".format(idx)
+		sql = "DELETE FROM shop WHERE idx = '{}'".format(idx)
 		cur.execute(sql)
-		cur.execute("select * from database2")
+		cur.execute("select * from shop")
 		con.commit()
 		rows = cur.fetchall()
 		return redirect(url_for('sub4.second'))
@@ -120,7 +120,7 @@ def ok():
 		con = sqlite3.connect(sub4db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database2")
+		cur.execute("select * from shop")
 		rows = cur.fetchall()
 		return redirect(url_for('sub4.second'))
 
@@ -151,7 +151,7 @@ def csv_import():
 		sheet['F1'] = "합계"
 		con = sqlite3.connect(sub4db,timeout=60)
 		cur = con.cursor()
-		bables = cur.execute('SELECT * FROM database2')
+		bables = cur.execute('SELECT * FROM shop')
 		rows = cur.fetchall()
 		nh_data = []
 		for table in rows:
@@ -181,7 +181,7 @@ def start():
 		con = sqlite3.connect(sub4db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database2 WHERE PRODUCT_NAME = '{}' ORDER BY ROWID DESC LIMIT 1".format(PRODUCT_NAME))
+		cur.execute("select * from shop WHERE PRODUCT_NAME = '{}' ORDER BY ROWID DESC LIMIT 1".format(PRODUCT_NAME))
 		rows = cur.fetchone()
 		try:
 			a = dict(rows)['TOTAL'] 
@@ -205,7 +205,7 @@ def start():
 					TOTAL = test
 					con.row_factory = sqlite3.Row
 					cur = con.cursor()
-					cur.execute("INSERT INTO database2 (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL) VALUES (?, ?, ?, ?, ?)", (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL))
+					cur.execute("INSERT INTO shop (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL) VALUES (?, ?, ?, ?, ?)", (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL))
 					#cur.execute("select * from database2")
 					con.commit()
 					rows = cur.fetchall()
@@ -213,7 +213,7 @@ def start():
 				else:
 					con.row_factory = sqlite3.Row
 					cur = con.cursor()
-					cur.execute("select * from database2")
+					cur.execute("select * from shop")
 					con.commit()
 					rows = cur.fetchall()
 					
