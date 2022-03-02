@@ -680,7 +680,8 @@ def ytnsnews():
 	URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 	req = session.get(URL,headers=header)
 	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("div",{"class":"news-con"})	
+	list = bs0bj.find("div",{"class":"section01"})	
+	posts = list.findAll("div",{"class":"news-con"})
 	ytnnews = []
 	for i in posts:
 		a1 = i.text
