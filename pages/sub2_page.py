@@ -62,7 +62,7 @@ scheduler2.start()
 
 #데이타베이스 없으면 생성
 conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT)')
+conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT, program TEXT)')
 conn.close()
 @bp2.route('/')
 @bp2.route('index')
@@ -749,7 +749,7 @@ def news():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
+		cur.execute("select * from database where program = 'news'")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -772,21 +772,24 @@ def news_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cursor.execute("select * from database")
+		try:
+			cursor.execute("select * from database where program = 'news'")
+		except:
+			cursor.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
 				update database
 					set telgm_token = ?
-					where telgm_botid = ?
+					where telgm_botid = ? AND program = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO database 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, 'news'))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -808,7 +811,7 @@ def unse():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
+		cur.execute("select * from database where program = 'unse'")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -831,21 +834,24 @@ def unse_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cursor.execute("select * from database")
+		try:
+			cursor.execute("select * from database where program = 'unse'")
+		except:
+			cursor.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
 				update database
 					set telgm_token = ?
-					where telgm_botid = ?
+					where telgm_botid = ? AND program = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO database 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, 'unse'))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -891,7 +897,10 @@ def weather():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
+		try:
+			cur.execute("select * from database where program = 'weather'")
+		except:
+			cur.execute("select * from database")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -915,21 +924,24 @@ def weather_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cursor.execute("select * from database")
+		try:
+			cursor.execute("select * from database where program = 'weather'")
+		except:
+			cursor.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
 				update database
 					set telgm_token = ?
-					where telgm_botid = ?
+					where telgm_botid = ? AND program = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO database 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid,'weather'))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -951,7 +963,10 @@ def tracking():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
+		try:
+			cur.execute("select * from database where program = 'tracking'")
+		except:
+			cur.execute("select * from database")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -976,21 +991,24 @@ def tracking_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cursor.execute("select * from database")
+		try:
+			cursor.execute("select * from database where program = 'tracking'")
+		except:
+			cursor.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
 				update database
 					set telgm_token = ?
-					where telgm_botid = ?
+					where telgm_botid = ? AND program = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO database 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid,program) VALUES (?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, 'tracking'))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -1055,21 +1073,24 @@ def board():
 		selnum = request.form['selnum']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cursor.execute("select * from database")
+		try:
+			cursor.execute("select * from database where program = 'board'")
+		except:
+			cur.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
 				update database
 					set telgm_token = ?
-					where telgm_botid = ?
+					where telgm_botid = ? AND program = ?
 				"""
 		else:
 			sql = """
 				INSERT INTO database 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
 				"""
 				
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid,'board'))
 		conn.commit()
 		cursor.close()
 		conn.close()
