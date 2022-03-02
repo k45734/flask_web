@@ -64,6 +64,21 @@ scheduler2.start()
 conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT, program TEXT)')
 conn.close()
+try:
+	#DB컬럼 추가
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database') WHERE name='program'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE database ADD COLUMN program TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+except:
+	pass
 @bp2.route('/')
 @bp2.route('index')
 def index():
