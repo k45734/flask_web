@@ -10,13 +10,23 @@
     <body>
 <!-- edit.html -->
 <div class="col-4 d-flex justify-content-center">
+<br><center><h4>프로그램 수정</p>
 <table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
 <form action="/sub3/edit_result" method="POST">
 <center>
 <tr>
-<th rowspan="2" align="center">프로그램명</th>
-<th rowspan="2" align="center">실행</th>
-<th rowspan="2" align="center">시간(CRON)</th>
+<th align="center">프로그램명</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSNAME" value="{{ FLASKAPPSNAME }}" readonly></td>
+</tr>
+<tr>
+<th align="center">실행</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKAPPS" value="{{ FLASKAPPS }}"></td>
+</tr>
+<tr>
+<th align="center">시간(CRON)</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
+</tr>
+<tr>
 <th colspan="4">텔레그램</th>
 </tr>
 <tr>
@@ -26,9 +36,6 @@
 <th align="center">사용</th>
 </tr>
 <tr>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSNAME" value="{{ FLASKAPPSNAME }}" readonly></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKAPPS" value="{{ FLASKAPPS }}"></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
 <td align="center"><select name="FLASKALIM">
     <option value="{{ FLASKALIM }}">{{ FLASKALIM }}</option>
     <option value="0">무음</option>
