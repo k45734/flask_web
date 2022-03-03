@@ -60,6 +60,13 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 scheduler2.start()
 
+#오늘날짜
+nowtime1 = datetime.now()
+newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
+#7일이전
+nowtime2 = nowtime1 - timedelta(days=7)
+olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
+
 #데이타베이스 없으면 생성
 conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT, program TEXT)')
@@ -74,6 +81,22 @@ try:
 	row = cur.fetchone()
 	if row[0] == 0:
 		conn.execute("ALTER TABLE database ADD COLUMN program TEXT")
+	else:
+		print('컬럼이 있습니다.')
+	conn.close()
+except:
+	pass
+
+try:
+	#DB컬럼 추가
+	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	cur = conn.cursor()
+	cur2 = conn.cursor()
+	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('news') WHERE name='DATE'"
+	cur.execute(sql)
+	row = cur.fetchone()
+	if row[0] == 0:
+		conn.execute("ALTER TABLE news ADD COLUMN DATE TEXT")
 	else:
 		print('컬럼이 있습니다.')
 	conn.close()
@@ -151,6 +174,19 @@ def url_to_image(url, dfolder, category, category2, filename):
 			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
+			
+#텔레그램 알림
+def tel(telgm,telgm_alim,telgm_token,telgm_botid,msg):
+	if telgm == 'True' :
+		bot = telegram.Bot(token = telgm_token)
+		if telgm_alim == 'True':
+			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
+		else :
+			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
+		print(msg)
+	else:
+		print(msg)
+		
 #펀맘 DB		
 def add_d(id, go, complte):
 	try:
@@ -247,15 +283,9 @@ def exec_start(t_main,sel,selnum,telgm,telgm_alim,telgm_token,telgm_botid):
 		with io.open(file, 'r+' ,-1, "utf-8") as f_read:
 			before = f_read.readline()
 			if before != a:			
-				if telgm == '0' :
-					bot = telepot.Bot(token = telgm_token)
-					if telgm_alim == '0' :
-						bot.sendMessage(chat_id = telgm_botid, text=msg_on, disable_notification=True)
-					else:
-						bot.sendMessage(chat_id = telgm_botid, text=msg_on, disable_notification=False)
-				print(msg_on)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			else:
-				print(msg_off)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 
 		with io.open(file, 'w+',-1, "utf-8") as f_write:
 			f_write.write(a)
@@ -350,14 +380,9 @@ def exec_start2(cafenum,cafe,num,cafemenu,cafeboard,boardpath,telgm,telgm_alim,t
 				before = f_read.readline()
 				message = ttp
 				if before != message:
-					if telgm == '0' :
-						bot = telepot.Bot(token = telgm_token)
-						if telgm_alim == '0' :
-							bot.sendMessage(chat_id = telgm_botid, text=message, disable_notification=True)
-						else:
-							bot.sendMessage(chat_id = telgm_botid, text=message, disable_notification=False)
-					else:
-						print(message)
+					tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+				else:
+					tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			with io.open(file, 'w+' ,-1, "utf-8") as f_write:
 				f_write.write(message)
 				f_write.close()
@@ -491,13 +516,7 @@ def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 		#json_string6 = json_string4.get("description")
 		
 		#print(jsonObject) 
-		if telgm == '0' :
-			bot = telepot.Bot(token = telgm_token)
-			if telgm_alim == '0' :
-				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
-			else:
-				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)	
-		print(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		
 def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	Finallocation = location + '날씨' 
@@ -517,16 +536,7 @@ def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		data_list.append(x.get_text())
 
 	msg = Finallocation + ' ' + data_list[13] + '\n현재온도는 ' + data_list[0] + '\n강수확률은 ' + data_list[7] + '\n습도 : ' + data_list[8] + '\n풍속 : ' + data_list[10]
-	print(msg)
-	if telgm == '0' :
-		bot = telepot.Bot(token = telgm_token)
-		if telgm_alim == '0':
-			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
-		else :
-			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
-		print(msg)
-	else:
-		print(msg)
+	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 
 #운세알리미
 def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
@@ -574,17 +584,10 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row[3] #띠별상세운세
 		e = row[4] #완료여부
 		a4 = b + ' (' + c + ')\n' + d
-		if telgm == '0' :
-			bot = telegram.Bot(token = telgm_token)
-			if telgm_alim == '0':
-				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=True)
-			else :
-				bot.sendMessage(chat_id = telgm_botid, text=a4, disable_notification=False)
-		else:
-			print(a4)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
 
-def addnews(a,b,c,d):
+def addnews(a,b,c,d,e):
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()
 	sql = "select * from news where TITLE = ? and URL = ?"
@@ -593,13 +596,13 @@ def addnews(a,b,c,d):
 	if row != None:
 		pass
 	else:
-		cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, COMPLETE) VALUES (?,?,?,?)", (a,b,c,d))
+		cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, COMPLETE, DATE) VALUES (?,?,?,?,?)", (a,b,c,d,e))
 		con.commit()
 	
 		#con.rollback()
 	con.close()
-		
-def addnews_d(a, b, c, d):
+	
+def addnews_d(a, b, c, d, e):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
@@ -610,14 +613,14 @@ def addnews_d(a, b, c, d):
 	except:
 		con.rollback()
 	finally:	
-		con.close()	
+		con.close()		
 
 def vietnews():
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://www.vinatimes.net/news'
 	req = session.get(URL,headers=header)
-	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.findAll("div",{"class":"list_title"})
 	vietnews = []
 	for test in posts:
@@ -625,8 +628,8 @@ def vietnews():
 		a2 = "".join(title.split())
 		a3 = test.a['href']
 		a5 = "VIET"
-		keys = ['CAST','TITLE','URL']
-		values = [a5, a2, a3]
+		keys = ['CAST','TITLE','URL','DATE']
+		values = [a5, a2, a3, newdate]
 		dt = dict(zip(keys, values))
 		vietnews.append(dt)
 	return vietnews	
@@ -636,7 +639,7 @@ def esbsnews():
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 	req = session.get(URL,headers=header)
-	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.find("div",{"class":"w_news_list"})
 	lists = posts.findAll("a")
 	sbsnews = []
@@ -647,8 +650,8 @@ def esbsnews():
 		a3 = 'https://news.sbs.co.kr' + a1
 		a4 = "{} \n{}\n".format(a2, a3)
 		a5 = "SBS"
-		keys = ['CAST','TITLE','URL']
-		values = [a5, a2, a3]
+		keys = ['CAST','TITLE','URL','DATE']
+		values = [a5, a2, a3, newdate]
 		dt = dict(zip(keys, values))
 		sbsnews.append(dt)
 	return sbsnews		
@@ -658,7 +661,7 @@ def ekbsnews():
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'http://news.kbs.co.kr/common/main.html'
 	req = session.get(URL,headers=header)
-	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 	lists = posts.findAll("a")
 	kbsnews = []
@@ -668,8 +671,8 @@ def ekbsnews():
 		a3 = 'http://news.kbs.co.kr' + a1
 		a4 = "{} \n{}\n".format(a2, a3)
 		a5 = "KBS"
-		keys = ['CAST','TITLE','URL']
-		values = [a5, a2, a3]
+		keys = ['CAST','TITLE','URL', 'DATE']
+		values = [a5, a2, a3, newdate]
 		dt = dict(zip(keys, values))
 		kbsnews.append(dt)
 	return kbsnews		
@@ -679,26 +682,26 @@ def ytnsnews():
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 	req = session.get(URL,headers=header)
-	bs0bj = BeautifulSoup(req.content.decode('utf-8','replace'),'html.parser')
+	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 	list = bs0bj.find("div",{"class":"section01"})	
-	posts = list.findAll("div",{"class":"news-con"})
+	posts = list.findAll("div",{"class":"news-con"})	
 	ytnnews = []
 	for i in posts:
 		a1 = i.text
 		a2 = " ".join(a1.split())
 		a3 = 'https:' + i.find('a')['href']
 		a4 = "YTN"
-		keys = ['CAST','TITLE','URL']
-		values = [a4, a2, a3]
+		keys = ['CAST','TITLE','URL', 'DATE']
+		values = [a4, a2, a3, newdate]
 		dt = dict(zip(keys, values))
 		ytnnews.append(dt)
 	return ytnnews	
 	
-	
 def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
 	#SQLITE3 DB 없으면 만들다.
+	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, COMPLETE TEXT)')	
+	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, COMPLETE TEXT, DATE TEXT)')	
 	conn.close()
 
 	sbs = esbsnews()
@@ -710,53 +713,66 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		addnews(a,b,c,d)
+		e = myfile
+		addnews(a,b,c,d,e)
 	for i in kbs:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		addnews(a,b,c,d)
+		e = myfile
+		addnews(a,b,c,d,e)
 	for i in viet:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		addnews(a,b,c,d)
+		e = myfile
+		addnews(a,b,c,d,e)
 	for i in ytn:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		addnews(a,b,c,d)
-		
+		e = myfile
+		addnews(a,b,c,d,e)
+	#최신 기사
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()	
 	sql = "select * from news where COMPLETE = ?"
 	cur.execute(sql, ('False', ))
-	rows = cur.fetchall()
-	
+	rows = cur.fetchall()		
 	#DB의 정보를 읽어옵니다.
 	for row in rows:
 		a = row[0]
 		b = row[1]
 		c = row[2]
 		d = row[3]
+		e = row[4]
 		msg = '{}\n{}\n{}'.format(a,b,c)
-		if telgm == '0' :
-			bot = telegram.Bot(token = telgm_token)
-			if telgm_alim == '0':
-				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
-			else:		
-				bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
-			time.sleep(10)
-		else:
-			print(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		time.sleep(10)
 		#중복 알림에거
-		addnews_d(a,b,c,d)
+		addnews_d(a,b,c,d,e)
+		
+	#오래된 기사 삭제	
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	cur = con.cursor()	
+	sql = "select * from news where DATE not between ? and ?"
+	cur.execute(sql, (olddate, newdate))
+	rows = cur.fetchall()
+	for row in rows:
+		a = row[1]
+		print(a)
+		cur.execute("DELETE FROM news WHERE TITLE = ?", (a,))
+		con.commit()
 
 @bp2.route('news')
 def news():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -765,7 +781,7 @@ def news():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database where program = 'news'")
+		cur.execute("select * from news")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -788,24 +804,21 @@ def news_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		try:
-			cursor.execute("select * from database where program = 'news'")
-		except:
-			cursor.execute("select * from database")
+		cursor.execute("select * from news")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update database
+				update news
 					set telgm_token = ?
-					where telgm_botid = ? AND program = ?
+					, telgm_botid = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO database 
-				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
+				INSERT INTO news 
+				(telgm_token, telgm_botid) VALUES (?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, 'news'))
+		cursor.execute(sql, (telgm_token, telgm_botid))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -819,6 +832,10 @@ def news_ok():
 		
 @bp2.route('unse')
 def unse():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS unse (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -827,7 +844,7 @@ def unse():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database where program = 'unse'")
+		cur.execute("select * from unse")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -850,24 +867,21 @@ def unse_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		try:
-			cursor.execute("select * from database where program = 'unse'")
-		except:
-			cursor.execute("select * from database")
+		cursor.execute("select * from unse")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update database
+				update unse
 					set telgm_token = ?
-					where telgm_botid = ? AND program = ?
+					, telgm_botid = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO database 
-				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
+				INSERT INTO unse 
+				(telgm_token, telgm_botid) VALUES (?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, 'unse'))
+		cursor.execute(sql, (telgm_token, telgm_botid))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -905,6 +919,10 @@ def sch_del():
 		
 @bp2.route('weather')
 def weather():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
@@ -913,10 +931,7 @@ def weather():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		try:
-			cur.execute("select * from database where program = 'weather'")
-		except:
-			cur.execute("select * from database")
+		cur.execute("select * from weather")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -940,24 +955,21 @@ def weather_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		try:
-			cursor.execute("select * from database where program = 'weather'")
-		except:
-			cursor.execute("select * from database")
+		cursor.execute("select * from weather")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update database
+				update weather
 					set telgm_token = ?
-					where telgm_botid = ? AND program = ?
+					, telgm_botid = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO database 
-				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
+				INSERT INTO weather 
+				(telgm_token, telgm_botid, program) VALUES (?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid,'weather'))
+		cursor.execute(sql, (telgm_token, telgm_botid))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -971,6 +983,10 @@ def weather_ok():
 		
 @bp2.route('tracking')
 def tracking():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -979,10 +995,7 @@ def tracking():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		try:
-			cur.execute("select * from database where program = 'tracking'")
-		except:
-			cur.execute("select * from database")
+		cur.execute("select * from tracking")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -1007,24 +1020,21 @@ def tracking_ok():
 		telgm_botid = request.form['telgm_botid']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		try:
-			cursor.execute("select * from database where program = 'tracking'")
-		except:
-			cursor.execute("select * from database")
+		cursor.execute("select * from tracking")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update database
+				update tracking
 					set telgm_token = ?
-					where telgm_botid = ? AND program = ?
+					, telgm_botid = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO database 
-				(telgm_token, telgm_botid,program) VALUES (?, ?, ?)
+				INSERT INTO tracking 
+				(telgm_token, telgm_botid) VALUES (?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, 'tracking'))
+		cursor.execute(sql, (telgm_token, telgm_botid))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -1062,6 +1072,10 @@ def funmom_ok():
 		
 @bp2.route('board', methods=['POST'])
 def board():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS board (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
@@ -1089,24 +1103,21 @@ def board():
 		selnum = request.form['selnum']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		try:
-			cursor.execute("select * from database where program = 'board'")
-		except:
-			cur.execute("select * from database")
+		cur.execute("select * from database")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update database
+				update board
 					set telgm_token = ?
-					where telgm_botid = ? AND program = ?
+					, telgm_botid = ?
 				"""
 		else:
 			sql = """
-				INSERT INTO database 
-				(telgm_token, telgm_botid, program) VALUES (?, ?, ?)
+				INSERT INTO board 
+				(telgm_token, telgm_botid) VALUES (?, ?)
 				"""
 				
-		cursor.execute(sql, (telgm_token, telgm_botid,'board'))
+		cursor.execute(sql, (telgm_token, telgm_botid))
 		conn.commit()
 		cursor.close()
 		conn.close()
