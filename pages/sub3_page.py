@@ -34,7 +34,8 @@ try:
 	row = cursor.fetchone()
 	if len(row) == 8:
 		cursor.execute("DROP TABLE database")
-		con.commit()
+		conn.commit()
+		conn.close()
 	else:
 		print(len(row))
 	logger.info(len(row))
@@ -87,6 +88,7 @@ def second():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
+		con.close()
 		return render_template('program.html', rows = rows, tltl = tltl)
 		
 @bp3.route("edit/<FLASKAPPSNAME>", methods=['GET'])
@@ -126,6 +128,7 @@ def edit_result():
 		sql_update = "UPDATE database SET FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
 		db.execute(sql_update,(FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
 		c.commit()
+		c.close()
 		return redirect(url_for('sub3.second'))
 		
 @bp3.route("databasedel/<FLASKAPPSNAME>", methods=["GET"])
@@ -141,6 +144,7 @@ def databasedel(FLASKAPPSNAME):
 		cur.execute("select * from database")
 		con.commit()
 		rows = cur.fetchall()
+		con.close()
 		return redirect(url_for('sub3.second'))
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
