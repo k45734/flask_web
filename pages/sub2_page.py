@@ -713,28 +713,28 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		e = myfile
+		e = newdate
 		addnews(a,b,c,d,e)
 	for i in kbs:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		e = myfile
+		e = newdate
 		addnews(a,b,c,d,e)
 	for i in viet:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		e = myfile
+		e = newdate
 		addnews(a,b,c,d,e)
 	for i in ytn:
 		a = i['CAST']
 		b = i['TITLE']
 		c = i['URL']
 		d = 'False'
-		e = myfile
+		e = newdate
 		addnews(a,b,c,d,e)
 	#최신 기사
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
