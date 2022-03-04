@@ -1093,6 +1093,7 @@ def godown(t_main, compress, cbz, packege , startname):
 	conn.close()
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect(webtoondb,timeout=60)
+	con.row_factory = sqlite3.Row
 	cur = con.cursor()
 	sql = "select * from " + packege + " where complte = 'False'"
 	cur.execute(sql)
@@ -1100,12 +1101,12 @@ def godown(t_main, compress, cbz, packege , startname):
 	session2 = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}	
 	for i in row:
-		title_old = i[0]
+		title_old = i['maintitle']
 		title = "".join(title_old.split())
-		title_old = i[1]
+		title_old = i['subtitle']
 		subtitle = "".join(title_old.split())
-		url = i[2]
-		complte = i[3]
+		url = i['urltitle']
+		complte = i['complte']
 		newurl = new_url(packege, t_main)
 		wwwkt = newurl + url
 		logger.info('%s', wwwkt)

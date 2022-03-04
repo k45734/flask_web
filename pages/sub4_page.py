@@ -15,8 +15,10 @@ dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub4db = at[0] + '/data/shop.db'
+	sub4dbl = at[0] + '/data'
 else:
 	sub4db = '/data/shop.db'
+	sub4dbl = '/data'
 #데이타베이스 없으면 생성
 conn = sqlite3.connect(sub4db,timeout=60)
 conn.execute('CREATE TABLE IF NOT EXISTS shop (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
@@ -126,7 +128,7 @@ def ok():
 
 @bp4.route("csv_download")		
 def csv_download():
-	file_name = f"./inventory.xlsx"
+	file_name = sub4dbl + "/inventory.xlsx"
 	return send_file(file_name, 
 					mimetype='application/vnd.ms-excel', 
 					attachment_filename='inventory.xlsx',# 다운받아지는 파일 이름. 
@@ -150,17 +152,18 @@ def csv_import():
 		sheet['E1'] = "출고"
 		sheet['F1'] = "합계"
 		con = sqlite3.connect(sub4db,timeout=60)
+		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		bables = cur.execute('SELECT * FROM shop')
 		rows = cur.fetchall()
 		nh_data = []
 		for table in rows:
-			a = table[0]
-			b = table[1]
-			c = table[2]
-			d = table[3]
-			e = table[4]
-			f = table[5]
+			a = table['idx']
+			b = table['MY_DATE']
+			c = table['PRODUCT_NAME']
+			d = table['RECEIVING']
+			e = table['SHIPPING']
+			f = table['TOTAL']
 			nh_data.extend([[a,b,c,d,e,f]])
 			
 		con.close()
@@ -168,7 +171,7 @@ def csv_import():
 		for i in nh_data:
 			sheet.append(i)
 		# 파일 저장하기
-		workbook.save("./inventory.xlsx")
+		workbook.save(sub4dbl + "/inventory.xlsx")
 		return redirect(url_for('sub4.second'))
 	
 @bp4.route("start", methods=['POST','GET'])

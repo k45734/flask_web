@@ -31,6 +31,7 @@
   <tr>
     <td class="tg-baqh">텔레그램알림</td>
     <td class="tg-0lax"><select name="telgm">
+	<option value="{{ telgm }}">{{ telgm }}</option>
 	<option value="1">안함</option>
     <option value="0">사용</option>
     </td>
@@ -38,6 +39,7 @@
   <tr>
     <td class="tg-baqh">텔레그램무음</td>
     <td class="tg-0lax"><select name="telgm_alim">
+	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
     <option value="1">안함</option>
     <option value="0">사용</option>
     </td>
@@ -52,7 +54,7 @@
   </tr>
   <tr>
     <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="*/1 * * * *" style="width:100%; border: 0;" ></td>
+    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
   </tr>
  <tr>
     <td class="tg-baqh">스케줄이름</td>

@@ -66,24 +66,60 @@ newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
 #7일이전
 nowtime2 = nowtime1 - timedelta(days=7)
 olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
-
-#데이타베이스 없으면 생성
-conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-conn.execute('CREATE TABLE IF NOT EXISTS database (telgm_token TEXT, telgm_botid TEXT, program TEXT)')
-conn.close()
 try:
-	#DB컬럼 추가
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	cur = conn.cursor()
-	cur2 = conn.cursor()
-	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('database') WHERE name='program'"
-	cur.execute(sql)
-	row = cur.fetchone()
-	if row[0] == 0:
-		conn.execute("ALTER TABLE database ADD COLUMN program TEXT")
-	else:
-		print('컬럼이 있습니다.')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	cur.execute("SELECT * FROM sqlite_master WHERE type='table'")
+	tableser = cur.fetchall()
+	rows = []
+	for tt in tableser:	
+		#DB컬럼 이 있으면 삭제합니다.
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cur = conn.cursor()
+		cur2 = conn.cursor()
+		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='program'"
+		cur.execute(sql)
+		row = cur.fetchone()
+		if row[0] == 0:
+			print('컬럼이 있어서 초기화합니다.')
+		else:
+			conn.execute("DROP TABLE  " + tt[1])
+		#DB컬럼 추가
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cur = conn.cursor()
+		cur2 = conn.cursor()
+		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='start_time'"
+		cur.execute(sql)
+		row = cur.fetchone()
+		if row[0] == 0:
+			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN start_time TEXT")
+		else:
+			print('컬럼이 있습니다.')
+		
+		#DB컬럼 추가
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cur = conn.cursor()
+		cur2 = conn.cursor()
+		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='telgm'"
+		cur.execute(sql)
+		row = cur.fetchone()
+		if row[0] == 0:
+			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN telgm TEXT")
+		else:
+			print('컬럼이 있습니다.')
+		#DB컬럼 추가
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cur = conn.cursor()
+		cur2 = conn.cursor()
+		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='telgm_alim'"
+		cur.execute(sql)
+		row = cur.fetchone()
+		if row[0] == 0:
+			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN telgm_alim TEXT")
+		else:
+			print('컬럼이 있습니다.')
+		conn.close()
 except:
 	pass
 
@@ -118,6 +154,10 @@ def index():
 
 @bp2.route("second")		
 def second():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS board (telgm_token TEXT, telgm_botid TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -126,7 +166,7 @@ def second():
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
+		cur.execute("select * from board")
 		rows = cur.fetchone()
 		if rows:
 			telgm_token = rows[0]
@@ -738,17 +778,18 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 		addnews(a,b,c,d,e)
 	#최신 기사
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
 	sql = "select * from news where COMPLETE = ?"
 	cur.execute(sql, ('False', ))
 	rows = cur.fetchall()		
 	#DB의 정보를 읽어옵니다.
 	for row in rows:
-		a = row[0]
-		b = row[1]
-		c = row[2]
-		d = row[3]
-		e = row[4]
+		a = row['CAST']
+		b = row['TITLE']
+		c = row['URL']
+		d = row['COMPLETE']
+		e = row['DATE']
 		msg = '{}\n{}\n{}'.format(a,b,c)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		time.sleep(10)
@@ -771,7 +812,7 @@ def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):
 def news():
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -784,12 +825,19 @@ def news():
 		cur.execute("select * from news")
 		rows = cur.fetchone()
 		if rows:
-			telgm_token = rows[0]
-			telgm_botid = rows[1]
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
+			print(telgm_alim, telgm)
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
-		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
+			start_time = '*/1 * * * *'
+			telgm = '1'
+			telgm_alim = '1'
+		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('news_ok', methods=['POST'])
 def news_ok():
@@ -811,14 +859,17 @@ def news_ok():
 				update news
 					set telgm_token = ?
 					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO news 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -834,7 +885,7 @@ def news_ok():
 def unse():
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS unse (telgm_token TEXT, telgm_botid TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS unse (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -847,12 +898,19 @@ def unse():
 		cur.execute("select * from unse")
 		rows = cur.fetchone()
 		if rows:
-			telgm_token = rows[0]
-			telgm_botid = rows[1]
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
-		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
+			start_time = '*/1 * * * *'
+			telgm = '1'
+			telgm_alim = '1'
+		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+
 
 @bp2.route('unse_ok', methods=['POST'])
 def unse_ok():
@@ -871,17 +929,20 @@ def unse_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update unse
+				update news
 					set telgm_token = ?
 					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO unse 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				INSERT INTO news 
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -921,7 +982,7 @@ def sch_del():
 def weather():
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -934,12 +995,18 @@ def weather():
 		cur.execute("select * from weather")
 		rows = cur.fetchone()
 		if rows:
-			telgm_token = rows[0]
-			telgm_botid = rows[1]
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
-		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
+			start_time = '*/1 * * * *'
+			telgm = '1'
+			telgm_alim = '1'
+		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('weather_ok', methods=['POST'])
 def weather_ok():
@@ -959,17 +1026,20 @@ def weather_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update weather
+				update news
 					set telgm_token = ?
 					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO weather 
-				(telgm_token, telgm_botid, program) VALUES (?, ?)
+				INSERT INTO news 
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -985,7 +1055,7 @@ def weather_ok():
 def tracking():
 	#데이타베이스 없으면 생성
 	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -998,12 +1068,18 @@ def tracking():
 		cur.execute("select * from tracking")
 		rows = cur.fetchone()
 		if rows:
-			telgm_token = rows[0]
-			telgm_botid = rows[1]
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
 		else:
 			telgm_token='입력하세요'
-			telgm_botid='입력하세요'	
-		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
+			telgm_botid='입력하세요'
+			start_time = '*/1 * * * *'
+			telgm = '1'
+			telgm_alim = '1'
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('tracking_ok', methods=['POST'])
 def tracking_ok():
@@ -1024,17 +1100,20 @@ def tracking_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update tracking
+				update news
 					set telgm_token = ?
 					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
 			"""
 		else:
 			sql = """
-				INSERT INTO tracking 
-				(telgm_token, telgm_botid) VALUES (?, ?)
+				INSERT INTO news 
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -1072,10 +1151,6 @@ def funmom_ok():
 		
 @bp2.route('board', methods=['POST'])
 def board():
-	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS board (telgm_token TEXT, telgm_botid TEXT)')
-	conn.close()
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
@@ -1103,7 +1178,7 @@ def board():
 		selnum = request.form['selnum']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
-		cur.execute("select * from database")
+		cur.execute("select * from board")
 		rows = cursor.fetchone()
 		if rows:
 			sql = """

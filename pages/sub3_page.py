@@ -82,17 +82,18 @@ def edit(FLASKAPPSNAME):
 		return redirect(url_for('main.index'))
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
+		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
 		sql = "select * from " + FLASKAPPSNAME + " where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
-		FLASKAPPSNAME = row[0]
-		FLASKAPPS = row[1]
-		FLASKTIME = row[2]
-		FLASKTELGM = row[3]
-		FLASKTOKEN = row[4]
-		FLASKBOTID = row[5]
-		FLASKALIM = row[6]
+		FLASKAPPSNAME = row['FLASKAPPSNAME']
+		FLASKAPPS = row['FLASKAPPS']
+		FLASKTIME = row['FLASKTIME']
+		FLASKTELGM = row['FLASKTELGM']
+		FLASKTOKEN = row['FLASKTOKEN']
+		FLASKBOTID = row['FLASKBOTID']
+		FLASKALIM = row['FLASKALIM']
 		cursor.close()
 		return render_template('edit.html', FLASKAPPSNAME=FLASKAPPSNAME, FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME)	
 
@@ -141,17 +142,18 @@ def ok(FLASKAPPSNAME):
 		return redirect(url_for('main.index'))
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
+		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
 		sql = 'select * from ' + FLASKAPPSNAME + ' where FLASKAPPSNAME = ?'
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
-		FLASKAPPSNAME = row[0]
-		FLASKAPPS = row[1]
-		FLASKTIME = row[2]
-		FLASKTELGM = row[3]
-		FLASKTOKEN = row[4]
-		FLASKBOTID = row[5]
-		FLASKALIM = row[6]
+		FLASKAPPSNAME = row['FLASKAPPSNAME']
+		FLASKAPPS = row['FLASKAPPS']
+		FLASKTIME = row['FLASKTIME']
+		FLASKTELGM = row['FLASKTELGM']
+		FLASKTOKEN = row['FLASKTOKEN']
+		FLASKBOTID = row['FLASKBOTID']
+		FLASKALIM = row['FLASKALIM']
 		try:
 			sub3_page.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
 			test2 = sub3_page.get_job(FLASKAPPSNAME).id
@@ -168,17 +170,18 @@ def now(FLASKAPPSNAME):
 		return redirect(url_for('main.index'))
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
+		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
 		sql = 'select * from ' + FLASKAPPSNAME + ' where FLASKAPPSNAME = ?'
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
-		FLASKAPPSNAME = row[0]
-		FLASKAPPS = row[1]
-		FLASKTIME = row[2]
-		FLASKTELGM = row[3]
-		FLASKTOKEN = row[4]
-		FLASKBOTID = row[5]
-		FLASKALIM = row[6]
+		FLASKAPPSNAME = row['FLASKAPPSNAME']
+		FLASKAPPS = row['FLASKAPPS']
+		FLASKTIME = row['FLASKTIME']
+		FLASKTELGM = row['FLASKTELGM']
+		FLASKTOKEN = row['FLASKTOKEN']
+		FLASKBOTID = row['FLASKBOTID']
+		FLASKALIM = row['FLASKALIM']
 		exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM)
 		return redirect(url_for('sub3.second'))
 		
