@@ -611,6 +611,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		
 	#중복 알림 방지
 	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+	con.row_factory = sqlite3.Row
 	cur = con.cursor()
 	sql = "select * from unse where COMPLTE = ?"
 	cur.execute(sql,('False',))
@@ -618,11 +619,11 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 	count = 0
 	for row in rows:
 		timestr = time.strftime("%Y%m%d")
-		a = row[0] #생성날짜
-		b = row[1] #띠
-		c = row[2] #띠별운세
-		d = row[3] #띠별상세운세
-		e = row[4] #완료여부
+		a = row['DATE'] #생성날짜
+		b = row['ZODIAC'] #띠
+		c = row['ZODIAC2'] #띠별운세
+		d = row['MEMO'] #띠별상세운세
+		e = row['COMPLTE'] #완료여부
 		a4 = b + ' (' + c + ')\n' + d
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
