@@ -624,7 +624,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 		c = row['ZODIAC2'] #띠별운세
 		d = row['MEMO'] #띠별상세운세
 		e = row['COMPLTE'] #완료여부
-		a4 = b + ' (' + c + ')\n' + d
+		msg = b + ' (' + c + ')\n' + d
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
 
