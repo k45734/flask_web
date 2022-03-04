@@ -930,7 +930,7 @@ def unse_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update news
+				update unse
 					set telgm_token = ?
 					, telgm_botid = ?
 					, start_time = ?
@@ -939,7 +939,7 @@ def unse_ok():
 			"""
 		else:
 			sql = """
-				INSERT INTO news 
+				INSERT INTO unse 
 				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
@@ -1027,7 +1027,7 @@ def weather_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update news
+				update weather
 					set telgm_token = ?
 					, telgm_botid = ?
 					, start_time = ?
@@ -1036,7 +1036,7 @@ def weather_ok():
 			"""
 		else:
 			sql = """
-				INSERT INTO news 
+				INSERT INTO weather 
 				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
@@ -1101,7 +1101,7 @@ def tracking_ok():
 		rows = cursor.fetchone()
 		if rows:
 			sql = """
-				update news
+				update tracking
 					set telgm_token = ?
 					, telgm_botid = ?
 					, start_time = ?
@@ -1110,7 +1110,7 @@ def tracking_ok():
 			"""
 		else:
 			sql = """
-				INSERT INTO news 
+				INSERT INTO tracking 
 				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
 			"""
 		
