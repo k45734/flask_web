@@ -589,7 +589,7 @@ def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
 
 	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
 	rs = requests.get(auth,headers=header,verify=False)
-	bs0bj = BeautifulSoup(rs.content.decode('utf-8','replace'),'html.parser')
+	bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
 	posts = bs0bj.findAll("div",{"class":"ani_result"})
 	dates = bs0bj.find('span',{'class':'cal'}).text
 	lastdate = " ".join(dates.split())
