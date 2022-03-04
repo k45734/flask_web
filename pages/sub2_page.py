@@ -177,9 +177,9 @@ def url_to_image(url, dfolder, category, category2, filename):
 			
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,msg):
-	if telgm == 'True' :
+	if telgm == '0' :
 		bot = telegram.Bot(token = telgm_token)
-		if telgm_alim == 'True':
+		if telgm_alim == '0':
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
 		else :
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
