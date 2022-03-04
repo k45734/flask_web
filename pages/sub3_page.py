@@ -26,22 +26,6 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 sub3_page.start()
 
-try:
-	#DB 변경
-	conn = sqlite3.connect(sub3db,timeout=60)
-	cursor = conn.cursor()
-	cursor.execute("select * from database")
-	row = cursor.fetchone()
-	if len(row) == 8:
-		cursor.execute("DROP TABLE database")
-		conn.commit()
-		conn.close()
-	else:
-		print(len(row))
-	logger.info(len(row))
-except:
-	pass
-		
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	
@@ -64,31 +48,32 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 @bp3.route('/')
 @bp3.route('index')
 def second():
-	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub3db,timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS database (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
-	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
-		FLASKAPPS = request.args.get('FLASKAPPS')
-		FLASKTIME = request.args.get('FLASKTIME')
-		FLASKTELGM = request.args.get('FLASKTELGM')
-		FLASKTOKEN = request.args.get('FLASKTOKEN')
-		FLASKBOTID = request.args.get('FLASKBOTID')
-		FLASKALIM = request.args.get('FLASKALIM')
+		#FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
+		#FLASKAPPS = request.args.get('FLASKAPPS')
+		#FLASKTIME = request.args.get('FLASKTIME')
+		#FLASKTELGM = request.args.get('FLASKTELGM')
+		#FLASKTOKEN = request.args.get('FLASKTOKEN')
+		#FLASKBOTID = request.args.get('FLASKBOTID')
+		#FLASKALIM = request.args.get('FLASKALIM')
 		con = sqlite3.connect(sub3db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		cur.execute("select * from database")
-		rows = cur.fetchall()
+		cur.execute("SELECT * FROM sqlite_master WHERE type='table'")
+		tableser = cur.fetchall()
+		rows = []
+		for tt in tableser:
+			cur.execute("SELECT * FROM " + tt[1])
+			mytable = cur.fetchall()
+			rows.append(mytable[0])
+		con.close()
 		tltl = []
 		test2 = sub3_page.get_jobs()
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
-		con.close()
 		return render_template('program.html', rows = rows, tltl = tltl)
 		
 @bp3.route("edit/<FLASKAPPSNAME>", methods=['GET'])
@@ -98,7 +83,7 @@ def edit(FLASKAPPSNAME):
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
-		sql = "select * from database where FLASKAPPSNAME = ?"
+		sql = "select * from " + FLASKAPPSNAME + " where FLASKAPPSNAME = ?"
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
 		FLASKAPPSNAME = row[0]
@@ -108,15 +93,14 @@ def edit(FLASKAPPSNAME):
 		FLASKTOKEN = row[4]
 		FLASKBOTID = row[5]
 		FLASKALIM = row[6]
+		cursor.close()
 		return render_template('edit.html', FLASKAPPSNAME=FLASKAPPSNAME, FLASKAPPS=FLASKAPPS,FLASKTELGM=FLASKTELGM,FLASKTOKEN=FLASKTOKEN,FLASKBOTID=FLASKBOTID,FLASKALIM=FLASKALIM,FLASKTIME=FLASKTIME)	
 
-@bp3.route("edit_result", methods=['POST'])
-def edit_result():
+@bp3.route("edit_result/<FLASKAPPSNAME>", methods=['POST'])
+def edit_result(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect(sub3db,timeout=60)
-		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
 		FLASKAPPS = request.form['FLASKAPPS']
 		FLASKTIME = request.form['FLASKTIME']
 		FLASKTELGM = request.form['FLASKTELGM']
@@ -124,11 +108,16 @@ def edit_result():
 		FLASKBOTID = request.form['FLASKBOTID']
 		FLASKALIM = request.form['FLASKALIM']
 		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-		db = c.cursor()
-		sql_update = "UPDATE database SET FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
-		db.execute(sql_update,(FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
-		c.commit()
-		c.close()
+		conn = sqlite3.connect(sub3db,timeout=60)
+		cursor = conn.cursor()
+		try:
+			sql_update = "UPDATE " + FLASKAPPSNAME + " SET FLASKAPPS= ?, FLASKTIME = ?, FLASKTELGM = ?, FLASKTOKEN = ?, FLASKBOTID =?, FLASKALIM =?  WHERE FLASKAPPSNAME = ?"
+			cursor.execute(sql_update,(FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM, FLASKAPPSNAME))
+			conn.commit()
+		except:
+			conn.rollback()
+		finally:	
+			conn.close()
 		return redirect(url_for('sub3.second'))
 		
 @bp3.route("databasedel/<FLASKAPPSNAME>", methods=["GET"])
@@ -136,15 +125,14 @@ def databasedel(FLASKAPPSNAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		print(FLASKAPPSNAME)
 		con = sqlite3.connect(sub3db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "DELETE FROM database WHERE FLASKAPPSNAME = '{}'".format(FLASKAPPSNAME)
+		sql = "DROP TABLE " + FLASKAPPSNAME
 		cur.execute(sql)
-		cur.execute("select * from database")
 		con.commit()
-		rows = cur.fetchall()
-		con.close()
+		con.close
 		return redirect(url_for('sub3.second'))
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])
@@ -154,7 +142,7 @@ def ok(FLASKAPPSNAME):
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
-		sql = "select * from database where FLASKAPPSNAME = ?"
+		sql = 'select * from ' + FLASKAPPSNAME + ' where FLASKAPPSNAME = ?'
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
 		FLASKAPPSNAME = row[0]
@@ -172,7 +160,7 @@ def ok(FLASKAPPSNAME):
 			test = sub3_page.get_job(FLASKAPPSNAME).id
 			test2 = sub3_page.modify_job(FLASKAPPSNAME).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)			
-		return redirect(url_for('sub3.second'))
+		return redirect(url_for('main.index'))
 
 @bp3.route("now/<FLASKAPPSNAME>", methods=["GET"])
 def now(FLASKAPPSNAME):
@@ -181,7 +169,7 @@ def now(FLASKAPPSNAME):
 	else:
 		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
-		sql = "select * from database where FLASKAPPSNAME = ?"
+		sql = 'select * from ' + FLASKAPPSNAME + ' where FLASKAPPSNAME = ?'
 		cursor.execute(sql, (FLASKAPPSNAME,))
 		row = cursor.fetchone()
 		FLASKAPPSNAME = row[0]
@@ -208,7 +196,6 @@ def cancle(FLASKAPPSNAME):
 			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', FLASKAPPSNAME)
 		else:
 			sub3_page.remove_job(FLASKAPPSNAME)
-			#sub3_page.shutdown()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = sub3_page.get_jobs()
 			for i in test2:
@@ -218,38 +205,33 @@ def cancle(FLASKAPPSNAME):
 		logger.info('%s 를 스케줄러를 삭제하였습니다.', test)
 		return redirect(url_for('sub3.second'))
 		
-@bp3.route("start", methods=['POST','GET'])
+@bp3.route("start", methods=['POST'])
 def start():
-	if request.method == 'POST':
-		try:
-			FLASKAPPSNAME = request.form['FLASKAPPSNAME']
-			FLASKAPPS = request.form['FLASKAPPS']
-			FLASKTIME = request.form['FLASKTIME']
-			FLASKTELGM = request.form['FLASKTELGM']
-			FLASKTOKEN = request.form['FLASKTOKEN']
-			FLASKBOTID = request.form['FLASKBOTID']
-			FLASKALIM = request.form['FLASKALIM']
-			FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-			with sqlite3.connect(sub3db,timeout=60) as con:
-				if session.get('logFlag'):
-					#print("OK")
-					con.row_factory = sqlite3.Row
-					cur = con.cursor()
-					cur.execute("INSERT INTO database (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM) VALUES (?, ?, ?, ?, ?, ?, ?)", (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
-					cur.execute("select * from database")
-					con.commit()
-					rows = cur.fetchall()
-				else:
-					#print("NO")
-					con.row_factory = sqlite3.Row
-					cur = con.cursor()
-					cur.execute("select * from database")
-					con.commit()
-					rows = cur.fetchall()
-					
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
+		FLASKAPPS = request.form['FLASKAPPS']
+		FLASKTIME = request.form['FLASKTIME']
+		FLASKTELGM = request.form['FLASKTELGM']
+		FLASKTOKEN = request.form['FLASKTOKEN']
+		FLASKBOTID = request.form['FLASKBOTID']
+		FLASKALIM = request.form['FLASKALIM']
+		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
+		#데이타베이스 없으면 생성
+		conn = sqlite3.connect(sub3db,timeout=60)
+		conn.execute('CREATE TABLE IF NOT EXISTS ' + FLASKAPPSNAME +' (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
+		conn.close()
+		try:		
+			print(FLASKAPPSNAME)
+			con = sqlite3.connect(sub3db,timeout=60)
+			cur = con.cursor()
+			cur.execute("INSERT OR REPLACE INTO " + FLASKAPPSNAME + "  (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM) VALUES (?, ?, ?, ?, ?, ?, ?)", (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
+			con.commit()		
 		except:
 			con.rollback()
 			
 		finally:
 			con.close()
-			return redirect(url_for('sub3.second'))
+			
+	return redirect(url_for('sub3.second'))
