@@ -29,9 +29,9 @@ sub3_page.start()
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	
-	if FLASKTELGM == '0' :
+	if FLASKTELGM == 'True' :
 		bot = telegram.Bot(token = FLASKTOKEN)
-		if FLASKALIM == '0' :
+		if FLASKALIM == 'True' :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
 			subprocess.call(FLASKAPPS, shell=True)
 		else :

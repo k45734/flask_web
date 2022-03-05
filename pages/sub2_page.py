@@ -217,9 +217,9 @@ def url_to_image(url, dfolder, category, category2, filename):
 			
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,msg):
-	if telgm == '0' :
+	if telgm == 'True' :
 		bot = telegram.Bot(token = telgm_token)
-		if telgm_alim == '0':
+		if telgm_alim == 'True':
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
 		else :
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
@@ -836,8 +836,8 @@ def news():
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
-			telgm = '1'
-			telgm_alim = '1'
+			telgm = 'False'
+			telgm_alim = 'False'
 		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('news_ok', methods=['POST'])
@@ -908,8 +908,8 @@ def unse():
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
-			telgm = '1'
-			telgm_alim = '1'
+			telgm = 'False'
+			telgm_alim = 'False'
 		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 
@@ -1005,8 +1005,8 @@ def weather():
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
-			telgm = '1'
-			telgm_alim = '1'
+			telgm = 'False'
+			telgm_alim = 'False'
 		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('weather_ok', methods=['POST'])
@@ -1078,8 +1078,8 @@ def tracking():
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
-			telgm = '1'
-			telgm_alim = '1'
+			telgm = 'False'
+			telgm_alim = 'False'
 		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('tracking_ok', methods=['POST'])
