@@ -1103,8 +1103,8 @@ def godown(t_main, compress, cbz, packege , startname):
 	for i in row:
 		title_old = i['maintitle']
 		title = "".join(title_old.split())
-		title_old = i['subtitle']
-		subtitle = "".join(title_old.split())
+		subtitle_old = i['subtitle']
+		subtitle = "".join(subtitle_old.split())
 		url = i['urltitle']
 		complte = i['complte']
 		newurl = new_url(packege, t_main)
@@ -1184,6 +1184,18 @@ def godown(t_main, compress, cbz, packege , startname):
 		else:
 			add_d(packege, subtitle, title)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
+
+@webtoon.route("now", methods=["POST"])
+def now():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		packege = request.form['packege']
+		t_main = request.form['t_main']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']		
+		godown(t_main, compress, cbz, packege , startname)
 		
 @webtoon.route('naver_list', methods=['POST'])
 def naver_list():
