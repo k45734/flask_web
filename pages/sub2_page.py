@@ -60,12 +60,6 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 scheduler2.start()
 
-#오늘날짜
-nowtime1 = datetime.now()
-newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
-#7일이전
-nowtime2 = nowtime1 - timedelta(days=7)
-olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
 try:
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 	con.row_factory = sqlite3.Row
@@ -656,7 +650,7 @@ def addnews_d(a, b, c, d, e):
 	finally:	
 		con.close()		
 
-def vietnews():
+def vietnews(newdate):
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://www.vinatimes.net/news'
@@ -675,7 +669,7 @@ def vietnews():
 		vietnews.append(dt)
 	return vietnews	
 		
-def esbsnews():
+def esbsnews(newdate):
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
@@ -697,7 +691,7 @@ def esbsnews():
 		sbsnews.append(dt)
 	return sbsnews		
 
-def ekbsnews():
+def ekbsnews(newdate):
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'http://news.kbs.co.kr/common/main.html'
@@ -718,7 +712,7 @@ def ekbsnews():
 		kbsnews.append(dt)
 	return kbsnews		
 	
-def ytnsnews():
+def ytnsnews(newdate):
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
@@ -739,16 +733,22 @@ def ytnsnews():
 	return ytnnews	
 	
 def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
+	#오늘날짜
+	nowtime1 = datetime.now()
+	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
+	#7일이전
+	nowtime2 = nowtime1 - timedelta(days=7)
+	olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
 	#SQLITE3 DB 없으면 만들다.
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, COMPLETE TEXT, DATE TEXT)')	
 	conn.close()
 
-	sbs = esbsnews()
-	kbs = ekbsnews()
-	viet = vietnews()
-	ytn = ytnsnews()
+	sbs = esbsnews(newdate)
+	kbs = ekbsnews(newdate)
+	viet = vietnews(newdate)
+	ytn = ytnsnews(newdate)
 	for i in sbs:
 		a = i['CAST']
 		b = i['TITLE']
