@@ -60,78 +60,7 @@ logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(leveln
 logger = logging.getLogger()
 scheduler2.start()
 
-try:
-	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()
-	cur.execute("SELECT * FROM sqlite_master WHERE type='table'")
-	tableser = cur.fetchall()
-	rows = []
-	for tt in tableser:	
-		#DB컬럼 이 있으면 삭제합니다.
-		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		cur = conn.cursor()
-		cur2 = conn.cursor()
-		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='program'"
-		cur.execute(sql)
-		row = cur.fetchone()
-		if row[0] == 0:
-			print('컬럼이 있어서 초기화합니다.')
-		else:
-			conn.execute("DROP TABLE  " + tt[1])
-		#DB컬럼 추가
-		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		cur = conn.cursor()
-		cur2 = conn.cursor()
-		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='start_time'"
-		cur.execute(sql)
-		row = cur.fetchone()
-		if row[0] == 0:
-			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN start_time TEXT")
-		else:
-			print('컬럼이 있습니다.')
-		
-		#DB컬럼 추가
-		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		cur = conn.cursor()
-		cur2 = conn.cursor()
-		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='telgm'"
-		cur.execute(sql)
-		row = cur.fetchone()
-		if row[0] == 0:
-			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN telgm TEXT")
-		else:
-			print('컬럼이 있습니다.')
-		#DB컬럼 추가
-		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		cur = conn.cursor()
-		cur2 = conn.cursor()
-		sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('" + tt[1] + "') WHERE name='telgm_alim'"
-		cur.execute(sql)
-		row = cur.fetchone()
-		if row[0] == 0:
-			conn.execute("ALTER TABLE " + tt[1] + " ADD COLUMN telgm_alim TEXT")
-		else:
-			print('컬럼이 있습니다.')
-		conn.close()
-except:
-	pass
 
-try:
-	#DB컬럼 추가
-	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	cur = conn.cursor()
-	cur2 = conn.cursor()
-	sql = "SELECT COUNT(*) AS CNTREC FROM pragma_table_info('news') WHERE name='DATE'"
-	cur.execute(sql)
-	row = cur.fetchone()
-	if row[0] == 0:
-		conn.execute("ALTER TABLE news ADD COLUMN DATE TEXT")
-	else:
-		print('컬럼이 있습니다.')
-	conn.close()
-except:
-	pass
 @bp2.route('/')
 @bp2.route('index')
 def index():
