@@ -66,6 +66,43 @@ def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		try:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			cur.execute("select * from main where SITE_NAME = 'copytoon'")
+			row = cur.fetchone()
+			a = row['SITE_NAME'] #제목
+			b = row['SITE_URL'] #URL
+		except:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			sql = "select * from main where SITE_NAME = ?"
+			cur.execute(sql, ('copytoon',))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('copytoon','NONE'))
+				con.commit()
+				con = sqlite3.connect(webtoondb,timeout=60)
+				con.row_factory = sqlite3.Row
+				cur = con.cursor()
+				cur.execute("select * from main where SITE_NAME = 'copytoon'")
+				row = cur.fetchone()
+				a = row['SITE_NAME'] #제목
+				b = row['SITE_URL'] #URL
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
@@ -103,13 +140,51 @@ def second():
 		except:	
 			i3 = '0'
 			rows.append(i3)
-		return render_template('copytoon.html', rows = rows)
+		
+		return render_template('copytoon.html', rows = rows , b = b)
 
 @webtoon.route('toonkor')
 def second2():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		try:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			cur.execute("select * from main where SITE_NAME = 'toonkor'")
+			row = cur.fetchone()
+			a = row['SITE_NAME'] #제목
+			b = row['SITE_URL'] #URL
+		except:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			sql = "select * from main where SITE_NAME = ?"
+			cur.execute(sql, ('toonkor',))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('toonkor','NONE'))
+				con.commit()
+				con = sqlite3.connect(webtoondb,timeout=60)
+				con.row_factory = sqlite3.Row
+				cur = con.cursor()
+				cur.execute("select * from main where SITE_NAME = 'toonkor'")
+				row = cur.fetchone()
+				a = row['SITE_NAME'] #제목
+				b = row['SITE_URL'] #URL
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
@@ -148,13 +223,50 @@ def second2():
 			i3 = '0'
 			rows.append(i3)
 
-		return render_template('toonkor.html', rows = rows) 
+		return render_template('toonkor.html', rows = rows, b = b) 
 
 @webtoon.route('newtoki')
 def second3():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		try:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			cur.execute("select * from main where SITE_NAME = 'newtoki'")
+			row = cur.fetchone()
+			a = row['SITE_NAME'] #제목
+			b = row['SITE_URL'] #URL
+		except:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			sql = "select * from main where SITE_NAME = ?"
+			cur.execute(sql, ('newtoki',))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('newtoki','NONE'))
+				con.commit()
+				con = sqlite3.connect(webtoondb,timeout=60)
+				con.row_factory = sqlite3.Row
+				cur = con.cursor()
+				cur.execute("select * from main where SITE_NAME = 'newtoki'")
+				row = cur.fetchone()
+				a = row['SITE_NAME'] #제목
+				b = row['SITE_URL'] #URL
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
@@ -193,13 +305,50 @@ def second3():
 			i3 = '0'
 			rows.append(i3)
 
-		return render_template('newtoki.html', rows = rows)
+		return render_template('newtoki.html', rows = rows, b = b)
 
 @webtoon.route('naver')
 def second4():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		try:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			cur.execute("select * from main where SITE_NAME = 'naver'")
+			row = cur.fetchone()
+			a = row['SITE_NAME'] #제목
+			b = row['SITE_URL'] #URL
+		except:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			sql = "select * from main where SITE_NAME = ?"
+			cur.execute(sql, ('naver',))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('naver','https://comic.naver.com'))
+				con.commit()
+				con = sqlite3.connect(webtoondb,timeout=60)
+				con.row_factory = sqlite3.Row
+				cur = con.cursor()
+				cur.execute("select * from main where SITE_NAME = 'naver'")
+				row = cur.fetchone()
+				a = row['SITE_NAME'] #제목
+				b = row['SITE_URL'] #URL
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
@@ -238,13 +387,50 @@ def second4():
 			i3 = '0'
 			rows.append(i3)
 
-		return render_template('naver.html', rows = rows)
+		return render_template('naver.html', rows = rows, b = b)
 
 @webtoon.route('dozi')
 def second5():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		try:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			cur.execute("select * from main where SITE_NAME = 'dozi'")
+			row = cur.fetchone()
+			a = row['SITE_NAME'] #제목
+			b = row['SITE_URL'] #URL
+		except:
+			#데이타베이스 없으면 생성
+			conn = sqlite3.connect(webtoondb,timeout=60)
+			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
+			conn.execute(sql)
+			conn.close()
+			con = sqlite3.connect(webtoondb,timeout=60)
+			con.row_factory = sqlite3.Row
+			cur = con.cursor()
+			sql = "select * from main where SITE_NAME = ?"
+			cur.execute(sql, ('dozi',))
+			row = cur.fetchone()
+			if row != None:
+				pass
+			else:
+				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('dozi','NONE'))
+				con.commit()
+				con = sqlite3.connect(webtoondb,timeout=60)
+				con.row_factory = sqlite3.Row
+				cur = con.cursor()
+				cur.execute("select * from main where SITE_NAME = 'dozi'")
+				row = cur.fetchone()
+				a = row['SITE_NAME'] #제목
+				b = row['SITE_URL'] #URL
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
@@ -283,7 +469,7 @@ def second5():
 			i3 = '0'
 			rows.append(i3)
 
-		return render_template('dozi.html', rows = rows)	
+		return render_template('dozi.html', rows = rows, b = b)	
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -486,22 +672,27 @@ def new_url(packege, t_main):
 				result = checkURL(url2)			
 			except:	
 				continue
-			text_file_path = os.getcwd() + '/templates/copytoon.html'
-			new_text_content = ''
-			target_word = t_main		
+			#text_file_path = os.getcwd() + '/templates/copytoon.html'
+			#new_text_content = ''
+			#target_word = t_main		
 			if result == 9999:				
 				print("new down url : " + url2)
-				print(text_file_path)
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
+				#print(text_file_path)
+				#with open(text_file_path,'r',encoding='utf-8') as f:
+				#	lines = f.readlines()
+				#	for i, l in enumerate(lines):
+				#		new_string = l.strip().replace(target_word,url2)
+				#		if new_string:
+				#			new_text_content += new_string + '\n'
+				#		else:
+				#			new_text_content += '\n'
+				#with open(text_file_path,'w',encoding='utf-8') as f:
+				#	f.write(new_text_content)
+				con = sqlite3.connect(webtoondb,timeout=60)
+				cur = con.cursor()
+				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+				cur.execute(sql,(url2,packege))
+				con.commit()
 				break
 		newurl = url2
 	elif packege == 'naver':
@@ -515,20 +706,25 @@ def new_url(packege, t_main):
 				result = checkURL(url2)
 			except:
 				continue
-			text_file_path = os.getcwd() + '/templates/dozi.html'
-			new_text_content = ''
-			target_word = t_main
+			#text_file_path = os.getcwd() + '/templates/dozi.html'
+			#new_text_content = ''
+			#target_word = t_main
 			if result == 9999:
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
+				#with open(text_file_path,'r',encoding='utf-8') as f:
+				#	lines = f.readlines()
+				#	for i, l in enumerate(lines):
+				#		new_string = l.strip().replace(target_word,url2)
+				#		if new_string:
+				#			new_text_content += new_string + '\n'
+				#		else:
+				#			new_text_content += '\n'
+				#with open(text_file_path,'w',encoding='utf-8') as f:
+				#	f.write(new_text_content)
+				con = sqlite3.connect(webtoondb,timeout=60)
+				cur = con.cursor()
+				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+				cur.execute(sql,(url2,packege))
+				con.commit()
 				break
 		newurl = url2
 	elif packege == 'newtoki':	
@@ -539,22 +735,27 @@ def new_url(packege, t_main):
 				result = checkURL(url2)			
 			except:
 				continue
-			text_file_path = os.getcwd() + '/templates/newtoki.html'
-			new_text_content = ''
-			target_word = t_main	
+			#text_file_path = os.getcwd() + '/templates/newtoki.html'
+			#new_text_content = ''
+			#target_word = t_main	
 			if result == 9999:			
 				print("new url : " + url2)
-				print(text_file_path)
-				with open(text_file_path,'r',encoding='utf-8') as f:
-					lines = f.readlines()
-					for i, l in enumerate(lines):
-						new_string = l.strip().replace(target_word,url2)
-						if new_string:
-							new_text_content += new_string + '\n'
-						else:
-							new_text_content += '\n'
-				with open(text_file_path,'w',encoding='utf-8') as f:
-					f.write(new_text_content)
+				#print(text_file_path)
+				#with open(text_file_path,'r',encoding='utf-8') as f:
+				#	lines = f.readlines()
+				#	for i, l in enumerate(lines):
+				#		new_string = l.strip().replace(target_word,url2)
+				#		if new_string:
+				#			new_text_content += new_string + '\n'
+				#		else:
+				#			new_text_content += '\n'
+				#with open(text_file_path,'w',encoding='utf-8') as f:
+				#	f.write(new_text_content)
+				con = sqlite3.connect(webtoondb,timeout=60)
+				cur = con.cursor()
+				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+				cur.execute(sql,(url2,packege))
+				con.commit()
 				break
 		newurl = url2
 	elif packege == 'toonkor':
@@ -569,20 +770,25 @@ def new_url(packege, t_main):
 			else:
 				tta = ttt[n-2]
 			final_str = tta[:-1]
-			text_file_path = os.getcwd() + '/templates/toonkor.html'
-			new_text_content = ''
-			target_word = t_main
+			#text_file_path = os.getcwd() + '/templates/toonkor.html'
+			#new_text_content = ''
+			#target_word = t_main
 			
-			with open(text_file_path,'r',encoding='utf-8') as f:
-				lines = f.readlines()
-				for i, l in enumerate(lines):
-					new_string = l.strip().replace(target_word,final_str)
-					if new_string:
-						new_text_content += new_string + '\n'
-					else:
-						new_text_content += '\n'
-			with open(text_file_path,'w',encoding='utf-8') as f:
-				f.write(new_text_content)	
+			#with open(text_file_path,'r',encoding='utf-8') as f:
+			#	lines = f.readlines()
+			#	for i, l in enumerate(lines):
+			#		new_string = l.strip().replace(target_word,final_str)
+			#		if new_string:
+			#			new_text_content += new_string + '\n'
+			#		else:
+			#			new_text_content += '\n'
+			#with open(text_file_path,'w',encoding='utf-8') as f:
+			#	f.write(new_text_content)	
+			con = sqlite3.connect(webtoondb,timeout=60)
+			cur = con.cursor()
+			sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+			cur.execute(sql,(final_str,packege))
+			con.commit()
 			newurl = final_str	
 	return newurl
 	
