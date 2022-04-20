@@ -482,7 +482,10 @@ def new_url(packege, t_main):
 		for i in range(245,500):
 			url2 = ("https://copytoon%s.com" % (i))
 			time.sleep(2)
-			result = checkURL(url2)			
+			try:
+				result = checkURL(url2)			
+			except:	
+				pass
 			text_file_path = os.getcwd() + '/templates/copytoon.html'
 			new_text_content = ''
 			target_word = t_main		
@@ -508,7 +511,10 @@ def new_url(packege, t_main):
 			str_zoro = str(i).zfill(3)
 			url2 = ("https://dozi%s.com" % (str_zoro))		
 			time.sleep(2)
-			result = checkURL(url2)
+			try:
+				result = checkURL(url2)
+			except:
+				pass
 			text_file_path = os.getcwd() + '/templates/dozi.html'
 			new_text_content = ''
 			target_word = t_main
@@ -529,7 +535,10 @@ def new_url(packege, t_main):
 		for i in range(116,500):
 			url2 = ("https://newtoki%s.com" % (i))
 			time.sleep(2)
-			result = checkURL(url2)			
+			try:
+				result = checkURL(url2)			
+			except:
+				pass
 			text_file_path = os.getcwd() + '/templates/newtoki.html'
 			new_text_content = ''
 			target_word = t_main	
