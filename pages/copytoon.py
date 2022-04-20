@@ -485,7 +485,7 @@ def new_url(packege, t_main):
 			try:
 				result = checkURL(url2)			
 			except:	
-				pass
+				continue
 			text_file_path = os.getcwd() + '/templates/copytoon.html'
 			new_text_content = ''
 			target_word = t_main		
@@ -514,7 +514,7 @@ def new_url(packege, t_main):
 			try:
 				result = checkURL(url2)
 			except:
-				pass
+				continue
 			text_file_path = os.getcwd() + '/templates/dozi.html'
 			new_text_content = ''
 			target_word = t_main
@@ -538,7 +538,7 @@ def new_url(packege, t_main):
 			try:
 				result = checkURL(url2)			
 			except:
-				pass
+				continue
 			text_file_path = os.getcwd() + '/templates/newtoki.html'
 			new_text_content = ''
 			target_word = t_main	
