@@ -1060,7 +1060,34 @@ def funmom():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
-		return render_template('funmom.html')
+	#ID TEXT, title TEXT, urltitle TEXT, complte TEXT
+		rows = []
+		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		try:
+			cur.execute("select * from funmom where complte = 'False'")
+			rows1 = cur.fetchall()
+			count = 1
+			for i in rows1:
+				i = count
+				count += 1
+			rows.append(i)
+		except:
+			i = '0'
+			rows.append(i)
+		try:
+			count2 = 1
+			cur.execute("select * from funmom where complte = 'True'")
+			rows2 = cur.fetchall()
+			for i2 in rows2:
+				i2 = count2
+				count2 += 1
+			rows.append(i2)
+		except:	
+			i2 = '0'	
+			rows.append(i2)
+		return render_template('funmom.html', rows = rows)
 
 @bp2.route('funmom_ok', methods=['POST'])
 def funmom_ok():
