@@ -170,7 +170,7 @@ def add_c(a,b,c,d):
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from funmom where urltitle = ?"
-		cur.execute(sql, (a,))
+		cur.execute(sql, (c,))
 		row = cur.fetchone()
 		if row != None:
 			pass
