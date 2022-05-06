@@ -421,7 +421,7 @@ def exec_start3(startname):
 					urls.append(str(img_url["src"]))		
 				jpeg_no = 00
 				for url in urls:
-					filename="funmom-" + str(jpeg_no) + ".jpg"
+					filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
 					url_to_image(url, dfolder, category, category2, filename)
 					jpeg_no += 1
 				add_d(id, go, complte)
