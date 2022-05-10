@@ -1057,10 +1057,23 @@ def tracking_ok():
 		
 @bp2.route('funmom')
 def funmom():
+	#데이타베이스 없으면 생성
+	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS funmom (start_time TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
-	#ID TEXT, title TEXT, urltitle TEXT, complte TEXT
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from funmom")
+		rows = cur.fetchone()
+		if rows:
+			start_time = rows['start_time']
+		else:
+			start_time = '*/1 * * * *'
+		#ID TEXT, title TEXT, urltitle TEXT, complte TEXT
 		rows = []
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		con.row_factory = sqlite3.Row
@@ -1087,7 +1100,7 @@ def funmom():
 		except:	
 			i2 = '0'	
 			rows.append(i2)
-		return render_template('funmom.html', rows = rows)
+		return render_template('funmom.html', rows = rows, start_time = start_time)
 
 @bp2.route('funmom_ok', methods=['POST'])
 def funmom_ok():
@@ -1096,6 +1109,25 @@ def funmom_ok():
 	else:
 		start_time = request.form['start_time']
 		startname = request.form['startname']
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cursor = conn.cursor()
+		cursor.execute("select * from funmom")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update funmom
+					set start_time = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO funmom 
+				(start_time) VALUES (?)
+			"""
+		
+		cursor.execute(sql, (start_time,))
+		conn.commit()
+		cursor.close()
+		conn.close()
 		try:
 			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
 			test = scheduler2.get_job(startname).id
