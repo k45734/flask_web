@@ -41,8 +41,8 @@ nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
-f = open(logdata + '/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+f = open(logdata + '/toon.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/toon.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 schedulerc.start()
@@ -482,7 +482,7 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	with requests.Session() as s:
 		try:
-			time.sleep(random.uniform(2,5)) 
+			#time.sleep(random.uniform(2,5)) 
 			req = s.get(url,headers=header)	
 		except:
 			time.sleep(random.uniform(2,5)) 
