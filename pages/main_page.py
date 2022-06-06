@@ -139,11 +139,8 @@ def user_info_edit_proc():
 def log():
 	createFolder(logdata)
 	filepath = logdata + '/flask.log'
-	filepath2 = logdata + '/toon.log'
 	if not os.path.isfile(filepath):
 		f = open('./log/flask.log','a', encoding='utf-8')
-	if not os.path.isfile(filepath2):
-		f = open('./log/toon.log','a', encoding='utf-8')
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
@@ -163,22 +160,6 @@ def log():
 			for i in lines:
 				test = i.strip()
 				tltl.append(test)
-				
-			filepath = logdata + '/toon.log'
-			tltl2 = []
-			with open(filepath, 'rt', encoding='cp949') as fp:
-				fp.seek (0, 2)
-				fsize = fp.tell()
-				fp.seek (max (fsize-1024, 0), 0)
-				try:
-					lines = fp.readlines()
-				except:
-					time.sleep(1)
-					lines = fp.readlines()
-			lines = lines[-10:]
-			for i in lines:
-				test = i.strip()
-				tltl2.append(test)
 					
 		else:
 			filepath = logdata + '/flask.log'
@@ -196,24 +177,8 @@ def log():
 			for i in lines:
 				test = i.strip()
 				tltl.append(test)
-
-			filepath = logdata + '/toon.log'
-			tltl2 = []
-			with open(filepath, 'rt', encoding='utf-8') as fp:
-				fp.seek (0, 2)
-				fsize = fp.tell()
-				fp.seek (max (fsize-1024, 0), 0)
-				try:
-					lines = fp.readlines()
-				except:
-					time.sleep(1)
-					lines = fp.readlines()
-			lines = lines[-10:]
-			for i in lines:
-				test = i.strip()
-				tltl2.append(test)
 				
-		return render_template('log.html', tltl=tltl, tltl2=tltl2)	
+		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
 def update(file_name = None):

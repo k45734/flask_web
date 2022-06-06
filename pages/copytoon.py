@@ -37,16 +37,23 @@ else:
 	logdata = '/data/log'
 	
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 job_defaults = { 'max_instances': 1 }
 schedulerc = BackgroundScheduler(job_defaults=job_defaults)
-f = open(logdata + '/toon.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/toon.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+f = open(logdata + '/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 schedulerc.start()
-
+def mydate():
+	now = datetime.datetime.now()
+	num = now.strftime('%y%m%d')
+	myday = now.strftime('%Y-%m-%d')
+	nowtime = time.localtime()
+	nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+	mytime = "%04d%02d%02d" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday)
+	return [now,num,myday,nowtime,mytime,nowDatetime]
+	
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
@@ -793,6 +800,7 @@ def new_url(packege, t_main):
 	return newurl
 	
 def exec_start(t_main, code, packege,startname):
+	now,num,myday,nowtime,mytime,nowDatetime = mydate()
 	print("카피툰시작")
 	logger.info('카피툰시작')
 	maintitle = []
@@ -871,6 +879,7 @@ def exec_start(t_main, code, packege,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start2(t_main, code, packege,startname):
+	now,num,myday,nowtime,mytime,nowDatetime = mydate()
 	print("툰코시작")
 	logger.info('툰코시작')
 	maintitle = []
@@ -948,6 +957,7 @@ def exec_start2(t_main, code, packege,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start3(t_main,code,packege,genre,startname):
+	now,num,myday,nowtime,mytime,nowDatetime = mydate()
 	print("뉴토끼시작")
 	logger.info('뉴토끼시작')
 	packege = 'newtoki'
@@ -1042,6 +1052,7 @@ def exec_start3(t_main,code,packege,genre,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
 def exec_start4(code,packege,startname):
+	now,num,myday,nowtime,mytime,nowDatetime = mydate()
 	print("네이버웹툰시작")
 	logger.info('네이버웹툰시작')
 	packege = 'naver'
