@@ -1233,7 +1233,6 @@ def godown(t_main, compress, cbz, packege , startname):
 				json_string = tt.group(1)
 				obj = str(base64.b64decode(json_string), encoding='utf-8')
 				taglist = re.compile(r'src="(.*?)"').findall(obj)
-				logger.info('%s', taglist)
 			elif packege == 'newtoki':
 				time.sleep(random.uniform(30,60))
 				tmp = ''.join(re.compile(r'html_data\+\=\'(.*?)\'\;').findall(html))
@@ -1293,7 +1292,7 @@ def godown(t_main, compress, cbz, packege , startname):
 			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
 		else:
 			add_d(packege, subtitle, title)
-			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, title, subtitle)
+			logger.info('%s 의 %s 의 %s 가 다운완료하였습니다.', packege, title, subtitle)
 
 @webtoon.route("now", methods=["POST"])
 def now():
