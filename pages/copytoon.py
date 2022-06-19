@@ -1290,9 +1290,11 @@ def godown(t_main, compress, cbz, packege , startname):
 		except:
 			add_pass(packege, subtitle, title)
 			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
+			break
 		else:
 			add_d(packege, subtitle, title)
 			logger.info('%s 의 %s 의 %s 가 다운완료하였습니다.', packege, title, subtitle)
+			break
 
 @webtoon.route("now", methods=["POST"])
 def now():
