@@ -1175,8 +1175,8 @@ def exec_start5(t_main, packege,startname):
 				b = cc
 				c = test
 				d = 'False'
-				print('{} {} {}\n{}'.format(atat, a, b, c))
-				add_c(packege, atat, a, b, c, d)
+				add_c(packege, a,b,c,d, atat)
+				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 				cc -= 1
 	try:
 		test = schedulerc.get_job(startname).id
