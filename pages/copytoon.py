@@ -1141,8 +1141,9 @@ def exec_start5(t_main, packege,startname):
 				subtitle.append(b)
 				urltitle.append(c)
 				mytoonlist.append(atat)
-				msg = '{} {} {} {}'.format(a,b,c,atat)
+				mmsg = '{} {} {} {}'.format(a,b,c,atat)
 				logger.info('%s', mmsg)
+				print(mmsg)
 				cc -= 1
 	logger.info('%s 의 정보가 있습니다.', len(a))
 	cnt = 1
