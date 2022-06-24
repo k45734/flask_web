@@ -1128,7 +1128,7 @@ def exec_start5(t_main, packege,startname):
 				logger.info('%s', mmsg)
 				print(mmsg)
 				cc -= 1
-	logger.info('%s 의 정보가 있습니다.', len(a))
+	logger.info('%s 의 정보가 있습니다.', len(maintitle))
 	cnt = 1
 	#앞에서 크롤링한 정보를 DB에 저장한다.
 	for a,b,c,atat in zip(maintitle,subtitle,urltitle,mytoonlist):
