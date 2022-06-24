@@ -6,7 +6,7 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess
+import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess, datetime
 import urllib.request as urllib2
 
 try:
@@ -45,14 +45,10 @@ rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 schedulerc.start()
+
 def mydate():
-	now = datetime.datetime.now()
-	num = now.strftime('%y%m%d')
-	myday = now.strftime('%Y-%m-%d')
-	nowtime = time.localtime()
 	nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-	mytime = "%04d%02d%02d" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday)
-	return [now,num,myday,nowtime,mytime,nowDatetime]
+	return nowDatetime
 	
 @webtoon.route('/')
 @webtoon.route('index')
@@ -678,23 +674,9 @@ def new_url(packege, t_main):
 			try:
 				result = checkURL(url2)			
 			except:	
-				continue
-			#text_file_path = os.getcwd() + '/templates/copytoon.html'
-			#new_text_content = ''
-			#target_word = t_main		
+				continue		
 			if result == 9999:				
 				print("new down url : " + url2)
-				#print(text_file_path)
-				#with open(text_file_path,'r',encoding='utf-8') as f:
-				#	lines = f.readlines()
-				#	for i, l in enumerate(lines):
-				#		new_string = l.strip().replace(target_word,url2)
-				#		if new_string:
-				#			new_text_content += new_string + '\n'
-				#		else:
-				#			new_text_content += '\n'
-				#with open(text_file_path,'w',encoding='utf-8') as f:
-				#	f.write(new_text_content)
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
 				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
@@ -759,7 +741,7 @@ def new_url(packege, t_main):
 	return newurl
 	
 def exec_start(t_main, code, packege,startname):
-	now,num,myday,nowtime,mytime,nowDatetime = mydate()
+	nowDatetime = mydate()
 	print("카피툰시작")
 	logger.info('카피툰시작')
 	maintitle = []
@@ -838,7 +820,7 @@ def exec_start(t_main, code, packege,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start2(t_main, code, packege,startname):
-	now,num,myday,nowtime,mytime,nowDatetime = mydate()
+	nowDatetime = mydate()
 	print("툰코시작")
 	logger.info('툰코시작')
 	maintitle = []
@@ -916,7 +898,7 @@ def exec_start2(t_main, code, packege,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start3(t_main,code,packege,genre,startname):
-	now,num,myday,nowtime,mytime,nowDatetime = mydate()
+	nowDatetime = mydate()
 	print("뉴토끼시작")
 	logger.info('뉴토끼시작')
 	packege = 'newtoki'
@@ -1011,7 +993,7 @@ def exec_start3(t_main,code,packege,genre,startname):
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
 def exec_start4(code,packege,startname):
-	now,num,myday,nowtime,mytime,nowDatetime = mydate()
+	nowDatetime = mydate()
 	print("네이버웹툰시작")
 	logger.info('네이버웹툰시작')
 	packege = 'naver'
@@ -1101,6 +1083,7 @@ def exec_start4(code,packege,startname):
 
 #도지코믹스
 def exec_start5(t_main, packege,startname):
+	nowDatetime = mydate()
 	maintitle = []
 	subtitle = []
 	urltitle = []
