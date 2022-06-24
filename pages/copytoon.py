@@ -713,20 +713,7 @@ def new_url(packege, t_main):
 				result = checkURL(url2)
 			except:
 				continue
-			#text_file_path = os.getcwd() + '/templates/dozi.html'
-			#new_text_content = ''
-			#target_word = t_main
 			if result == 9999:
-				#with open(text_file_path,'r',encoding='utf-8') as f:
-				#	lines = f.readlines()
-				#	for i, l in enumerate(lines):
-				#		new_string = l.strip().replace(target_word,url2)
-				#		if new_string:
-				#			new_text_content += new_string + '\n'
-				#		else:
-				#			new_text_content += '\n'
-				#with open(text_file_path,'w',encoding='utf-8') as f:
-				#	f.write(new_text_content)
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
 				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
@@ -742,22 +729,8 @@ def new_url(packege, t_main):
 				result = checkURL(url2)			
 			except:
 				continue
-			#text_file_path = os.getcwd() + '/templates/newtoki.html'
-			#new_text_content = ''
-			#target_word = t_main	
 			if result == 9999:			
 				print("new url : " + url2)
-				#print(text_file_path)
-				#with open(text_file_path,'r',encoding='utf-8') as f:
-				#	lines = f.readlines()
-				#	for i, l in enumerate(lines):
-				#		new_string = l.strip().replace(target_word,url2)
-				#		if new_string:
-				#			new_text_content += new_string + '\n'
-				#		else:
-				#			new_text_content += '\n'
-				#with open(text_file_path,'w',encoding='utf-8') as f:
-				#	f.write(new_text_content)
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
 				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
@@ -777,20 +750,6 @@ def new_url(packege, t_main):
 			else:
 				tta = ttt[n-2]
 			final_str = tta[:-1]
-			#text_file_path = os.getcwd() + '/templates/toonkor.html'
-			#new_text_content = ''
-			#target_word = t_main
-			
-			#with open(text_file_path,'r',encoding='utf-8') as f:
-			#	lines = f.readlines()
-			#	for i, l in enumerate(lines):
-			#		new_string = l.strip().replace(target_word,final_str)
-			#		if new_string:
-			#			new_text_content += new_string + '\n'
-			#		else:
-			#			new_text_content += '\n'
-			#with open(text_file_path,'w',encoding='utf-8') as f:
-			#	f.write(new_text_content)	
 			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
 			sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
@@ -1142,6 +1101,10 @@ def exec_start4(code,packege,startname):
 
 #도지코믹스
 def exec_start5(t_main, packege,startname):
+	maintitle = []
+	subtitle = []
+	urltitle = []
+	mytoonlist = []
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
@@ -1174,10 +1137,20 @@ def exec_start5(t_main, packege,startname):
 				a = title
 				b = cc
 				c = test
-				d = 'False'
-				add_c(packege, a,b,c,d, atat)
-				logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
+				maintitle.append(a)
+				subtitle.append(b)
+				urltitle.append(c)
+				mytoonlist.append(atat)
+				print('{} {} {} {}'.format(a,b,c,atat))
 				cc -= 1
+	logger.info('%s 의 정보가 있습니다.', len(a))
+	cnt = 1
+	#앞에서 크롤링한 정보를 DB에 저장한다.
+	for a,b,c,atat in zip(maintitle,subtitle,urltitle,mytoonlist):
+		d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+		add_c(packege, a,b,c,d, atat)
+		logger.info('%s 번째 %s 의 %s 의 %s 를 등록하였습니다.', cnt, packege, a, b)
+		cnt += 1
 	try:
 		test = schedulerc.get_job(startname).id
 		logger.info('%s가 스케줄러에 있습니다.', test)

@@ -159,7 +159,10 @@ def log():
 			lines = lines[-10:]
 			for i in lines:
 				test = i.strip()
-				tltl.append(test)
+				if '/log' in test:
+					pass
+				else:
+					tltl.append(test)
 					
 		else:
 			filepath = logdata + '/flask.log'
@@ -176,8 +179,10 @@ def log():
 			lines = lines[-10:]
 			for i in lines:
 				test = i.strip()
-				tltl.append(test)
-				
+				if '/log' in test:
+					pass
+				else:
+					tltl.append(test)				
 		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
