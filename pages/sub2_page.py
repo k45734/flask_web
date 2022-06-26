@@ -482,24 +482,37 @@ def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		
 def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
-	Finallocation = location + '날씨' 
-	URL = 'https://www.google.com/search?client=opera&hs=iaa&ei=FHvcX9HDAtWC-QaY95HYBA&q=' + Finallocation
-
-	headers = {
-		"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36 OPR/67.0.3575.115'}
-
-	page = requests.get(URL, headers=headers)
-	soup = bs(page.content, 'html.parser', from_encoding="utf8")
-	data = soup.find("div", {"id": "wob_wc"})
-	refine = data.findAll("span")
-
-	data_list = []
-
-	for x in refine:
-		data_list.append(x.get_text())
-
-	msg = Finallocation + ' ' + data_list[13] + '\n현재온도는 ' + data_list[0] + '\n강수확률은 ' + data_list[7] + '\n습도 : ' + data_list[8] + '\n풍속 : ' + data_list[10]
-	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	#기상청 날씨누리 현재시간기준
+	natotal = []
+	with requests.Session() as s:
+		#지역명을 찾는다.
+		GEO = {'query': location, 
+				'start': '1',
+				'src': 'A4'}
+		url = 'https://www.weather.go.kr/w/renew2021/rest/main/place-search.do' 
+		resp = s.get(url,data=GEO).json()
+		geo_code = resp[0]['dongCode']
+		#지역명으로 날씨검색을 한다.
+		weather = {'code': geo_code,
+				'unit': 'm/s',
+				'aws': 'N'}
+		url = 'https://www.weather.go.kr/w/wnuri-fct2021/main/current-weather.do'
+		html = s.get(url,data=weather).text
+		gogo = bs(html, "html.parser")	
+		
+		for i in gogo.findAll('span'):
+			natotal.append(i.text)
+		#특보예보
+		fact = gogo.find("div",{"class":"cmp-impact-fct"}).text
+		natotal.append(fact)
+		#현재온도
+		temp = natotal[4]
+		#특보
+		fact_a = natotal[-1]
+		fact_ok = ''.join(fact_a.split())
+		#현재날짜
+		msg = '{}\n온도 {} / 체감온도 {} / 습도 {} / 바람 {} / 1시간강수량 {}\n{}'.format(natotal[0],temp[0:5],natotal[10],natotal[12],natotal[14],natotal[16],fact_ok)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 
 #운세알리미
 def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
