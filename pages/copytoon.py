@@ -687,7 +687,7 @@ def new_url(packege, t_main):
 	elif packege == 'naver':
 		newurl = 'https://comic.naver.com'
 	elif packege == 'dozi':	
-		for i in range(30,500):
+		for i in range(66,500):
 			str_zoro = str(i).zfill(3)
 			url2 = ("https://dozi%s.com" % (str_zoro))		
 			time.sleep(2)
@@ -1179,6 +1179,7 @@ def godown(t_main, compress, cbz, packege , startname):
 		wwwkt = newurl + url
 		logger.info('%s', wwwkt)
 		try:
+			response1 = session2.get(newurl,headers=header)
 			response1 = session2.get(wwwkt,headers=header)
 			html = response1.text
 			st = response1.status_code
@@ -1214,7 +1215,7 @@ def godown(t_main, compress, cbz, packege , startname):
 			urls = []
 			
 			for img in taglist:
-				if packege == 'toonkor' or packege == 'newtoki':
+				if packege == 'toonkor' or packege == 'newtoki' or packege == 'dozi':
 					urls.append(img)
 				else:
 					urls.append(img['src'])
