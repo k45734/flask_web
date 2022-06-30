@@ -51,13 +51,6 @@ def second():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#FLASKAPPSNAME = request.args.get('FLASKAPPSNAME')
-		#FLASKAPPS = request.args.get('FLASKAPPS')
-		#FLASKTIME = request.args.get('FLASKTIME')
-		#FLASKTELGM = request.args.get('FLASKTELGM')
-		#FLASKTOKEN = request.args.get('FLASKTOKEN')
-		#FLASKBOTID = request.args.get('FLASKBOTID')
-		#FLASKALIM = request.args.get('FLASKALIM')
 		con = sqlite3.connect(sub3db,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
@@ -162,7 +155,7 @@ def ok(FLASKAPPSNAME):
 			test = sub3_page.get_job(FLASKAPPSNAME).id
 			test2 = sub3_page.modify_job(FLASKAPPSNAME).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)			
-		return redirect(url_for('main.index'))
+		return redirect(url_for('sub3.second'))
 
 @bp3.route("now/<FLASKAPPSNAME>", methods=["GET"])
 def now(FLASKAPPSNAME):
