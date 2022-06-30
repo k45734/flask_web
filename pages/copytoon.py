@@ -608,7 +608,7 @@ def add_c(packege, a, b, c, d, atat):
 	finally:		
 		con.close()
 
-def add_d(packege, subtitle, title):
+def add_d(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
 		conn = sqlite3.connect(webtoondb,timeout=60)
@@ -620,14 +620,14 @@ def add_d(packege, subtitle, title):
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		cur.execute(sql,('True',subtitle, title))
+		cur.execute(sql,('True',subtitle_old, title_old))
 		con.commit()
 	except:
 		con.rollback()
 	finally:	
 		con.close()	
 		
-def add_pass(packege, subtitle, title):
+def add_pass(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
 		conn = sqlite3.connect(webtoondb,timeout=60)
@@ -639,7 +639,7 @@ def add_pass(packege, subtitle, title):
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE " + packege + " SET complte = ? WHERE subtitle = ? AND maintitle = ?"
-		cur.execute(sql,('PASS',subtitle, title))
+		cur.execute(sql,('PASS',subtitle_old, title_old))
 		con.commit()
 	except:
 		con.rollback()
@@ -1247,11 +1247,11 @@ def godown(t_main, compress, cbz, packege , startname):
 			else:
 				pass
 		except:
-			add_pass(packege, subtitle, title)
+			add_pass(packege, subtitle_old, title_old)
 			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
 			break
 		else:
-			add_d(packege, subtitle, title)
+			add_d(packege, subtitle_old, title_old)
 			logger.info('%s 의 %s 의 %s 가 다운완료하였습니다.', packege, title, subtitle)
 			break
 
