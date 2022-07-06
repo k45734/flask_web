@@ -75,30 +75,6 @@ def index():
 		#t_main = request.form['t_main']
 		return render_template('sub2_index.html', tltl = tltl)
 
-@bp2.route("second")		
-def second():
-	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS board (telgm_token TEXT, telgm_botid TEXT)')
-	conn.close()
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		telgm_token = request.args.get('telgm_token')
-		telgm_botid = request.args.get('telgm_botid')
-		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		cur.execute("select * from board")
-		rows = cur.fetchone()
-		if rows:
-			telgm_token = rows[0]
-			telgm_botid = rows[1]
-		else:
-			telgm_token='입력하세요'
-			telgm_botid='입력하세요'	
-		return render_template('board.html', telgm_token = telgm_token, telgm_botid = telgm_botid)
-
 def url_to_image(url, dfolder, category, category2, filename):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	#req = requests.get(url,headers=header)
@@ -157,7 +133,7 @@ def sch_del():
 		return redirect(url_for('sub2.index'))
 		
 #택배조회서비스
-def exec_start4(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
+def tracking_start(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	code = { "DHL":"de.dhl",
 			"Sagawa":"jp.sagawa",
 			"Kuroneko Yamato":"jp.yamato",
@@ -271,14 +247,14 @@ def tracking_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
 		return redirect(url_for('sub2.index'))
 		
-def exec_start5(location,telgm,telgm_alim,telgm_token,telgm_botid):
+def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	#기상청 날씨누리 현재시간기준
 	natotal = []
 	with requests.Session() as s:
@@ -376,7 +352,7 @@ def weather_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start5, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
@@ -494,7 +470,7 @@ def ytnsnews(newdate):
 		ytnnews.append(dt)
 	return ytnnews	
 	
-def exec_start7(telgm,telgm_alim,telgm_token,telgm_botid):	
+def news_start(telgm,telgm_alim,telgm_token,telgm_botid):	
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
@@ -637,7 +613,7 @@ def news_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start7, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(news_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
@@ -682,7 +658,7 @@ def add_unse_d(a, b, c, d, e):
 	finally:	
 		con.close()	
 		
-def exec_start6(telgm,telgm_alim,telgm_token,telgm_botid):
+def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
@@ -797,7 +773,7 @@ def unse_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start6, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
@@ -844,7 +820,7 @@ def quiz_add_go_d(MEMO, COMPLTE):
 	finally:	
 		con.close()
 		
-def exec_start8(telgm,telgm_alim,telgm_token,telgm_botid):
+def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
@@ -899,8 +875,7 @@ def exec_start8(telgm,telgm_alim,telgm_token,telgm_botid):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
-		msg = '새 글이 없어요'
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		pass
 		
 @bp2.route('quiz')
 def quiz():
@@ -968,7 +943,7 @@ def quiz_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start8, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
@@ -1007,7 +982,7 @@ def add_c(a,b,c,d):
 		con.rollback()
 	finally:		
 		con.close()			
-def exec_start3(startname):
+def funmom_start(startname):
 	conn = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
@@ -1157,7 +1132,7 @@ def funmom_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
+			scheduler2.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
