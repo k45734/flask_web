@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>퀴즈정답알림서비스</p>
+<table class="tg" style="undefined;table-layout: fixed; width: 600px">
+<colgroup>
+<col style="width: 109px">
+<col style="width: 491px">
+</colgroup>
+<center>
+<form method="POST">
+
+<thead>
+  <tr>
+    <th class="tg-baqh" colspan="2">퀴즈정답알림서비스</th>
+  </tr>
+</thead>
+<tbody>
+   <tr>
+    <td class="tg-baqh">텔레그램알림</td>
+    <td class="tg-0lax"><select name="telgm">
+	<option value="{{ telgm }}">{{ telgm }}</option>
+	<option value="False">안함</option>
+    <option value="True">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램무음</td>
+    <td class="tg-0lax"><select name="telgm_alim">
+	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
+    <option value="False">안함</option>
+    <option value="True">사용</option>
+    </td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램토큰</td>
+    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">텔레그램아이디</td>
+    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">실행주기</td>
+    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
+  </tr>
+ <tr>
+    <td class="tg-baqh">스케줄이름</td>
+    <td class="tg-0lax"><input type="text" name="startname" value="quiz" style="width:100%; border: 0;" ></td>
+  </tr>
+
+<tr>
+
+<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='quiz_ok';">
+<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
+</th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+{% endblock %}
