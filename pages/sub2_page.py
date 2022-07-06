@@ -852,11 +852,14 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.find('h2').text
-			keys = ['TITLE','MEMO', 'URL']
-			values = [title, posts, URL]
-			dt = dict(zip(keys, values))
-			last.append(dt)
-			quiz_add_go(title, posts, URL)
+			if '공유' in posts:
+				pass
+			else:
+				keys = ['TITLE','MEMO', 'URL']
+				values = [title, posts, URL]
+				dt = dict(zip(keys, values))
+				last.append(dt)
+				quiz_add_go(title, posts, URL)
 	
 	#알려준다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
