@@ -852,7 +852,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.find('h2').text
-			if '공유' in posts:
+			if '됩니다.' in posts :
 				pass
 			else:
 				keys = ['TITLE','MEMO', 'URL']
