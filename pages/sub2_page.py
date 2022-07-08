@@ -782,17 +782,24 @@ def unse_ok():
 
 #퀴즈정답알림
 #DB 알리미
-def quiz_add_go(title, posts, URL):
+def quiz_add_go(title, memo_s, URL):
 	try: #URL TEXT, SEL TEXT, SELNUM TEXT
-		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+		con = sqlite3.connect(BASE_DIR + '/quiz.db',timeout=60)
+		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "select * from quiz where TITLE = ?"
-		cur.execute(sql, (title,))
+		sql = "select * from quiz where URL = ? "
+		cur.execute(sql, (URL,))
 		row = cur.fetchone()
 		if row != None:
-			print("해당 내용은 DB에 있습니다.")
+			MEMO = row['MEMO']
+			if MEMO == memo_s:
+				pass
+			else:
+				cur.execute("update quiz set MEMO = ?, COMPLTE = ? where URL = ?",(memo_s,'False',URL))
+				con.commit()
+				print("해당 내용은 DB에 있어서 {} -> {} 수정합니다.".format(MEMO, memo_s))
 		else:
-			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title, URL, posts, 'False'))
+			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title, URL, memo_s, 'False'))
 			con.commit()
 	except:
 		con.rollback()	
@@ -852,14 +859,19 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.find('h2').text
-			if '됩니다.' in posts :
-				pass
+			p = re.compile('(?<=\:)(.*)')
+			memo = p.findall(posts)
+			memo_s = ''.join(memo)
+			if '됩니다.' in memo_s :
+				continue
+			elif len(memo_s) == 0 :
+				continue
 			else:
 				keys = ['TITLE','MEMO', 'URL']
-				values = [title, posts, URL]
+				values = [title, memo_s, URL]
 				dt = dict(zip(keys, values))
 				last.append(dt)
-				quiz_add_go(title, posts, URL)
+				quiz_add_go(title, memo_s, URL)
 	
 	#알려준다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
