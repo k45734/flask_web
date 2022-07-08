@@ -784,7 +784,7 @@ def unse_ok():
 #DB 알리미
 def quiz_add_go(title, memo_s, URL):
 	try: #URL TEXT, SEL TEXT, SELNUM TEXT
-		con = sqlite3.connect(BASE_DIR + '/quiz.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "select * from quiz where URL = ? "
