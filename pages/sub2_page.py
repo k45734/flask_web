@@ -792,12 +792,13 @@ def quiz_add_go(title, memo_s, URL):
 		row = cur.fetchone()
 		if row != None:
 			MEMO = row['MEMO']
-			if MEMO == memo_s:
+			old_title = row['TITLE']
+			if MEMO == memo_s and old_title == title:
 				pass
 			else:
-				cur.execute("update quiz set MEMO = ?, COMPLTE = ? where URL = ?",(memo_s,'False',URL))
+				cur.execute("update quiz set MEMO = ?, COMPLTE = ?, TITLE = ? where URL = ? ",(memo_s,'False',title,URL))
 				con.commit()
-				print("해당 내용은 DB에 있어서 {} -> {} 수정합니다.".format(MEMO, memo_s))
+				print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title, MEMO, title, memo_s))
 		else:
 			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title, URL, memo_s, 'False'))
 			con.commit()
@@ -885,7 +886,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			TITLE = row['TITLE']
 			MEMO = row['MEMO']
 			COMPLTE = row['COMPLTE']
-			msg = '{} {}'.format(TITLE,MEMO)
+			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
