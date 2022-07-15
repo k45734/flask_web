@@ -830,27 +830,33 @@ def quiz_add_go_d(MEMO, COMPLTE):
 		con.close()
 		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('퀴즈정답알림 시작')
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
 	conn.close()
 	list = []
 	last = []
+	u = {'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%98%A4%ED%80%B4%EC%A6%88',
+		'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%BA%90%EC%8B%9C%EC%9B%8C%ED%81%AC',
+		}
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
-		URL = 'https://quizbang.tistory.com'
-		req = s.get(URL,headers=header)
-		html = req.text
-		gogo = bs(html, "html.parser")
-		posts = gogo.findAll("div",{"class":"post-item"})
+		for page in u:
+			#URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
+			URL = page
+			req = s.get(URL,headers=header)
+			html = req.text
+			gogo = bs(html, "html.parser")
+			posts = gogo.findAll("div",{"class":"post-item"})
 		
-		for i in posts:
-			title = i.find('span',{'class':'title'}).text
-			url = i.find('a')["href"]
-			keys = ['TITLE','URL']
-			values = [title, url]
-			dt = dict(zip(keys, values))
-			list.append(dt)
+			for i in posts:
+				title = i.find('span',{'class':'title'}).text
+				url = i.find('a')["href"]
+				keys = ['TITLE','URL']
+				values = [title, url]
+				dt = dict(zip(keys, values))
+				list.append(dt)
 	
 	for i in list:
 		list_url = i['URL']
@@ -1000,6 +1006,7 @@ def add_c(a,b,c,d):
 	finally:		
 		con.close()			
 def funmom_start(startname):
+	logger.info('펀맘알림 시작')
 	conn = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
