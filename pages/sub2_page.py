@@ -99,10 +99,8 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,msg):
 		else :
 			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
 		print(msg)
-		logger.info('%s', msg)
 	else:
 		print(msg)
-		logger.info('%s', msg)
 				
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -801,7 +799,7 @@ def quiz_add_go(title, memo_s, URL):
 				cur.execute("update quiz set MEMO = ?, COMPLTE = ?, TITLE = ? where URL = ? ",(memo_s,'False',title,URL))
 				con.commit()
 				logger.info('해당 내용은 DB에 있어서 %s %s -> %s %s 수정합니다.', old_title, MEMO, title, memo_s)
-				print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title, MEMO, title, memo_s))
+				#print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title, MEMO, title, memo_s))
 		else:
 			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title, URL, memo_s, 'False'))
 			con.commit()
@@ -898,7 +896,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
-		pass
+		logger.info('퀴즈정답 신규내용이 없습니다.')
 		
 @bp2.route('quiz')
 def quiz():
