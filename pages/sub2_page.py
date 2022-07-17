@@ -793,7 +793,7 @@ def quiz_add_go(title, memo_s, URL):
 		if row != None:
 			MEMO = row['MEMO']
 			old_title = row['TITLE']
-			if MEMO == memo_s and old_title == title:
+			if memo_s == MEMO and title == old_title:
 				pass
 			else:
 				cur.execute("update quiz set MEMO = ?, COMPLTE = ?, TITLE = ? where URL = ? ",(memo_s,'False',title,URL))
@@ -870,15 +870,20 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			memo = p.findall(posts)
 			memo_s = ''.join(memo)
 			if '됩니다.' in memo_s :
-				continue
+				pass
 			elif len(memo_s) == 0 :
-				continue
+				pass
 			else:
 				keys = ['TITLE','MEMO', 'URL']
 				values = [title, memo_s, URL]
 				dt = dict(zip(keys, values))
 				last.append(dt)
-				quiz_add_go(title, memo_s, URL)
+				
+	for ii in last:
+		title = ii['TITLE']
+		memo_s = ii['MEMO']
+		URL = ii['URL']
+		quiz_add_go(title, memo_s, URL)
 	
 	#알려준다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
