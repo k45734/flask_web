@@ -869,15 +869,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			p = re.compile('(?<=\:)(.*)')
 			memo = p.findall(posts)
 			memo_s = ''.join(memo)
-			if '됩니다.' in memo_s :
-				pass
-			elif len(memo_s) == 0 :
-				pass
-			else:
-				keys = ['TITLE','MEMO', 'URL']
-				values = [title, memo_s, URL]
-				dt = dict(zip(keys, values))
-				last.append(dt)
+			#if '됩니다.' in memo_s :
+			#	pass
+			#elif len(memo_s) == 0 :
+			#	pass
+			#else:
+			keys = ['TITLE','MEMO', 'URL']
+			values = [title, memo_s, URL]
+			dt = dict(zip(keys, values))
+			last.append(dt)
 				
 	for ii in last:
 		title = ii['TITLE']
