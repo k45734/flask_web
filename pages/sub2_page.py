@@ -835,14 +835,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	conn.close()
 	list = []
 	last = []
-	u = {'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%98%A4%ED%80%B4%EC%A6%88',
-		'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%BA%90%EC%8B%9C%EC%9B%8C%ED%81%AC',
-		}
+	#u = {'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%98%A4%ED%80%B4%EC%A6%88',
+	#	'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%BA%90%EC%8B%9C%EC%9B%8C%ED%81%AC',
+	#	}
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
-		for page in u:
-			#URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			URL = page
+		#for page in u:
+		for page in range(1,11):
+			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
+			#URL = page
 			req = s.get(URL,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
