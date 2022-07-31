@@ -65,7 +65,9 @@ job_defaults = {
     'coalesce': False,
     'max_instances': 1
 }
-scheduler2 = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,timezone=utc) #executors=executors, 
+scheduler2 = BackgroundScheduler(job_defaults=job_defaults,timezone='Asia/Seoul') #executors=executors,
+scheduler2.add_jobstore('sqlalchemy', url='sqlite:////data/jobs2.sqlite')
+scheduler2.configure({'apscheduler.daemon': False}) 
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
