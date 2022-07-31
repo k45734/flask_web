@@ -63,7 +63,7 @@ executors = {
 }
 job_defaults = {
     'coalesce': False,
-    'max_instances': 3
+    'max_instances': 1
 }
 sub3_page = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 f = open(logdata + '/flask.log','a', encoding='utf-8')
