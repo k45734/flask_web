@@ -64,7 +64,7 @@ def create_app():
 	app.register_blueprint(sub3_page.bp3)
 	app.register_blueprint(sub4_page.bp4)
 	app.register_blueprint(copytoon.webtoon)
-	app.run(host="0.0.0.0", debug=True, threaded=True)
+	app.run(host="0.0.0.0", debug=False, threaded=True)
 	return app
 	
 if __name__ == '__main__':
