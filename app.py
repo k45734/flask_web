@@ -40,7 +40,7 @@ def create_app():
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
 	jobstores = {
-		'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite')
+		'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite' , tablename='main')
 		}
 	executors = {
 		'default': ThreadPoolExecutor(20),

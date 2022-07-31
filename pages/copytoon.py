@@ -42,7 +42,7 @@ else:
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs4.sqlite')
+    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite' , tablename='toon')
 }
 executors = {
     'default': ThreadPoolExecutor(20),
