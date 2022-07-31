@@ -12,6 +12,8 @@ from logging.handlers import RotatingFileHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	logdata = at[0] + '/data/log'
@@ -36,9 +38,18 @@ def create_app():
 	logger = logging.getLogger()
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
-	job_defaults = { 'max_instances': 1 }
-	scheduler = BackgroundScheduler(job_defaults=job_defaults)
-	#scheduler = BackgroundScheduler()
+	jobstores = {
+		'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+		}
+	executors = {
+		'default': ThreadPoolExecutor(20),
+		'processpool': ProcessPoolExecutor(5)
+		}
+	job_defaults = {
+		'coalesce': False,
+		'max_instances': 3
+		}
+	scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page

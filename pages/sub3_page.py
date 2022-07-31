@@ -1,13 +1,49 @@
+#-*- coding: utf-8 -*-
+import sys
+try:
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
+except:
+	pass
 from flask import Blueprint
+import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random
+from datetime import datetime
+
+try:
+	import requests
+except ImportError:
+	os.system('pip install requests')
+	import requests
+
+try:
+	from bs4 import BeautifulSoup as bs
+except ImportError:
+	os.system('pip install BeautifulSoup4')
+	from bs4 import BeautifulSoup as bs
+
+try:
+	import telegram
+except ImportError:
+	os.system('pip install python-telegram-bot')
+	import telegram
+try: #python3
+	from urllib.request import urlopen
+except: #python2
+	from urllib2 import urlopen
+	#from urllib.request import urlopen 
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+
 #여기서 필요한 모듈
-from datetime import datetime, timedelta 
-import os.path, bs4, sqlite3, threading, telegram, time, logging, subprocess, requests, os
+from datetime import datetime, timedelta
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
+from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
-import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub3db = at[0] + '/data/database.db'
@@ -18,8 +54,18 @@ else:
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
-job_defaults = { 'coalesce': False, 'max_instances': 1 }
-sub3_page = BackgroundScheduler(job_defaults=job_defaults)
+jobstores = {
+    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+}
+executors = {
+    'default': ThreadPoolExecutor(20),
+    'processpool': ProcessPoolExecutor(5)
+}
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 3
+}
+sub3_page = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])

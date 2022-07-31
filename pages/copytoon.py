@@ -28,6 +28,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.jobstores.base import BaseJobStore, JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	webtoondb = at[0] + '/data/webtoon.db'
@@ -38,8 +40,18 @@ else:
 	
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
-job_defaults = { 'max_instances': 1 }
-schedulerc = BackgroundScheduler(job_defaults=job_defaults)
+jobstores = {
+    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+}
+executors = {
+    'default': ThreadPoolExecutor(20),
+    'processpool': ProcessPoolExecutor(5)
+}
+job_defaults = {
+    'coalesce': False,
+    'max_instances': 3
+}
+schedulerc = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
