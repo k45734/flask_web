@@ -54,7 +54,7 @@ else:
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')
+    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite')
 }
 executors = {
     'default': ThreadPoolExecutor(20),
