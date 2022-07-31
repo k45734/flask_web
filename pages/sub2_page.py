@@ -61,7 +61,7 @@ executors = {
     'processpool': ProcessPoolExecutor(5)
 }
 job_defaults = {
-    'coalesce': False,
+    'coalesce': True,
     'max_instances': 1
 }
 scheduler2 = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors, 
