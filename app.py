@@ -9,6 +9,7 @@ from flask import Flask, flash, redirect, render_template, request, session, abo
 import platform
 import os.path, os, logging
 from logging.handlers import RotatingFileHandler
+from pytz import utc
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.triggers.cron import CronTrigger
@@ -49,7 +50,7 @@ def create_app():
 		'coalesce': True,
 		'max_instances': 1
 		}
-	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors, 
+	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,timezone=utc) #executors=executors, 
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page

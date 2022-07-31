@@ -22,6 +22,7 @@ except ImportError:
 	import sqlite3
 
 #여기서 필요한 모듈
+from pytz import utc
 from datetime import datetime, timedelta
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -51,7 +52,7 @@ job_defaults = {
     'coalesce': True,
     'max_instances': 1
 }
-schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors, 
+schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,timezone=utc) #executors=executors, 
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
