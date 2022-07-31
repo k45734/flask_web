@@ -47,7 +47,7 @@ def create_app():
 		}
 	job_defaults = {
 		'coalesce': False,
-		'max_instances': 3
+		'max_instances': 1
 		}
 	scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 	scheduler.start()
