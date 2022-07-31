@@ -50,9 +50,8 @@ def create_app():
 		'coalesce': False,
 		'max_instances': 1
 		}
-	#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,timezone=utc) #executors=executors, 
-	scheduler = BackgroundScheduler(job_defaults=job_defaults,timezone='Asia/Seoul') #executors=executors,
-	scheduler.add_jobstore('sqlalchemy', url='sqlite:////data/jobs.sqlite')
+	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
+	
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page
