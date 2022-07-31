@@ -63,7 +63,7 @@ executors = {
     'processpool': ProcessPoolExecutor(5)
 }
 job_defaults = {
-    'coalesce': True,
+    'coalesce': False,
     'max_instances': 1
 }
 sub3_page = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,timezone=utc) #executors=executors,
