@@ -49,7 +49,7 @@ def create_app():
 		'coalesce': False,
 		'max_instances': 1
 		}
-	scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors, 
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page

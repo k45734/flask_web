@@ -55,7 +55,7 @@ bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:////data/program_sch.sqlite')
+    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite')
 }
 executors = {
     'default': ThreadPoolExecutor(20),
@@ -65,7 +65,7 @@ job_defaults = {
     'coalesce': False,
     'max_instances': 1
 }
-sub3_page = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+sub3_page = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors,
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])

@@ -41,7 +41,7 @@ else:
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:////data/webtoon_sch.sqlite')
+    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite')
 }
 executors = {
     'default': ThreadPoolExecutor(20),
@@ -51,7 +51,7 @@ job_defaults = {
     'coalesce': False,
     'max_instances': 1
 }
-schedulerc = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults) #executors=executors, 
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
