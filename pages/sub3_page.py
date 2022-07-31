@@ -55,7 +55,7 @@ bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 jobstores = {
-    'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite')
+    'default': SQLAlchemyJobStore(url='sqlite:////data/program_sch.sqlite')
 }
 executors = {
     'default': ThreadPoolExecutor(20),
