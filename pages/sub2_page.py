@@ -145,53 +145,69 @@ def sch_del():
 		return redirect(url_for('sub2.index'))
 		
 #택배조회서비스
-def tracking_start(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
-	code = { "DHL":"de.dhl",
-			"Sagawa":"jp.sagawa",
-			"Kuroneko Yamato":"jp.yamato",
-			"Japan Post":"jp.yuubin",
-			"천일택배":"kr.chunilps",
-			"CJ대한통운":"kr.cjlogistics",
-			"CU 편의점택배":"kr.cupost",
-			"GS Postbox 택배":"kr.cvsnet",
-			"CWAY (Woori Express)":"kr.cway",
-			"대신택배":"kr.daesin",
-			"우체국 택배":"kr.epost",
-			"한의사랑택배":"kr.hanips",
-			"한진택배":"kr.hanjin",
-			"합동택배":"kr.hdexp",
-			"홈픽":"kr.homepick",
-			"한서호남택배":"kr.honamlogis",
-			"일양로지스":"kr.ilyanglogis",
-			"경동택배":"kr.kdexp",
-			"건영택배":"kr.kunyoung",
-			"로젠택배":"kr.logen",
-			"롯데택배":"kr.lotte",
-			"SLX":"kr.slx",
-			"성원글로벌카고":"kr.swgexp",
-			"TNT":"nl.tnt",
-			"EMS":"un.upu.ems",
-			"Fedex":"us.fedex",
-			"UPS":"us.ups",
-			"USPS":"us.usps"
-			}
-	carrier = code[f'{carrier_id}']
-	with requests.Session() as s:
-		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
-		url = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id #기본 URL
-		resp = s.get(url, headers=headers).json()
-		check = resp.get('to', None)
-		if check == None:
-			msg = '송장번호가 없는거 같습니다.'
-		else:
-			json_string = resp.get("from").get("name") #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("progresses") #배송현재상태
-			json_string4 = resp.get("carrier").get("name") #택배사
-			msg = '{} 님이 {} 으로 보내신 {} 님의 현재 배송상태는 {} 입니다.'.format(json_string,json_string4,json_string2,json_string3[0]["description"])
-		
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		
+def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.close()
+	#알림
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from tracking"
+	cur.execute(sql,)
+	rows = cur.fetchall()
+	if len(rows) != 0:
+		for row in rows:
+			carrier_id = row['PARCEL']
+			track_id = row['NUMBER']
+			code = { "DHL":"de.dhl",
+					"Sagawa":"jp.sagawa",
+					"Kuroneko Yamato":"jp.yamato",
+					"Japan Post":"jp.yuubin",
+					"천일택배":"kr.chunilps",
+					"CJ대한통운":"kr.cjlogistics",
+					"CU 편의점택배":"kr.cupost",
+					"GS Postbox 택배":"kr.cvsnet",
+					"CWAY (Woori Express)":"kr.cway",
+					"대신택배":"kr.daesin",
+					"우체국 택배":"kr.epost",
+					"한의사랑택배":"kr.hanips",
+					"한진택배":"kr.hanjin",
+					"합동택배":"kr.hdexp",
+					"홈픽":"kr.homepick",
+					"한서호남택배":"kr.honamlogis",
+					"일양로지스":"kr.ilyanglogis",
+					"경동택배":"kr.kdexp",
+					"건영택배":"kr.kunyoung",
+					"로젠택배":"kr.logen",
+					"롯데택배":"kr.lotte",
+					"SLX":"kr.slx",
+					"성원글로벌카고":"kr.swgexp",
+					"TNT":"nl.tnt",
+					"EMS":"un.upu.ems",
+					"Fedex":"us.fedex",
+					"UPS":"us.ups",
+					"USPS":"us.usps"
+					}
+			carrier = code[f'{carrier_id}']
+			with requests.Session() as s:
+				headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+				url = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id #기본 URL
+				resp = s.get(url, headers=headers).json()
+				check = resp.get('to', None)
+				if check == None:
+					msg = '송장번호가 없는거 같습니다.'
+				else:
+					json_string = resp.get("from").get("name") #누가 보냈냐			
+					json_string2 = resp.get("to").get("name") #누가 받냐
+					json_string3 = resp.get("progresses") #배송현재상태
+					json_string4 = resp.get("carrier").get("name") #택배사
+					msg = '{} 님이 {} 으로 보내신 {} 님의 현재 배송상태는 {} 입니다.'.format(json_string,json_string4,json_string2,json_string3[0]["description"])
+				
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	else:
+		print('test')
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -222,6 +238,54 @@ def tracking():
 			telgm_alim = 'False'
 		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
+@bp2.route('tracking_add', methods=['POST'])
+def tracking_add():
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.close()
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		carrier_id = request.form['carrier_id']
+		track_id = request.form['track_id']
+		conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+		cursor = conn.cursor()
+		sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
+		cursor.execute(sql, (carrier_id,track_id))
+		rows = cursor.fetchone()
+		if rows:
+			pass
+		else:
+			sql = """
+				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER) VALUES (?,?)
+			"""
+		cursor.execute(sql, (carrier_id, track_id))
+		conn.commit()
+		cursor.close()
+		conn.close()
+	return redirect(url_for('sub2.tracking'))
+
+@bp2.route('tracking_del', methods=['POST'])
+def tracking_del():
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.close()
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		carrier_id = request.form['carrier_id']
+		track_id = request.form['track_id']
+		conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+		cursor = conn.cursor()
+		sql = "DELETE FROM tracking WHERE PARCEL = ? AND NUMBER = ?"
+		cursor.execute(sql, (carrier_id, track_id))
+		conn.commit()
+		cursor.close()
+		conn.close()
+	return redirect(url_for('sub2.tracking'))	
+	
 @bp2.route('tracking_ok', methods=['POST'])
 def tracking_ok():
 	if not session.get('logFlag'):
@@ -259,7 +323,7 @@ def tracking_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid])
+			scheduler2.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 			test = scheduler2.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
