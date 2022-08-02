@@ -71,8 +71,24 @@ rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 scheduler2.start()
-
-
+try:
+	#데이터베이스 컬럼 추가하기
+	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	#alter table tracking add column PARCEL;
+	cur = conn.cursor()
+	sql = "alter table tracking add column DATE TEXT"
+	cur.execute(sql)
+	sql = "alter table tracking add column COMPLTE TEXT"
+	cur.execute(sql)
+	conn.commit()
+	conn.close()
+except:
+	pass
+def mydate():
+	nowtime = time.localtime()
+	mytime = "%04d-%02d-%02d" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday)
+	return mytime
+	
 @bp2.route('/')
 @bp2.route('index')
 def index():
@@ -176,7 +192,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	url = []
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
 	conn.close()
 	#알림
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -248,7 +264,7 @@ def tracking():
 	conn.close()
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -290,9 +306,10 @@ def tracking():
 
 @bp2.route('tracking_add', methods=['POST'])
 def tracking_add():
+	mytime = mydate()
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -308,9 +325,9 @@ def tracking_add():
 			pass
 		else:
 			sql = """
-				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER) VALUES (?,?)
+				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
 			"""
-		cursor.execute(sql, (carrier_id, track_id))
+		cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
 		conn.commit()
 		cursor.close()
 		conn.close()
@@ -320,7 +337,7 @@ def tracking_add():
 def tracking_del():
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
 	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
