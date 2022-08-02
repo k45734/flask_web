@@ -979,8 +979,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
-		msg = '퀴즈정답 신규내용이 없습니다'
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		#msg = '퀴즈정답 신규내용이 없습니다'
+		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		logger.info('퀴즈정답 신규내용이 없습니다.')
 		
 @bp2.route('quiz')
