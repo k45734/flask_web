@@ -145,7 +145,35 @@ def sch_del():
 		return redirect(url_for('sub2.index'))
 		
 #택배조회서비스
+#서버에서 조회를 하여 메모리에 저장
+def flfl(json_string_m):
+	test = []
+	for list in json_string_m:
+		a = list.get("time")
+		at = a[0:16]
+		new_s = at.replace('T',' ')
+		b = list.get("location").get('name')
+		c = list.get("status").get('text')
+		d = list.get("description")
+		msg = {'시간':new_s,'상품위치':b,'현재상태':c, '상품상태':d}
+		test.append(msg)				
+	return test
+	
+#저장된 정보를 출력하여 나열하여 메모리에 저장한뒤 출력한다.
+def ff(msg2, json_string,json_string2,json_string4,json_string5):
+	msg = []
+	for i in range(len(msg2)):
+		a = msg2[i]['시간']
+		b = msg2[i]['상품위치']
+		c = msg2[i]['현재상태']
+		d = msg2[i]['상품상태']
+		#total = '{} {} {} {}'.format(a,b,c,d)
+		total = '{}'.format(d)
+		msg.append(total)
+	return msg
+#택배조회 구동	
 def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	url = []
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
@@ -157,57 +185,61 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	sql = "select * from tracking"
 	cur.execute(sql,)
 	rows = cur.fetchall()
-	if len(rows) != 0:
-		for row in rows:
-			carrier_id = row['PARCEL']
-			track_id = row['NUMBER']
-			code = { "DHL":"de.dhl",
-					"Sagawa":"jp.sagawa",
-					"Kuroneko Yamato":"jp.yamato",
-					"Japan Post":"jp.yuubin",
-					"천일택배":"kr.chunilps",
-					"CJ대한통운":"kr.cjlogistics",
-					"CU 편의점택배":"kr.cupost",
-					"GS Postbox 택배":"kr.cvsnet",
-					"CWAY (Woori Express)":"kr.cway",
-					"대신택배":"kr.daesin",
-					"우체국 택배":"kr.epost",
-					"한의사랑택배":"kr.hanips",
-					"한진택배":"kr.hanjin",
-					"합동택배":"kr.hdexp",
-					"홈픽":"kr.homepick",
-					"한서호남택배":"kr.honamlogis",
-					"일양로지스":"kr.ilyanglogis",
-					"경동택배":"kr.kdexp",
-					"건영택배":"kr.kunyoung",
-					"로젠택배":"kr.logen",
-					"롯데택배":"kr.lotte",
-					"SLX":"kr.slx",
-					"성원글로벌카고":"kr.swgexp",
-					"TNT":"nl.tnt",
-					"EMS":"un.upu.ems",
-					"Fedex":"us.fedex",
-					"UPS":"us.ups",
-					"USPS":"us.usps"
-					}
-			carrier = code[f'{carrier_id}']
-			with requests.Session() as s:
-				headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
-				url = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id #기본 URL
-				resp = s.get(url, headers=headers).json()
-				check = resp.get('to', None)
-				if check == None:
-					msg = '송장번호가 없는거 같습니다.'
-				else:
-					json_string = resp.get("from").get("name") #누가 보냈냐			
-					json_string2 = resp.get("to").get("name") #누가 받냐
-					json_string3 = resp.get("progresses") #배송현재상태
-					json_string4 = resp.get("carrier").get("name") #택배사
-					msg = '{} 님이 {} 으로 보내신 {} 님의 현재 배송상태는 {} 입니다.'.format(json_string,json_string4,json_string2,json_string3[0]["description"])
-				
+	for row in rows:
+		carrier_id = row['PARCEL']
+		track_id = row['NUMBER']	
+		code = { "DHL":"de.dhl",
+				"Sagawa":"jp.sagawa",
+				"Kuroneko Yamato":"jp.yamato",
+				"Japan Post":"jp.yuubin",
+				"천일택배":"kr.chunilps",
+				"CJ대한통운":"kr.cjlogistics",
+				"CU 편의점택배":"kr.cupost",
+				"GS Postbox 택배":"kr.cvsnet",
+				"CWAY (Woori Express)":"kr.cway",
+				"대신택배":"kr.daesin",
+				"우체국 택배":"kr.epost",
+				"한의사랑택배":"kr.hanips",
+				"한진택배":"kr.hanjin",
+				"합동택배":"kr.hdexp",
+				"홈픽":"kr.homepick",
+				"한서호남택배":"kr.honamlogis",
+				"일양로지스":"kr.ilyanglogis",
+				"경동택배":"kr.kdexp",
+				"건영택배":"kr.kunyoung",
+				"로젠택배":"kr.logen",
+				"롯데택배":"kr.lotte",
+				"SLX":"kr.slx",
+				"성원글로벌카고":"kr.swgexp",
+				"TNT":"nl.tnt",
+				"EMS":"un.upu.ems",
+				"Fedex":"us.fedex",
+				"UPS":"us.ups",
+				"USPS":"us.usps"
+				}
+		carrier = code[f'{carrier_id}']
+		ttt = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id
+		url.append(ttt)
+	with requests.Session() as s:
+		for a in url:
+			resp = s.get(a).json()
+			check = resp.get('from', None)
+			if check == None:
+				msg = '송장번호가 없는거 같습니다.\n'
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-	else:
-		print('test')
+			else:
+				json_string = check.get("name", None) #누가 보냈냐			
+				json_string2 = resp.get("to").get("name") #누가 받냐
+				json_string3 = resp.get("state").get("text") #배송현재상태
+				json_string4 = resp.get("carrier").get("name") #택배사
+				json_string5 = resp.get("carrier").get("id") #택배사
+				json_string_m = resp.get("progresses") #배송상황
+				msg2 = flfl(json_string_m)
+				gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
+				ms = '\n'.join(gg)
+				msga = '==========================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n=========================================='.format(json_string,json_string2,json_string4,json_string5,ms)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+				
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -236,7 +268,21 @@ def tracking():
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+		view1 = []
+		view2 = []
+		#알림
+		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		sql = "select * from tracking"
+		cur.execute(sql,)
+		rows = cur.fetchall()
+		for row in rows:
+			carrier_id = row['PARCEL']
+			track_id = row['NUMBER']
+			view1.append(carrier_id)
+			view2.append(track_id)
+		return render_template('tracking.html',zip=zip, view1 = view1, view2 = view2, telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('tracking_add', methods=['POST'])
 def tracking_add():

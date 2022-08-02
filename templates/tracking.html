@@ -13,6 +13,15 @@
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <center><h4>택배알림서비스</p>
+<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<tr>
+<th align="center" class="tg-baqh">저장된 목록보기</td>
+</tr>
+<tr>
+<td align="center" class="tg-baqh">{% for row1,row2 in zip(view1,view2) %} {{row1}} {{row2}} <br> {% endfor %}</td>
+</tr>
+</table>
 <table class="tg" style="undefined;table-layout: fixed; width: 600px">
 <colgroup>
 <col style="width: 109px">
