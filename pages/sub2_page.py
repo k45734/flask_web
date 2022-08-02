@@ -246,6 +246,10 @@ def tracking():
 	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	conn.close()
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT)')
+	conn.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
