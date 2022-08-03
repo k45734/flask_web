@@ -237,26 +237,26 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		ttt = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id
 		url.append(ttt)
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
-	#with requests.Session() as s:
-	for a in url:
-		resp = requests.get(a, headers=h).json()
-		#print(resp)
-		check = resp.get('from', None)
-		if check == None:
-			msg = '송장번호가 없는거 같습니다.\n'
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		else:
-			json_string = check.get("name", None) #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("state").get("text") #배송현재상태
-			json_string4 = resp.get("carrier").get("name") #택배사
-			json_string5 = resp.get("carrier").get("id") #택배사
-			json_string_m = resp.get("progresses") #배송상황
-			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
-			ms = '\n'.join(gg)
-			msga = '==========================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n=========================================='.format(json_string,json_string2,json_string4,json_string5,ms)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+	with requests.Session() as s:
+		for a in url:
+			url = s.get(a, headers=h)
+			resp = url.json()
+			check = resp.get('from', None)
+			if check == None:
+				msg = '송장번호가 없는거 같습니다.\n'
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			else:
+				json_string = check.get("name", None) #누가 보냈냐			
+				json_string2 = resp.get("to").get("name") #누가 받냐
+				json_string3 = resp.get("state").get("text") #배송현재상태
+				json_string4 = resp.get("carrier").get("name") #택배사
+				json_string5 = resp.get("carrier").get("id") #택배사
+				json_string_m = resp.get("progresses") #배송상황
+				msg2 = flfl(json_string_m)
+				gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
+				ms = '\n'.join(gg)
+				msga = '==========================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n=========================================='.format(json_string,json_string2,json_string4,json_string5,ms)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 				
 @bp2.route('tracking')
 def tracking():
