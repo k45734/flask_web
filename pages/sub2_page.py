@@ -71,19 +71,40 @@ rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 scheduler2.start()
-try:
-	#데이터베이스 컬럼 추가하기
-	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	#alter table tracking add column PARCEL;
-	cur = conn.cursor()
+
+#데이터베이스 컬럼 추가하기
+conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+cur = conn.cursor()
+sql = "SELECT sql FROM sqlite_master WHERE name='tracking' AND sql LIKE '%DATE%'"
+cur.execute(sql)
+rows = cur.fetchall()
+if len(rows) == 0:
 	sql = "alter table tracking add column DATE TEXT"
 	cur.execute(sql)
+else:
+	pass
+sql = "SELECT sql FROM sqlite_master WHERE name='tracking' AND sql LIKE '%PARCEL%'"
+cur.execute(sql)
+rows = cur.fetchall()
+if len(rows) == 0:
+	sql = "alter table tracking add column PARCEL TEXT"
+	cur.execute(sql)
+else:
+	pass
+sql = "SELECT sql FROM sqlite_master WHERE name='tracking' AND sql LIKE '%COMPLTE%'"
+cur.execute(sql)
+rows = cur.fetchall()
+if len(rows) == 0:
 	sql = "alter table tracking add column COMPLTE TEXT"
 	cur.execute(sql)
-	conn.commit()
-	conn.close()
-except:
+elif len(rows) == 1:
+	sql = "update tracking set COMPLTE = 'False' where COMPLTE is null"
+	cur.execute(sql)
+else:
 	pass
+conn.commit()
+conn.close()
+
 def mydate():
 	nowtime = time.localtime()
 	mytime = "%04d-%02d-%02d" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday)
