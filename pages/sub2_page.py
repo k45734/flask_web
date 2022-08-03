@@ -182,6 +182,23 @@ def sch_del():
 		return redirect(url_for('sub2.index'))
 		
 #택배조회서비스
+#알리미 완료
+def tracking_del_new(carrier_id, track_id):
+	#마지막 실행까지 작업안했던 결과물 저장
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	
+	cur = con.cursor()
+	sql = "select * from tracking where NUMBER = ? and PARCEL = ?"
+	cur.execute(sql, (track_id,carrier_id))
+	row = cur.fetchone()
+	if row == None:
+		pass
+	else:
+		sql = "UPDATE tracking SET COMPLTE = ? WHERE NUMBER = ? and PARCEL = ?"	
+		cur.execute(sql,('True', track_id, carrier_id))
+		con.commit()			
+		con.close()
+		
 #서버에서 조회를 하여 메모리에 저장
 def flfl(json_string_m):
 	test = []
@@ -219,8 +236,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
-	sql = "select * from tracking"
-	cur.execute(sql,)
+	sql = "select * from tracking where COMPLTE = ?"
+	cur.execute(sql, ('False',))
 	rows = cur.fetchall()
 	for row in rows:
 		carrier_id = row['PARCEL']
@@ -270,13 +287,17 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				json_string = check.get("name", None) #누가 보냈냐			
 				json_string2 = resp.get("to").get("name") #누가 받냐
 				json_string3 = resp.get("state").get("text") #배송현재상태
-				json_string4 = resp.get("carrier").get("name") #택배사
-				json_string5 = resp.get("carrier").get("id") #택배사
+				json_string4 = resp.get("carrier").get("name") #택배사이름
+				json_string5 = resp.get("carrier").get("id") #택배사송장번호
 				json_string_m = resp.get("progresses") #배송상황
 				msg2 = flfl(json_string_m)
 				gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
 				ms = '\n'.join(gg)
 				msga = '==========================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n=========================================='.format(json_string,json_string2,json_string4,json_string5,ms)
+				if '완료' in msga :
+					tracking_del_new(json_string4, json_string5)
+				else:
+					pass
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 				
 @bp2.route('tracking')
