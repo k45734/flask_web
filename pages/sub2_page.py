@@ -805,16 +805,16 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		addnews_d(a,b,c,d,e)
 		
 	#오래된 기사 삭제	
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	cur = con.cursor()	
-	sql = "select * from news where DATE not between ? and ?"
-	cur.execute(sql, (olddate, newdate))
-	rows = cur.fetchall()
-	for row in rows:
-		a = row[1]
-		print(a)
-		cur.execute("DELETE FROM news WHERE TITLE = ?", (a,))
-		con.commit()
+	#con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	#cur = con.cursor()	
+	#sql = "select * from news where DATE not between ? and ?"
+	#cur.execute(sql, (olddate, newdate))
+	#rows = cur.fetchall()
+	#for row in rows:
+	#	a = row[1]
+	#	print(a)
+	#	cur.execute("DELETE FROM news WHERE TITLE = ?", (a,))
+	#	con.commit()
 
 @bp2.route('news')
 def news():
