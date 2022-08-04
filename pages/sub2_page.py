@@ -606,10 +606,12 @@ def vietnews(newdate):
 		URL = i['URL']
 		req = session.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		ttitle = bs0bj.find("h1")
 		posts = bs0bj.find('div',{'class':'xe_content'})
 		memo = []
-		memo.append(posts.text)
-		a2 = i['TITLE']
+		memo.append(posts.text.strip())
+		#a2 = i['TITLE']
+		a2 = ttitle.text.strip()
 		a4 = "VIET"
 		keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 		values = [a4, a2, URL, memo,newdate, 'False']
@@ -645,6 +647,7 @@ def ytnsnews(newdate):
 		URL = i['URL']
 		req = session.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		ttitle = bs0bj.find("h1",{"class":"tit"})
 		posts = bs0bj.findAll('p')
 		memo = []
 		for ii in posts:
@@ -656,8 +659,9 @@ def ytnsnews(newdate):
 				pass
 				
 			else:
-				memo.append(ii.text)
-		a2 = i['TITLE']
+				memo.append(ii.text.strip())
+		#a2 = i['TITLE']
+		a2 = ttitle.text.strip()
 		a4 = "YTN"
 		keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 		values = [a4, a2, URL, memo,newdate, 'False']
@@ -697,10 +701,12 @@ def esbsnews(newdate):
 		URL = i['URL']
 		req = session.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 		posts = bs0bj.find("div",{"class":"main_text"})
 		memo = []
-		memo.append(posts.text)
-		a2 = i['TITLE']
+		memo.append(posts.text.strip())
+		#a2 = i['TITLE']
+		a2 = ttitle.text.strip()
 		a4 = "SBS"
 		keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 		values = [a4, a2, URL, memo,newdate, 'False']
@@ -739,10 +745,12 @@ def ekbsnews(newdate):
 		URL = i['URL']
 		req = session.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		ttitle = bs0bj.find("h5",{"class":"tit-s"})
 		posts = bs0bj.find("div",{"id":"cont_newstext"})
 		memo = []
-		memo.append(posts.text)
-		a2 = i['TITLE']
+		memo.append(posts.text.strip())
+		a2 = ttitle.text.strip()
+		#a2 = i['TITLE']
 		a4 = "KBS"
 		keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 		values = [a4, a2, URL, memo, newdate,'False']
@@ -753,7 +761,7 @@ def ekbsnews(newdate):
 	with open(file_path, 'w') as outfile:
 		json.dump(kbsnews1, outfile)
 	addnews(newdate)	
-	return
+	return		
 	
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#오늘날짜
