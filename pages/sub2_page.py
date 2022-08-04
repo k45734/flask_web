@@ -555,7 +555,7 @@ def addnews(newdate):
 			old = i['MEMO']
 			d = '\n'.join(old)
 			e = i['COMPLETE']
-			con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+			con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 			cur = con.cursor()
 			sql = "select * from news where TITLE = ? and URL = ?"
 			cur.execute(sql, (b,c))
@@ -569,10 +569,10 @@ def addnews(newdate):
 				#con.rollback()
 				con.close()
 		
-def addnews_d(a, b, c, d, e):
+def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		cur = con.cursor()
 		sql = "UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?"
 		cur.execute(sql,('True',b, c))
@@ -763,11 +763,11 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	nowtime2 = nowtime1 - timedelta(days=7)
 	olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 	conn.close()
 	#데이터베이스 컬럼 추가하기
-	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	cur = conn.cursor()
 	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%MEMO%'"
 	cur.execute(sql)
@@ -785,7 +785,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	ytnsnews(newdate)
 
 		
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
 	sql = "select * from news where COMPLETE = ?"
@@ -802,7 +802,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		msg = '{}\n{}\n{}'.format(a,b,d)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
-		addnews_d(a,b,c,d,e)
+		addnews_d(a,b,c,d,e,newdate)
 		
 	#오래된 기사 삭제	
 	#con = sqlite3.connect(sub2db + '/news.db',timeout=60)
