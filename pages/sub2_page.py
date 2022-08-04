@@ -377,8 +377,8 @@ def tracking_add():
 		conn.close()
 	return redirect(url_for('sub2.tracking'))
 
-@bp2.route('tracking_del', methods=['POST'])
-def tracking_del():
+@bp2.route('tracking_del/<carrier_id>/<track_id>', methods=["GET"])
+def tracking_del(carrier_id,track_id):
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
@@ -386,8 +386,6 @@ def tracking_del():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		carrier_id = request.form['carrier_id']
-		track_id = request.form['track_id']
 		conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 		cursor = conn.cursor()
 		sql = "DELETE FROM tracking WHERE PARCEL = ? AND NUMBER = ?"

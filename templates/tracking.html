@@ -13,15 +13,7 @@
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <center><h4>택배알림서비스</p>
-<table class="tg" width="600" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<tr>
-<th align="center" class="tg-baqh">저장된 목록보기</td>
-</tr>
-<tr>
-<td align="center" class="tg-baqh">{% for row1,row2 in zip(view1,view2) %} {{row1}} {{row2}} <br> {% endfor %}</td>
-</tr>
-</table>
+
 <table class="tg" style="undefined;table-layout: fixed; width: 600px">
 <colgroup>
 <col style="width: 109px">
@@ -110,12 +102,21 @@
 <th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='tracking_ok';">
 <input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
 <input type="submit" value="추가" onclick="javascript: form.action='tracking_add';">
-<input type="submit" value="삭제" onclick="javascript: form.action='tracking_del';">
+
 </th>
 </thead>
 </center>
 </tr>
 </form>
 </tbody>
-</table> 
+</table>
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<thead>
+{% for row1,row2 in zip(view1,view2) %} 
+<tr>
+<th align="center" class="tg-0lax">{{row1}} {{row2}}</th>
+<td align="center" class="tg-0lax" colspan="2"><input type="button" value="삭제" onclick="location.href='tracking_del/{{ row1 }}/{{ row2 }}'">
+</td>
+</tr>
+ {% endfor %}
 {% endblock %}
