@@ -293,7 +293,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				msg2 = flfl(json_string_m)
 				gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
 				ms = '\n'.join(gg)
-				msga = '==========================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n=========================================='.format(json_string,json_string2,json_string4,json_string5,ms)
+				msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,json_string5,ms)
 				if '완료' in msga :
 					tracking_del_new(json_string4, json_string5)
 				else:
