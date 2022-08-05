@@ -26,13 +26,6 @@ try:
 except ImportError:
 	os.system('pip install python-telegram-bot')
 	import telegram
-try: #python3
-	from urllib.request import urlopen
-except: #python2
-	from urllib2 import urlopen
-	#from urllib.request import urlopen 
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 
 #여기서 필요한 모듈
 from pytz import utc
@@ -88,12 +81,10 @@ def index():
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
-		#t_main = request.form['t_main']
 		return render_template('sub2_index.html', tltl = tltl)
 
 def url_to_image(url, dfolder, category, category2, filename):
 	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	#req = requests.get(url,headers=header)
 	with requests.Session() as s:
 		req = s.get(url,headers=header)
 		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
@@ -178,7 +169,6 @@ def sch_del():
 		else:
 			#remove_job
 			scheduler2.remove_job(startname)
-			#scheduler2.shutdown()
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
 			test2 = scheduler2.get_jobs()
 			for i in test2:
@@ -232,6 +222,7 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 	return msg
 #택배조회 구동	
 def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('택배알림시작')
 	url = []
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -335,10 +326,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					tracking_del_new(json_string4, json_string5)
 				else:
 					pass
-				#tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-				#news_barn = text_barn_maker(msga)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-		logger.info('택배 알림완료')
+	logger.info('택배 알림완료')
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -479,6 +468,7 @@ def tracking_ok():
 		return redirect(url_for('sub2.index'))
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('날씨알림시작')
 	#기상청 날씨누리 현재시간기준
 	natotal = []
 	with requests.Session() as s:
@@ -512,7 +502,8 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#news_barn = text_barn_maker(msg)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		logger.info('날씨 알림완료')
+	logger.info('날씨 알림완료')
+		
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
@@ -608,8 +599,6 @@ def addnews(newdate):
 			else:
 				cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)", (a,b,c,d,newdate,e))
 				con.commit()
-			
-				#con.rollback()
 				con.close()
 		
 def addnews_d(a, b, c, d, e,newdate):
@@ -807,6 +796,7 @@ def ekbsnews(newdate):
 	return		
 	
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('뉴스알림시작')
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
@@ -855,17 +845,6 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
 	logger.info('뉴스 알림완료')	
-	#오래된 기사 삭제	
-	#con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	#cur = con.cursor()	
-	#sql = "select * from news where DATE not between ? and ?"
-	#cur.execute(sql, (olddate, newdate))
-	#rows = cur.fetchall()
-	#for row in rows:
-	#	a = row[1]
-	#	print(a)
-	#	cur.execute("DELETE FROM news WHERE TITLE = ?", (a,))
-	#	con.commit()
 
 @bp2.route('news')
 def news():
@@ -979,6 +958,7 @@ def add_unse_d(a, b, c, d, e):
 		con.close()	
 		
 def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('운세알림시작')
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
@@ -1027,6 +1007,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
 	logger.info('운세 알림완료')	
+	
 @bp2.route('unse')
 def unse():
 	#데이타베이스 없으면 생성
@@ -1156,15 +1137,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	conn.close()
 	list = []
 	last = []
-	#u = {'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%98%A4%ED%80%B4%EC%A6%88',
-	#	'https://quizbang.tistory.com/category/%ED%80%B4%EC%A6%88%20%EC%A0%95%EB%8B%B5/%EC%BA%90%EC%8B%9C%EC%9B%8C%ED%81%AC',
-	#	}
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
 		#for page in u:
 		for page in range(1,11):
 			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			#URL = page
 			req = s.get(URL,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
@@ -1191,11 +1168,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			p = re.compile('(?<=\:)(.*)')
 			memo = p.findall(posts)
 			memo_s = ''.join(memo)
-			#if '됩니다.' in memo_s :
-			#	pass
-			#elif len(memo_s) == 0 :
-			#	pass
-			#else:
 			keys = ['TITLE','MEMO', 'URL']
 			values = [title, memo_s, URL]
 			dt = dict(zip(keys, values))
@@ -1223,8 +1195,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
-		#msg = '퀴즈정답 신규내용이 없습니다'
-		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		logger.info('퀴즈정답 신규내용이 없습니다.')
 		
 @bp2.route('quiz')
@@ -1304,7 +1274,6 @@ def quiz_ok():
 #펀맘 DB		
 def add_d(id, go, complte):
 	try:
-		#print(a,b)
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
@@ -1428,7 +1397,6 @@ def funmom():
 			start_time = rows['start_time']
 		else:
 			start_time = '*/1 * * * *'
-		#ID TEXT, title TEXT, urltitle TEXT, complte TEXT
 		rows = []
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		con.row_factory = sqlite3.Row
