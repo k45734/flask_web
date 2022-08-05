@@ -108,37 +108,73 @@ def url_to_image(url, dfolder, category, category2, filename):
 			code.write(req.content)
 			
 #텔레그램 4000자 전송제한
-def text_barn_maker(post_lines, max_char = 4000):
-	cumulated = 0
-	_text = ''
-	text_barn = []
-	for t in post_lines:
-		trim_t = t.strip(' ')[:max_char] #prevent limit max_char
-		cumulated += len(trim_t)
-
-		if cumulated > max_char:
-			text_barn.append(_text)
-			_text = '' #text initialize
-			cumulated = len(trim_t) #new text_part
-			_text += trim_t
-		else:
-			_text += trim_t
-
-	text_barn.append(_text)
-
-	return text_barn			
+#def text_barn_maker(post_lines, max_char = 4000):
+#	cumulated = 0
+#	_text = ''
+#	text_barn = []
+#	for t in post_lines:
+#		trim_t = t.strip(' ')[:max_char] #prevent limit max_char
+#		cumulated += len(trim_t)
+#
+#		if cumulated > max_char:
+#			text_barn.append(_text)
+#			_text = '' #text initialize
+#			cumulated = len(trim_t) #new text_part
+#			_text += trim_t
+#		else:
+#			_text += trim_t
+#
+#	text_barn.append(_text)
+#
+#	return text_barn			
 #텔레그램 알림
-def tel(telgm,telgm_alim,telgm_token,telgm_botid,text_barn):
-	for text_line in text_barn:
+def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
+	if len(text) <= 4096:
 		if telgm == 'True' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == 'True':
-				bot.sendMessage(chat_id = telgm_botid, text=text_line, disable_notification=True)
-			else :
-				bot.sendMessage(chat_id = telgm_botid, text=text_line, disable_notification=False)
-			print(text_line)
+				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)    
+			else:
+				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 		else:
-			print(text_line)
+			print(text)
+	else:
+		parts = []
+		while len(text) > 0:
+			if len(text) > 4080: # '(Continuing...)\n'이 16자임을 고려하여 4096-16=4080을 했습니다.
+				part = text[:4080]
+				first_lnbr = part.rfind('\n')
+				if first_lnbr != -1: # 가능하면 개행문자를 기준으로 자릅니다.
+					parts.append(part[:first_lnbr])
+					text = text[first_lnbr:]
+				else:
+					parts.append(part)
+					text = text[4080:]
+			else:
+				parts.append(text)
+				break
+		for idx, part in enumerate(parts):
+			if idx == 0:
+				if telgm == 'True' :
+					bot = telegram.Bot(token = telgm_token)
+					if telgm_alim == 'True':
+						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)    
+					else :
+						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+					print(part)
+				else:
+					print(part)
+			else: # 두번째 메시지부터 '(Continuing...)\n'을 앞에 붙여줍니다.
+				if telgm == 'True' :
+					bot = telegram.Bot(token = telgm_token)
+					if telgm_alim == 'True':
+						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)    
+					else :
+						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+					print(part)
+				else:
+					print(part)
+			time.sleep(0.5)
 					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -319,8 +355,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				else:
 					pass
 				#tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-				news_barn = text_barn_maker(msga)
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+				#news_barn = text_barn_maker(msga)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 				
 @bp2.route('tracking')
 def tracking():
@@ -493,8 +529,8 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		#현재날짜
 		msg = '{}\n온도 {} / 체감온도 {} / 습도 {} / 바람 {} / 1시간강수량 {}\n{}'.format(natotal[0],temp[0:5],natotal[10],natotal[12],natotal[14],natotal[16],fact_ok)
 		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		news_barn = text_barn_maker(msg)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+		#news_barn = text_barn_maker(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		
 @bp2.route('weather')
 def weather():
@@ -834,9 +870,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row['MEMO']
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
-		news_barn = text_barn_maker(msg)
-		time.sleep(5)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
 		
@@ -1009,9 +1043,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row['MEMO'] #띠별상세운세
 		e = row['COMPLTE'] #완료여부
 		msg = b + ' (' + c + ')\n' + d
-		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		news_barn = text_barn_maker(msg)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
 		
 @bp2.route('unse')
@@ -1207,9 +1239,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			MEMO = row['MEMO']
 			COMPLTE = row['COMPLTE']
 			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
-			#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-			news_barn = text_barn_maker(msg)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
 		#msg = '퀴즈정답 신규내용이 없습니다'
