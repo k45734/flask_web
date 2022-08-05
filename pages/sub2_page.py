@@ -338,7 +338,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				#tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 				#news_barn = text_barn_maker(msga)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-				
+		logger.info('택배 알림완료')
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -512,7 +512,7 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#news_barn = text_barn_maker(msg)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		
+		logger.info('날씨 알림완료')
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
@@ -854,7 +854,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
-		
+	logger.info('뉴스 알림완료')	
 	#오래된 기사 삭제	
 	#con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	#cur = con.cursor()	
@@ -1026,7 +1026,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		msg = b + ' (' + c + ')\n' + d
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
-		
+	logger.info('운세 알림완료')	
 @bp2.route('unse')
 def unse():
 	#데이타베이스 없으면 생성
@@ -1408,6 +1408,7 @@ def funmom_start(startname):
 					url_to_image(url, dfolder, category, category2, filename)
 					jpeg_no += 1
 				add_d(id, go, complte)
+		logger.info('펀맘 알림완료')		
 				
 @bp2.route('funmom')
 def funmom():
