@@ -107,18 +107,39 @@ def url_to_image(url, dfolder, category, category2, filename):
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
 			
+#텔레그램 4000자 전송제한
+def text_barn_maker(post_lines, max_char = 4000):
+	cumulated = 0
+	_text = ''
+	text_barn = []
+	for t in post_lines:
+		trim_t = t.strip(' ')[:max_char] #prevent limit max_char
+		cumulated += len(trim_t)
+
+		if cumulated > max_char:
+			text_barn.append(_text)
+			_text = '' #text initialize
+			cumulated = len(trim_t) #new text_part
+			_text += trim_t
+		else:
+			_text += trim_t
+
+	text_barn.append(_text)
+
+	return text_barn			
 #텔레그램 알림
-def tel(telgm,telgm_alim,telgm_token,telgm_botid,msg):
-	if telgm == 'True' :
-		bot = telegram.Bot(token = telgm_token)
-		if telgm_alim == 'True':
-			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=True)
-		else :
-			bot.sendMessage(chat_id = telgm_botid, text=msg, disable_notification=False)
-		print(msg)
-	else:
-		print(msg)
-				
+def tel(telgm,telgm_alim,telgm_token,telgm_botid,text_barn):
+	for text_line in text_barn:
+		if telgm == 'True' :
+			bot = telegram.Bot(token = telgm_token)
+			if telgm_alim == 'True':
+				bot.sendMessage(chat_id = telgm_botid, text=text_barn, disable_notification=True)
+			else :
+				bot.sendMessage(chat_id = telgm_botid, text=text_barn, disable_notification=False)
+			print(text_barn)
+		else:
+			print(text_barn)
+					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
@@ -808,7 +829,8 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row['MEMO']
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		news_barn = text_barn_maker(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
 		
