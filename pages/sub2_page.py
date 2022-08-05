@@ -619,7 +619,12 @@ def vietnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+		req = s.get(URL,headers=header)
+		if req == "<Response [200]>":
+			logger.info('VIET뉴스 시작')
+		else:
+			logger.info('VIET뉴스 종료')
+			sys.exit()		
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"list_title"})
 		vietnews = []
@@ -644,6 +649,11 @@ def vietnews(newdate):
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
+			if req == "<Response [200]>":
+				logger.info('VIET뉴스 시작')
+			else:
+				logger.info('VIET뉴스 종료')
+				sys.exit()	
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h1")
 			posts = bs0bj.find('div',{'class':'xe_content'})
@@ -666,7 +676,12 @@ def ytnsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+		req = s.get(URL,headers=header)
+		if req == "<Response [200]>":
+			logger.info('YTN뉴스 시작')
+		else:
+			logger.info('YTN뉴스 종료')
+			sys.exit()		
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"news-con"})	
 		ytnnews = []
@@ -683,7 +698,12 @@ def ytnsnews(newdate):
 		for i in ytnnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+			req = s.get(URL,headers=header)
+			if req == "<Response [200]>":
+				logger.info('YTN뉴스 시작')
+			else:
+				logger.info('YTN뉴스 종료')
+				sys.exit()			
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h1",{"class":"tit"})
 			posts = bs0bj.findAll('p')
@@ -716,7 +736,12 @@ def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+		req = s.get(URL,headers=header)
+		if req == "<Response [200]>":
+			logger.info('SBS뉴스 시작')
+		else:
+			logger.info('SBS뉴스 종료')
+			sys.exit()		
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"w_news_list"})
 		lists = posts.findAll("a")
@@ -736,7 +761,12 @@ def esbsnews(newdate):
 		for i in sbsnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+			req = s.get(URL,headers=header)
+			if req == "<Response [200]>":
+				logger.info('SBS뉴스 시작')
+			else:
+				logger.info('SBS뉴스 종료')
+				sys.exit()
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 			posts = bs0bj.find("div",{"class":"main_text"})
@@ -760,7 +790,12 @@ def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+		req = s.get(URL,headers=header)
+		if req == "<Response [200]>":
+			logger.info('KBS뉴스 시작')
+		else:
+			logger.info('KBS뉴스 종료')
+			sys.exit()		
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 		lists = posts.findAll("a")
@@ -779,7 +814,12 @@ def ekbsnews(newdate):
 		for i in kbsnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
+			req = s.get(URL,headers=header)
+			if req == "<Response [200]>":
+				logger.info('KBS뉴스 시작')
+			else:
+				logger.info('KBS뉴스 종료')
+				sys.exit()
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h5",{"class":"tit-s"})
 			posts = bs0bj.find("div",{"id":"cont_newstext"})
