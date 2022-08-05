@@ -109,7 +109,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 		else:
 			print(text)
-		time.sleep(10)	
+		#time.sleep(10)	
 	else:
 		parts = []
 		while len(text) > 0:
@@ -146,7 +146,8 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					print(part)
 				else:
 					print(part)
-			time.sleep(10)
+			#time.sleep(10)
+			time.sleep(0.5)
 					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -842,6 +843,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		time.sleep(10)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
 	logger.info('뉴스 알림완료')	
