@@ -319,7 +319,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				else:
 					pass
 				#tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-				news_barn = text_barn_maker(msg)
+				news_barn = text_barn_maker(msga)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 				
 @bp2.route('tracking')
