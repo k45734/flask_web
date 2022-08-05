@@ -318,7 +318,9 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					tracking_del_new(json_string4, json_string5)
 				else:
 					pass
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+				#tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+				news_barn = text_barn_maker(msg)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 				
 @bp2.route('tracking')
 def tracking():
@@ -490,7 +492,10 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		fact_ok = ''.join(fact_a.split())
 		#현재날짜
 		msg = '{}\n온도 {} / 체감온도 {} / 습도 {} / 바람 {} / 1시간강수량 {}\n{}'.format(natotal[0],temp[0:5],natotal[10],natotal[12],natotal[14],natotal[16],fact_ok)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		news_barn = text_barn_maker(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
+		
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
@@ -1003,7 +1008,9 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row['MEMO'] #띠별상세운세
 		e = row['COMPLTE'] #완료여부
 		msg = b + ' (' + c + ')\n' + d
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		news_barn = text_barn_maker(msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 		add_unse_d(a, b, c, d, e)
 		
 @bp2.route('unse')
@@ -1199,7 +1206,9 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			MEMO = row['MEMO']
 			COMPLTE = row['COMPLTE']
 			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			news_barn = text_barn_maker(msg)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 			quiz_add_go_d(MEMO, COMPLTE)
 	else:
 		#msg = '퀴즈정답 신규내용이 없습니다'
