@@ -84,7 +84,7 @@ def index():
 		return render_template('sub2_index.html', tltl = tltl)
 
 def url_to_image(url, dfolder, category, category2, filename):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 	with requests.Session() as s:
 		req = s.get(url,headers=header)
 		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
@@ -619,7 +619,7 @@ def vietnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"list_title"})
 		vietnews = []
@@ -666,7 +666,7 @@ def ytnsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"news-con"})	
 		ytnnews = []
@@ -683,7 +683,7 @@ def ytnsnews(newdate):
 		for i in ytnnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h1",{"class":"tit"})
 			posts = bs0bj.findAll('p')
@@ -716,7 +716,7 @@ def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"w_news_list"})
 		lists = posts.findAll("a")
@@ -736,7 +736,7 @@ def esbsnews(newdate):
 		for i in sbsnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 			posts = bs0bj.find("div",{"class":"main_text"})
@@ -760,7 +760,7 @@ def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 		lists = posts.findAll("a")
@@ -779,7 +779,7 @@ def ekbsnews(newdate):
 		for i in kbsnews:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header, stream=True, timeout=(60, 120))
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h5",{"class":"tit-s"})
 			posts = bs0bj.find("div",{"id":"cont_newstext"})
@@ -981,7 +981,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
 	conn.close()
 	session = requests.Session()
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
 	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
 	rs = requests.get(auth,headers=header,verify=False)
@@ -1155,7 +1155,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	list = []
 	last = []
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
 		#for page in u:
 		for page in range(1,11):
 			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
@@ -1176,7 +1176,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		list_url = i['URL']
 		title = i['TITLE']
 		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
 			URL = 'https://quizbang.tistory.com' + list_url
 			req = s.get(URL,headers=header)
 			html = req.text
@@ -1324,7 +1324,7 @@ def funmom_start(startname):
 	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
 	conn.close()
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		gogo = 1
 		a = 1
 		while True:
