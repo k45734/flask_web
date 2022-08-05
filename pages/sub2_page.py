@@ -617,7 +617,7 @@ def addnews_d(a, b, c, d, e,newdate):
 
 def vietnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.vinatimes.net/news'
 		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -641,7 +641,7 @@ def vietnews(newdate):
 				dt = dict(zip(keys, values))
 				vietnews.append(dt)	
 		for i in vietnews:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -664,7 +664,7 @@ def vietnews(newdate):
 
 def ytnsnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -681,7 +681,7 @@ def ytnsnews(newdate):
 			dt = dict(zip(keys, values))
 			ytnnews.append(dt)
 		for i in ytnnews:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -714,7 +714,7 @@ def ytnsnews(newdate):
 	
 def esbsnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -734,7 +734,7 @@ def esbsnews(newdate):
 			dt = dict(zip(keys, values))
 			sbsnews.append(dt)
 		for i in sbsnews:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -758,7 +758,7 @@ def esbsnews(newdate):
 
 def ekbsnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
 		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -777,7 +777,7 @@ def ekbsnews(newdate):
 			dt = dict(zip(keys, values))
 			kbsnews.append(dt)
 		for i in kbsnews:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
