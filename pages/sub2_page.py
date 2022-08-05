@@ -664,13 +664,13 @@ def vietnews(newdate):
 					dt = dict(zip(keys, values))
 					vietnews1.append(dt)		
 				else:
-					print('No!')
+					logger.info('viet No!')
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(vietnews1, outfile)
 			addnews(newdate,a4)	
 		else:
-			print('No!')
+			logger.info('viet No!')
 	return a4
 			
 def ytnsnews(newdate):
@@ -718,13 +718,13 @@ def ytnsnews(newdate):
 					dt = dict(zip(keys, values))
 					ytnnews1.append(dt)
 				else:
-					print('No!')
+					logger.info('ytn No!')
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(ytnnews1, outfile)
 			addnews(newdate,a4)		
 		else:
-			print('No!')
+			logger.info('ytn No!')
 	return a4
 			
 def esbsnews(newdate):
@@ -766,13 +766,13 @@ def esbsnews(newdate):
 					dt = dict(zip(keys, values))
 					sbsnews1.append(dt)
 				else:
-					print('No!')
+					logger.info('sbs No!')
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(sbsnews1, outfile)
 			addnews(newdate,a4)	
 		else:
-			print('No!')
+			logger.info('sbs No!')
 	return a4
 	
 def ekbsnews(newdate):
@@ -813,13 +813,13 @@ def ekbsnews(newdate):
 					dt = dict(zip(keys, values))
 					kbsnews1.append(dt)
 				else:
-					print('No!')	
+					logger.info('kbs No!')	
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(kbsnews1, outfile)
 			addnews(newdate,a4)	
 		else:
-			print('No!')
+			logger.info('kbs No!')
 	return a4		
 			
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
