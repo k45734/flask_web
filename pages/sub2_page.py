@@ -106,27 +106,7 @@ def url_to_image(url, dfolder, category, category2, filename):
 			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
-			
-#텔레그램 4000자 전송제한
-#def text_barn_maker(post_lines, max_char = 4000):
-#	cumulated = 0
-#	_text = ''
-#	text_barn = []
-#	for t in post_lines:
-#		trim_t = t.strip(' ')[:max_char] #prevent limit max_char
-#		cumulated += len(trim_t)
-#
-#		if cumulated > max_char:
-#			text_barn.append(_text)
-#			_text = '' #text initialize
-#			cumulated = len(trim_t) #new text_part
-#			_text += trim_t
-#		else:
-#			_text += trim_t
-#
-#	text_barn.append(_text)
-#
-#	return text_barn			
+	
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 	if len(text) <= 4096:
@@ -138,6 +118,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 		else:
 			print(text)
+		time.sleep(1)	
 	else:
 		parts = []
 		while len(text) > 0:
@@ -174,7 +155,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					print(part)
 				else:
 					print(part)
-			time.sleep(0.5)
+			time.sleep(1)
 					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
