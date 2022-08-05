@@ -118,7 +118,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 		else:
 			print(text)
-		time.sleep(1)	
+		time.sleep(3)	
 	else:
 		parts = []
 		while len(text) > 0:
@@ -155,7 +155,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					print(part)
 				else:
 					print(part)
-			time.sleep(1)
+			time.sleep(3)
 					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
