@@ -825,8 +825,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	ekbsnews(newdate)
 	vietnews(newdate)
 	ytnsnews(newdate)
-
-		
+	#DB에 저장된 뉴스목록을 불러와서 알림
 	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
@@ -842,6 +841,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = row['MEMO']
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
+		logger.info('%s %s',a,b)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		time.sleep(10)
 		#중복 알림에거
