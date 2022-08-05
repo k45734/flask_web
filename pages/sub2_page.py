@@ -620,7 +620,7 @@ def vietnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.vinatimes.net/news'
 		req = s.get(URL,headers=header)
-		if req == "<Response [200]>":
+		if req.status_code == 200:
 			logger.info('VIET뉴스 시작')
 		else:
 			logger.info('VIET뉴스 종료')
@@ -649,7 +649,7 @@ def vietnews(newdate):
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
-			if req == "<Response [200]>":
+			if req.status_code == 200:
 				logger.info('VIET뉴스 시작')
 			else:
 				logger.info('VIET뉴스 종료')
@@ -677,7 +677,7 @@ def ytnsnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 		req = s.get(URL,headers=header)
-		if req == "<Response [200]>":
+		if req.status_code == 200:
 			logger.info('YTN뉴스 시작')
 		else:
 			logger.info('YTN뉴스 종료')
@@ -737,7 +737,7 @@ def esbsnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 		req = s.get(URL,headers=header)
-		if req == "<Response [200]>":
+		if req.status_code == 200:
 			logger.info('SBS뉴스 시작')
 		else:
 			logger.info('SBS뉴스 종료')
@@ -762,7 +762,7 @@ def esbsnews(newdate):
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
-			if req == "<Response [200]>":
+			if req.status_code == 200:
 				logger.info('SBS뉴스 시작')
 			else:
 				logger.info('SBS뉴스 종료')
@@ -791,7 +791,7 @@ def ekbsnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
 		req = s.get(URL,headers=header)
-		if req == "<Response [200]>":
+		if req.status_code == 200:
 			logger.info('KBS뉴스 시작')
 		else:
 			logger.info('KBS뉴스 종료')
@@ -815,7 +815,7 @@ def ekbsnews(newdate):
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 			URL = i['URL']
 			req = s.get(URL,headers=header)
-			if req == "<Response [200]>":
+			if req.status_code == 200:
 				logger.info('KBS뉴스 시작')
 			else:
 				logger.info('KBS뉴스 종료')
