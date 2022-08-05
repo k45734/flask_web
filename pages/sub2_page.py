@@ -839,7 +839,7 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		#time.sleep(10)
+		time.sleep(10)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
 			
