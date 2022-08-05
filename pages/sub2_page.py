@@ -601,6 +601,7 @@ def addnews(newdate):
 				cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)", (a,b,c,d,newdate,e))
 				con.commit()
 				con.close()
+				logger.info('%s %s',a,b)
 		
 def addnews_d(a, b, c, d, e,newdate):
 	try:
