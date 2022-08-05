@@ -579,7 +579,11 @@ def weather_ok():
 		return redirect(url_for('sub2.index'))
 		
 #뉴스알림		
-def addnews(newdate):	
+def addnews(newdate,a4):
+	#SQLITE3 DB 없으면 만들다.
+	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS ' + a4 + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+	conn.close()	
 	file_path = sub2db + '/temp.json'
 	with open(file_path, "r") as json_file:
 		json_data = json.load(json_file)
@@ -592,13 +596,13 @@ def addnews(newdate):
 			e = i['COMPLETE']
 			con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 			cur = con.cursor()
-			sql = "select * from news where TITLE = ? and URL = ?"
+			sql = 'select * from ' + a4 + ' where TITLE = ? and URL = ?'
 			cur.execute(sql, (b,c))
 			row = cur.fetchone()
 			if row != None:
 				pass
 			else:
-				cur.execute("INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)", (a,b,c,d,newdate,e))
+				cur.execute('INSERT OR REPLACE INTO ' + a4 + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (a,b,c,d,newdate,e))
 				con.commit()
 				con.close()
 				logger.info('%s %s',a,b)
@@ -608,7 +612,7 @@ def addnews_d(a, b, c, d, e,newdate):
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		cur = con.cursor()
-		sql = "UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?"
+		sql = 'UPDATE ' + a + ' SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
 		cur.execute(sql,('True',b, c))
 		con.commit()
 	except:
@@ -655,7 +659,6 @@ def vietnews(newdate):
 					#a2 = i['TITLE']
 					a2 = ttitle.text.strip()
 					a4 = "VIET"
-					print(a4)
 					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 					values = [a4, a2, URL, memo,newdate, 'False']
 					dt = dict(zip(keys, values))
@@ -665,9 +668,10 @@ def vietnews(newdate):
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(vietnews1, outfile)
-			addnews(newdate)
+			addnews(newdate,a4)	
 		else:
 			print('No!')
+	return a4
 			
 def ytnsnews(newdate):
 	with requests.Session() as s:
@@ -707,10 +711,8 @@ def ytnsnews(newdate):
 							
 						else:
 							memo.append(ii.text.strip())
-					#a2 = i['TITLE']
 					a2 = ttitle.text.strip()
 					a4 = "YTN"
-					print(a4)
 					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 					values = [a4, a2, URL, memo,newdate, 'False']
 					dt = dict(zip(keys, values))
@@ -720,9 +722,10 @@ def ytnsnews(newdate):
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(ytnnews1, outfile)
-			addnews(newdate)	
+			addnews(newdate,a4)		
 		else:
 			print('No!')
+	return a4
 			
 def esbsnews(newdate):
 	with requests.Session() as s:
@@ -756,10 +759,8 @@ def esbsnews(newdate):
 					posts = bs0bj.find("div",{"class":"main_text"})
 					memo = []
 					memo.append(posts.text.strip())
-					#a2 = i['TITLE']
 					a2 = ttitle.text.strip()
 					a4 = "SBS"
-					print(a4)
 					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 					values = [a4, a2, URL, memo,newdate, 'False']
 					dt = dict(zip(keys, values))
@@ -769,10 +770,11 @@ def esbsnews(newdate):
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(sbsnews1, outfile)
-			addnews(newdate)
+			addnews(newdate,a4)	
 		else:
 			print('No!')
-			
+	return a4
+	
 def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
@@ -805,9 +807,7 @@ def ekbsnews(newdate):
 					memo = []
 					memo.append(posts.text.strip())
 					a2 = ttitle.text.strip()
-					#a2 = i['TITLE']
 					a4 = "KBS"
-					print(a4)
 					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
 					values = [a4, a2, URL, memo, newdate,'False']
 					dt = dict(zip(keys, values))
@@ -817,15 +817,16 @@ def ekbsnews(newdate):
 			file_path = sub2db + '/temp.json'
 			with open(file_path, 'w') as outfile:
 				json.dump(kbsnews1, outfile)
-			addnews(newdate)	
+			addnews(newdate,a4)	
 		else:
 			print('No!')
-	
-def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
+	return a4		
+			
+def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
 	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
-	sql = "select * from news where COMPLETE = ?"
+	sql = 'select * from ' + a4 + ' where COMPLETE = ?'
 	cur.execute(sql, ('False', ))
 	rows = cur.fetchall()
 	
@@ -840,8 +841,8 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#time.sleep(10)
 		#중복 알림에거
-		addnews_d(a,b,c,d,e,newdate)	
-		
+		addnews_d(a,b,c,d,e,newdate)
+			
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
 	#오늘날짜
@@ -850,38 +851,21 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#7일이전
 	nowtime2 = nowtime1 - timedelta(days=7)
 	olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
-	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
-	conn.close()
-	#데이터베이스 컬럼 추가하기
-	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
-	cur = conn.cursor()
-	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%MEMO%'"
-	cur.execute(sql)
-	rows = cur.fetchall()
-	if len(rows) == 0:
-		sql = "alter table news add column MEMO TEXT"
-		cur.execute(sql)
-	else:
-		pass
-	conn.commit()
-	conn.close()
-	#뉴스알림시작
-	ytnsnews(newdate)
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
-	logger.info('ytn뉴스 알림완료')	
-	time.sleep(5)
-	esbsnews(newdate)
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
-	logger.info('sbs뉴스 알림완료')	
-	time.sleep(5)
-	ekbsnews(newdate)
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
-	logger.info('kbs뉴스 알림완료')	
-	time.sleep(5)
-	vietnews(newdate)
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
+
+	ytn = ytnsnews(newdate)
+	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,ytn)
+	logger.info('ytn 기사 완료')
+	
+	sbs = esbsnews(newdate)
+	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,sbs)
+	logger.info('sbs 기사 완료')
+	
+	kbs = ekbsnews(newdate)
+	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,kbs)
+	logger.info('kbs 기사 완료')
+	
+	viet = vietnews(newdate)
+	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,viet)
 	logger.info('viet뉴스 알림완료')	
 	logger.info('전체뉴스 알림완료')	
 
