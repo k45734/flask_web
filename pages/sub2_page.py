@@ -835,6 +835,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
 		news_barn = text_barn_maker(msg)
+		time.sleep(5)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,news_barn)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
