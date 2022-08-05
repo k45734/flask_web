@@ -133,12 +133,12 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text_barn):
 		if telgm == 'True' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == 'True':
-				bot.sendMessage(chat_id = telgm_botid, text=text_barn, disable_notification=True)
+				bot.sendMessage(chat_id = telgm_botid, text=text_line, disable_notification=True)
 			else :
-				bot.sendMessage(chat_id = telgm_botid, text=text_barn, disable_notification=False)
-			print(text_barn)
+				bot.sendMessage(chat_id = telgm_botid, text=text_line, disable_notification=False)
+			print(text_line)
 		else:
-			print(text_barn)
+			print(text_line)
 					
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
