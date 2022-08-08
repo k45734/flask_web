@@ -40,7 +40,7 @@ def create_app():
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
 	jobstores = {
-		'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite' , tablename='main')
+		'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
 		}
 	executors = {
 		'default': ThreadPoolExecutor(20),
@@ -48,8 +48,10 @@ def create_app():
 		}
 	job_defaults = {
 		'coalesce': False,
-		'max_instances': 1
+		'max_instances': 1,
+		'misfire_grace_time': 15*60
 		}
+	
 	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 	scheduler.start()
 	from pages import main_page
