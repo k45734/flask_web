@@ -47,9 +47,9 @@ def create_app():
 		'processpool': ProcessPoolExecutor(5)
 		}
 	job_defaults = {
-		'coalesce': False,
+		'coalesce': True,
 		'max_instances': 3,
-		'misfire_grace_time': 60
+		'misfire_grace_time': 300
 		}
 	
 	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
