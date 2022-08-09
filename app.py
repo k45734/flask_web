@@ -42,17 +42,17 @@ def create_app():
 	jobstores = {
 		'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
 		}
-	#executors = {
-	#	'default': ThreadPoolExecutor(20),
-	#	'processpool': ProcessPoolExecutor(5)
-	#	}
+	executors = {
+		'default': ThreadPoolExecutor(20),
+		'processpool': ProcessPoolExecutor(5)
+		}
 	job_defaults = {
 		'coalesce': True,
 		'max_instances': 1
-	#	'misfire_grace_time': 300
+		'misfire_grace_time': 300
 		}
-	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
-	#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
+	#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
+	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page
