@@ -51,8 +51,8 @@ def create_app():
 		'max_instances': 1
 	#	'misfire_grace_time': 300
 		}
-	
-	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
+	scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
+	#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 	scheduler.start()
 	from pages import main_page
 	#from pages import sub_page
