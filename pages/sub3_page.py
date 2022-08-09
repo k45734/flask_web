@@ -58,14 +58,14 @@ dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='sub3')
 	}
-executors = {
-	'default': ThreadPoolExecutor(20),
-	'processpool': ProcessPoolExecutor(5)
-	}
+#executors = {
+#	'default': ThreadPoolExecutor(20),
+#	'processpool': ProcessPoolExecutor(5)
+#	}
 job_defaults = {
 	'coalesce': True,
-	'max_instances': 3,
-	'misfire_grace_time': 300
+	'max_instances': 1
+#	'misfire_grace_time': 300
 	}
 sub3_page = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors,timezone='Asia/Seoul')
 f = open(logdata + '/flask.log','a', encoding='utf-8')
