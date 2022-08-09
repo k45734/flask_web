@@ -605,9 +605,14 @@ def addnews(newdate,a4):
 			if row != None:
 				pass
 			else:
-				cur.execute('INSERT OR REPLACE INTO ' + a4 + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (a,b,c,d,newdate,e))
-				con.commit()
-				con.close()
+				try:
+					cur.execute('INSERT OR REPLACE INTO ' + a4 + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (a,b,c,d,newdate,e))
+					con.commit()
+				
+				except:
+					con.rollback()
+				finally:	
+					con.close()
 				logger.info('%s %s',a,b)
 		
 def addnews_d(a, b, c, d, e,newdate):
