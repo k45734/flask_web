@@ -172,10 +172,14 @@ def databasedel(FLASKAPPSNAME):
 		con = sqlite3.connect(sub3db,timeout=60)	
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "DROP TABLE " + FLASKAPPSNAME
-		cur.execute(sql)
-		con.commit()
-		con.close
+		try:
+			sql = "DROP TABLE " + FLASKAPPSNAME
+			cur.execute(sql)
+			con.commit()
+		except:
+			con.rollback()
+		finally:	
+			con.close()	
 		return redirect(url_for('sub3.second'))
 
 @bp3.route("ok/<FLASKAPPSNAME>", methods=["GET"])

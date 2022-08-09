@@ -694,9 +694,14 @@ def new_url(packege, t_main):
 				print("new down url : " + url2)
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
-				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
-				cur.execute(sql,(url2,packege))
-				con.commit()
+				try:
+					sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+					cur.execute(sql,(url2,packege))
+					con.commit()
+				except:
+					con.rollback()
+				finally:	
+					con.close()	
 				break
 		newurl = url2
 	elif packege == 'naver':
@@ -713,9 +718,14 @@ def new_url(packege, t_main):
 			if result == 9999:
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
-				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
-				cur.execute(sql,(url2,packege))
-				con.commit()
+				try:
+					sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+					cur.execute(sql,(url2,packege))
+					con.commit()
+				except:
+					con.rollback()
+				finally:	
+					con.close()	
 				break
 		newurl = url2
 	elif packege == 'newtoki':	
@@ -730,9 +740,14 @@ def new_url(packege, t_main):
 				print("new url : " + url2)
 				con = sqlite3.connect(webtoondb,timeout=60)
 				cur = con.cursor()
-				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
-				cur.execute(sql,(url2,packege))
-				con.commit()
+				try:
+					sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+					cur.execute(sql,(url2,packege))
+					con.commit()
+				except:
+					con.rollback()
+				finally:	
+					con.close()	
 				break
 		newurl = url2
 	elif packege == 'toonkor':
@@ -749,9 +764,14 @@ def new_url(packege, t_main):
 			final_str = tta[:-1]
 			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
-			sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
-			cur.execute(sql,(final_str,packege))
-			con.commit()
+			try:
+				sql = "UPDATE main SET SITE_URL = ? WHERE SITE_NAME = ?"
+				cur.execute(sql,(final_str,packege))
+				con.commit()
+			except:
+				con.rollback()
+			finally:	
+				con.close()	
 			newurl = final_str	
 	return newurl
 	
