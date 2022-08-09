@@ -44,17 +44,17 @@ webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='toon')
 	}
-executors = {
-	'default': ThreadPoolExecutor(20),
-	'processpool': ProcessPoolExecutor(5)
-	}
+#executors = {
+#	'default': ThreadPoolExecutor(20),
+#	'processpool': ProcessPoolExecutor(5)
+#	}
 job_defaults = {
-	'coalesce': True,
+#	'coalesce': True,
 	'max_instances': 1,
-	'misfire_grace_time': 300
+#	'misfire_grace_time': 300
 	}
-#schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
-schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
+schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
+#schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
