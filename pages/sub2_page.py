@@ -56,7 +56,7 @@ executors = {
 	}
 job_defaults = {
 	'coalesce': True,
-	'max_instances': 1
+	'max_instances': 1,
 	'misfire_grace_time': 300
 	}
 #scheduler2 = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
