@@ -10,6 +10,8 @@
     </head>
     <body><br>
 	<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+	
+	<tr align="center" class="tg-0lax">현재 시스템 사양</tr>
 	<tr>
 <td align="center">버젼</td>
 <td align="center"> 현재 {{lines}} 최신 {{version}}  <button type='button' onclick="location.href='/update'">업데이트</button></td>
@@ -35,7 +37,17 @@
 <td align="center"> {{disk_percent}}</td>
 </tr>
 </table><br>
-
+<table border=1 width="600" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<tr align="center" class="tg-0lax">현재 스케줄러에 있는 목록보기</tr>
+<thead>
+{% for row in sch_save %} 
+<tr>
+<th align="center" class="tg-0lax">{{row}}</th>
+<td align="center" class="tg-0lax" colspan="2"><input type="button" value="스케줄러 취소" onclick="location.href='cancle/{{ row }}'">
+</td>
+</tr>
+ {% endfor %}
     </body>
 </html>
 

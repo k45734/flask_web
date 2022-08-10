@@ -152,7 +152,7 @@ def sch_del():
 			for i in test2:
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('main.index'))
 		
 #택배조회서비스
 #알리미 완료
@@ -443,7 +443,7 @@ def tracking_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.tracking'))
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
@@ -590,7 +590,7 @@ def weather_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.weather'))
 		
 #뉴스알림		
 def addnews(newdate,a4):
@@ -959,7 +959,7 @@ def news_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.news'))
 
 #운세알리미
 #운세알리미 DB
@@ -1121,7 +1121,7 @@ def unse_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.unse'))
 
 
 #퀴즈정답알림
@@ -1310,7 +1310,7 @@ def quiz_ok():
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.quiz'))
 		
 #펀맘 서비스
 #펀맘 DB		
@@ -1500,4 +1500,4 @@ def funmom_ok():
 		except:
 			pass
 		
-		return redirect(url_for('sub2.index'))
+		return redirect(url_for('sub2.funmom'))

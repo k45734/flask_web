@@ -1299,7 +1299,7 @@ def naver_list():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second4'))
 		
 @webtoon.route('naver_down', methods=['POST'])
 def naver_down():
@@ -1320,7 +1320,7 @@ def naver_down():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second4'))
 		
 @webtoon.route('newtoki_list', methods=['POST'])
 def newtoki_list():
@@ -1343,7 +1343,7 @@ def newtoki_list():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second3'))
 		
 @webtoon.route('newtoki_down', methods=['POST'])
 def newtoki_down():
@@ -1365,7 +1365,7 @@ def newtoki_down():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second3'))
 		
 @webtoon.route('copytoon_list', methods=['POST'])
 def copytoon_list():
@@ -1387,7 +1387,7 @@ def copytoon_list():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second'))
 		
 @webtoon.route('copytoon_down', methods=['POST'])
 def copytoon_down():
@@ -1408,7 +1408,7 @@ def copytoon_down():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second'))
 
 @webtoon.route('toonkor_list', methods=['POST'])
 def toonkor_list():
@@ -1430,7 +1430,7 @@ def toonkor_list():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second2'))
 		
 @webtoon.route('toonkor_down', methods=['POST'])
 def toonkor_down():
@@ -1451,7 +1451,7 @@ def toonkor_down():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second2'))
 		
 @webtoon.route('sch_del', methods=['POST'])
 def sch_del():
@@ -1474,7 +1474,7 @@ def sch_del():
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('main.index'))
 		
 #추가
 @webtoon.route('dozi_list', methods=['POST'])
@@ -1497,7 +1497,7 @@ def dozi_list():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))	
+		return redirect(url_for('webtoon.second5'))	
 		
 @webtoon.route('dozi_down', methods=['POST'])
 def dozi_down():
@@ -1518,4 +1518,4 @@ def dozi_down():
 			test = scheduler.get_job(startname).id
 			test2 = scheduler.modify_job(startname).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.index'))
+		return redirect(url_for('webtoon.second5'))

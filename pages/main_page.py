@@ -94,9 +94,23 @@ def index():
 	oocpu = platform.machine()
 	mem_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%)' % (sizeof_fmt(tmp[0], suffix='B'), sizeof_fmt(tmp[3], suffix='B'), sizeof_fmt(tmp[1], suffix='B'), tmp[2])
 	disk_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%) - 드라이브 (%s)' % (sizeof_fmt(tmp2[0], suffix='B'), sizeof_fmt(tmp2[1], suffix='B'), sizeof_fmt(tmp2[2], suffix='B'), tmp2[3], root)
-	
-	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines)
+	sch_save = []
+	sch_list = scheduler.get_jobs()
+	for i in sch_list:
+		job_id = i.id
+		sch_save.append(job_id)
+	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
 
+@bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
+def cancle(FLASKAPPSNAME):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		scheduler.remove_job(FLASKAPPSNAME)
+		logger.info('%s 스케줄러를 삭제하였습니다.', FLASKAPPSNAME)
+		
+
+		return redirect(url_for('main.index'))
 			
 @bp.route('login')
 def login():
