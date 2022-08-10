@@ -473,38 +473,75 @@ def tracking_ok():
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
-	#기상청 날씨누리 현재시간기준
-	natotal = []
+	headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
+	data = []
+	list = []
 	with requests.Session() as s:
-		#지역명을 찾는다.
-		GEO = {'query': location, 
-				'start': '1',
-				'src': 'A4'}
-		url = 'https://www.weather.go.kr/w/renew2021/rest/main/place-search.do' 
-		resp = s.get(url,data=GEO).json()
-		geo_code = resp[0]['dongCode']
-		#지역명으로 날씨검색을 한다.
-		weather = {'code': geo_code,
-				'unit': 'm/s',
-				'aws': 'N'}
-		url = 'https://www.weather.go.kr/w/wnuri-fct2021/main/current-weather.do'
-		html = s.get(url,data=weather).text
-		gogo = bs(html, "html.parser")	
+		mainurl = 'https://weather.kweather.co.kr/weather/kweather/get_region_list'
+		url = s.get(mainurl, headers=headers, verify=False)
+		resp = url.json()
+		#주소1
+		for i in range(len(resp)):
+			si = resp[i]['name']
+			tt = len(resp[i]['cityList'])
+			#주소2
+			for ii in range(len(resp[i]['cityList'])):
+				city = resp[i]['cityList'][ii]
+				gun = city['name']
+				#주소3
+				for iii in range(len(city['dongList'])):
+					dong = resp[i]['cityList'][ii]['dongList'][iii]
+					dosi = dong['name']
+					check = '{} {} {}'.format(si, gun, dosi)
+					if location in check:
+						gogo = dong['currentWeatherAreacode']
+						gogo2 = dong['forecastHalfDAreacode']
+						geo = '{} {} {}'.format(si, gun, dosi)
+						keys = ['GOGO','GOGO2','GEO']
+						values = [gogo, gogo2, geo]
+						dt = dict(zip(keys, values))
+						list.append(dt)
+						break
+
+	#키값이 있는지 체크후 정보검색
+	try:
+		print(geo,gogo,gogo2)
+	except NameError:
+		gogo = None
+		gogo2 = None
+		geo = None
+	else:
+		print(gogo,gogo2)
+
+	if gogo != None and gogo2 != None and geo != None:
+		start = 'https://weather.kweather.co.kr/weather/kweather/get_current_weather/' + gogo
+		url = s.get(start, headers=headers, verify=False)
+		resp = url.json()
+		date = resp['announceTime']
+		weather = resp['weather']
+		wtext = resp['wtext']
+		temp = resp['temp']
+		humidity = resp['humidity']
+		rainFallHR = resp['rainFallHR']
+		rainFallD= resp['rainFallD']
+		snowFall = resp['snowFall']
+		tempSense = resp['tempSense']
+		windDirection = resp['windDirection']
+		windSpeed = resp['windSpeed']
+		msg = '{} {} {} {}\n기온 : {}\n습도 : {}\n강수량 시간 : {} / 일 : {}\n적설량 : {}\n체감기온 : {}\n풍향 : {}\n풍속 : {}\n'.format(date,geo,weather,wtext,temp,humidity,rainFallHR,rainFallD,snowFall,tempSense,windDirection,windSpeed)
+		#기상상세정보
+		start = 'https://weather.kweather.co.kr/weather/kweather/get_forecast_week/' + gogo2
+		url = s.get(start, headers=headers, verify=False)
+		resp = url.json()
+		old = resp['wf']
+		new = old.replace('<br><br><br><br>','\n')
+		new = old.replace('<br><br>','\n')
+		aa = '{}\n{}'.format(msg,new)
+		data.append(aa)
+	else:
+		data.append('정보없음')
 		
-		for i in gogo.findAll('span'):
-			natotal.append(i.text)
-		#특보예보
-		fact = gogo.find("div",{"class":"cmp-impact-fct"}).text
-		natotal.append(fact)
-		#현재온도
-		temp = natotal[4]
-		#특보
-		fact_a = natotal[-1]
-		fact_ok = ''.join(fact_a.split())
-		#현재날짜
-		msg = '{}\n온도 {} / 체감온도 {} / 습도 {} / 바람 {} / 1시간강수량 {}\n{}'.format(natotal[0],temp[0:5],natotal[10],natotal[12],natotal[14],natotal[16],fact_ok)
-		#tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		#news_barn = text_barn_maker(msg)
+	for msg in data:
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
 		
