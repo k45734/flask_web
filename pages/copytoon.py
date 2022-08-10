@@ -45,12 +45,12 @@ jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='toon')
 	}
 executors = {
-	'default': ThreadPoolExecutor(max_workers=20),
-	'processpool': ProcessPoolExecutor(max_workers=10)
+	'default': ThreadPoolExecutor(max_workers=40),
+	'processpool': ProcessPoolExecutor(max_workers=20)
 	}
 job_defaults = {
 	'coalesce': True,
-	'max_instances': 1,
+	'max_instances': 3,
 	'misfire_grace_time': 300
 	}
 #schedulerc = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
