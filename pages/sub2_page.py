@@ -593,38 +593,27 @@ def weather_ok():
 		return redirect(url_for('sub2.weather'))
 		
 #뉴스알림		
-def addnews(newdate,a4):
+def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS ' + a4 + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+	conn.execute('CREATE TABLE IF NOT EXISTS ' + CAST + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 	conn.close()	
-	file_path = sub2db + '/temp.json'
-	with open(file_path, "r") as json_file:
-		json_data = json.load(json_file)
-		for i in json_data:
-			a = i['CAST']
-			b = i['TITLE']
-			c = i['URL']
-			old = i['MEMO']
-			d = '\n'.join(old)
-			e = i['COMPLETE']
-			con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
-			cur = con.cursor()
-			sql = 'select * from ' + a4 + ' where TITLE = ? and URL = ?'
-			cur.execute(sql, (b,c))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				try:
-					cur.execute('INSERT OR REPLACE INTO ' + a4 + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (a,b,c,d,newdate,e))
-					con.commit()
-				
-				except:
-					con.rollback()
-				finally:	
-					con.close()
-				logger.info('%s %s',a,b)
+	
+	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+	cur = con.cursor()
+	sql = 'select * from ' + CAST + ' where TITLE = ? and URL = ?'
+	cur.execute(sql, (TITLE,URL))
+	row = cur.fetchone()
+	if row != None:
+		pass
+	else:
+		try:
+			cur.execute('INSERT OR REPLACE INTO ' + CAST + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
+			con.commit()
+		except:
+			con.rollback()
+		finally:
+			con.close()
 		
 def addnews_d(a, b, c, d, e,newdate):
 	try:
@@ -644,11 +633,11 @@ def vietnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.vinatimes.net/news'
 		req = s.get(URL,headers=header)
+		#logger.info('VIET %s',req.status_code)
 		if req.status_code == 200:	
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			posts = bs0bj.findAll("div",{"class":"list_title"})
 			vietnews = []
-			vietnews1 = []
 			for test in posts:
 				title = test.text
 				a2 = "".join(title.split())
@@ -669,39 +658,33 @@ def vietnews(newdate):
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
 				req = s.get(URL,headers=header)
+				logger.info('VIET %s %s',req.status_code,URL)
 				if req.status_code == 200:					
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h1")
 					posts = bs0bj.find('div',{'class':'xe_content'})
-					memo = []
-					memo.append(posts.text.strip())
-					#a2 = i['TITLE']
-					a2 = ttitle.text.strip()
-					a4 = "VIET"
-					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
-					values = [a4, a2, URL, memo,newdate, 'False']
-					dt = dict(zip(keys, values))
-					vietnews1.append(dt)		
+					MEMO = posts.text.strip()
+					TITLE = ttitle.text.strip()
+					CAST = "VIET"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 				else:
-					logger.info('viet No!')
-			file_path = sub2db + '/temp.json'
-			with open(file_path, 'w') as outfile:
-				json.dump(vietnews1, outfile)
-			addnews(newdate,a4)	
+					logger.info('No!')
+
 		else:
-			logger.info('viet No!')
-	return a4
+			logger.info('No!')
+	return CAST
 			
 def ytnsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 		req = s.get(URL,headers=header)
+		#logger.info('YTN %s',req.status_code)
 		if req.status_code == 200:
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			posts = bs0bj.findAll("div",{"class":"news-con"})	
 			ytnnews = []
-			ytnnews1 = []
 			for i in posts:
 				a1 = i.text
 				a2 = " ".join(a1.split())
@@ -715,10 +698,11 @@ def ytnsnews(newdate):
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
 				req = s.get(URL,headers=header)
+				logger.info('YTN %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h1",{"class":"tit"})
-					posts = bs0bj.findAll('p')
+					posts = bs0bj.findAll('p')	
 					memo = []
 					for ii in posts:
 						if '재난포털' in ii.text :
@@ -728,35 +712,30 @@ def ytnsnews(newdate):
 						elif '자동완성 기능이 켜져 있습니다.' in ii.text:
 							pass
 							
-						else:
+						else:			
 							memo.append(ii.text.strip())
-					a2 = ttitle.text.strip()
-					a4 = "YTN"
-					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
-					values = [a4, a2, URL, memo,newdate, 'False']
-					dt = dict(zip(keys, values))
-					ytnnews1.append(dt)
+					MEMO = '\n'.join(memo)
+					TITLE = ttitle.text.strip()
+					CAST = "YTN"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 				else:
-					logger.info('ytn No!')
-			file_path = sub2db + '/temp.json'
-			with open(file_path, 'w') as outfile:
-				json.dump(ytnnews1, outfile)
-			addnews(newdate,a4)		
+					logger.info('No!')	
 		else:
-			logger.info('ytn No!')
-	return a4
+			logger.info('No!')
+	return CAST
 			
 def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 		req = s.get(URL,headers=header)
+		#logger.info('SBS %s',req.status_code)
 		if req.status_code == 200:	
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			posts = bs0bj.find("div",{"class":"w_news_list"})
 			lists = posts.findAll("a")
 			sbsnews = []
-			sbsnews1 = []
 			for i in lists:
 				a1 = i.attrs['href']
 				a5 = i.text
@@ -772,39 +751,33 @@ def esbsnews(newdate):
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
 				req = s.get(URL,headers=header)
+				logger.info('SBS %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 					posts = bs0bj.find("div",{"class":"main_text"})
-					memo = []
-					memo.append(posts.text.strip())
-					a2 = ttitle.text.strip()
-					a4 = "SBS"
-					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
-					values = [a4, a2, URL, memo,newdate, 'False']
-					dt = dict(zip(keys, values))
-					sbsnews1.append(dt)
+					MEMO = posts.text.strip()
+					TITLE = ttitle.text.strip()
+					CAST = "SBS"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 				else:
-					logger.info('sbs No!')
-			file_path = sub2db + '/temp.json'
-			with open(file_path, 'w') as outfile:
-				json.dump(sbsnews1, outfile)
-			addnews(newdate,a4)	
+					logger.info('No!')
 		else:
-			logger.info('sbs No!')
-	return a4
+			logger.info('No!')
+	return CAST
 	
 def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
 		req = s.get(URL,headers=header)
+		logger.info('KBS %s',req.status_code)
 		if req.status_code == 200:
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 			lists = posts.findAll("a")
 			kbsnews = []
-			kbsnews1 = []
 			for i in lists:
 				a1 = i.attrs['href']
 				a2 = i.text
@@ -819,27 +792,21 @@ def ekbsnews(newdate):
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
 				req = s.get(URL,headers=header)
+				logger.info('KBS %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h5",{"class":"tit-s"})
 					posts = bs0bj.find("div",{"id":"cont_newstext"})
-					memo = []
-					memo.append(posts.text.strip())
-					a2 = ttitle.text.strip()
-					a4 = "KBS"
-					keys = ['CAST','TITLE','URL','MEMO','DATE','COMPLETE']
-					values = [a4, a2, URL, memo, newdate,'False']
-					dt = dict(zip(keys, values))
-					kbsnews1.append(dt)
+					MEMO = posts.text.strip()
+					TITLE = ttitle.text.strip()
+					CAST = "KBS"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 				else:
-					logger.info('kbs No!')	
-			file_path = sub2db + '/temp.json'
-			with open(file_path, 'w') as outfile:
-				json.dump(kbsnews1, outfile)
-			addnews(newdate,a4)	
+					logger.info('No!')	
 		else:
-			logger.info('kbs No!')
-	return a4		
+			logger.info('No!')
+	return CAST		
 			
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
 	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
