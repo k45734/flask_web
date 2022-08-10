@@ -26,6 +26,7 @@ except ImportError:
 from datetime import datetime, timedelta
 from pages.main_page import scheduler
 from pages.main_page import logger
+from apscheduler.triggers.cron import CronTrigger
 
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
