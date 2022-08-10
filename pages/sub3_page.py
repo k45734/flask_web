@@ -63,10 +63,10 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 	else :
 		logger.info(msg)
 		subprocess.call(FLASKAPPS, shell=True)
-	test2 = scheduler.get_jobs()
-	for i in test2:
-		aa = i.id
-		logger.info('%s 가 스케줄러가 있습니다.', aa)
+#	test2 = scheduler.get_jobs()
+#	for i in test2:
+#		aa = i.id
+#		logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 @bp3.route('/')
 @bp3.route('index')
