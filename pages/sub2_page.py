@@ -448,74 +448,34 @@ def tracking_ok():
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
 	headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
-	data = []
-	list = []
 	with requests.Session() as s:
-		mainurl = 'https://weather.kweather.co.kr/weather/kweather/get_region_list'
-		url = s.get(mainurl, headers=headers, verify=False)
+		mainurl = 'https://www.kr-weathernews.com/mv3/if/search.fcgi?query=' + location
+		url = s.get(mainurl, headers=headers)
 		resp = url.json()
-		#주소1
-		for i in range(len(resp)):
-			si = resp[i]['name']
-			tt = len(resp[i]['cityList'])
-			#주소2
-			for ii in range(len(resp[i]['cityList'])):
-				city = resp[i]['cityList'][ii]
-				gun = city['name']
-				#주소3
-				for iii in range(len(city['dongList'])):
-					dong = resp[i]['cityList'][ii]['dongList'][iii]
-					dosi = dong['name']
-					check = '{} {} {}'.format(si, gun, dosi)
-					if location in check:
-						gogo = dong['currentWeatherAreacode']
-						gogo2 = dong['forecastHalfDAreacode']
-						geo = '{} {} {}'.format(si, gun, dosi)
-						keys = ['GOGO','GOGO2','GEO']
-						values = [gogo, gogo2, geo]
-						dt = dict(zip(keys, values))
-						list.append(dt)
-						break
-
-	#키값이 있는지 체크후 정보검색
-	try:
-		print(geo,gogo,gogo2)
-	except NameError:
-		gogo = None
-		gogo2 = None
-		geo = None
-	else:
-		print(gogo,gogo2)
-
-	if gogo != None and gogo2 != None and geo != None:
-		start = 'https://weather.kweather.co.kr/weather/kweather/get_current_weather/' + gogo
-		url = s.get(start, headers=headers, verify=False)
-		resp = url.json()
-		date = resp['announceTime']
-		weather = resp['weather']
-		wtext = resp['wtext']
-		temp = resp['temp']
-		humidity = resp['humidity']
-		rainFallHR = resp['rainFallHR']
-		rainFallD= resp['rainFallD']
-		snowFall = resp['snowFall']
-		tempSense = resp['tempSense']
-		windDirection = resp['windDirection']
-		windSpeed = resp['windSpeed']
-		msg = '{} {} {} {}\n기온 : {}\n습도 : {}\n강수량 시간 : {} / 일 : {}\n적설량 : {}\n체감기온 : {}\n풍향 : {}\n풍속 : {}\n'.format(date,geo,weather,wtext,temp,humidity,rainFallHR,rainFallD,snowFall,tempSense,windDirection,windSpeed)
-		#기상상세정보
-		start = 'https://weather.kweather.co.kr/weather/kweather/get_forecast_week/' + gogo2
-		url = s.get(start, headers=headers, verify=False)
-		resp = url.json()
-		old = resp['wf']
-		new = old.replace('<br><br><br><br>','\n')
-		new = old.replace('<br><br>','\n')
-		aa = '{}\n{}'.format(msg,new)
-		data.append(aa)
-	else:
-		data.append('정보없음')
+		list = resp['cities']
+		for i in list:
+			code = i['region_key']
 		
-	for msg in data:
+		start = 'https://www.kr-weathernews.com/mv3/if/today.fcgi?region=' + code
+		url = s.get(start, headers=headers)
+		resp = url.json()
+		state = resp['state'] #주소1
+		city = resp['city'] #주소2
+		news = resp['news']['type']
+		news2 = resp['news']['title']
+		sunrise = resp['sunrise'] #일출
+		sunset = resp['sunset'] #일몰
+		date = resp['current']['date']
+		time = resp['current']['time']
+		temp = resp['current']['temp']
+		feeltemp = resp['current']['feeltemp'] #어제보다 ... 높음
+		rhum = resp['current']['rhum'] #습도
+		press = resp['current']['press'] #기압
+		wdir = resp['current']['wdir'] #바람 남...
+		wspd = resp['current']['wspd'] #wdir + wspd
+		pm10 = resp['current']['pm10'] #미세먼지
+		pm25 = resp['current']['pm25'] #초미세먼지
+		msg = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
 		
