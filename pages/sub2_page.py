@@ -475,7 +475,18 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		wspd = resp['current']['wspd'] #wdir + wspd
 		pm10 = resp['current']['pm10'] #미세먼지
 		pm25 = resp['current']['pm25'] #초미세먼지
-		msg = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)
+		msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)	
+	
+		big = 'https://www.kr-weathernews.com/mv3/if/warn.fcgi?region=' + code
+		url = s.get(big, headers=headers)
+		resp = url.json()
+		big_date = resp['warn'][0]['announce_date']
+		big_title = resp['warn'][0]['title']
+		big_region = resp['warn'][0]['region']
+		big_efftsatus = resp['warn'][0]['efftsatus']
+		big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
+		msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
+		msg = '{}\n\n{}'.format(msg1,msg2)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
 		
