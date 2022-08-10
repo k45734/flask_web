@@ -5,9 +5,9 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-from flask import Blueprint
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
 import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 try:
 	import requests
@@ -27,45 +27,19 @@ except ImportError:
 	os.system('pip install python-telegram-bot')
 	import telegram
 
-#여기서 필요한 모듈
-from pytz import utc
-from datetime import datetime, timedelta
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.jobstores.base import JobLookupError
-from apscheduler.triggers.cron import CronTrigger
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from pages.main_page import scheduler
+from pages.main_page import logger
+
+
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub2db = at[0] + '/data'
-	logdata = at[0] + '/data/log'
 else:
 	sub2db = '/data'
-	logdata = '/data/log'
 	
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-jobstores = {
-	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='sub2')
-	}
-executors = {
-	'default': ThreadPoolExecutor(max_workers=80),
-	'processpool': ProcessPoolExecutor(max_workers=40)
-	}
-job_defaults = {
-	'coalesce': True,
-	'max_instances': 1,
-	'misfire_grace_time': 300
-	}
-#scheduler2 = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
-scheduler2 = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
-f = open(logdata + '/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
-logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
-logger = logging.getLogger()
-scheduler2.start()
+
 
 def mydate():
 	nowtime = time.localtime()
@@ -79,7 +53,7 @@ def index():
 		return redirect(url_for('main.index'))
 	else:
 		tltl = []
-		test2 = scheduler2.get_jobs()
+		test2 = scheduler.get_jobs()
 		for i in test2:
 			aa = i.id
 			tltl.append(aa)
@@ -164,7 +138,7 @@ def sch_del():
 	else:
 		startname = request.form['startname']
 		try:
-			test = scheduler2.get_job(startname).id
+			test = scheduler.get_job(startname).id
 			logger.info('%s가 스케줄러에 있습니다.', test)
 		except Exception as e:
 			test = None
@@ -172,9 +146,9 @@ def sch_del():
 			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
 		else:
 			#remove_job
-			scheduler2.remove_job(startname)
+			scheduler.remove_job(startname)
 			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = scheduler2.get_jobs()
+			test2 = scheduler.get_jobs()
 			for i in test2:
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
@@ -464,8 +438,8 @@ def tracking_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -611,8 +585,8 @@ def weather_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -980,8 +954,8 @@ def news_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(news_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(news_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1142,8 +1116,8 @@ def unse_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1331,8 +1305,8 @@ def quiz_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1520,8 +1494,8 @@ def funmom_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler2.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
-			test = scheduler2.get_job(startname).id
+			scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
+			test = scheduler.get_job(startname).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass

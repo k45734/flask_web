@@ -1,18 +1,24 @@
 #-*- coding: utf-8 -*-
-from flask import Blueprint
 import sys
 try:
 	reload(sys)
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import os, os.path, sqlite3, time , psutil, platform
+import os, os.path, sqlite3, time , psutil, platform, logging
 from datetime import datetime, timedelta
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
 from requests import get
 import requests
 import zipfile, shutil 
 from distutils.dir_util import copy_tree
+from logging.handlers import RotatingFileHandler
+from pytz import utc
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 bp = Blueprint('main', __name__, url_prefix='/')
 if platform.system() == 'Windows':
@@ -20,6 +26,29 @@ if platform.system() == 'Windows':
 	logdata = at[0] + '/data/log'
 else:
 	logdata = '/data/log'
+
+filepath = logdata + '/flask.log'
+if not os.path.isfile(filepath):
+	f = open(logdata + '/flask.log','a', encoding='utf-8')
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
+logger = logging.getLogger()
+
+jobstores = {
+	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
+	}
+executors = {
+	'default': ThreadPoolExecutor(max_workers=80),
+	'processpool': ProcessPoolExecutor(max_workers=40)
+	}
+job_defaults = {
+	'coalesce': True,
+	'max_instances': 1,
+	'misfire_grace_time': 300
+	}
+#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
+scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
+scheduler.start()
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
 		if abs(num) < 1024.0:
