@@ -604,180 +604,105 @@ def vietnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header,verify=False)
-		#logger.info('VIET %s',req.status_code)
-		if req.status_code == 200:	
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			posts = bs0bj.findAll("div",{"class":"list_title"})
-			vietnews = []
-			for test in posts:
-				title = test.text
-				a2 = "".join(title.split())
-				a3 = test.a['href']
-				a5 = "VIET"
-				if 'https://www.vinatimes.net/notice/461808' in a3:
-					pass
-				elif 'https://www.vinatimes.net/notice/456598' in a3:
-					pass 
-				elif 'https://www.vinatimes.net/notice/454369' in a3:
-					pass
-				else:
-					keys = ['CAST','TITLE','URL']
-					values = [a5, a2, a3]
-					dt = dict(zip(keys, values))
-					vietnews.append(dt)	
-			for i in vietnews:
-				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-				URL = i['URL']
-				req = s.get(URL,headers=header,verify=False)
-				logger.info('VIET %s %s',req.status_code,URL)
-				if req.status_code == 200:					
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.find("h1")
-					posts = bs0bj.find('div',{'class':'xe_content'})
-					MEMO = posts.text.strip()
-					TITLE = ttitle.text.strip()
-					CAST = "VIET"
-					COMPLETE = 'False'
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				else:
-					logger.info('No!')
-
-		else:
-			logger.info('No!')
+		req = s.get(URL,headers=header)	
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"list_title"})
+		for test in posts:
+			URL = test.a['href']
+			if 'https://www.vinatimes.net/notice/461808' in URL:
+				pass
+			elif 'https://www.vinatimes.net/notice/456598' in URL:
+				pass 
+			elif 'https://www.vinatimes.net/notice/454369' in URL:
+				pass
+			else:
+				req = s.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h1")
+				posts = bs0bj.find('div',{'class':'xe_content'})
+				MEMO = posts.text.strip()
+				TITLE = ttitle.text.strip()
+				CAST = "VIET"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+		
 	return CAST
 			
 def ytnsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = s.get(URL,headers=header,verify=False)
-		#logger.info('YTN %s',req.status_code)
+		MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
+		req = s.get(MAIN,headers=header,verify=False)
 		if req.status_code == 200:
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			posts = bs0bj.findAll("div",{"class":"news-con"})	
-			ytnnews = []
 			for i in posts:
-				a1 = i.text
-				a2 = " ".join(a1.split())
-				a3 = 'https:' + i.find('a')['href']
-				a4 = "YTN"
-				keys = ['CAST','TITLE','URL']
-				values = [a4, a2, a3]
-				dt = dict(zip(keys, values))
-				ytnnews.append(dt)
-			for i in ytnnews:
-				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-				URL = i['URL']
+				URL = 'https:' + i.find('a')['href']
 				req = s.get(URL,headers=header,verify=False)
-				logger.info('YTN %s %s',req.status_code,URL)
-				if req.status_code == 200:
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.find("h1",{"class":"tit"})
-					posts = bs0bj.findAll('p')	
-					memo = []
-					for ii in posts:
-						if '재난포털' in ii.text :
-							pass
-						elif '기사제보' in ii.text :
-							pass
-						elif '자동완성 기능이 켜져 있습니다.' in ii.text:
-							pass
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h1",{"class":"tit"})
+				posts = bs0bj.findAll('p')	
+				memo = []
+				for ii in posts:
+					if '재난포털' in ii.text :
+						pass
+					elif '기사제보' in ii.text :
+						pass
+					elif '자동완성 기능이 켜져 있습니다.' in ii.text:
+						pass
 							
-						else:			
-							memo.append(ii.text.strip())
-					MEMO = '\n'.join(memo)
-					TITLE = ttitle.text.strip()
-					CAST = "YTN"
-					COMPLETE = 'False'
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				else:
-					logger.info('No!')	
-		else:
-			logger.info('No!')
+					else:			
+						memo.append(ii.text.strip())
+				MEMO = '\n'.join(memo)
+				TITLE = ttitle.text.strip()
+				CAST = "YTN"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+				
 	return CAST
 			
 def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header,verify=False)
-		#logger.info('SBS %s',req.status_code)
-		if req.status_code == 200:	
+		req = s.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.find("div",{"class":"w_news_list"})
+		lists = posts.findAll("a")		
+		for i in lists:
+			URL = 'https://news.sbs.co.kr' + i.attrs['href']
+			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			posts = bs0bj.find("div",{"class":"w_news_list"})
-			lists = posts.findAll("a")
-			sbsnews = []
-			for i in lists:
-				a1 = i.attrs['href']
-				a5 = i.text
-				a2 = "".join(a5.split())
-				a3 = 'https://news.sbs.co.kr' + a1
-				a4 = "{} \n{}\n".format(a2, a3)
-				a5 = "SBS"
-				keys = ['CAST','TITLE','URL']
-				values = [a5, a2, a3]
-				dt = dict(zip(keys, values))
-				sbsnews.append(dt)
-			for i in sbsnews:
-				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-				URL = i['URL']
-				req = s.get(URL,headers=header,verify=False)
-				logger.info('SBS %s %s',req.status_code,URL)
-				if req.status_code == 200:
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
-					posts = bs0bj.find("div",{"class":"main_text"})
-					MEMO = posts.text.strip()
-					TITLE = ttitle.text.strip()
-					CAST = "SBS"
-					COMPLETE = 'False'
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				else:
-					logger.info('No!')
-		else:
-			logger.info('No!')
+			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
+			posts = bs0bj.find("div",{"class":"main_text"})
+			MEMO = posts.text.strip()
+			TITLE = ttitle.text.strip()
+			CAST = "SBS"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+			
 	return CAST
 	
 def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header,verify=False)
-		logger.info('KBS %s',req.status_code)
-		if req.status_code == 200:
+		req = s.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
+		lists = posts.findAll("a")
+		for i in lists:
+			URL = 'http://news.kbs.co.kr' + i.attrs['href']
+			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
-			lists = posts.findAll("a")
-			kbsnews = []
-			for i in lists:
-				a1 = i.attrs['href']
-				a2 = i.text
-				a3 = 'http://news.kbs.co.kr' + a1
-				a4 = "{} \n{}\n".format(a2, a3)
-				a5 = "KBS"
-				keys = ['CAST','TITLE','URL']
-				values = [a5, a2, a3]
-				dt = dict(zip(keys, values))
-				kbsnews.append(dt)
-			for i in kbsnews:
-				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-				URL = i['URL']
-				req = s.get(URL,headers=header,verify=False)
-				logger.info('KBS %s %s',req.status_code,URL)
-				if req.status_code == 200:
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.find("h5",{"class":"tit-s"})
-					posts = bs0bj.find("div",{"id":"cont_newstext"})
-					MEMO = posts.text.strip()
-					TITLE = ttitle.text.strip()
-					CAST = "KBS"
-					COMPLETE = 'False'
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				else:
-					logger.info('No!')	
-		else:
-			logger.info('No!')
+			ttitle = bs0bj.find("h5",{"class":"tit-s"})
+			posts = bs0bj.find("div",{"id":"cont_newstext"})
+			MEMO = posts.text.strip()
+			TITLE = ttitle.text.strip()
+			CAST = "KBS"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+			
 	return CAST		
 			
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
@@ -806,26 +731,23 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
-	#7일이전
-	nowtime2 = nowtime1 - timedelta(days=7)
-	olddate = "%04d-%02d-%02d" % (nowtime2.year, nowtime2.month, nowtime2.day)
 
 	ytn = ytnsnews(newdate)
+	sbs = esbsnews(newdate)
+	kbs = ekbsnews(newdate)
+	viet = vietnews(newdate)
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,ytn)
 	logger.info('ytn 기사 완료')
-	
-	sbs = esbsnews(newdate)
+		
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,sbs)
 	logger.info('sbs 기사 완료')
-	
-	kbs = ekbsnews(newdate)
+		
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,kbs)
 	logger.info('kbs 기사 완료')
-	
-	viet = vietnews(newdate)
+		
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,viet)
 	logger.info('viet뉴스 알림완료')	
-	logger.info('전체뉴스 알림완료')	
+	
 
 @bp2.route('news')
 def news():
