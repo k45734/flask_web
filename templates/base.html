@@ -95,7 +95,7 @@ section {
 <nav role="navigation">
   <ul id="main-menu">
     <li><a href="{{ url_for('main.index') }}">홈</a></li>
-    <li><a href="{{ url_for('sub2.index') }}">일반 메뉴</a>
+    <li><a href="{{ url_for('sub2.index') }}">일반</a>
       <ul id="sub-menu">
 		<li><a href="{{ url_for('sub2.funmom') }}" aria-label="subemnu">아이들색칠공부다운로더</a></li>
 		<li><a href="{{ url_for('sub2.weather') }}" aria-label="subemnu">날씨알림서비스</a></li>		
@@ -105,7 +105,7 @@ section {
 		<li><a href="{{ url_for('sub2.tracking') }}" aria-label="subemnu">택배조회</a></li>
       </ul>
     </li>
-	<li><a href="{{ url_for('webtoon.index') }}">웹툰 메뉴</a>
+	<li><a href="{{ url_for('webtoon.index') }}">웹툰</a>
       <ul id="sub-menu">
 		<li><a href="{{ url_for('webtoon.second') }}" aria-label="subemnu">카피툰</a></li>
 		<li><a href="{{ url_for('webtoon.second2') }}" aria-label="subemnu">툰코</a></li>
@@ -115,16 +115,16 @@ section {
       </ul>
     </li>
 	{% if session.get('logFlag') %}
-    <li><a href="#">시스템 메뉴</a>
+    <li><a href="#">시스템</a>
       <ul id="sub-menu">     
         <li><a href="{{ url_for('sub3.second') }}" aria-label="subemnu">프로그램</a></li>
         <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
         <li><a href="{{ url_for('main.log') }}" aria-label="subemnu">로그</a></li>
 	  <li><a href="{{ url_for('main.restart') }}" aria-label="subemnu">재시작</a></li>
+	      <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
+	<li><a href="/logout">로그아웃</a></li>
       </ul>
     </li>
-    <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
-	<li><a href="/logout">로그아웃</a></li>
 	{% else %}
     <li><a href="/login">로그인</a></li>
 	{% endif %}
