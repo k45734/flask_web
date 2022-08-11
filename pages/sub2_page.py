@@ -604,7 +604,7 @@ def vietnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		#logger.info('VIET %s',req.status_code)
 		if req.status_code == 200:	
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -629,7 +629,7 @@ def vietnews(newdate):
 			for i in vietnews:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
-				req = s.get(URL,headers=header)
+				req = s.get(URL,headers=header,verify=False)
 				logger.info('VIET %s %s',req.status_code,URL)
 				if req.status_code == 200:					
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -651,7 +651,7 @@ def ytnsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		#logger.info('YTN %s',req.status_code)
 		if req.status_code == 200:
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -669,7 +669,7 @@ def ytnsnews(newdate):
 			for i in ytnnews:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
-				req = s.get(URL,headers=header)
+				req = s.get(URL,headers=header,verify=False)
 				logger.info('YTN %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -701,7 +701,7 @@ def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		#logger.info('SBS %s',req.status_code)
 		if req.status_code == 200:	
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -722,7 +722,7 @@ def esbsnews(newdate):
 			for i in sbsnews:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
-				req = s.get(URL,headers=header)
+				req = s.get(URL,headers=header,verify=False)
 				logger.info('SBS %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -743,7 +743,7 @@ def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		logger.info('KBS %s',req.status_code)
 		if req.status_code == 200:
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -763,7 +763,7 @@ def ekbsnews(newdate):
 			for i in kbsnews:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 				URL = i['URL']
-				req = s.get(URL,headers=header)
+				req = s.get(URL,headers=header,verify=False)
 				logger.info('KBS %s %s',req.status_code,URL)
 				if req.status_code == 200:
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -1123,7 +1123,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#for page in u:
 		for page in range(1,11):
 			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header,verify=False)
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.findAll("div",{"class":"post-item"})
@@ -1142,7 +1142,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		with requests.Session() as s:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
 			URL = 'https://quizbang.tistory.com' + list_url
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header,verify=False)
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.find('h2').text
