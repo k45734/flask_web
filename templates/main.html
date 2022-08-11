@@ -42,8 +42,9 @@
 <thead>
 {% for row in sch_save %} 
 <tr>
-<th align="center" class="tg-0lax">{{row}}</th>
-<td align="center" class="tg-0lax" colspan="2"><input type="button" value="스케줄러 취소" onclick="location.href='cancle/{{ row }}'">
+<th align="center" class="tg-0lax">{{row['NAME']}}</th>
+<th align="center" class="tg-0lax" colspan="2">{{row['TIME']}}</th>
+<td align="center" class="tg-0lax" colspan="3"><input type="button" value="스케줄러 취소" onclick="location.href='cancle/{{ row['NAME'] }}'">
 </td>
 </tr>
  {% endfor %}

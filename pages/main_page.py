@@ -98,7 +98,11 @@ def index():
 	sch_list = scheduler.get_jobs()
 	for i in sch_list:
 		job_id = i.id
-		sch_save.append(job_id)
+		job_next_time  = i.next_run_time
+		keys = ['NAME','TIME']
+		values = [job_id, job_next_time]
+		dt = dict(zip(keys, values))
+		sch_save.append(dt)
 	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])

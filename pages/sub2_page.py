@@ -338,8 +338,7 @@ def tracking():
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		view1 = []
-		view2 = []
+		view = []
 		#알림
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 		con.row_factory = sqlite3.Row
@@ -350,9 +349,11 @@ def tracking():
 		for row in rows:
 			carrier_id = row['PARCEL']
 			track_id = row['NUMBER']
-			view1.append(carrier_id)
-			view2.append(track_id)
-		return render_template('tracking.html',zip=zip, view1 = view1, view2 = view2, telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+			keys = ['PARCEL','NUMBER']
+			values = [carrier_id, track_id]
+			dt = dict(zip(keys, values))
+			view.append(dt)
+		return render_template('tracking.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
 
 @bp2.route('tracking_add', methods=['POST'])
 def tracking_add():
