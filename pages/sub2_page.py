@@ -570,7 +570,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS ' + CAST + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 	conn.close()	
-	
+	time.sleep(random.uniform(2,10)) 
 	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 	cur = con.cursor()
 	sql = 'select * from ' + CAST + ' where TITLE = ? and URL = ?'
@@ -590,6 +590,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
+		time.sleep(random.uniform(2,10)) 
 		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE ' + a + ' SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
