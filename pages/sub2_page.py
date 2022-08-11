@@ -567,20 +567,20 @@ def weather_ok():
 #뉴스알림		
 def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS ' + CAST + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 	conn.close()	
 	time.sleep(random.uniform(2,10)) 
-	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()
-	sql = 'select * from ' + CAST + ' where TITLE = ? and URL = ?'
+	sql = 'select * from news where TITLE = ? and URL = ?'
 	cur.execute(sql, (TITLE,URL))
 	row = cur.fetchone()
 	if row != None:
 		pass
 	else:
 		try:
-			cur.execute('INSERT OR REPLACE INTO ' + CAST + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
+			cur.execute('INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
 			con.commit()
 		except:
 			con.rollback()
@@ -591,9 +591,9 @@ def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		time.sleep(random.uniform(2,10)) 
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
-		sql = 'UPDATE ' + a + ' SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
+		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
 		cur.execute(sql,('True',b, c))
 		con.commit()
 	except:
@@ -706,11 +706,11 @@ def ekbsnews(newdate):
 			
 	return CAST		
 			
-def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,a4):
-	con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
-	sql = 'select * from ' + a4 + ' where COMPLETE = ?'
+	sql = 'select * from news where COMPLETE = ?'
 	cur.execute(sql, ('False', ))
 	rows = cur.fetchall()
 	
@@ -737,17 +737,9 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	sbs = esbsnews(newdate)
 	kbs = ekbsnews(newdate)
 	viet = vietnews(newdate)
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,ytn)
-	logger.info('ytn 기사 완료')
-		
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,sbs)
-	logger.info('sbs 기사 완료')
-		
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,kbs)
-	logger.info('kbs 기사 완료')
-		
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate,viet)
-	logger.info('viet뉴스 알림완료')	
+	
+	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
+	logger.info('뉴스 알림완료')	
 	
 
 @bp2.route('news')
