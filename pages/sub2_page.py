@@ -124,7 +124,6 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					print(part)
 			#time.sleep(10)
 			time.sleep(0.5)
-		del parts
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -626,8 +625,6 @@ def vietnews(newdate):
 				CAST = "VIET"
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-		
-	return CAST
 			
 def ytnsnews(newdate):
 	with requests.Session() as s:
@@ -659,9 +656,7 @@ def ytnsnews(newdate):
 				CAST = "YTN"
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				
-	return CAST
-			
+
 def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
@@ -681,8 +676,6 @@ def esbsnews(newdate):
 			CAST = "SBS"
 			COMPLETE = 'False'
 			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-			
-	return CAST
 	
 def ekbsnews(newdate):
 	with requests.Session() as s:
@@ -702,9 +695,7 @@ def ekbsnews(newdate):
 			TITLE = ttitle.text.strip()
 			CAST = "KBS"
 			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-			
-	return CAST		
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
 			
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
@@ -723,21 +714,22 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 		e = row['COMPLETE']
 		msg = '{}\n{}\n{}'.format(a,b,d)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		time.sleep(10)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
-			
+		time.sleep(random.uniform(2,5))
+		
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
-
-	ytn = ytnsnews(newdate)
-	sbs = esbsnews(newdate)
-	kbs = ekbsnews(newdate)
-	viet = vietnews(newdate)
-	
+	try:
+		ytnsnews(newdate)
+		esbsnews(newdate)
+		ekbsnews(newdate)
+		vietnews(newdate)
+	except:	
+		pass
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
 	logger.info('뉴스 알림완료')	
 	
