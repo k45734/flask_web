@@ -52,13 +52,13 @@ jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
 	}
 executors = {
-	'default': ThreadPoolExecutor(max_workers=160),
-	'processpool': ProcessPoolExecutor(max_workers=60)
+	'default': ThreadPoolExecutor(max_workers=20),
+	'processpool': ProcessPoolExecutor(max_workers=10)
 	}
 job_defaults = {
-	#'coalesce': True,
+	'coalesce': True,
 	'max_instances': 1,
-	#'misfire_grace_time': 10
+	'misfire_grace_time': 10
 	}
 #scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
