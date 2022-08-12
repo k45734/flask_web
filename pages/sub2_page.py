@@ -604,19 +604,20 @@ def vietnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header)	
+		req = s.get(URL,headers=header,verify=False)	
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"list_title"})
 		for test in posts:
-			URL = test.a['href']
-			if 'https://www.vinatimes.net/notice/461808' in URL:
+			
+			if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
 				pass
-			elif 'https://www.vinatimes.net/notice/456598' in URL:
+			elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
 				pass 
-			elif 'https://www.vinatimes.net/notice/454369' in URL:
+			elif 'https://www.vinatimes.net/notice/454369' in test.a['href']:
 				pass
 			else:
-				req = s.get(URL,headers=header)
+				URL = test.a['href']
+				req = s.get(URL,headers=header,verify=False)
 				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 				ttitle = bs0bj.find("h1")
 				posts = bs0bj.find('div',{'class':'xe_content'})
@@ -661,13 +662,13 @@ def esbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"w_news_list"})
 		lists = posts.findAll("a")		
 		for i in lists:
 			URL = 'https://news.sbs.co.kr' + i.attrs['href']
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header,verify=False)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 			posts = bs0bj.find("div",{"class":"main_text"})
@@ -681,13 +682,13 @@ def ekbsnews(newdate):
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header)
+		req = s.get(URL,headers=header,verify=False)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
 		lists = posts.findAll("a")
 		for i in lists:
 			URL = 'http://news.kbs.co.kr' + i.attrs['href']
-			req = s.get(URL,headers=header)
+			req = s.get(URL,headers=header,verify=False)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 			ttitle = bs0bj.find("h5",{"class":"tit-s"})
 			posts = bs0bj.find("div",{"id":"cont_newstext"})

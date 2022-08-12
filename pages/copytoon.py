@@ -221,170 +221,6 @@ def second2():
 
 		return render_template('toonkor.html', rows = rows, b = b) 
 
-@webtoon.route('newtoki')
-def second3():
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		try:
-			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
-			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
-			con = sqlite3.connect(webtoondb,timeout=60)
-			con.row_factory = sqlite3.Row
-			cur = con.cursor()
-			cur.execute("select * from main where SITE_NAME = 'newtoki'")
-			row = cur.fetchone()
-			a = row['SITE_NAME'] #제목
-			b = row['SITE_URL'] #URL
-		except:
-			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
-			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
-			con = sqlite3.connect(webtoondb,timeout=60)
-			con.row_factory = sqlite3.Row
-			cur = con.cursor()
-			sql = "select * from main where SITE_NAME = ?"
-			cur.execute(sql, ('newtoki',))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('newtoki','NONE'))
-				con.commit()
-				con = sqlite3.connect(webtoondb,timeout=60)
-				con.row_factory = sqlite3.Row
-				cur = con.cursor()
-				cur.execute("select * from main where SITE_NAME = 'newtoki'")
-				row = cur.fetchone()
-				a = row['SITE_NAME'] #제목
-				b = row['SITE_URL'] #URL
-		rows = []
-		con = sqlite3.connect(webtoondb,timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		try:
-			cur.execute("select * from newtoki where complte = 'False'")
-			rows1 = cur.fetchall()
-			count = 1
-			for i in rows1:
-				i = count
-				count += 1
-			rows.append(i)
-		except:
-			i = '0'
-			rows.append(i)
-		try:
-			count2 = 1
-			cur.execute("select * from newtoki where complte = 'PASS'")
-			rows2 = cur.fetchall()
-			for i2 in rows2:
-				i2 = count2
-				count2 += 1
-			rows.append(i2)
-		except:	
-			i2 = '0'	
-			rows.append(i2)
-		try:
-			count3 = 1
-			cur.execute("select * from newtoki where complte = 'True'")
-			rows3 = cur.fetchall()
-			for i3 in rows3:
-				i3 = count3
-				count3 += 1
-			rows.append(i3)
-		except:	
-			i3 = '0'
-			rows.append(i3)
-
-		return render_template('newtoki.html', rows = rows, b = b)
-
-@webtoon.route('naver')
-def second4():
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		try:
-			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
-			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
-			con = sqlite3.connect(webtoondb,timeout=60)
-			con.row_factory = sqlite3.Row
-			cur = con.cursor()
-			cur.execute("select * from main where SITE_NAME = 'naver'")
-			row = cur.fetchone()
-			a = row['SITE_NAME'] #제목
-			b = row['SITE_URL'] #URL
-		except:
-			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
-			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
-			con = sqlite3.connect(webtoondb,timeout=60)
-			con.row_factory = sqlite3.Row
-			cur = con.cursor()
-			sql = "select * from main where SITE_NAME = ?"
-			cur.execute(sql, ('naver',))
-			row = cur.fetchone()
-			if row != None:
-				pass
-			else:
-				cur.execute("INSERT OR REPLACE INTO main (SITE_NAME, SITE_URL) VALUES (?, ?)", ('naver','https://comic.naver.com'))
-				con.commit()
-				con = sqlite3.connect(webtoondb,timeout=60)
-				con.row_factory = sqlite3.Row
-				cur = con.cursor()
-				cur.execute("select * from main where SITE_NAME = 'naver'")
-				row = cur.fetchone()
-				a = row['SITE_NAME'] #제목
-				b = row['SITE_URL'] #URL
-		rows = []
-		con = sqlite3.connect(webtoondb,timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		try:
-			cur.execute("select * from naver where complte = 'False'")
-			rows1 = cur.fetchall()
-			count = 1
-			for i in rows1:
-				i = count
-				count += 1
-			rows.append(i)
-		except:
-			i = '0'
-			rows.append(i)
-		try:
-			count2 = 1
-			cur.execute("select * from naver where complte = 'PASS'")
-			rows2 = cur.fetchall()
-			for i2 in rows2:
-				i2 = count2
-				count2 += 1
-			rows.append(i2)
-		except:	
-			i2 = '0'	
-			rows.append(i2)
-		try:
-			count3 = 1
-			cur.execute("select * from naver where complte = 'True'")
-			rows3 = cur.fetchall()
-			for i3 in rows3:
-				i3 = count3
-				count3 += 1
-			rows.append(i3)
-		except:	
-			i3 = '0'
-			rows.append(i3)
-
-		return render_template('naver.html', rows = rows, b = b)
-
 @webtoon.route('dozi')
 def second5():
 	if not session.get('logFlag'):
@@ -478,11 +314,10 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	with requests.Session() as s:
 		try:
-			#time.sleep(random.uniform(2,5)) 
-			req = s.get(url,headers=header)	
+			req = s.get(url,headers=header,verify=False)	
 		except:
 			time.sleep(random.uniform(2,5)) 
-			req = s.get(url,headers=header)	
+			req = s.get(url,headers=header,verify=False)	
 	
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
@@ -516,9 +351,7 @@ def manazip(subtitle, title, filename, dfolder, cbz, packege):
 					fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), dfolder + '/{}/{}'.format(parse,parse2)), compress_type = zipfile.ZIP_DEFLATED)                     
 		fantasy_zip.close()
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
-	print('{}  압축 완료'.format(parse))				
-	logger.info('%s / %s / %s  압축 완료', packege, parse, parse2)
-	
+		
 @webtoon.route('db_reset', methods=['POST'])
 def db_reset():
 	if not session.get('logFlag'):
@@ -585,7 +418,6 @@ def add_c(packege, a, b, c, d, atat):
 		conn.execute(sql)
 		conn.close()
 		time.sleep(random.uniform(2,10)) 
-		print(packege, a, b , c ,d, atat)
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "select * from " + packege + " where urltitle = ?"
@@ -765,7 +597,7 @@ def exec_start(t_main, code, packege,startname):
 	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
 		if code == 'all':
-			response = s.get(newurl,headers=header)
+			response = s.get(newurl,headers=header,verify=False)
 			html = response.text
 			soup = bs(html, "html.parser").findAll("div",{"class":"section-item-title"})
 			for tag in soup:
@@ -788,7 +620,7 @@ def exec_start(t_main, code, packege,startname):
 				all = newurl + '/' + url
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			logger.info('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
-			response1 = s.get(all,headers=header)
+			response1 = s.get(all,headers=header,verify=False)
 			html = response1.text
 			soup = bs(html, "html.parser")
 			mm = soup.find("div",{"class":"contents-list"})
@@ -816,21 +648,6 @@ def exec_start(t_main, code, packege,startname):
 			atat = packege
 			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-		try:
-			test = scheduler.get_job(startname).id
-			logger.info('%s가 스케줄러에 있습니다.', test)
-		except Exception as e:
-			test = None
-		if test == None:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-		else:
-			scheduler.remove_job(startname)
-			scheduler.start()
-			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = scheduler.get_jobs()
-			for i in test2:
-				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
 			
 def exec_start2(t_main, code, packege,startname):
 	nowDatetime = mydate()
@@ -844,7 +661,7 @@ def exec_start2(t_main, code, packege,startname):
 	with requests.Session() as s:		
 		newurl = new_url(packege, t_main)
 		if code == 'all':
-			response = s.get(newurl,headers=header)
+			response = s.get(newurl,headers=header,verify=False)
 			time.sleep(random.uniform(2,5)) 	
 			html = response.text
 			soup = bs(html, "html.parser").findAll("a",{"id":"title"})
@@ -863,7 +680,7 @@ def exec_start2(t_main, code, packege,startname):
 			all = newurl + '/' + test
 			print('{} 의 {} 을 찾았습니다. {}'.format(packege, all, nowDatetime))
 			logger.info('%s 의 %s 을 찾았습니다. %s', packege, all, nowDatetime)
-			response1 = s.get(all,headers=header)
+			response1 = s.get(all,headers=header,verify=False)
 			time.sleep(random.uniform(2,5)) 
 			html = response1.text
 			soup2 = bs(html, "html.parser").find("table",{"class":"web_list"})
@@ -894,205 +711,6 @@ def exec_start2(t_main, code, packege,startname):
 			atat = packege
 			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-		try:
-			test = scheduler.get_job(startname).id
-			logger.info('%s가 스케줄러에 있습니다.', test)
-		except Exception as e:
-			test = None
-		if test == None:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-		else:
-			scheduler.remove_job(startname)
-			scheduler.start()
-			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = scheduler.get_jobs()
-			for i in test2:
-				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
-			
-def exec_start3(t_main,code,packege,genre,startname):
-	nowDatetime = mydate()
-	print("뉴토끼시작")
-	logger.info('뉴토끼시작')
-	packege = 'newtoki'
-	main_list = [] #url 주소를 만든다.
-	maintitle = [] #대제목이 저장된다
-	maintitle2 = [] #대제목 2번째 DB를 위한 작업공간
-	subtitle = [] #소제목이 저장된다.
-	urltitle = []
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	newurl = new_url(packege, t_main)
-	with requests.Session() as s:
-		if code == 'all':
-			for page in range(1,11): 
-				main_url = newurl + '/webtoon/p' + str(page) + '?toon=' + genre
-				time.sleep(random.uniform(30,60)) 
-				req = s.get(main_url)	
-				html = req.text
-				gogo = bs(html, "html.parser")
-				posts = gogo.find_all(attrs = {'class':'img-item'})
-				posts_list = gogo.find(attrs = {'class':'img-item'})
-				if posts_list is None: 
-					pass
-				else:	
-					for i in posts:
-						a_link = i('a')
-						a_href = a_link[1]['href'].split('webtoon/')[1].split('/')[0]
-						main_url = newurl + '/webtoon/' + a_href
-						main_list.append(main_url)
-		else:	
-			allcode = code.split('|')
-			for i in allcode:
-				main_url = newurl + '/webtoon/' + i	
-				main_list.append(main_url)
-		
-		for a in main_list :
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, a, nowDatetime))
-			logger.info('%s 의 %s 을 찾았습니다. %s', packege, a, nowDatetime)
-			time.sleep(random.uniform(30,60))
-			try:
-				req = s.get(a,headers=header)
-			except:
-				print("캡챠있다.")
-				logger.info('캡챠있다')
-				continue
-			html = req.text
-			gogo = bs(html, "html.parser")
-			title = gogo.find(attrs={'class':'page-desc'})
-			cacha = gogo.find("div",{"class":"form-header"})
-			data_tmp = title.text.lstrip() #대제목	
-			posts_list = gogo.find_all(attrs = {'class':'item-subject'})
-			count = []
-				
-			if cacha:
-				print("캡챠있다.")
-				continue
-			else:
-				for b in posts_list:
-					a_link = b['href']
-					count.append(a_link)
-				test22 = len(count)
-				cc = int(test22)
-				for b in posts_list:
-					aa = b.find('b')
-					a_link = b['href']
-					a_link2 = a_link.replace(newurl,'')
-					aa_tmp = '{}화'.format(cc)
-					maintitle.append(data_tmp) #대제목이다.
-					subtitle.append(aa_tmp) #소제목이다.
-					urltitle.append(a_link2) #URL 주소가 저장된다.
-					cc -= 1
-				
-		#앞에서 크롤링한 정보를 DB에 저장한다.
-		for a,b,c in zip(maintitle,subtitle,urltitle):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			atat = packege
-			add_c(packege, a,b,c,d, atat)
-			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-		try:
-			test = scheduler.get_job(startname).id
-			logger.info('%s가 스케줄러에 있습니다.', test)
-		except Exception as e:
-			test = None
-		if test == None:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-		else:
-			scheduler.remove_job(startname)
-			scheduler.start()
-			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = scheduler.get_jobs()
-			for i in test2:
-				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
-		
-def exec_start4(code,packege,startname):
-	nowDatetime = mydate()
-	print("네이버웹툰시작")
-	logger.info('네이버웹툰시작')
-	packege = 'naver'
-	maintitle = []
-	subtitle = []
-	urltitle = []
-	titleid = []
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:
-		url = 'https://comic.naver.com/webtoon/weekday.nhn'
-		response = s.get(url,headers=header)
-		html = response.text
-		soup = bs(html, "html.parser")
-		tags = soup.findAll("div",{"class":"thumb"})
-		if code == 'all':
-			#전체 웹툰코드를 받아온다. 
-			for tag in tags:		
-				href = tag.find('a')['href']
-				title_id = href.split('titleId=')[1].split('&')[0].strip()
-				titleid.append(title_id)
-		else:
-			allcode = code.split('|')
-			for i in allcode:
-				t_maincode = i
-				titleid.append(i)			
-
-		for i in titleid:
-			print('{} 의 {} 을 찾았습니다. {}'.format(packege, i, nowDatetime))
-			logger.info('%s 의 %s 을 찾았습니다. %s', packege, i, nowDatetime)
-			suburl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i
-			response = s.get(suburl,headers=header)
-			html = response.text
-			soup = bs(html, "html.parser")
-			#대제목을 가져온다.
-			tags = soup.find("div",{"class":"detail"})
-			tt2 = tags.find('span',{'class':'title'}).text
-					
-			for p in range(1, 1001):
-				pageurl = 'https://comic.naver.com/webtoon/list.nhn?titleId=' + i + '&page=' + str(p)
-				response = s.get(pageurl,headers=header)
-				html = response.text
-				soup = bs(html, "html.parser")
-				sublist = soup.findAll("td",{"class":"title"})
-				pageend = soup.find("a",{"class":"next"})		
-				
-				if pageend:
-					for ii in sublist:
-						test = ii.find('a')['href']
-						cc = test.split('no=')[1].split('&')[0].strip()
-						test2 = '{}화'.format(cc)
-						maintitle.append(tt2)
-						subtitle.append(test2)
-						urltitle.append(test)
-						#cc -= 1
-				else:
-					for ii in sublist:
-						test = ii.find('a')['href']
-						cc = test.split('no=')[1].split('&')[0].strip()
-						test2 = '{}화'.format(cc)
-						maintitle.append(tt2)
-						subtitle.append(test2)
-						urltitle.append(test)
-						#cc -= 1	
-					break				
-				
-		#앞에서 크롤링한 정보를 DB에 저장한다.
-		for a,b,c in zip(maintitle,subtitle,urltitle):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-			atat = packege
-			add_c(packege, a,b,c,d, atat)
-			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-		try:
-			test = scheduler.get_job(startname).id
-			logger.info('%s가 스케줄러에 있습니다.', test)
-		except Exception as e:
-			test = None
-		if test == None:
-			logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-		else:
-			scheduler.remove_job(startname)
-			scheduler.start()
-			logger.info('%s 스케줄러를 삭제하였습니다.', test)
-			test2 = scheduler.get_jobs()
-			for i in test2:
-				aa = i.id
-				logger.info('%s 가 스케줄러가 있습니다.', aa)
 
 #도지코믹스
 def exec_start5(t_main, packege,startname):
@@ -1105,7 +723,7 @@ def exec_start5(t_main, packege,startname):
 	newurl = new_url(packege, t_main)
 	with requests.Session() as s:
 		t_main = newurl + '/%EC%97%85%EB%8D%B0%EC%9D%B4%ED%8A%B8'		
-		response = s.get(t_main,headers=header)
+		response = s.get(t_main,headers=header,verify=False)
 		html = response.text
 		soup = bs(html, "html.parser").findAll("div",{"class":"section-item-inner"})
 		for tag in soup:
@@ -1120,7 +738,7 @@ def exec_start5(t_main, packege,startname):
 			url = urlfind['href']#메인 URL주소
 			title = urlfind['alt'] #대제목
 			#회차목록과 주소를 가져온다.
-			response1 = s.get(url,headers=header)
+			response1 = s.get(url,headers=header,verify=False)
 			html = response1.text
 			soup = bs(html, "html.parser")
 			mm = soup.findAll("td",{"name":"view_list"})
@@ -1149,21 +767,6 @@ def exec_start5(t_main, packege,startname):
 		add_c(packege, a,b,c,d, atat)
 		logger.info('%s 번째 %s 의 %s 의 %s 를 등록하였습니다.', cnt, packege, a, b)
 		cnt += 1
-	try:
-		test = scheduler.get_job(startname).id
-		logger.info('%s가 스케줄러에 있습니다.', test)
-	except Exception as e:
-		test = None
-	if test == None:
-		logger.info('%s의 스케줄러가 종료가 되지 않았습니다.', startname)
-	else:
-		scheduler.remove_job(startname)
-		scheduler.start()
-		logger.info('%s 스케줄러를 삭제하였습니다.', test)
-		test2 = scheduler.get_jobs()
-		for i in test2:
-			aa = i.id
-			logger.info('%s 가 스케줄러가 있습니다.', aa)
 	
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
@@ -1190,13 +793,10 @@ def godown(t_main, compress, cbz, packege , startname):
 		complte = i['complte']
 		newurl = new_url(packege, t_main)
 		wwwkt = newurl + url
-		logger.info('%s', wwwkt)
 		try:
-			response1 = session2.get(newurl,headers=header)
-			response1 = session2.get(wwwkt,headers=header)
+			response1 = session2.get(newurl,headers=header,verify=False)
+			response1 = session2.get(wwwkt,headers=header,verify=False)
 			html = response1.text
-			st = response1.status_code
-			logger.info('%s 의 상태는 %s', packege, st)
 			soup = bs(html, "html.parser")
 			print("{}에서 {} 의 {} 을 시작합니다".format(packege,title, subtitle))
 			logger.info('%s에서 %s 의 %s 을 시작합니다', packege,title, subtitle)
@@ -1279,94 +879,7 @@ def now():
 		cbz = request.form['cbz']
 		startname = request.form['startname']		
 		godown(t_main, compress, cbz, packege , startname)
-		
-@webtoon.route('naver_list', methods=['POST'])
-def naver_list():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		packege = request.form['packege']
-		code = request.form['code']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			scheduler.add_job(exec_start4, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[code,packege,startname] )
-			test = scheduler.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:
-			test = scheduler.get_job(startname).id
-			test2 = scheduler.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.second4'))
-		
-@webtoon.route('naver_down', methods=['POST'])
-def naver_down():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		packege = request.form['packege']
-		t_main = request.form['t_main']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
-			test = scheduler.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:	
-			test = scheduler.get_job(startname).id
-			test2 = scheduler.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.second4'))
-		
-@webtoon.route('newtoki_list', methods=['POST'])
-def newtoki_list():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		packege = request.form['packege']
-		t_main = request.form['t_main']
-		genre = request.form['genre']
-		code = request.form['code']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			scheduler.add_job(exec_start3, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,code,packege,genre,startname] )
-			test = scheduler.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:	
-			test = scheduler.get_job(startname).id
-			test2 = scheduler.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.second3'))
-		
-@webtoon.route('newtoki_down', methods=['POST'])
-def newtoki_down():
-	if session.get('logFlag') != True:
-		return redirect(url_for('main.index'))
-	else:
-		packege = request.form['packege']
-		t_main = request.form['t_main']
-		genre = request.form['genre']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
-		try:
-			scheduler.add_job(godown, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[t_main,compress,cbz,packege,startname] )
-			test = scheduler.get_job(startname).id
-			logger.info('%s 스케줄러에 등록하였습니다.', test)
-		except ConflictingIdError:	
-			test = scheduler.get_job(startname).id
-			test2 = scheduler.modify_job(startname).id
-			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
-		return redirect(url_for('webtoon.second3'))
-		
+			
 @webtoon.route('copytoon_list', methods=['POST'])
 def copytoon_list():
 	if session.get('logFlag') != True:
