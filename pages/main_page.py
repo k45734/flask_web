@@ -27,10 +27,24 @@ if platform.system() == 'Windows':
 else:
 	logdata = '/data/log'
 
+def sizeof_fmt(num, suffix='Bytes'):
+	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+		if abs(num) < 1024.0:
+			return "%3.1f%s%s" % (num, unit, suffix)
+		num /= 1024.0
+	return "%.1f%s%s" % (num, 'Y', suffix)
+	
+def createFolder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
+
 filepath = logdata + '/flask.log'
 if not os.path.isfile(filepath):
 	f = open(logdata + '/flask.log','a', encoding='utf-8')
-rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
+rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding='utf-8', delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
 logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
@@ -49,19 +63,6 @@ job_defaults = {
 #scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 scheduler.start()
-def sizeof_fmt(num, suffix='Bytes'):
-	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
-		if abs(num) < 1024.0:
-			return "%3.1f%s%s" % (num, unit, suffix)
-		num /= 1024.0
-	return "%.1f%s%s" % (num, 'Y', suffix)
-	
-def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print ('Error: Creating directory. ' +  directory)
 		
 @bp.route("/")
 @bp.route("index")
