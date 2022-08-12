@@ -123,7 +123,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				else:
 					print(part)
 			#time.sleep(10)
-			time.sleep(0.5)
+			#time.sleep(0.5)
 		
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -631,31 +631,30 @@ def ytnsnews(newdate):
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
 		req = s.get(MAIN,headers=header,verify=False)
-		if req.status_code == 200:
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"news-con"})	
+		for i in posts:
+			URL = 'https:' + i.find('a')['href']
+			req = s.get(URL,headers=header,verify=False)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			posts = bs0bj.findAll("div",{"class":"news-con"})	
-			for i in posts:
-				URL = 'https:' + i.find('a')['href']
-				req = s.get(URL,headers=header,verify=False)
-				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-				ttitle = bs0bj.find("h1",{"class":"tit"})
-				posts = bs0bj.findAll('p')	
-				memo = []
-				for ii in posts:
-					if '재난포털' in ii.text :
-						pass
-					elif '기사제보' in ii.text :
-						pass
-					elif '자동완성 기능이 켜져 있습니다.' in ii.text:
-						pass
-							
-					else:			
-						memo.append(ii.text.strip())
-				MEMO = '\n'.join(memo)
-				TITLE = ttitle.text.strip()
-				CAST = "YTN"
-				COMPLETE = 'False'
-				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+			ttitle = bs0bj.find("h1",{"class":"tit"})
+			posts = bs0bj.findAll('p')	
+			memo = []
+			for ii in posts:
+				if '재난포털' in ii.text :
+					pass
+				elif '기사제보' in ii.text :
+					pass
+				elif '자동완성 기능이 켜져 있습니다.' in ii.text:
+					pass
+						
+				else:			
+					memo.append(ii.text.strip())
+			MEMO = '\n'.join(memo)
+			TITLE = ttitle.text.strip()
+			CAST = "YTN"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 
 def esbsnews(newdate):
 	with requests.Session() as s:
@@ -712,7 +711,7 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 		c = row['URL']
 		d = row['MEMO']
 		e = row['COMPLETE']
-		msg = '{}\n{}\n{}'.format(a,b,c)
+		msg = '{}\n{}\n{}'.format(a,b,d)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
