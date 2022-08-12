@@ -33,13 +33,13 @@ if not os.path.isfile(filepath):
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=2, encoding=None, delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(filename)s:%(lineno)d %(levelname)s] - %(message)s",handlers=[rfh])
 logger = logging.getLogger()
-
+logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
 jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
 	}
 executors = {
 	'default': ThreadPoolExecutor(max_workers=160),
-	'processpool': ProcessPoolExecutor(max_workers=80)
+	'processpool': ProcessPoolExecutor(max_workers=60)
 	}
 job_defaults = {
 	'coalesce': True,
