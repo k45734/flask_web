@@ -716,7 +716,7 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
-		time.sleep(10))
+		time.sleep(10)
 		
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
