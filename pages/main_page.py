@@ -56,9 +56,9 @@ executors = {
 	'processpool': ProcessPoolExecutor(max_workers=60)
 	}
 job_defaults = {
-	'coalesce': True,
+	#'coalesce': True,
 	'max_instances': 1,
-	'misfire_grace_time': 10
+	#'misfire_grace_time': 10
 	}
 #scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
