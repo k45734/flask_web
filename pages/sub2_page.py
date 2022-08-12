@@ -569,7 +569,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 	conn.close()	
-	time.sleep(random.uniform(2,10)) 
+	time.sleep(random.uniform(2,5)) 
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	cur = con.cursor()
 	sql = 'select * from news where TITLE = ? and URL = ?'
@@ -589,7 +589,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		time.sleep(random.uniform(2,10)) 
+		time.sleep(random.uniform(2,5)) 
 		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
@@ -608,7 +608,6 @@ def vietnews(newdate):
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"list_title"})
 		for test in posts:
-			
 			if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
 				pass
 			elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
@@ -717,7 +716,7 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		#중복 알림에거
 		addnews_d(a,b,c,d,e,newdate)
-		time.sleep(random.uniform(2,5))
+		time.sleep(10))
 		
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
@@ -757,7 +756,6 @@ def news():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
-			print(telgm_alim, telgm)
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
