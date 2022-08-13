@@ -475,7 +475,9 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		wspd = resp['current']['wspd'] #wdir + wspd
 		pm10 = resp['current']['pm10'] #미세먼지
 		pm25 = resp['current']['pm25'] #초미세먼지
-		msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)	
+		prec = resp['current']['prec'] #강수량 1시간
+		msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n강수량 : {}㎜   습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,prec,rhum,press,wdir,wspd,sunrise,sunset,news2)	
+		#msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)	
 	
 		big = 'https://www.kr-weathernews.com/mv3/if/warn.fcgi?region=' + code
 		url = s.get(big, headers=headers)
