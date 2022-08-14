@@ -73,7 +73,12 @@ def url_to_image(url, dfolder, category, category2, filename):
 			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
-	
+#특수문자제거
+def cleanText(readData):
+	#텍스트에 포함되어 있는 특수 문자 제거
+	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
+	#text = re.sub('[\/:*?"<>|]', '', readData)
+	return text		
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 	if len(text) <= 4096:
@@ -623,7 +628,10 @@ def vietnews(newdate):
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h1")
 					posts = bs0bj.find('div',{'class':'xe_content'})
-					MEMO = posts.text.strip()
+					#MEMO = posts.text.strip()
+					MEMO2 = posts.text.strip()
+					#MEMO = cleanText(MEMO2)
+					MEMO = MEMO2.replace('  ','\n')
 					TITLE = ttitle.text.strip()
 					CAST = "VIET"
 					COMPLETE = 'False'
@@ -655,7 +663,10 @@ def ytnsnews(newdate):
 							
 					else:			
 						memo.append(ii.text.strip())
-				MEMO = '\n'.join(memo)
+				#MEMO = '\n'.join(memo)
+				MEMO2 = '\n'.join(memo)
+				#MEMO = cleanText(MEMO2)
+				MEMO = MEMO2.replace('  ','\n')
 				TITLE = ttitle.text.strip()
 				CAST = "YTN"
 				COMPLETE = 'False'
@@ -677,7 +688,10 @@ def esbsnews(newdate):
 				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 				ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
 				posts = bs0bj.find("div",{"class":"main_text"})
-				MEMO = posts.text.strip()
+				#MEMO = posts.text.strip()
+				MEMO2 = posts.text.strip()
+				#MEMO = cleanText(MEMO2)
+				MEMO = MEMO2.replace('  ','\n')
 				TITLE = ttitle.text.strip()
 				CAST = "SBS"
 				COMPLETE = 'False'
@@ -699,7 +713,10 @@ def ekbsnews(newdate):
 				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 				ttitle = bs0bj.find("h5",{"class":"tit-s"})
 				posts = bs0bj.find("div",{"id":"cont_newstext"})
-				MEMO = posts.text.strip()
+				#MEMO = posts.text.strip()
+				MEMO2 = posts.text.strip()
+				#MEMO = cleanText(MEMO2)
+				MEMO = MEMO2.replace('  ','\n')
 				TITLE = ttitle.text.strip()
 				CAST = "KBS"
 				COMPLETE = 'False'
@@ -725,7 +742,9 @@ def daumnews(newdate):
 					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 					ttitle = bs0bj.find("h3",{"class":"tit_view"})
 					posts = bs0bj.find("div",{"id":"harmonyContainer"})
-					MEMO = posts.text.strip()
+					MEMO2 = posts.text.strip()
+					#MEMO = cleanText(MEMO2)
+					MEMO = MEMO2.replace('  ','\n')
 					TITLE = ttitle.text.strip()
 					CAST = "DAUM"
 					COMPLETE = 'False'
