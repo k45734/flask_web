@@ -567,27 +567,27 @@ def weather_ok():
 		
 #뉴스알림		
 def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
-	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
-	conn.close()	
-	time.sleep(random.uniform(2,5)) 
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	cur = con.cursor()
-	sql = 'select * from news where TITLE = ? and URL = ?'
-	cur.execute(sql, (TITLE,URL))
-	row = cur.fetchone()
-	if row != None:
-		pass
-	else:
-		try:
+	try:
+		#SQLITE3 DB 없으면 만들다.
+		conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+		conn.close()	
+		time.sleep(random.uniform(2,5)) 
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		cur = con.cursor()
+		sql = 'select * from news where TITLE = ? and URL = ?'
+		cur.execute(sql, (TITLE,URL))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
 			cur.execute('INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
 			con.commit()
-		except:
-			con.rollback()
-		finally:
-			con.close()
-		
+	except:
+		con.rollback()
+	finally:
+		con.close()
+	
 def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
@@ -603,144 +603,158 @@ def addnews_d(a, b, c, d, e,newdate):
 		con.close()	
 
 def vietnews(newdate):
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		URL = 'https://www.vinatimes.net/news'
-		req = s.get(URL,headers=header,verify=False)	
-		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.findAll("div",{"class":"list_title"})
-		for test in posts:
-			if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
-				pass
-			elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
-				pass 
-			elif 'https://www.vinatimes.net/notice/454369' in test.a['href']:
-				pass
-			else:
-				URL = test.a['href']
+	try:
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			URL = 'https://www.vinatimes.net/news'
+			req = s.get(URL,headers=header,verify=False)	
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			posts = bs0bj.findAll("div",{"class":"list_title"})
+			for test in posts:
+				if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
+					pass
+				elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
+					pass 
+				elif 'https://www.vinatimes.net/notice/454369' in test.a['href']:
+					pass
+				else:
+					URL = test.a['href']
+					req = s.get(URL,headers=header,verify=False)
+					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+					ttitle = bs0bj.find("h1")
+					posts = bs0bj.find('div',{'class':'xe_content'})
+					MEMO = posts.text.strip()
+					TITLE = ttitle.text.strip()
+					CAST = "VIET"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:	
+		pass
+def ytnsnews(newdate):
+	try:
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
+			req = s.get(MAIN,headers=header,verify=False)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			posts = bs0bj.findAll("div",{"class":"news-con"})	
+			for i in posts:
+				URL = 'https:' + i.find('a')['href']
 				req = s.get(URL,headers=header,verify=False)
 				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-				ttitle = bs0bj.find("h1")
-				posts = bs0bj.find('div',{'class':'xe_content'})
-				MEMO = posts.text.strip()
+				ttitle = bs0bj.find("h1",{"class":"tit"})
+				posts = bs0bj.findAll('p')	
+				memo = []
+				for ii in posts:
+					if '재난포털' in ii.text :
+						pass
+					elif '기사제보' in ii.text :
+						pass
+					elif '자동완성 기능이 켜져 있습니다.' in ii.text:
+						pass
+							
+					else:			
+						memo.append(ii.text.strip())
+				MEMO = '\n'.join(memo)
 				TITLE = ttitle.text.strip()
-				CAST = "VIET"
+				CAST = "YTN"
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-			
-def ytnsnews(newdate):
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = s.get(MAIN,headers=header,verify=False)
-		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.findAll("div",{"class":"news-con"})	
-		for i in posts:
-			URL = 'https:' + i.find('a')['href']
-			req = s.get(URL,headers=header,verify=False)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h1",{"class":"tit"})
-			posts = bs0bj.findAll('p')	
-			memo = []
-			for ii in posts:
-				if '재난포털' in ii.text :
-					pass
-				elif '기사제보' in ii.text :
-					pass
-				elif '자동완성 기능이 켜져 있습니다.' in ii.text:
-					pass
-						
-				else:			
-					memo.append(ii.text.strip())
-			MEMO = '\n'.join(memo)
-			TITLE = ttitle.text.strip()
-			CAST = "YTN"
-			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-
+	except:	
+		pass
 def esbsnews(newdate):
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-		req = s.get(URL,headers=header,verify=False)
-		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.find("div",{"class":"w_news_list"})
-		lists = posts.findAll("a")		
-		for i in lists:
-			URL = 'https://news.sbs.co.kr' + i.attrs['href']
+	try:
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
 			req = s.get(URL,headers=header,verify=False)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
-			posts = bs0bj.find("div",{"class":"main_text"})
-			MEMO = posts.text.strip()
-			TITLE = ttitle.text.strip()
-			CAST = "SBS"
-			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-	
-def ekbsnews(newdate):
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		URL = 'http://news.kbs.co.kr/common/main.html'
-		req = s.get(URL,headers=header,verify=False)
-		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
-		lists = posts.findAll("a")
-		for i in lists:
-			URL = 'http://news.kbs.co.kr' + i.attrs['href']
-			req = s.get(URL,headers=header,verify=False)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h5",{"class":"tit-s"})
-			posts = bs0bj.find("div",{"id":"cont_newstext"})
-			MEMO = posts.text.strip()
-			TITLE = ttitle.text.strip()
-			CAST = "KBS"
-			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
-			
-def daumnews(newdate):
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		URL = 'https://news.daum.net/'
-		req = s.get(URL,headers=header)
-		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.findAll("div",{"class":"cont_thumb"})
-		for i in posts:
-			lists = i.find("a")
-			if 'https://gallery.v.daum.net/p/viewer' in lists.attrs['href'] :
-				pass
-			else:
-				URL = lists.attrs['href']
-				req = s.get(URL,headers=header)
+			posts = bs0bj.find("div",{"class":"w_news_list"})
+			lists = posts.findAll("a")		
+			for i in lists:
+				URL = 'https://news.sbs.co.kr' + i.attrs['href']
+				req = s.get(URL,headers=header,verify=False)
 				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-				ttitle = bs0bj.find("h3",{"class":"tit_view"})
-				posts = bs0bj.find("div",{"id":"harmonyContainer"})
+				ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
+				posts = bs0bj.find("div",{"class":"main_text"})
 				MEMO = posts.text.strip()
 				TITLE = ttitle.text.strip()
-				CAST = "DAUM"
+				CAST = "SBS"
 				COMPLETE = 'False'
-				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)			
-def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()	
-	sql = 'select * from news where COMPLETE = ?'
-	cur.execute(sql, ('False', ))
-	rows = cur.fetchall()
-	
-	#DB의 정보를 읽어옵니다.
-	for row in rows:
-		a = row['CAST']
-		b = row['TITLE']
-		c = row['URL']
-		d = row['MEMO']
-		e = row['COMPLETE']
-		msg = '{}\n{}\n{}'.format(a,b,d)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		#중복 알림에거
-		addnews_d(a,b,c,d,e,newdate)
-		#time.sleep(10)
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:
+		pass
+def ekbsnews(newdate):
+	try:
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			URL = 'http://news.kbs.co.kr/common/main.html'
+			req = s.get(URL,headers=header,verify=False)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
+			lists = posts.findAll("a")
+			for i in lists:
+				URL = 'http://news.kbs.co.kr' + i.attrs['href']
+				req = s.get(URL,headers=header,verify=False)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h5",{"class":"tit-s"})
+				posts = bs0bj.find("div",{"id":"cont_newstext"})
+				MEMO = posts.text.strip()
+				TITLE = ttitle.text.strip()
+				CAST = "KBS"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
+	except:
+		pass
 		
+def daumnews(newdate):
+	try:
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			URL = 'https://news.daum.net/'
+			req = s.get(URL,headers=header)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			posts = bs0bj.findAll("div",{"class":"cont_thumb"})
+			for i in posts:
+				lists = i.find("a")
+				if 'https://gallery.v.daum.net/p/viewer' in lists.attrs['href'] :
+					pass
+				else:
+					URL = lists.attrs['href']
+					req = s.get(URL,headers=header)
+					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+					ttitle = bs0bj.find("h3",{"class":"tit_view"})
+					posts = bs0bj.find("div",{"id":"harmonyContainer"})
+					MEMO = posts.text.strip()
+					TITLE = ttitle.text.strip()
+					CAST = "DAUM"
+					COMPLETE = 'False'
+					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:	
+		pass
+def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
+	try:
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()	
+		sql = 'select * from news where COMPLETE = ?'
+		cur.execute(sql, ('False', ))
+		rows = cur.fetchall()
+	
+		#DB의 정보를 읽어옵니다.
+		for row in rows:
+			a = row['CAST']
+			b = row['TITLE']
+			c = row['URL']
+			d = row['MEMO']
+			e = row['COMPLETE']
+			msg = '{}\n{}\n{}'.format(a,b,d)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			#중복 알림에거
+			addnews_d(a,b,c,d,e,newdate)
+			#time.sleep(10)
+	except:	
+		pass
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
 	#오늘날짜
@@ -752,9 +766,10 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#ekbsnews(newdate)
 		#vietnews(newdate)
 		daumnews(newdate)
+		ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
 	except:	
 		pass
-	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
+	
 	logger.info('뉴스 알림완료')	
 	
 
