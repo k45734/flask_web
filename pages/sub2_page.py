@@ -698,6 +698,28 @@ def ekbsnews(newdate):
 			COMPLETE = 'False'
 			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
 			
+def daumnews(newdate):
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://news.daum.net/'
+		req = s.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"cont_thumb"})
+		for i in posts:
+			lists = i.find("a")
+			if 'https://gallery.v.daum.net/p/viewer' in lists.attrs['href'] :
+				pass
+			else:
+				URL = lists.attrs['href']
+				req = s.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h3",{"class":"tit_view"})
+				posts = bs0bj.find("div",{"id":"harmonyContainer"})
+				MEMO = posts.text.strip()
+				TITLE = ttitle.text.strip()
+				CAST = "DAUM"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)			
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 	con.row_factory = sqlite3.Row
@@ -725,10 +747,11 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
 	try:
-		ytnsnews(newdate)
-		esbsnews(newdate)
-		ekbsnews(newdate)
-		vietnews(newdate)
+		#ytnsnews(newdate)
+		#esbsnews(newdate)
+		#ekbsnews(newdate)
+		#vietnews(newdate)
+		daumnews(newdate)
 	except:	
 		pass
 	ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
