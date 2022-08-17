@@ -781,10 +781,10 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
 	try:
-		ytnsnews(newdate)
-		esbsnews(newdate)
-		ekbsnews(newdate)
-		vietnews(newdate)
+		#ytnsnews(newdate)
+		#esbsnews(newdate)
+		#ekbsnews(newdate)
+		#vietnews(newdate)
 		daumnews(newdate)
 		ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
 	except:	
