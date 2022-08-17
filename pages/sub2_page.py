@@ -291,7 +291,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			resp = url.json()
 			check = resp.get('from', None)
 			if check == None:
-				msg = '송장번호가 없는거 같습니다.\n'
+				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier,track_id)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			else:
 				json_string = check.get("name", None) #누가 보냈냐			
