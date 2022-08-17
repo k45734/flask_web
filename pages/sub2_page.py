@@ -291,7 +291,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			resp = url.json()
 			check = resp.get('from', None)
 			if check == None:
-				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier,track_id)
+				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			else:
 				json_string = check.get("name", None) #누가 보냈냐			
@@ -419,6 +419,7 @@ def tracking_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from tracking")
@@ -443,8 +444,11 @@ def tracking_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				tracking_start(telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -539,6 +543,7 @@ def weather_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from weather")
@@ -563,8 +568,11 @@ def weather_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -834,6 +842,7 @@ def news_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from news")
@@ -858,8 +867,11 @@ def news_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(news_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(news_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				news_start(telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -996,6 +1008,7 @@ def unse_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from unse")
@@ -1020,8 +1033,11 @@ def unse_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				unse_start(telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1185,6 +1201,7 @@ def quiz_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from quiz")
@@ -1209,8 +1226,11 @@ def quiz_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1280,7 +1300,7 @@ def funmom_start(startname):
 				a += 1
 			gogo += 1
 		print('목록을 전부 만들었습니다.')		
-
+		logger.info('목록을 전부 만들었습니다.')
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from funmom where complte = ?"
@@ -1378,6 +1398,7 @@ def funmom_ok():
 	else:
 		start_time = request.form['start_time']
 		startname = request.form['startname']
+		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from funmom")
@@ -1398,8 +1419,11 @@ def funmom_ok():
 		cursor.close()
 		conn.close()
 		try:
-			scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
-			test = scheduler.get_job(startname).id
+			if now == 'True':
+				scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname])
+				test = scheduler.get_job(startname).id
+			else:
+				funmom_start(startname)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
