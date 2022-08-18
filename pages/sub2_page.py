@@ -180,14 +180,17 @@ def tracking_del_new(carrier_id, track_id):
 def flfl(json_string_m):
 	test = []
 	for list in json_string_m:
-		a = list.get("time")
-		at = a[0:16]
-		new_s = at.replace('T',' ')
-		b = list.get("location").get('name')
-		c = list.get("status").get('text')
-		d = list.get("description")
-		msg = {'시간':new_s,'상품위치':b,'현재상태':c, '상품상태':d}
-		test.append(msg)				
+		try:
+			a = list.get("time")
+			at = a[0:16]
+			new_s = at.replace('T',' ')
+			b = list.get("location").get('name')
+			c = list.get("status").get('text')
+			d = list.get("description")
+			msg = {'시간':new_s,'상품위치':b,'현재상태':c, '상품상태':d}
+			test.append(msg)				
+		except:	
+			pass
 	return test
 	
 #저장된 정보를 출력하여 나열하여 메모리에 저장한뒤 출력한다.
