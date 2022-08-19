@@ -42,7 +42,19 @@ webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 def mydate():
 	nowDatetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
 	return nowDatetime
-	
+
+#DB최적화
+def db_optimization():
+	try:
+		con = sqlite3.connect(webtoondb,timeout=60)		
+		con.execute('VACUUM')
+		con.commit()
+		logger.info('DB최적화를 진행하였습니다.')
+	except:
+		con.rollback()	
+	finally:	
+		con.close()	
+		
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
@@ -702,7 +714,9 @@ def exec_start(t_main, code, packege,startname):
 			atat = packege
 			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-			
+	#DB최적화		
+	db_optimization()
+	
 def exec_start2(t_main, code, packege,startname):
 	nowDatetime = mydate()
 	print("툰코시작")
@@ -765,7 +779,9 @@ def exec_start2(t_main, code, packege,startname):
 			atat = packege
 			add_c(packege, a,b,c,d, atat)
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
-
+	#DB최적화		
+	db_optimization()
+	
 #도지코믹스
 def exec_start5(t_main, packege,startname):
 	nowDatetime = mydate()
@@ -821,7 +837,8 @@ def exec_start5(t_main, packege,startname):
 		add_c(packege, a,b,c,d, atat)
 		logger.info('%s 번째 %s 의 %s 의 %s 를 등록하였습니다.', cnt, packege, a, b)
 		cnt += 1
-	quit()
+	#DB최적화		
+	db_optimization()
 	
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
@@ -923,11 +940,13 @@ def godown(t_main, compress, cbz, packege , startname):
 		except:
 			add_pass(packege, subtitle_old, title_old)
 			logger.info('%s에서 %s 의 %s 을 링크가 없으므로 다음부터 실행하지 않습니다.', packege,title, subtitle)
+			db_optimization()
 			break
 			
 		else:
 			add_d(packege, subtitle_old, title_old)
 			logger.info('%s 의 %s 의 %s 가 다운완료하였습니다.', packege, title, subtitle)
+			db_optimization()
 			break
 			
 

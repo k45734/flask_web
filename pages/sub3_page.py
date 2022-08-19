@@ -49,6 +49,18 @@ bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 
+#DB최적화
+def db_optimization():
+	try:
+		con = sqlite3.connect(sub3db,timeout=60)		
+		con.execute('VACUUM')
+		con.commit()
+		logger.info('DB최적화를 진행하였습니다.')
+	except:
+		con.rollback()	
+	finally:	
+		con.close()
+		
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	
@@ -60,14 +72,14 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 		else :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
 			subprocess.call(FLASKAPPS, shell=True)
+		
 	else :
 		logger.info(msg)
 		subprocess.call(FLASKAPPS, shell=True)
-#	test2 = scheduler.get_jobs()
-#	for i in test2:
-#		aa = i.id
-#		logger.info('%s 가 스케줄러가 있습니다.', aa)
 
+	#DB최적화
+	db_optimization()
+			
 @bp3.route('/')
 @bp3.route('index')
 def second():
