@@ -796,16 +796,27 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
+	time = "%02dH%02dM" % (nowtime1.hour, nowtime1.minute)
 	try:
-		#ytnsnews(newdate)
-		#esbsnews(newdate)
-		#ekbsnews(newdate)
-		#vietnews(newdate)
+		file_size = os.stat(sub2db + '/news_' + newdate + '.db')
+		if file_size.st_size >= 600000 :
+			file_oldname = os.path.join(sub2db + '/news_' + newdate + '.db')
+			file_newname_newfile = os.path.join(sub2db + '/news_' + newdate + '_' + time + '.db')
+			os.rename(file_oldname, file_newname_newfile)
+		else:
+			pass
+	except:
+		pass
+	try:
+		ytnsnews(newdate)
+		esbsnews(newdate)
+		ekbsnews(newdate)
+		vietnews(newdate)
 		daumnews(newdate)
 		ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
 		logger.info('뉴스 알림완료')	
 	except:	
-		logger.info('뉴스 알림종료')	
+		logger.info('뉴스 알림종료')
 	
 @bp2.route('news')
 def news():
