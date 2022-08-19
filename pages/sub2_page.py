@@ -768,7 +768,7 @@ def daumnews(newdate):
 		logger.info('다음뉴스에러')
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 	try:
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()	
 		sql = 'select * from news where COMPLETE = ?'
