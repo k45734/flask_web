@@ -212,6 +212,12 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
 	conn.close()
 	#데이터베이스 컬럼 추가하기
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -369,9 +375,15 @@ def tracking():
 def tracking_add():
 	mytime = mydate()
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -397,9 +409,15 @@ def tracking_add():
 @bp2.route('tracking_del/<carrier_id>/<track_id>', methods=["GET"])
 def tracking_del(carrier_id,track_id):
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -510,9 +528,15 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
@@ -590,6 +614,12 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 		#SQLITE3 DB 없으면 만들다.
 		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		con.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
 		con.close()	
 		time.sleep(random.uniform(2,5)) 
 		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
@@ -821,9 +851,15 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 @bp2.route('news')
 def news():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -936,9 +972,15 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('운세알림시작')
 		#SQLITE3 DB 없으면 만들다.
-		conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
-		conn.close()
+		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		session = requests.Session()
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
@@ -989,9 +1031,15 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 @bp2.route('unse')
 def unse():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS unse (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS unse (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -1115,9 +1163,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('퀴즈정답알림 시작')
 		#SQLITE3 DB 없으면 만들다.
-		conn = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
-		conn.close()
+		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		list = []
 		last = []
 		with requests.Session() as s:
@@ -1185,9 +1239,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 @bp2.route('quiz')
 def quiz():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS quiz (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -1292,9 +1352,15 @@ def add_c(a,b,c,d):
 		con.close()			
 def funmom_start(startname):
 	logger.info('펀맘알림 시작')
-	conn = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 		gogo = 1
@@ -1371,9 +1437,15 @@ def funmom_start(startname):
 @bp2.route('funmom')
 def funmom():
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS funmom (start_time TEXT)')
-	conn.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS funmom (start_time TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	

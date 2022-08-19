@@ -64,10 +64,16 @@ def second():
 	else:
 		try:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -77,10 +83,16 @@ def second():
 			b = row['SITE_URL'] #URL
 		except:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -146,10 +158,16 @@ def second2():
 	else:
 		try:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -159,10 +177,16 @@ def second2():
 			b = row['SITE_URL'] #URL
 		except:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -228,10 +252,16 @@ def second5():
 	else:
 		try:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -241,10 +271,16 @@ def second5():
 			b = row['SITE_URL'] #URL
 		except:
 			#데이타베이스 없으면 생성
-			conn = sqlite3.connect(webtoondb,timeout=60)
+			con = sqlite3.connect(webtoondb,timeout=60)
 			sql = "CREATE TABLE IF NOT EXISTS main (SITE_NAME TEXT, SITE_URL TEXT)"
-			conn.execute(sql)
-			conn.close()
+			con.execute(sql)
+			con.execute("PRAGMA synchronous = OFF")
+			con.execute("PRAGMA journal_mode = MEMORY")
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = EXCLUSIVE")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.close()
 			con = sqlite3.connect(webtoondb,timeout=60)
 			con.row_factory = sqlite3.Row
 			cur = con.cursor()
@@ -413,10 +449,16 @@ def add_c(packege, a, b, c, d, atat):
 	print(packege, a, b , c ,d, atat)
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect(webtoondb,timeout=60)
+		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
-		conn.execute(sql)
-		conn.close()
+		con.execute(sql)
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		time.sleep(random.uniform(2,10)) 
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
@@ -436,10 +478,16 @@ def add_c(packege, a, b, c, d, atat):
 def add_d(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect(webtoondb,timeout=60)
+		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
-		conn.execute(sql)
-		conn.close()
+		con.execute(sql)
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		time.sleep(random.uniform(2,10)) 
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -455,10 +503,16 @@ def add_d(packege, subtitle_old, title_old):
 def add_pass(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect(webtoondb,timeout=60)
+		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
-		conn.execute(sql)
-		conn.close()
+		con.execute(sql)
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		time.sleep(random.uniform(2,10)) 
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -772,10 +826,16 @@ def exec_start5(t_main, packege,startname):
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
 	#데이타베이스 없으면 생성
-	conn = sqlite3.connect(webtoondb,timeout=60)
+	con = sqlite3.connect(webtoondb,timeout=60)
 	sql = "CREATE TABLE IF NOT EXISTS " + packege + " (maintitle TEXT, subtitle TEXT, urltitle TEXT, complte TEXT, toon TEXT)"
-	conn.execute(sql)
-	conn.close()
+	con.execute(sql)
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()
 	#DB 목록을 받아와 다운로드를 진행한다.
 	con = sqlite3.connect(webtoondb,timeout=60)
 	con.row_factory = sqlite3.Row

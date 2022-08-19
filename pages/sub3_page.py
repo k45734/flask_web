@@ -242,9 +242,15 @@ def start():
 		FLASKALIM = request.form['FLASKALIM']
 		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
 		#데이타베이스 없으면 생성
-		conn = sqlite3.connect(sub3db,timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS ' + FLASKAPPSNAME +' (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
-		conn.close()
+		con = sqlite3.connect(sub3db,timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS ' + FLASKAPPSNAME +' (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
+		con.execute("PRAGMA synchronous = OFF")
+		con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.close()
 		try:		
 			print(FLASKAPPSNAME)
 			con = sqlite3.connect(sub3db,timeout=60)
