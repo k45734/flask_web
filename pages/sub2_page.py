@@ -588,11 +588,11 @@ def weather_ok():
 def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	try:
 		#SQLITE3 DB 없으면 만들다.
-		conn = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		conn.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
-		conn.close()	
+		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+		con.close()	
 		time.sleep(random.uniform(2,5)) 
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		cur = con.cursor()
 		sql = 'select * from news where TITLE = ? and URL = ?'
 		cur.execute(sql, (TITLE,URL))
@@ -611,7 +611,7 @@ def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		time.sleep(random.uniform(2,5)) 
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
 		cur.execute(sql,('True',b, c))
@@ -687,6 +687,7 @@ def ytnsnews(newdate):
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	except:	
 		logger.info('YTN뉴스에러')
+		
 def esbsnews(newdate):
 	try:
 		with requests.Session() as s:
