@@ -786,7 +786,8 @@ def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 			#time.sleep(10)
 		con.close()	
 	except:	
-		quit()
+		pass
+		
 def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
 	#오늘날짜
@@ -918,56 +919,59 @@ def add_unse_d(a, b, c, d, e):
 		con.close()	
 		
 def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
-	logger.info('운세알림시작')
-	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
-	conn.close()
-	session = requests.Session()
-	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
+	try:
+		logger.info('운세알림시작')
+		#SQLITE3 DB 없으면 만들다.
+		conn = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+		conn.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
+		conn.close()
+		session = requests.Session()
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
-	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
-	rs = requests.get(auth,headers=header,verify=False)
-	bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("div",{"class":"ani_result"})
-	dates = bs0bj.find('span',{'class':'cal'}).text
-	lastdate = " ".join(dates.split())
-	for i in posts:
-		a = i.text
-		test = i.find('dd')
-		title = test.text
-		a2 = " ".join(title.split())
-		aaa = a2.split(maxsplit=1)
-		zodiac = aaa[0]
-		zodiac2 = aaa[1]
-		name = i.find('ul')
-		li = name.text
-		list = " ".join(li.split())
-		#a4 = a2 + '\n' + list
-		a4 = zodiac + '\n' + zodiac2 + '\n' + list
-		complte = 'False'
-		add_unse(lastdate, zodiac, zodiac2, list, complte)
+		auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
+		rs = requests.get(auth,headers=header,verify=False)
+		bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"ani_result"})
+		dates = bs0bj.find('span',{'class':'cal'}).text
+		lastdate = " ".join(dates.split())
+		for i in posts:
+			a = i.text
+			test = i.find('dd')
+			title = test.text
+			a2 = " ".join(title.split())
+			aaa = a2.split(maxsplit=1)
+			zodiac = aaa[0]
+			zodiac2 = aaa[1]
+			name = i.find('ul')
+			li = name.text
+			list = " ".join(li.split())
+			#a4 = a2 + '\n' + list
+			a4 = zodiac + '\n' + zodiac2 + '\n' + list
+			complte = 'False'
+			add_unse(lastdate, zodiac, zodiac2, list, complte)
+			
+		#중복 알림 방지
+		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		sql = "select * from unse where COMPLTE = ?"
+		cur.execute(sql,('False',))
+		rows = cur.fetchall()
+		count = 0
+		for row in rows:
+			timestr = time.strftime("%Y%m%d")
+			a = row['DATE'] #생성날짜
+			b = row['ZODIAC'] #띠
+			c = row['ZODIAC2'] #띠별운세
+			d = row['MEMO'] #띠별상세운세
+			e = row['COMPLTE'] #완료여부
+			msg = b + ' (' + c + ')\n' + d
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			add_unse_d(a, b, c, d, e)
+		logger.info('운세 알림완료')	
+	except:
+		pass
 		
-	#중복 알림 방지
-	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()
-	sql = "select * from unse where COMPLTE = ?"
-	cur.execute(sql,('False',))
-	rows = cur.fetchall()
-	count = 0
-	for row in rows:
-		timestr = time.strftime("%Y%m%d")
-		a = row['DATE'] #생성날짜
-		b = row['ZODIAC'] #띠
-		c = row['ZODIAC2'] #띠별운세
-		d = row['MEMO'] #띠별상세운세
-		e = row['COMPLTE'] #완료여부
-		msg = b + ' (' + c + ')\n' + d
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		add_unse_d(a, b, c, d, e)
-	logger.info('운세 알림완료')	
-	
 @bp2.route('unse')
 def unse():
 	#데이타베이스 없으면 생성
@@ -1094,72 +1098,75 @@ def quiz_add_go_d(MEMO, COMPLTE):
 		con.close()
 		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
-	logger.info('퀴즈정답알림 시작')
-	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
-	conn.close()
-	list = []
-	last = []
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-		#for page in u:
-		for page in range(1,11):
-			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			req = s.get(URL,headers=header,verify=False)
-			html = req.text
-			gogo = bs(html, "html.parser")
-			posts = gogo.findAll("div",{"class":"post-item"})
-		
-			for i in posts:
-				title = i.find('span',{'class':'title'}).text
-				url = i.find('a')["href"]
-				keys = ['TITLE','URL']
-				values = [title, url]
-				dt = dict(zip(keys, values))
-				list.append(dt)
-	
-	for i in list:
-		list_url = i['URL']
-		title = i['TITLE']
+	try:
+		logger.info('퀴즈정답알림 시작')
+		#SQLITE3 DB 없으면 만들다.
+		conn = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+		conn.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
+		conn.close()
+		list = []
+		last = []
 		with requests.Session() as s:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-			URL = 'https://quizbang.tistory.com' + list_url
-			req = s.get(URL,headers=header,verify=False)
-			html = req.text
-			gogo = bs(html, "html.parser")
-			posts = gogo.find('h2').text
-			p = re.compile('(?<=\:)(.*)')
-			memo = p.findall(posts)
-			memo_s = ''.join(memo)
-			keys = ['TITLE','MEMO', 'URL']
-			values = [title, memo_s, URL]
-			dt = dict(zip(keys, values))
-			last.append(dt)
-				
-	for ii in last:
-		title = ii['TITLE']
-		memo_s = ii['MEMO']
-		URL = ii['URL']
-		quiz_add_go(title, memo_s, URL)
-	
-	#알려준다.
-	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()
-	sql = "select * from quiz where COMPLTE = ?"
-	cur.execute(sql, ('False',))
-	rows = cur.fetchall()
-	if len(rows) != 0:
-		for row in rows:
-			TITLE = row['TITLE']
-			MEMO = row['MEMO']
-			COMPLTE = row['COMPLTE']
-			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-			quiz_add_go_d(MEMO, COMPLTE)
-	else:
-		logger.info('퀴즈정답 신규내용이 없습니다.')
+			#for page in u:
+			for page in range(1,11):
+				URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
+				req = s.get(URL,headers=header,verify=False)
+				html = req.text
+				gogo = bs(html, "html.parser")
+				posts = gogo.findAll("div",{"class":"post-item"})
+			
+				for i in posts:
+					title = i.find('span',{'class':'title'}).text
+					url = i.find('a')["href"]
+					keys = ['TITLE','URL']
+					values = [title, url]
+					dt = dict(zip(keys, values))
+					list.append(dt)
+		
+		for i in list:
+			list_url = i['URL']
+			title = i['TITLE']
+			with requests.Session() as s:
+				header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
+				URL = 'https://quizbang.tistory.com' + list_url
+				req = s.get(URL,headers=header,verify=False)
+				html = req.text
+				gogo = bs(html, "html.parser")
+				posts = gogo.find('h2').text
+				p = re.compile('(?<=\:)(.*)')
+				memo = p.findall(posts)
+				memo_s = ''.join(memo)
+				keys = ['TITLE','MEMO', 'URL']
+				values = [title, memo_s, URL]
+				dt = dict(zip(keys, values))
+				last.append(dt)
+					
+		for ii in last:
+			title = ii['TITLE']
+			memo_s = ii['MEMO']
+			URL = ii['URL']
+			quiz_add_go(title, memo_s, URL)
+		
+		#알려준다.
+		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		sql = "select * from quiz where COMPLTE = ?"
+		cur.execute(sql, ('False',))
+		rows = cur.fetchall()
+		if len(rows) != 0:
+			for row in rows:
+				TITLE = row['TITLE']
+				MEMO = row['MEMO']
+				COMPLTE = row['COMPLTE']
+				msg = '{}\n정답 : {}'.format(TITLE,MEMO)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+				quiz_add_go_d(MEMO, COMPLTE)
+		else:
+			logger.info('퀴즈정답 신규내용이 없습니다.')
+	except:	
+		pass
 		
 @bp2.route('quiz')
 def quiz():
