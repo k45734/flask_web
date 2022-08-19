@@ -210,15 +210,15 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('택배알림시작')
 	url = []
 	#SQLITE3 DB 없으면 만들다.
-	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	conn.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
 	con.execute("PRAGMA synchronous = OFF")
 	con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
-	conn.close()
+	con.close()
 	#데이터베이스 컬럼 추가하기
 	conn = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	cur = conn.cursor()
