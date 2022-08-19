@@ -313,7 +313,6 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					pass
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 	logger.info('택배 알림완료')
-	quit()
 	
 @bp2.route('tracking')
 def tracking():
@@ -505,7 +504,6 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		msg = '{}\n\n{}'.format(msg1,msg2)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
-	quit()
 	
 @bp2.route('weather')
 def weather():
@@ -651,7 +649,7 @@ def vietnews(newdate):
 					COMPLETE = 'False'
 					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	except:	
-		quit()
+		logger.info('VIET뉴스에러')
 def ytnsnews(newdate):
 	try:
 		with requests.Session() as s:
@@ -686,7 +684,7 @@ def ytnsnews(newdate):
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	except:	
-		quit()
+		logger.info('YTN뉴스에러')
 def esbsnews(newdate):
 	try:
 		with requests.Session() as s:
@@ -711,7 +709,7 @@ def esbsnews(newdate):
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	except:
-		quit()
+		logger.info('SBS뉴스에러')
 def ekbsnews(newdate):
 	try:
 		with requests.Session() as s:
@@ -736,7 +734,7 @@ def ekbsnews(newdate):
 				COMPLETE = 'False'
 				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
 	except:
-		quit()
+		logger.info('KBS뉴스에러')
 		
 def daumnews(newdate):
 	try:
@@ -764,7 +762,7 @@ def daumnews(newdate):
 					COMPLETE = 'False'
 					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	except:	
-		quit()
+		logger.info('다음뉴스에러')
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 	try:
 		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
@@ -804,11 +802,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		logger.info('뉴스 알림완료')	
 	except:	
 		logger.info('뉴스 알림종료')	
-		quit()
 	
-	
-	
-
 @bp2.route('news')
 def news():
 	#데이타베이스 없으면 생성
@@ -973,7 +967,6 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 		add_unse_d(a, b, c, d, e)
 	logger.info('운세 알림완료')	
-	quit()
 	
 @bp2.route('unse')
 def unse():
@@ -1165,10 +1158,9 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			quiz_add_go_d(MEMO, COMPLTE)
-		quit()
 	else:
 		logger.info('퀴즈정답 신규내용이 없습니다.')
-		quit()	
+		
 @bp2.route('quiz')
 def quiz():
 	#데이타베이스 없으면 생성
@@ -1353,8 +1345,8 @@ def funmom_start(startname):
 					url_to_image(url, dfolder, category, category2, filename)
 					jpeg_no += 1
 				add_d(id, go, complte)
-		logger.info('펀맘 알림완료')		
-		quit()		
+		logger.info('펀맘 알림완료')	
+		
 @bp2.route('funmom')
 def funmom():
 	#데이타베이스 없으면 생성
