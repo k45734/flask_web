@@ -620,7 +620,7 @@ def weather_ok():
 def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	try:
 		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		con.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 		con.execute("PRAGMA synchronous = OFF")
 		con.execute("PRAGMA journal_mode = MEMORY")
@@ -630,7 +630,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.close()	
 		time.sleep(random.uniform(2,5)) 
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
 		sql = 'select * from news where TITLE = ? and URL = ?'
 		cur.execute(sql, (TITLE,URL))
@@ -649,7 +649,7 @@ def addnews_d(a, b, c, d, e,newdate):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		time.sleep(random.uniform(2,5)) 
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
 		cur.execute(sql,('True',b, c))
@@ -806,7 +806,7 @@ def daumnews(newdate):
 		logger.info('다음뉴스에러')
 def ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate):
 	try:
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()	
 		sql = 'select * from news where COMPLETE = ?'
@@ -836,9 +836,9 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
 	time = "%02dH%02dM" % (nowtime1.hour, nowtime1.minute)
 	try:
-		file_size = os.stat(sub2db + '/news_' + newdate + '.db')
+		file_size = os.stat(sub2db + '/news.db')
 		if file_size.st_size >= 600000 :
-			file_oldname = os.path.join(sub2db + '/news_' + newdate + '.db')
+			file_oldname = os.path.join(sub2db + '/news.db')
 			file_newname_newfile = os.path.join(sub2db + '/news_' + newdate + '_' + time + '.db')
 			os.rename(file_oldname, file_newname_newfile)
 		else:
@@ -856,7 +856,7 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	except:	
 		logger.info('뉴스 알림종료')
 	try:
-		con = sqlite3.connect(sub2db + '/news_' + newdate + '.db',timeout=60)	
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)	
 		con.execute('VACUUM')
 		con.commit()
 		logger.info('DB최적화를 진행하였습니다.')
