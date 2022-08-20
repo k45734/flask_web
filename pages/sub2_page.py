@@ -373,8 +373,13 @@ def tracking():
 		for row in rows:
 			carrier_id = row['PARCEL']
 			track_id = row['NUMBER']
-			keys = ['PARCEL','NUMBER']
-			values = [carrier_id, track_id]
+			COMPETE = row['COMPLTE']
+			if COMPETE == 'True':
+				wow = '배송완료'
+			else:
+				wow = '배송중'
+			keys = ['PARCEL','NUMBER','COMPLETE']
+			values = [carrier_id, track_id, wow]
 			dt = dict(zip(keys, values))
 			view.append(dt)
 		return render_template('tracking.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)

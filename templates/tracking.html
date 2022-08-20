@@ -117,13 +117,22 @@
 </form>
 </tbody>
 </table>
+<br>
 <table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
 <thead>
+<tr>
+<th align="center" class="tg-baqh">택배사</th>
+<th align="center" class="tg-baqh" colspan="2">송장번호</th>
+<td align="center" class="tg-baqh" colspan="3">배송완료여부</td>
+<td align="center" class="tg-baqh" colspan="4"><br></td>
+</tr>
 {% for row in view %} 
 <tr>
 <th align="center" class="tg-0lax">{{row['PARCEL']}}</th>
 <th align="center" class="tg-0lax" colspan="2">{{row['NUMBER']}}</th>
-<td align="center" class="tg-0lax" colspan="3"><input type="button" value="삭제" onclick="location.href='tracking_del/{{row['PARCEL']}}/{{row['NUMBER']}}'">
+<td align="center" class="tg-0lax" colspan="3">{{row['COMPLETE']}}</td>
+<td align="center" class="tg-0lax" colspan="4">
+<input type="button" value="삭제" onclick="location.href='tracking_del/{{row['PARCEL']}}/{{row['NUMBER']}}'">
 </td>
 </tr>
  {% endfor %}
