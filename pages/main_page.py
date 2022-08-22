@@ -34,6 +34,21 @@ def sizeof_fmt(num, suffix='Bytes'):
 		num /= 1024.0
 	return "%.1f%s%s" % (num, 'Y', suffix)
 	
+def mem_check():
+	tmp = psutil.virtual_memory()
+	test = tmp[2]
+	test = mem_check()
+	if test >= 50 :
+		logger.info('현재 메모리를 %s 사용하고 있어서 재시작을 합니다.', test)
+		if platform.system() == 'Windows':
+			os.system("flask run --reload")
+		else:
+			os.system("cat /dev/null > " + logdata + "/flask.log")
+			os.system("chmod 777 * -R")
+			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+	else:
+		logger.info('현재 메모리를 %s 사용하고 있습니다.', test)
+		
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
@@ -68,7 +83,13 @@ job_defaults = {
 #scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 scheduler.start()
-		
+
+try:	
+	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('0 */1 * * *'), id='system_check')
+	logger.info('시스템 체크 시작')
+except:	
+	logger.info('시스템 체크 시작(이미등록되었습니다.)')
+	pass
 @bp.route("/")
 @bp.route("index")
 def index():
