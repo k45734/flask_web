@@ -37,8 +37,7 @@ def sizeof_fmt(num, suffix='Bytes'):
 def mem_check():
 	tmp = psutil.virtual_memory()
 	test = tmp[2]
-	#test = mem_check()
-	if test >= 50 :
+	if test >= 70 :
 		logger.info('현재 메모리를 %s 사용하고 있어서 재시작을 합니다.', test)
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
