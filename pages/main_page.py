@@ -37,14 +37,14 @@ def sizeof_fmt(num, suffix='Bytes'):
 def mem_check():
 	tmp = psutil.virtual_memory()
 	test = tmp[2]
-	if test >= 70 :
+	if test >= 90 :
 		logger.info('현재 메모리를 %s 사용하고 있어서 재시작을 합니다.', test)
-		#if platform.system() == 'Windows':
-		#	os.system("flask run --reload")
-		#else:
-		#	os.system("cat /dev/null > " + logdata + "/flask.log")
-		#	os.system("chmod 777 * -R")
-		#	os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+		if platform.system() == 'Windows':
+			os.system("flask run --reload")
+		else:
+			os.system("cat /dev/null > " + logdata + "/flask.log")
+			os.system("chmod 777 * -R")
+			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 	else:
 		logger.info('현재 메모리를 %s 사용하고 있습니다.', test)
 		
