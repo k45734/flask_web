@@ -851,9 +851,9 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	except:
 		pass
 	try:
-		ytnsnews(newdate)
-		esbsnews(newdate)
-		ekbsnews(newdate)
+		#ytnsnews(newdate)
+		#esbsnews(newdate)
+		#ekbsnews(newdate)
 		vietnews(newdate)
 		daumnews(newdate)
 		ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
