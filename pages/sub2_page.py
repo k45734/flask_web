@@ -852,10 +852,10 @@ def news_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		pass
 	try:
 		#ytnsnews(newdate)
-		#esbsnews(newdate)
-		#ekbsnews(newdate)
+		esbsnews(newdate)
+		ekbsnews(newdate)
 		vietnews(newdate)
-		daumnews(newdate)
+		#daumnews(newdate)
 		ali(telgm,telgm_alim,telgm_token,telgm_botid,newdate)
 		logger.info('뉴스 알림완료')	
 	except:	
