@@ -6,7 +6,7 @@ try:
 except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
-import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random
+import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,psutil
 from datetime import datetime, timedelta
 
 try:
@@ -60,10 +60,59 @@ def db_optimization():
 		con.rollback()	
 	finally:	
 		con.close()
+
+#프로세스확인
+def proc_test(name):
+	if platform.system() == 'Windows':
+		wow = name + '.exe'
+		py = "python.exe"
+		aa = name[7:]
+		print(aa)
+	else:
+		wow = name
+		py = "python"
+		aa = name[7:]
+		print(aa)
 		
+	for proc in psutil.process_iter():
+		# 프로세스 이름, PID값 가져오기
+		processName = proc.name()
+		processID = proc.pid
+		 #[:6] 
+		if processName == py:
+			commandLine = proc.cmdline()
+			
+			# 동일한 프로세스 확인. code 확인
+			if aa in commandLine:			
+				parent_pid = processID  #PID
+				parent = psutil.Process(parent_pid)  # PID 찾기
+				
+				for child in parent.children(recursive=True):  #자식-부모 종료
+					child.kill()
+				parent.kill()
+				
+			else:
+				print(processName, ' ', commandLine, ' - ', processID)
+		elif processName == wow:
+			commandLine = proc.cmdline()
+			
+			# 동일한 프로세스 확인. code 확인
+			if aa in commandLine:			
+				parent_pid = processID  #PID
+				parent = psutil.Process(parent_pid)  # PID 찾기
+				
+				for child in parent.children(recursive=True):  #자식-부모 종료
+					child.kill()
+				parent.kill()
+				
+			else:
+				print(processName, ' ', commandLine, ' - ', processID)
+	msg = '동일 프로세스 확인 완료....'
+	return msg
+	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
-	
+	proc_test(FLASKAPPS)
 	if FLASKTELGM == 'True' :
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
