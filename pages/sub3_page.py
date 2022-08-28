@@ -81,32 +81,32 @@ def proc_test(name):
 		 #[:6] 
 		if processName == py:
 			commandLine = proc.cmdline()
-			
-			# 동일한 프로세스 확인. code 확인
-			if aa in commandLine:			
-				parent_pid = processID  #PID
-				parent = psutil.Process(parent_pid)  # PID 찾기
-				
-				for child in parent.children(recursive=True):  #자식-부모 종료
-					child.kill()
-				parent.kill()
-				
-			else:
-				print(processName, ' ', commandLine, ' - ', processID)
+			for i in commandLine:
+				# 동일한 프로세스 확인. code 확인
+				if aa in i:			
+					parent_pid = processID  #PID
+					parent = psutil.Process(parent_pid)  # PID 찾기
+					
+					for child in parent.children(recursive=True):  #자식-부모 종료
+						child.kill()
+					parent.kill()
+					
+				else:
+					print(processName, ' ', commandLine, ' - ', processID)
 		elif processName == wow:
 			commandLine = proc.cmdline()
-			
-			# 동일한 프로세스 확인. code 확인
-			if aa in commandLine:			
-				parent_pid = processID  #PID
-				parent = psutil.Process(parent_pid)  # PID 찾기
-				
-				for child in parent.children(recursive=True):  #자식-부모 종료
-					child.kill()
-				parent.kill()
-				
-			else:
-				print(processName, ' ', commandLine, ' - ', processID)
+			for i in commandLine:
+				# 동일한 프로세스 확인. code 확인
+				if aa in i:			
+					parent_pid = processID  #PID
+					parent = psutil.Process(parent_pid)  # PID 찾기
+					
+					for child in parent.children(recursive=True):  #자식-부모 종료
+						child.kill()
+					parent.kill()
+					
+				else:
+					print(processName, ' ', commandLine, ' - ', processID)
 	msg = '동일 프로세스 확인 완료....'
 	return msg
 	
