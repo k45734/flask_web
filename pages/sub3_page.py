@@ -116,7 +116,8 @@ def proc_test(name):
 	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
-	proc_test(FLASKAPPS)
+	ss = proc_test(FLASKAPPS)
+	logger.info(ss)
 	if FLASKTELGM == 'True' :
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
