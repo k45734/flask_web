@@ -66,13 +66,17 @@ def proc_test(name):
 	if platform.system() == 'Windows':
 		wow = name + '.exe'
 		py = "python.exe"
-		aa = name[7:]
-		print(aa)
+		a1 = name[7:]
+		a2 = a1.split()
+		aa = a2[0]
+		logger.info(aa)
 	else:
 		wow = name
 		py = "python"
-		aa = name[7:]
-		print(aa)
+		a1 = name[7:]
+		a2 = a1.split()
+		aa = a2[0]
+		logger.info(aa)
 		
 	for proc in psutil.process_iter():
 		# 프로세스 이름, PID값 가져오기
