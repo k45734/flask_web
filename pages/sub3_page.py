@@ -64,18 +64,20 @@ def db_optimization():
 #프로세스확인
 def proc_test(name):
 	if platform.system() == 'Windows':
-		wow = name + '.exe'
 		py = "python.exe"
-		a1 = name[7:]
-		a2 = a1.split()
-		aa = a2[0]
+		a2 = name.split()
+		if py in a2:
+			aa = a2[1]
+		else:
+			aa = a2[0]
 		logger.info(aa)
 	else:
-		wow = name
 		py = "python"
-		a1 = name[7:]
-		a2 = a1.split()
-		aa = a2[0]
+		a2 = name.split()
+		if py in a2:
+			aa = a2[1]
+		else:
+			aa = a2[0]
 		logger.info(aa)
 		
 	for proc in psutil.process_iter():
@@ -97,7 +99,7 @@ def proc_test(name):
 					
 				else:
 					print(processName, ' ', commandLine, ' - ', processID)
-		elif processName == wow:
+		else:
 			commandLine = proc.cmdline()
 			for i in commandLine:
 				# 동일한 프로세스 확인. code 확인
