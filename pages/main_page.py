@@ -84,7 +84,7 @@ scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,e
 scheduler.start()
 
 try:	
-	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('0 */1 * * *'), id='system_check')
+	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='system_check')
 	logger.info('시스템 체크 시작')
 except:	
 	logger.info('시스템 체크 시작(이미등록되었습니다.)')
