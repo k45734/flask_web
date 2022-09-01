@@ -83,12 +83,12 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 scheduler.start()
 
-try:	
-	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='system_check')
-	logger.info('시스템 체크 시작')
-except:	
-	logger.info('시스템 체크 시작(이미등록되었습니다.)')
-	pass
+#try:	
+#	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='system_check')
+#	logger.info('시스템 체크 시작')
+#except:	
+#	logger.info('시스템 체크 시작(이미등록되었습니다.)')
+#	pass
 @bp.route("/")
 @bp.route("index")
 def index():
