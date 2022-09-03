@@ -294,32 +294,32 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		ttt = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id
 		url.append(ttt)
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
-	with requests.Session() as s:
-		for a in url:
-			url = s.get(a, headers=h)
-			resp = url.json()
-			check = resp.get('from', None)
-			if check == None:
-				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	#with requests.Session() as s:
+	for a in url:
+		url = requests.get(a, headers=h)
+		resp = url.json()
+		check = resp.get('from', None)
+		if check == None:
+			msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		else:
+			json_string = check.get("name", None) #누가 보냈냐			
+			json_string2 = resp.get("to").get("name") #누가 받냐
+			json_string3 = resp.get("state").get("text") #배송현재상태
+			json_string4 = resp.get("carrier").get("name") #택배사이름
+			json_string5 = resp.get("carrier").get("id") #택배사송장번호
+			json_string_m = resp.get("progresses") #배송상황
+			msg2 = flfl(json_string_m)
+			gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
+			ms = '\n'.join(gg)
+			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,json_string5,ms)
+			if '배송완료' in msga :
+				tracking_del_new(json_string4, json_string5)
+			elif '배달 완료' in msga :
+				tracking_del_new(json_string4, json_string5)
 			else:
-				json_string = check.get("name", None) #누가 보냈냐			
-				json_string2 = resp.get("to").get("name") #누가 받냐
-				json_string3 = resp.get("state").get("text") #배송현재상태
-				json_string4 = resp.get("carrier").get("name") #택배사이름
-				json_string5 = resp.get("carrier").get("id") #택배사송장번호
-				json_string_m = resp.get("progresses") #배송상황
-				msg2 = flfl(json_string_m)
-				gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
-				ms = '\n'.join(gg)
-				msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,json_string5,ms)
-				if '배송완료' in msga :
-					tracking_del_new(json_string4, json_string5)
-				elif '배달 완료' in msga :
-					tracking_del_new(json_string4, json_string5)
-				else:
-					pass
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+				pass
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 	logger.info('택배 알림완료')
 	try:
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)		
@@ -494,48 +494,48 @@ def tracking_ok():
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
 	headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
-	with requests.Session() as s:
-		mainurl = 'https://www.kr-weathernews.com/mv3/if/search.fcgi?query=' + location
-		url = s.get(mainurl, headers=headers)
-		resp = url.json()
-		list = resp['cities']
-		for i in list:
-			code = i['region_key']
-		
-		start = 'https://www.kr-weathernews.com/mv3/if/today.fcgi?region=' + code
-		url = s.get(start, headers=headers)
-		resp = url.json()
-		state = resp['state'] #주소1
-		city = resp['city'] #주소2
-		news = resp['news']['type']
-		news2 = resp['news']['title']
-		sunrise = resp['sunrise'] #일출
-		sunset = resp['sunset'] #일몰
-		date = resp['current']['date']
-		time = resp['current']['time']
-		temp = resp['current']['temp']
-		feeltemp = resp['current']['feeltemp'] #어제보다 ... 높음
-		rhum = resp['current']['rhum'] #습도
-		press = resp['current']['press'] #기압
-		wdir = resp['current']['wdir'] #바람 남...
-		wspd = resp['current']['wspd'] #wdir + wspd
-		pm10 = resp['current']['pm10'] #미세먼지
-		pm25 = resp['current']['pm25'] #초미세먼지
-		prec = resp['current']['prec'] #강수량 1시간
-		msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n강수량 : {}㎜   습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,prec,rhum,press,wdir,wspd,sunrise,sunset,news2)	
-		#msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)	
+	#with requests.Session() as s:
+	mainurl = 'https://www.kr-weathernews.com/mv3/if/search.fcgi?query=' + location
+	url = requests.get(mainurl, headers=headers)
+	resp = url.json()
+	list = resp['cities']
+	for i in list:
+		code = i['region_key']
 	
-		big = 'https://www.kr-weathernews.com/mv3/if/warn.fcgi?region=' + code
-		url = s.get(big, headers=headers)
-		resp = url.json()
-		big_date = resp['warn'][0]['announce_date']
-		big_title = resp['warn'][0]['title']
-		big_region = resp['warn'][0]['region']
-		big_efftsatus = resp['warn'][0]['efftsatus']
-		big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
-		msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
-		msg = '{}\n\n{}'.format(msg1,msg2)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	start = 'https://www.kr-weathernews.com/mv3/if/today.fcgi?region=' + code
+	url = requests.get(start, headers=headers)
+	resp = url.json()
+	state = resp['state'] #주소1
+	city = resp['city'] #주소2
+	news = resp['news']['type']
+	news2 = resp['news']['title']
+	sunrise = resp['sunrise'] #일출
+	sunset = resp['sunset'] #일몰
+	date = resp['current']['date']
+	time = resp['current']['time']
+	temp = resp['current']['temp']
+	feeltemp = resp['current']['feeltemp'] #어제보다 ... 높음
+	rhum = resp['current']['rhum'] #습도
+	press = resp['current']['press'] #기압
+	wdir = resp['current']['wdir'] #바람 남...
+	wspd = resp['current']['wspd'] #wdir + wspd
+	pm10 = resp['current']['pm10'] #미세먼지
+	pm25 = resp['current']['pm25'] #초미세먼지
+	prec = resp['current']['prec'] #강수량 1시간
+	msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n강수량 : {}㎜   습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,prec,rhum,press,wdir,wspd,sunrise,sunset,news2)	
+	#msg1 = '{} {}기준 {} {}\n현재온도 {}℃ (체감온도 {}℃)\n미세먼지 : {}   초미세먼지 : {}\n습도 : {}％\n기압 : {}hPa\n바람 : {} {}m/s\n일출 : {}   일몰 : {}\n{} {}'.format(date,time,state,city,temp,feeltemp,pm10,pm25,rhum,press,wdir,wspd,sunrise,sunset,news,news2)	
+
+	big = 'https://www.kr-weathernews.com/mv3/if/warn.fcgi?region=' + code
+	url = requests.get(big, headers=headers)
+	resp = url.json()
+	big_date = resp['warn'][0]['announce_date']
+	big_title = resp['warn'][0]['title']
+	big_region = resp['warn'][0]['region']
+	big_efftsatus = resp['warn'][0]['efftsatus']
+	big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
+	msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
+	msg = '{}\n\n{}'.format(msg1,msg2)
+	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
 		
 @bp2.route('weather')
@@ -873,41 +873,41 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.close()
 		list = []
 		last = []
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-			#for page in u:
-			for page in range(1,11):
-				URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-				req = s.get(URL,headers=header,verify=False)
-				html = req.text
-				gogo = bs(html, "html.parser")
-				posts = gogo.findAll("div",{"class":"post-item"})
-			
-				for i in posts:
-					title = i.find('span',{'class':'title'}).text
-					url = i.find('a')["href"]
-					keys = ['TITLE','URL']
-					values = [title, url]
-					dt = dict(zip(keys, values))
-					list.append(dt)
+		#with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
+		#for page in u:
+		for page in range(1,11):
+			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
+			req = requests.get(URL,headers=header,verify=False)
+			html = req.text
+			gogo = bs(html, "html.parser")
+			posts = gogo.findAll("div",{"class":"post-item"})
+		
+			for i in posts:
+				title = i.find('span',{'class':'title'}).text
+				url = i.find('a')["href"]
+				keys = ['TITLE','URL']
+				values = [title, url]
+				dt = dict(zip(keys, values))
+				list.append(dt)
 		
 		for i in list:
 			list_url = i['URL']
 			title = i['TITLE']
-			with requests.Session() as s:
-				header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-				URL = 'https://quizbang.tistory.com' + list_url
-				req = s.get(URL,headers=header,verify=False)
-				html = req.text
-				gogo = bs(html, "html.parser")
-				posts = gogo.find('h2').text
-				p = re.compile('(?<=\:)(.*)')
-				memo = p.findall(posts)
-				memo_s = ''.join(memo)
-				keys = ['TITLE','MEMO', 'URL']
-				values = [title, memo_s, URL]
-				dt = dict(zip(keys, values))
-				last.append(dt)
+			#with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
+			URL = 'https://quizbang.tistory.com' + list_url
+			req = requests.get(URL,headers=header,verify=False)
+			html = req.text
+			gogo = bs(html, "html.parser")
+			posts = gogo.find('h2').text
+			p = re.compile('(?<=\:)(.*)')
+			memo = p.findall(posts)
+			memo_s = ''.join(memo)
+			keys = ['TITLE','MEMO', 'URL']
+			values = [title, memo_s, URL]
+			dt = dict(zip(keys, values))
+			last.append(dt)
 					
 		for ii in last:
 			title = ii['TITLE']
@@ -1068,78 +1068,78 @@ def funmom_start(startname):
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.close()
-	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
-		gogo = 1
-		a = 1
-		while True:
-			dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
-			login = s.get(dd,headers=header)
-			html = login.text
-			soup = bs(html, 'html.parser')
-			list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
-			if len(list) == 0:
-				print("마지막 페이지입니다.\n종료합니다.")
-				break
+	#with requests.Session() as s:
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
+	gogo = 1
+	a = 1
+	while True:
+		dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
+		login = requests.get(dd,headers=header)
+		html = login.text
+		soup = bs(html, 'html.parser')
+		list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
+		if len(list) == 0:
+			print("마지막 페이지입니다.\n종료합니다.")
+			break
+		
+		hrefs = []
+		title = []
+		for href in list:
+			t = href.find("a")["href"]
+			hrefs.append(str(t))
+			title.append(href.text)
 			
-			hrefs = []
-			title = []
-			for href in list:
-				t = href.find("a")["href"]
-				hrefs.append(str(t))
-				title.append(href.text)
-				
-			tt = 0
-			for c,b in zip(hrefs,title):
-				d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-				add_c(a,b,c,d)
-				a += 1
-			gogo += 1
-		print('목록을 전부 만들었습니다.')		
-		logger.info('목록을 전부 만들었습니다.')
-		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
-		cur = con.cursor()
-		sql = "select * from funmom where complte = ?"
-		cur.execute(sql,('False',))
-		row = cur.fetchall()	
-		for i in row:			
-			id = i[0] #숫자
-			ti = i[1] #제목
-			go = i[2] #url
-			complte = i[3] #완료여부
-			if complte == 'True':
-				continue
+		tt = 0
+		for c,b in zip(hrefs,title):
+			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
+			add_c(a,b,c,d)
+			a += 1
+		gogo += 1
+	print('목록을 전부 만들었습니다.')		
+	logger.info('목록을 전부 만들었습니다.')
+	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+	cur = con.cursor()
+	sql = "select * from funmom where complte = ?"
+	cur.execute(sql,('False',))
+	row = cur.fetchall()	
+	for i in row:			
+		id = i[0] #숫자
+		ti = i[1] #제목
+		go = i[2] #url
+		complte = i[3] #완료여부
+		if complte == 'True':
+			continue
+		else:
+			dd2 = 'https://funmom.tistory.com' + go
+			login2 = requests.get(dd2,headers=header)
+			html = login2.text
+			soup = bs(html, 'html.parser')
+			menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
+			test = menu.find('h4')
+			ttt = test('a')
+			category = ttt[0].text
+			category2 = ttt[1].text
+			if platform.system() == 'Windows':
+				at = os.path.splitdrive(os.getcwd())
+				root = at[0] + '/data'
 			else:
-				dd2 = 'https://funmom.tistory.com' + go
-				login2 = s.get(dd2,headers=header)
-				html = login2.text
-				soup = bs(html, 'html.parser')
-				menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
-				test = menu.find('h4')
-				ttt = test('a')
-				category = ttt[0].text
-				category2 = ttt[1].text
-				if platform.system() == 'Windows':
-					at = os.path.splitdrive(os.getcwd())
-					root = at[0] + '/data'
-				else:
-					root = '/data'
+				root = '/data'
 
-				dfolder = root + '/funmom'# + category + '/' + category2
-				title = soup.find('title')	
-				thisdata = cleanText(title.text)
-				ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-				urls = []
-				for img in ex_id_divs:
-					img_url = img.find("img")
-					urls.append(str(img_url["src"]))		
-				jpeg_no = 00
-				for url in urls:
-					filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
-					url_to_image(url, dfolder, category, category2, filename)
-					jpeg_no += 1
-				add_d(id, go, complte)
-		logger.info('펀맘 알림완료')	
+			dfolder = root + '/funmom'# + category + '/' + category2
+			title = soup.find('title')	
+			thisdata = cleanText(title.text)
+			ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+			urls = []
+			for img in ex_id_divs:
+				img_url = img.find("img")
+				urls.append(str(img_url["src"]))		
+			jpeg_no = 00
+			for url in urls:
+				filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
+				url_to_image(url, dfolder, category, category2, filename)
+				jpeg_no += 1
+			add_d(id, go, complte)
+	logger.info('펀맘 알림완료')	
 	try:
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		con.execute('VACUUM')
