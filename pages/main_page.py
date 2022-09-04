@@ -47,13 +47,17 @@ def mem_check():
 			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 	else:
 		logger.info('현재 메모리를 %s 사용하고 있습니다.', test)
-		
+	comp = '완료'
+	return comp
+	
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except OSError:
         print ('Error: Creating directory. ' +  directory)
+	comp = '완료'
+	return comp
 #실행할때 로그 전체 삭제
 filepath = logdata + '/flask.log'
 try:

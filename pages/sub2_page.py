@@ -73,6 +73,8 @@ def url_to_image(url, dfolder, category, category2, filename):
 			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
+	comp = '완료'
+	return comp
 #특수문자제거
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -129,7 +131,8 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					print(part)
 			#time.sleep(10)
 			#time.sleep(0.5)
-		
+	comp = '완료'
+	return comp	
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
@@ -175,7 +178,8 @@ def tracking_del_new(carrier_id, track_id):
 		cur.execute(sql,('True', track_id, carrier_id))
 		con.commit()			
 		con.close()
-		
+	comp = '완료'
+	return comp	
 #서버에서 조회를 하여 메모리에 저장
 def flfl(json_string_m):
 	test = []
@@ -330,6 +334,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.rollback()	
 	finally:	
 		con.close()	
+	comp = '완료'
+	return comp
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -537,7 +543,8 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	msg = '{}\n\n{}'.format(msg1,msg2)
 	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 	logger.info('날씨 알림완료')
-		
+	comp = '완료'
+	return comp	
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
@@ -639,7 +646,8 @@ def add_unse(lastdate, zodiac, zodiac2, list, complte):
 		con.rollback()	
 	finally:
 		con.close()
-		
+	comp = '완료'
+	return comp	
 def add_unse_d(a, b, c, d, e):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
@@ -658,7 +666,8 @@ def add_unse_d(a, b, c, d, e):
 		con.rollback()	
 	finally:	
 		con.close()	
-		
+	comp = '완료'
+	return comp	
 def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('운세알림시작')
@@ -727,6 +736,8 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.rollback()	
 	finally:	
 		con.close()			
+	comp = '완료'
+	return comp
 @bp2.route('unse')
 def unse():
 	#데이타베이스 없으면 생성
@@ -809,8 +820,7 @@ def unse_ok():
 		except:
 			pass
 		return redirect(url_for('sub2.unse'))
-
-
+	
 #퀴즈정답알림
 #DB 알리미
 def quiz_add_go(title, memo_s, URL):
@@ -838,6 +848,8 @@ def quiz_add_go(title, memo_s, URL):
 		con.rollback()	
 	finally:
 		con.close()
+	comp = '완료'
+	return comp
 #알리미 완료
 def quiz_add_go_d(MEMO, COMPLTE):
 	try:
@@ -857,7 +869,8 @@ def quiz_add_go_d(MEMO, COMPLTE):
 		con.rollback()	
 	finally:	
 		con.close()
-		
+	comp = '완료'
+	return comp	
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('퀴즈정답알림 시작')
@@ -942,7 +955,9 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	except:
 		con.rollback()	
 	finally:	
-		con.close()			
+		con.close()	
+	comp = '완료'
+	return comp		
 @bp2.route('quiz')
 def quiz():
 	#데이타베이스 없으면 생성
@@ -1040,6 +1055,8 @@ def add_d(id, go, complte):
 		con.rollback()
 	finally:	
 		con.close()	
+	comp = '완료'
+	return comp
 #펀맘 DB	
 def add_c(a,b,c,d):
 	try:
@@ -1056,7 +1073,10 @@ def add_c(a,b,c,d):
 	except:
 		con.rollback()
 	finally:		
-		con.close()			
+		con.close()	
+	comp = '완료'
+	return comp
+	
 def funmom_start(startname):
 	logger.info('펀맘알림 시작')
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
@@ -1148,7 +1168,11 @@ def funmom_start(startname):
 	except:
 		con.rollback()	
 	finally:	
-		con.close()			
+		con.close()	
+	
+	comp = '완료'
+	return comp
+	
 @bp2.route('funmom')
 def funmom():
 	#데이타베이스 없으면 생성

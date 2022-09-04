@@ -60,7 +60,8 @@ def db_optimization():
 		con.rollback()	
 	finally:	
 		con.close()
-
+	comp = '완료'
+	return comp
 #프로세스확인
 def proc_test(name):
 	if platform.system() == 'Windows':
@@ -135,7 +136,8 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 
 	#DB최적화
 	db_optimization()
-			
+	comp = '완료'
+	return comp		
 @bp3.route('/')
 @bp3.route('index')
 def second():

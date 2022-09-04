@@ -54,7 +54,8 @@ def db_optimization():
 		con.rollback()	
 	finally:	
 		con.close()	
-		
+	comp = '완료'
+	return comp	
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
@@ -382,7 +383,8 @@ def url_to_image(subtitle, title, url, filename, dfolder):
 	if not os.path.isfile(fifi):
 		with open(fifi, 'wb') as code:
 			code.write(req.content)
-			
+	comp = '완료'
+	return comp		
 def manazip(subtitle, title, filename, dfolder, cbz, packege):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
@@ -399,7 +401,8 @@ def manazip(subtitle, title, filename, dfolder, cbz, packege):
 					fantasy_zip.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), dfolder + '/{}/{}'.format(parse,parse2)), compress_type = zipfile.ZIP_DEFLATED)                     
 		fantasy_zip.close()
 	shutil.rmtree(dfolder + '/{}/{}'.format(parse,parse2))
-		
+	comp = '완료'
+	return comp	
 @webtoon.route('db_reset', methods=['POST'])
 def db_reset():
 	if not session.get('logFlag'):
@@ -437,7 +440,8 @@ def db_redown():
 		finally:		
 			con.close()
 		return redirect(url_for('main.index'))
-
+	comp = '완료'
+	return comp
 @webtoon.route('db_repass', methods=['POST'])
 def db_repass():
 	if not session.get('logFlag'):
@@ -486,7 +490,8 @@ def add_c(packege, a, b, c, d, atat):
 		con.rollback()
 	finally:		
 		con.close()
-
+	comp = '완료'
+	return comp
 def add_d(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
@@ -511,7 +516,8 @@ def add_d(packege, subtitle_old, title_old):
 		con.rollback()
 	finally:	
 		con.close()	
-		
+	comp = '완료'
+	return comp	
 def add_pass(packege, subtitle_old, title_old):
 	try:
 		#데이타베이스 없으면 생성
@@ -535,7 +541,9 @@ def add_pass(packege, subtitle_old, title_old):
 	except:
 		con.rollback()
 	finally:	
-		con.close()			
+		con.close()	
+	comp = '완료'
+	return comp
 def checkURL(url2):
 	user_agent = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'
 	headers={'User-Agent':user_agent,} 
@@ -716,7 +724,8 @@ def exec_start(t_main, code, packege,startname):
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 	#DB최적화		
 	db_optimization()
-	
+	comp = '완료'
+	return comp
 def exec_start2(t_main, code, packege,startname):
 	nowDatetime = mydate()
 	print("툰코시작")
@@ -781,7 +790,8 @@ def exec_start2(t_main, code, packege,startname):
 			logger.info('%s 의 %s 의 %s 를 등록하였습니다.', packege, a, b)
 	#DB최적화		
 	db_optimization()
-	
+	comp = '완료'
+	return comp
 #도지코믹스
 def exec_start5(t_main, packege,startname):
 	nowDatetime = mydate()
@@ -839,7 +849,8 @@ def exec_start5(t_main, packege,startname):
 		cnt += 1
 	#DB최적화		
 	db_optimization()
-	
+	comp = '완료'
+	return comp
 #공통 다운로드	
 def godown(t_main, compress, cbz, packege , startname):	
 	#데이타베이스 없으면 생성
@@ -948,7 +959,8 @@ def godown(t_main, compress, cbz, packege , startname):
 			logger.info('%s 의 %s 의 %s 가 다운완료하였습니다.', packege, title, subtitle)
 			db_optimization()
 			break
-			
+	comp = '완료'
+	return comp		
 
 @webtoon.route("now", methods=["POST"])
 def now():
@@ -961,7 +973,9 @@ def now():
 		cbz = request.form['cbz']
 		startname = request.form['startname']		
 		godown(t_main, compress, cbz, packege , startname)
-			
+	comp = '완료'
+	return comp
+	
 @webtoon.route('copytoon_list', methods=['POST'])
 def copytoon_list():
 	if session.get('logFlag') != True:
