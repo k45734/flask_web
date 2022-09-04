@@ -51,13 +51,14 @@ def mem_check():
 	return comp
 	
 def createFolder(directory):
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except OSError:
-        print ('Error: Creating directory. ' +  directory)
+	try:
+		if not os.path.exists(directory):
+			os.makedirs(directory)
+	except OSError:
+		print ('Error: Creating directory. ' +  directory)
 	comp = '완료'
 	return comp
+	
 #실행할때 로그 전체 삭제
 filepath = logdata + '/flask.log'
 try:
