@@ -84,7 +84,6 @@ job_defaults = {
 	'max_instances': 10,
 	'misfire_grace_time': 10
 	}
-#scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults, timezone='Asia/Seoul') 
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 scheduler.start()
 
