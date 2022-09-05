@@ -316,8 +316,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			result = track_url(url2)
 			if result == 9999:	
 				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-				keys = ['url','carrier','track_id']
-				values = [url2,carrier,track_id]
+				keys = ['url','carrier','track_id','carrier_id']
+				values = [url2,carrier,track_id,carrier_id]
 				dt = dict(zip(keys, values))
 				url.append(dt)
 				break
@@ -327,9 +327,11 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		main_url = a['url']
 		carrier = a['carrier']
 		track_id = a['track_id']
+		carrier_id = a['carrier_id']
 		aa = main_url + '/' +  carrier + '/tracks/' + track_id
 		url = requests.get(aa, headers=h)
 		resp = url.json()
+		print(resp)
 		check = resp.get('from', None)
 		
 		if check == None:
