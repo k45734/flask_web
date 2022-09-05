@@ -270,15 +270,16 @@ def update(file_name = None):
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			org = '/usr/bin/git'
-			if os.path.exists(org):
-				print("파일있다")
-				os.system('cd /var/local/.app')
-				os.system("git pull")
-			else:
-				print("파일없다")
-				os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
-				os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
+			os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
+			#org = '/usr/bin/git'
+			#if os.path.exists(org):
+			#	print("파일있다")
+			#	os.system('cd /var/local/.app')
+			#	os.system("git pull")
+			#else:
+			#	print("파일없다")
+			#	os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+			#	os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
 		
 @bp.route("restart")
