@@ -267,16 +267,16 @@ def update(file_name = None):
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
-		org = '/usr/bin/git'
-		if os.path.exists(org):
-			print("파일있다")
-			os.system('cd /var/local/.app')
-			os.system("git pull")
+		if platform.system() == 'Windows':
+			os.system("flask run --reload")
 		else:
-			print("파일없다")
-			if platform.system() == 'Windows':
-				os.system("flask run --reload")
+			org = '/usr/bin/git'
+			if os.path.exists(org):
+				print("파일있다")
+				os.system('cd /var/local/.app')
+				os.system("git pull")
 			else:
+				print("파일없다")
 				os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
 				os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
