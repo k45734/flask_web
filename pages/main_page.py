@@ -267,47 +267,18 @@ def update(file_name = None):
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
-		url = "https://github.com/k45734/flask_web/archive/refs/heads/main.zip"
-		
-		if not file_name:
-			file_name = url.split('/')[-1]
-
-		with open(file_name, "wb") as file:   
-				response = get(url)               
-				file.write(response.content)      
-		fantasy_zip = zipfile.ZipFile('./main.zip')
-		fantasy_zip.extractall('./')
-		fantasy_zip.close()
-		os.remove('./flask_web-main/login.db')
-		org = './flask_web-main/app.py'
-		org2 = './flask_web-main/pages'
-		org3 = './flask_web-main/templates'
-		org4 = './flask_web-main/version.txt'
-		new = './'
-		new2 = './pages'
-		new3 = './templates'
-		shutil.copy(org, new)
-		copy_tree(org2, new2)
-		copy_tree(org3, new3)
-		shutil.copy(org4, new)
-		os.remove('./main.zip')
-		shutil.rmtree ('./flask_web-main')
+		org = '/usr/bin/git'
 		if os.path.exists(org):
 			print("파일있다")
-			shutil.copy(org, new)
-			copy_tree(org2, new2)
-			copy_tree(org3, new3)
-			shutil.copy(org4, new)
-			os.remove('./main.zip')
-			shutil.rmtree ('./flask_web-main')
+			os.system('cd /var/local/.app')
+			os.system("git pull")
 		else:
 			print("파일없다")
 			if platform.system() == 'Windows':
 				os.system("flask run --reload")
 			else:
-				os.system("cat /dev/null > " + logdata + "/flask.log")
-				os.system("chmod 777 * -R")
 				os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+				os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
 		
 @bp.route("restart")
