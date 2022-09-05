@@ -6,7 +6,7 @@ try:
 except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
-import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random
+import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,urllib.request
 from datetime import datetime, timedelta
 
 try:
@@ -209,6 +209,22 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 		total = '{}'.format(d)
 		msg.append(total)
 	return msg
+#택배조회 확인
+def track_url(url):
+	try:
+		request=urllib.request.Request(url,None) #The assembled request
+		response = urllib.request.urlopen(request,timeout=3)		
+	except:
+		print('The server couldn\'t fulfill the request. %s'% url)     
+	else:
+		data = response.read()
+		data = data.decode()     
+		result = 0
+		result = data.find('id')
+		if result > 0:
+			print ("Website is working fine %s "% url)
+			return 9999
+		return response.status
 #택배조회 구동	
 def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('택배알림시작')
@@ -295,14 +311,19 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				"USPS":"us.usps"
 				}
 		carrier = code[f'{carrier_id}']
-		ttt = 'https://apis.tracker.delivery/carriers/' +  carrier + '/tracks/' + track_id
-		url.append(ttt)
+		url_list = ["http://192.168.0.97:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+		for url2 in url_list:
+			result = track_url(url2)
+			if result == 9999:	
+				ttt = url2 + '/' +  carrier + '/tracks/' + track_id
+				url.append(ttt)
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
 	#with requests.Session() as s:
 	for a in url:
 		url = requests.get(a, headers=h)
 		resp = url.json()
 		check = resp.get('from', None)
+		print(check)
 		if check == None:
 			msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
