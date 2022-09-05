@@ -315,13 +315,20 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		for url2 in url_list:
 			result = track_url(url2)
 			if result == 9999:	
-				ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-				url.append(ttt)
+				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
+				keys = ['url','carrier','track_id']
+				values = [url2,carrier,track_id]
+				dt = dict(zip(keys, values))
+				url.append(dt)
 				break
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
 	#with requests.Session() as s:
 	for a in url:
-		url = requests.get(a, headers=h)
+		main_url = a['url']
+		carrier = a['carrier']
+		track_id = a['track_id']
+		aa = main_url + '/' +  carrier + '/tracks/' + track_id
+		url = requests.get(aa, headers=h)
 		resp = url.json()
 		check = resp.get('from', None)
 		
