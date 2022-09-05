@@ -317,13 +317,14 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			if result == 9999:	
 				ttt = url2 + '/' +  carrier + '/tracks/' + track_id
 				url.append(ttt)
+				break
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
 	#with requests.Session() as s:
 	for a in url:
 		url = requests.get(a, headers=h)
 		resp = url.json()
 		check = resp.get('from', None)
-		print(check)
+		
 		if check == None:
 			msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
@@ -331,17 +332,18 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			json_string = check.get("name", None) #누가 보냈냐			
 			json_string2 = resp.get("to").get("name") #누가 받냐
 			json_string3 = resp.get("state").get("text") #배송현재상태
-			json_string4 = resp.get("carrier").get("name") #택배사이름
-			json_string5 = resp.get("carrier").get("id") #택배사송장번호
+			#json_string4 = resp.get("carrier").get("name") #택배사이름
+			#json_string5 = resp.get("carrier").get("id") #택배사송장번호
+			
 			json_string_m = resp.get("progresses") #배송상황
 			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,json_string4,json_string5)
+			gg = ff(msg2,json_string,json_string2,carrier_id,track_id)
 			ms = '\n'.join(gg)
-			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,json_string5,ms)
+			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,carrier_id,track_id,ms)
 			if '배송완료' in msga :
-				tracking_del_new(json_string4, json_string5)
+				tracking_del_new(carrier_id,track_id)
 			elif '배달 완료' in msga :
-				tracking_del_new(json_string4, json_string5)
+				tracking_del_new(carrier_id,track_id)
 			else:
 				pass
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
