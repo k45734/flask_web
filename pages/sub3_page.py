@@ -65,55 +65,70 @@ def db_optimization():
 #프로세스확인
 def proc_test(name):
 	if platform.system() == 'Windows':
-		py = "python.exe"
+		py = "python"
 		a2 = name.split()
 		if py in a2:
 			aa = a2[1]
+			try:
+				bb = a2[2]
+			except:
+				bb = None
 		else:
 			aa = a2[0]
-		logger.info(aa)
+			try:
+				bb = a2[1]
+			except:
+				bb = None
 	else:
 		py = "python"
 		a2 = name.split()
 		if py in a2:
 			aa = a2[1]
+			try:
+				bb = a2[2]
+			except:
+				bb = None
 		else:
 			aa = a2[0]
-		logger.info(aa)
-		
+			try:
+				bb = a2[1]
+			except:
+				bb = None
+	logger.info(aa, bb)
 	for proc in psutil.process_iter():
 		# 프로세스 이름, PID값 가져오기
 		processName = proc.name()
 		processID = proc.pid
 		 #[:6] 
-		if processName == py:
+		try:
 			commandLine = proc.cmdline()
 			for i in commandLine:
 				# 동일한 프로세스 확인. code 확인
-				if aa in i:			
-					parent_pid = processID  #PID
-					parent = psutil.Process(parent_pid)  # PID 찾기
-					
-					for child in parent.children(recursive=True):  #자식-부모 종료
-						child.kill()
-					parent.kill()
-					
+				if len(a2) == 3:
+					if bb in i:	
+						logger.info(bb)
+						parent_pid = processID  #PID
+						parent = psutil.Process(parent_pid)  # PID 찾기
+						#print(parent)
+						for child in parent.children(recursive=True):  #자식-부모 종료
+							child.kill()
+						parent.kill()
 				else:
-					print(processName, ' ', commandLine, ' - ', processID)
-		else:
-			commandLine = proc.cmdline()
-			for i in commandLine:
-				# 동일한 프로세스 확인. code 확인
-				if aa in i:			
-					parent_pid = processID  #PID
-					parent = psutil.Process(parent_pid)  # PID 찾기
-					
-					for child in parent.children(recursive=True):  #자식-부모 종료
-						child.kill()
-					parent.kill()
-					
-				else:
-					print(processName, ' ', commandLine, ' - ', processID)
+					if aa in i:
+						logger.info(aa)
+						parent_pid = processID  #PID
+						parent = psutil.Process(parent_pid)  # PID 찾기
+						#print(parent)
+						for child in parent.children(recursive=True):  #자식-부모 종료
+							child.kill()
+						parent.kill()
+							
+				#else:
+				#	pass
+					#print(processName, ' ', commandLine, ' - ', processID)
+		except:
+			pass
+		
 	msg = '동일 프로세스 확인 완료....'
 	return msg
 	
