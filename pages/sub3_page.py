@@ -129,7 +129,7 @@ def proc_test(name):
 		except:
 			pass
 		
-	msg = '동일 프로세스 확인 완료....'
+	msg = '{} {} 동일 프로세스 확인 완료....'.format(aa,bb)
 	return msg
 	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
