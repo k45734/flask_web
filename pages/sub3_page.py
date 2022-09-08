@@ -104,7 +104,7 @@ def proc_test(name):
 			commandLine = proc.cmdline()
 			for i in commandLine:
 				# 동일한 프로세스 확인. code 확인
-				if len(a2) == 3:
+				if len(a2) >= 3:
 					if bb in i:	
 						logger.info(bb)
 						parent_pid = processID  #PID
