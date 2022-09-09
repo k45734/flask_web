@@ -133,6 +133,21 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 			#time.sleep(0.5)
 	comp = '완료'
 	return comp	
+
+#텔레그램 알림
+def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg):
+	if telgm == 'True' :
+		bot = telegram.Bot(token = telgm_token)
+		if telgm_alim == 'True':
+			bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)   
+		else:
+			bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
+	else:
+		print(msg)
+	
+	comp = '완료'
+	return comp	
+	
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
 	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
@@ -160,7 +175,7 @@ def sch_del():
 				aa = i.id
 				logger.info('%s 가 스케줄러가 있습니다.', aa)
 		return redirect(url_for('main.index'))
-		
+	
 #택배조회서비스
 #알리미 완료
 def tracking_del_new(carrier_id, track_id):
@@ -528,6 +543,65 @@ def tracking_ok():
 		except:
 			pass
 		return redirect(url_for('sub2.tracking'))
+
+def url_to_image(url, filename):
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
+	req = requests.get(url,headers=header,verify=False)	
+
+	if not os.path.isfile(filename):
+		with open(filename, 'wb') as code:
+			code.write(req.content)
+	comp = '완료'
+	return comp		
+	
+#실동작	
+def Typhoon():
+	nowtime = time.localtime()
+	newdate = "%04d-%02d-%02d_%02d시%02d분%02d초" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday, nowtime.tm_hour, nowtime.tm_min, nowtime.tm_sec)
+	no = []
+	mydata = []
+	last = []
+	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
+	a = 'https://search.daum.net/search?w=tot&DA=YZR&t__nil_searchbox=btn&sug=&sugo=&sq=&o=&q=%ED%83%9C%ED%92%8D'
+	req = requests.get(a, headers=h)
+	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+	#태풍 이름
+	name = bs0bj.find("em",{"class":"f_etit ls_1"})
+
+	#태풍 경로 이미지
+	img_map = bs0bj.find("div",{"class":"inner_map"})
+	urls = []
+	for img in img_map("img"):
+		tt = img.get('src')
+		urls.append(tt)
+	for url in urls:
+		filename = name.text + '_' + str(newdate) + ".jpg"
+		url_to_image(url, filename)
+	
+	#태풍 경로 텍스트 정보
+	ttitle = bs0bj.find("table",{"class":"tbl"})
+	for i in ttitle.findAll('td'):
+		a1 = i.text.strip()
+		no.append(a1)
+	
+	for i in range(len(no)):
+		try:
+			dict = {'예상일시':no[i],'진행방향':no[i + 1],'진행속도(km/h)':no[i + 2],'최대풍속(m/s)':no[i + 3],'강풍반경(km)':no[i + 4],'강도':no[i + 5],'크기':no[i + 6]}
+			if i % 7 == 0:
+				mydata.append(dict)
+		except:
+			pass
+	for ii in mydata:	
+		a = ii['예상일시']
+		b = ii['진행방향']
+		c = ii['진행속도(km/h)']
+		d = ii['최대풍속(m/s)']
+		e = ii['강풍반경(km)']
+		f = ii['강도']
+		g = ii['크기']
+		msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
+		last.append(msg)
+	return [last,filename]
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
@@ -572,11 +646,21 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	big_efftsatus = resp['warn'][0]['efftsatus']
 	big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
 	msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
-	msg = '{}\n\n{}'.format(msg1,msg2)
+	try:
+		msg4,filename = Typhoon()
+		msg3 = " ".join(msg4)
+		msg = '{}\n\n{}\n\n태풍 정보\n{}'.format(msg1,msg2,msg3)	
+	except:
+		msg = '{}\n\n{}'.format(msg1,msg2)
 	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	try:
+		tel_img(telgm,telgm_alim,telgm_token,telgm_botid,filename)
+	except:
+		pass
 	logger.info('날씨 알림완료')
 	comp = '완료'
 	return comp	
+	
 @bp2.route('weather')
 def weather():
 	#데이타베이스 없으면 생성
