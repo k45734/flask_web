@@ -75,6 +75,17 @@ def url_to_image(url, dfolder, category, category2, filename):
 			code.write(req.content)
 	comp = '완료'
 	return comp
+	
+def url_to_image2(url, filename):
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
+	req = requests.get(url,headers=header,verify=False)	
+
+	if not os.path.isfile(filename):
+		with open(filename, 'wb') as code:
+			code.write(req.content)
+	comp = '완료'
+	return comp		
+	
 #특수문자제거
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
@@ -543,16 +554,6 @@ def tracking_ok():
 		except:
 			pass
 		return redirect(url_for('sub2.tracking'))
-
-def url_to_image(url, filename):
-	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
-	req = requests.get(url,headers=header,verify=False)	
-
-	if not os.path.isfile(filename):
-		with open(filename, 'wb') as code:
-			code.write(req.content)
-	comp = '완료'
-	return comp		
 	
 #실동작	
 def Typhoon():
@@ -575,8 +576,14 @@ def Typhoon():
 		tt = img.get('src')
 		urls.append(tt)
 	for url in urls:
-		filename = name.text + '_' + str(newdate) + ".jpg"
-		url_to_image(url, filename)
+		if platform.system() == 'Windows':
+			at = os.path.splitdrive(os.getcwd())
+			root = at[0] + '/data'
+		else:
+			root = '/data'
+		dfolder = root + '/'
+		filename = dfolder + '/' + name.text + '_' + str(newdate) + ".jpg"
+		url_to_image2(url, filename)
 	
 	#태풍 경로 텍스트 정보
 	ttitle = bs0bj.find("table",{"class":"tbl"})
