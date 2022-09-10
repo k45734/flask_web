@@ -574,7 +574,9 @@ def Typhoon():
 	urls = []
 	for img in img_map("img"):
 		tt = img.get('src')
-		urls.append(tt)
+		tt_aa = result = tt[-64:]
+		cc = 'http://t1.daumcdn.net/contentshub/kweatherTyphoonReport/' + tt_aa
+		urls.append(cc)
 	for url in urls:
 		if platform.system() == 'Windows':
 			at = os.path.splitdrive(os.getcwd())
