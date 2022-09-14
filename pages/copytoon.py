@@ -324,7 +324,7 @@ def dozi_list():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='webtoon_list')
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/1 * * * *'), id='webtoon_list')
 			test = scheduler.get_job('webtoon_list').id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
