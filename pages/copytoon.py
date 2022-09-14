@@ -185,6 +185,7 @@ def add_d(subtitle, title,webtoon_image):
 	
 #텔레그램 메시지 암호화 복호화후 DB 저장하기...
 def tel_send_message():
+	logger.info('웹툰 DB정보를 받아옵니다.')
 	aac = []
 	url2 = 'https://t.me/s/webtoonalim'
 	req = requests.get(url2)
@@ -208,10 +209,12 @@ def tel_send_message():
 		except:	
 			pass
 	comp = '완료'
+	logger.info('웹툰 DB정보를 종료합니다.')
 	return comp
 	
 #다운해보자
 def down(compress,cbz):
+	logger.info('웹툰 다운로드합니다.')
 	try:
 		start = []
 		#DB 목록을 받아와 다운로드를 진행한다.
@@ -250,7 +253,7 @@ def down(compress,cbz):
 				pass
 	except:
 		print('정보가없습니다.')
-		
+	logger.info('웹툰 다운로드를 종료합니다.')	
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
