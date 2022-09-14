@@ -211,7 +211,6 @@ def tel_send_message():
 	
 #다운해보자
 def down(compress,cbz):
-	tel_send_message()
 	try:
 		start = []
 		#DB 목록을 받아와 다운로드를 진행한다.
@@ -283,7 +282,7 @@ def index():
 		except:	
 			i3 = '0'
 			rows.append(i3)
-		return render_template('dozi.html', rows = rows)	
+		return render_template('webtoon.html', rows = rows)	
 
 @webtoon.route('db_redown', methods=['POST'])
 def db_redown():
@@ -314,8 +313,27 @@ def now():
 		down(compress,cbz)
 	comp = '완료'
 	return comp
+
+@webtoon.route('webtoon_list', methods=['POST'])
+def dozi_list():
+	if session.get('logFlag') != True:
+		return redirect(url_for('main.index'))
+	else:
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		startname = request.form['startname']
+		start_time = request.form['start_time']
+		try:
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='webtoon_list')
+			test = scheduler.get_job('webtoon_list').id
+			logger.info('%s 스케줄러에 등록하였습니다.', test)
+		except ConflictingIdError:
+			test = scheduler.get_job('webtoon_list').id
+			test2 = scheduler.modify_job('webtoon_list').id
+			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
+		return redirect(url_for('webtoon.index'))
 	
-@webtoon.route('dozi_down', methods=['POST'])
+@webtoon.route('webtoon_down', methods=['POST'])
 def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
