@@ -207,7 +207,8 @@ def tel_send_message():
 			add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 		except:	
 			pass
-	return
+	comp = '완료'
+	return comp
 	
 #다운해보자
 def down(compress,cbz):
@@ -319,10 +320,6 @@ def dozi_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
 		try:
 			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/1 * * * *'), id='webtoon_list')
 			test = scheduler.get_job('webtoon_list').id
