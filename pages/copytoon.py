@@ -204,7 +204,10 @@ def tel_send_message():
 			webtoon_url = aac[3]
 			webtoon_image = aac[4]
 			webtoon_number = aac[5]
-			complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+			complete = "False" #처음에 등록할때 무조건 False 로 등록한다.
+			mm = '{} {} {} {} {} {} {}'.format(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+			logger.info('%s',mm)
+			
 			add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 		except:	
 			pass
