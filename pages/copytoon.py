@@ -138,7 +138,7 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.close()
-		time.sleep(random.uniform(2,10)) 
+		time.sleep(3) 
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
 		sql = "select * from TOON where WEBTOON_IMAGE = ? and TITLE = ? and SUBTITLE = ?"
@@ -169,7 +169,7 @@ def add_d(subtitle, title,webtoon_image):
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.close()
-		time.sleep(random.uniform(2,10)) 
+		time.sleep(3) 
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
@@ -200,6 +200,7 @@ def tel_send_message():
 		lastpage = aa['data-post']
 		page_num = lastpage.strip("webtoonalim/")
 		print(page_num)
+		logger.info('%s',page_num)
 		for i in mm:
 			aa = i.text
 			try:
@@ -214,20 +215,22 @@ def tel_send_message():
 				webtoon_number = aac[5]
 				complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 				add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-				print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-			except:	
+				#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+			except:
+				logger.info('웹툰 DB 수집 에러')
 				pass	
 		
 		for ii in range(1,1000):
 			if ii % 20 == 0:
 				a = int(page_num) - ii
 				print(a)
+				logger.info('%s',a)
 				PAGE_INFO = {'before': a }
 				req = s.post(url2, data=PAGE_INFO)
 				html = req.text
 				soup = bs(html, "html.parser")
 				mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-				print(len(mm))
+				
 				for i in mm:
 					aa = i.text
 					try:
@@ -242,13 +245,15 @@ def tel_send_message():
 						webtoon_number = aac[5]
 						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-						print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 					except:	
+						logger.info('웹툰 DB 수집 에러')
 						pass
 			else:
 				pass
+		logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
-	logger.info('웹툰 DB정보를 종료합니다.')
+	
 	return comp
 	
 #다운해보자
@@ -291,7 +296,7 @@ def down(compress,cbz):
 			else:
 				pass
 	except:
-		print('정보가없습니다.')
+		logger.info('정보가없습니다.')
 	logger.info('웹툰 다운로드를 종료합니다.')	
 @webtoon.route('/')
 @webtoon.route('index')
