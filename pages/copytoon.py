@@ -185,77 +185,91 @@ def add_d(subtitle, title,webtoon_image):
 	
 #텔레그램 메시지 암호화 복호화후 DB 저장하기...
 def tel_send_message(list):
-	logger.info('웹툰 DB정보를 받아옵니다.')
-	with requests.Session() as s:
-		aac = []
-		url2 = 'https://t.me/s/webtoonalim'
-		req = s.get(url2)
-		html = req.text
-		soup = bs(html, "html.parser")
-		aa = soup.find("div",{"class":"tgme_widget_message"})
-		mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-		#현재페이지의 갯수
-		#print(len(mm))
-		#현재페이지에 보이는 메시지 아이디
-		lastpage = aa['data-post']
-		page_num = lastpage.strip("webtoonalim/")
-		print(page_num)
-		logger.info('%s',page_num)
-		for i in mm:
-			aa = i.text
-			try:
-				sitename_bytes = base64.b64decode(aa)
-				sitename = sitename_bytes.decode('utf-8')
-				aac = sitename.split('\n\n')
-				title = aac[0]
-				subtitle = aac[1]
-				webtoon_site = aac[2]
-				webtoon_url = aac[3]
-				webtoon_image = aac[4]
-				webtoon_number = aac[5]
-				complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-				add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-				#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-			except:
-				logger.info('웹툰 DB 수집 에러')
-				pass	
-		
-		for ii in range(1,1000):
-			if ii % 20 == 0:
-				a = int(page_num) - ii
-				print(a)
-				logger.info('%s',a)
-				PAGE_INFO = {'before': a }
-				req = s.post(url2, data=PAGE_INFO)
-				html = req.text
-				soup = bs(html, "html.parser")
-				mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-				
-				for i in mm:
-					aa = i.text
-					try:
-						sitename_bytes = base64.b64decode(aa)
-						sitename = sitename_bytes.decode('utf-8')
-						aac = sitename.split('\n\n')
-						title = aac[0]
-						subtitle = aac[1]
-						webtoon_site = aac[2]
-						webtoon_url = aac[3]
-						webtoon_image = aac[4]
-						webtoon_number = aac[5]
-						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-						#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-					except:	
-						logger.info('웹툰 DB 수집 에러')
-						pass
-			else:
-				pass
-		logger.info('웹툰 DB정보를 종료합니다.')
+	if platform.system() == 'Windows':
+		at = os.path.splitdrive(os.getcwd())
+		root = at[0] + '/data'
+	else:
+		root = '/data'
+	check = root + '/empty.txt'
+	
+	if os.path.isfile(check):
+		logger.info('웹툰 DB 중복 실행방지')
+		print('종료')
+	else:
+		with open(check, 'w'):
+			pass
+		logger.info('웹툰 DB정보를 받아옵니다.')
+		with requests.Session() as s:
+			aac = []
+			url2 = 'https://t.me/s/webtoonalim'
+			req = s.get(url2)
+			html = req.text
+			soup = bs(html, "html.parser")
+			aa = soup.find("div",{"class":"tgme_widget_message"})
+			mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
+			#현재페이지의 갯수
+			#print(len(mm))
+			#현재페이지에 보이는 메시지 아이디
+			lastpage = aa['data-post']
+			page_num = lastpage.strip("webtoonalim/")
+			print(page_num)
+			logger.info('%s',page_num)
+			for i in mm:
+				aa = i.text
+				try:
+					sitename_bytes = base64.b64decode(aa)
+					sitename = sitename_bytes.decode('utf-8')
+					aac = sitename.split('\n\n')
+					title = aac[0]
+					subtitle = aac[1]
+					webtoon_site = aac[2]
+					webtoon_url = aac[3]
+					webtoon_image = aac[4]
+					webtoon_number = aac[5]
+					complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+					add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+					#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+				except:
+					logger.info('웹툰 DB 수집 에러')
+					pass	
+			
+			for ii in range(1,1000):
+				if ii % 20 == 0:
+					a = int(page_num) - ii
+					print(a)
+					logger.info('%s',a)
+					PAGE_INFO = {'before': a }
+					req = s.post(url2, data=PAGE_INFO)
+					html = req.text
+					soup = bs(html, "html.parser")
+					mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
+					
+					for i in mm:
+						aa = i.text
+						try:
+							sitename_bytes = base64.b64decode(aa)
+							sitename = sitename_bytes.decode('utf-8')
+							aac = sitename.split('\n\n')
+							title = aac[0]
+							subtitle = aac[1]
+							webtoon_site = aac[2]
+							webtoon_url = aac[3]
+							webtoon_image = aac[4]
+							webtoon_number = aac[5]
+							complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+							#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						except:	
+							logger.info('웹툰 DB 수집 에러')
+							pass
+				else:
+					pass
+			os.remove(check)
+			logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
 	
 	return comp
-	
+
 #다운해보자
 def down(compress,cbz):
 	logger.info('웹툰 다운로드합니다.')
@@ -369,7 +383,7 @@ def dozi_list():
 	else:
 		list = '웹툰DB'
 		try:
-			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('0 */1 * * *'), id='webtoon_list', args=[list])
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/1 * * * *'), id='webtoon_list', args=[list])
 			test = scheduler.get_job('webtoon_list').id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:

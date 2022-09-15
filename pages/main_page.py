@@ -24,8 +24,10 @@ bp = Blueprint('main', __name__, url_prefix='/')
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	logdata = at[0] + '/data/log'
+	root = at[0] + '/data'
 else:
 	logdata = '/data/log'
+	root = '/data'
 
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
@@ -58,7 +60,7 @@ def createFolder(directory):
 		print ('Error: Creating directory. ' +  directory)
 	comp = '완료'
 	return comp
-	
+
 #실행할때 로그 전체 삭제
 filepath = logdata + '/flask.log'
 try:
@@ -66,6 +68,9 @@ try:
         f.truncate()
 except IOError:
     print('Failure')
+#실행할때 웹툰DB 목록 중복
+check = root + '/empty.txt'
+os.remove(check)
 if not os.path.isfile(filepath):
 	f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=0, encoding='utf-8', delay=0)
