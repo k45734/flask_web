@@ -70,7 +70,10 @@ except IOError:
     print('Failure')
 #실행할때 웹툰DB 목록 중복
 check = root + '/empty.txt'
-os.remove(check)
+try:
+	os.remove(check)
+except:
+	pass
 if not os.path.isfile(filepath):
 	f = open(logdata + '/flask.log','a', encoding='utf-8')
 rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=5*1024*1024, backupCount=0, encoding='utf-8', delay=0)
