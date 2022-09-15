@@ -369,7 +369,7 @@ def dozi_list():
 	else:
 		list = '웹툰DB'
 		try:
-			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='webtoon_list', args=[list])
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('0 */1 * * *'), id='webtoon_list', args=[list])
 			test = scheduler.get_job('webtoon_list').id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
