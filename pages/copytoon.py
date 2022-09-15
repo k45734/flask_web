@@ -184,7 +184,7 @@ def add_d(subtitle, title,webtoon_image):
 	return comp	
 	
 #텔레그램 메시지 암호화 복호화후 DB 저장하기...
-def tel_send_message():
+def tel_send_message(list):
 	logger.info('웹툰 DB정보를 받아옵니다.')
 	with requests.Session() as s:
 		aac = []
@@ -367,8 +367,9 @@ def dozi_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+		list = '웹툰DB'
 		try:
-			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='webtoon_list')
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='webtoon_list', args=[list])
 			test = scheduler.get_job('webtoon_list').id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
