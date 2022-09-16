@@ -230,7 +230,7 @@ def tel_send_message(list):
 					add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 					#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 				except:
-					logger.info('웹툰 DB 수집 에러')
+					logger.info('웹툰 DB 수집 에러 %s', aa)
 					pass	
 			
 			for ii in range(1,1000):
@@ -261,7 +261,7 @@ def tel_send_message(list):
 								add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 								#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 							except:	
-								logger.info('웹툰 DB 수집 에러')
+								logger.info('웹툰 DB 수집 에러 %s', aa)
 								pass
 					else:
 						print(a)
