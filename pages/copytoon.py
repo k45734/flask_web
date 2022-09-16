@@ -65,7 +65,7 @@ def cleanText(readData):
 	text = re.sub("\s{2,}", ' ', text)
 	return text	
 	
-def url_to_image(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete):
+def url_to_image(title, subtitle, webtoon_image, webtoon_number):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	req = requests.get(webtoon_image,headers=header)	
 	title2 = title.strip()
@@ -94,7 +94,7 @@ def url_to_image(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon
 	comp = '완료'
 	return comp	
 	
-def manazip(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,cbz):
+def manazip(title, subtitle,cbz):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	parse = cleanText(title2)
@@ -105,7 +105,6 @@ def manazip(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_numb
 	else:
 		root = '/data'
 	packege = 'webtoon'
-	filename = webtoon_number + '.jpg'
 	dfolder = root + '/' + packege
 	if os.path.isdir(dfolder + '/{}/{}'.format(parse,parse2)):
 		if cbz == '0':
@@ -271,39 +270,25 @@ def tel_send_message(list):
 def down(compress,cbz):
 	logger.info('웹툰 다운로드합니다.')
 	try:
-		start = []
-		#DB 목록을 받아와 다운로드를 진행한다.
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		sql = "select * from TOON where COMPLETE = 'False'"
-		cur.execute(sql)
-		rows = cur.fetchall()
-		for i in rows:
+		cur2 = con.cursor()
+		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER) from TOON group by SUBTITLE'
+		#sql2 = "select * from TOON where SUBTITLE = ? and COMPLETE = 'False'"
+		cur2.execute(sql2)
+		itrows = cur2.fetchall()
+		for i in itrows:
+			title = i['TITLE']
 			subtitle = i['SUBTITLE']
-			start.append(subtitle)
-			con.close()	
-		for ii in start:
-			subtitle = ii
-			con = sqlite3.connect(webtoondb,timeout=60)
-			con.row_factory = sqlite3.Row
-			cur2 = con.cursor()
-			sql2 = "select * from TOON where SUBTITLE = ? and COMPLETE = 'False'"
-			cur2.execute(sql2,(subtitle,))
-			itrows = cur2.fetchall()
-			for irows in range(len(itrows)):
-				title = itrows[irows]['TITLE']
-				subtitle = itrows[irows]['SUBTITLE']
-				webtoon_site= itrows[irows]['WEBTOON_SITE']
-				webtoon_url = itrows[irows]['WEBTOON_URL']
-				webtoon_image = itrows[irows]['WEBTOON_IMAGE']
-				webtoon_number = itrows[irows]['WEBTOON_IMAGE_NUMBER']
-				complete = itrows[irows]['COMPLETE']
-				url_to_image(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-				add_d(subtitle, title,webtoon_image)
-				time.sleep(1)
+			webtoon_image = i[2]
+			webtoon_image_number = i[3]
+			image_url_last = webtoon_image.split(',')
+			image_number_last = webtoon_image_number.split(',')
+			for ii,iii in zip(image_url_last,image_number_last):
+				url_to_image(title, subtitle,ii,iii)	
+				add_d(subtitle, title,ii)
 			if compress == '0':
-				manazip(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,cbz)
+				manazip(title, subtitle,cbz)
 			else:
 				pass
 	except:
@@ -395,10 +380,8 @@ def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		#compress = request.form['compress']
-		compress = '1'
-		cbz = '1'
-		#cbz = request.form['cbz']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
