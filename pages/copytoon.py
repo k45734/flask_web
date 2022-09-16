@@ -261,8 +261,6 @@ def tel_send_message(list):
 						except:	
 							logger.info('웹툰 DB 수집 에러 %s', aa)
 							continue
-				else:
-					pass
 				total -= 20
 			os.remove(check)
 			logger.info('웹툰 DB정보를 종료합니다.')
