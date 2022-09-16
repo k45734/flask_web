@@ -395,8 +395,10 @@ def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		compress = request.form['compress']
-		cbz = request.form['cbz']
+		#compress = request.form['compress']
+		compress = '1'
+		cbz = '1'
+		#cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
