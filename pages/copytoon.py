@@ -233,42 +233,33 @@ def tel_send_message(list):
 					logger.info('웹툰 DB 수집 에러 %s', aa)
 					pass	
 			
-			for ii in range(1,1000):
-				if ii % 20 == 0:
-					a = int(page_num) - ii
-					print(a)
-					logger.info('%s',a)
-					if a != 0:
-						PAGE_INFO = {'before': a }
-						req = s.post(url2, data=PAGE_INFO)
-						html = req.text
-						soup = bs(html, "html.parser")
-						mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-						
-						for i in mm:
-							aa = i.text
-							try:
-								sitename_bytes = base64.b64decode(aa)
-								sitename = sitename_bytes.decode('utf-8')
-								aac = sitename.split('\n\n')
-								title = aac[0]
-								subtitle = aac[1]
-								webtoon_site = aac[2]
-								webtoon_url = aac[3]
-								webtoon_image = aac[4]
-								webtoon_number = aac[5]
-								complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-								add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-								#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-							except:	
-								logger.info('웹툰 DB 수집 에러 %s', aa)
-								pass
-					else:
-						print(a)
-						logger.info('%s',a)
-						break
-				else:
-					pass
+			for ii in range(int(page_num)):
+				a = int(page_num) - ii
+				print(a)
+				logger.info('%s',a)			
+				PAGE_INFO = {'before': a }
+				req = s.post(url2, data=PAGE_INFO)
+				html = req.text
+				soup = bs(html, "html.parser")
+				mm = soup.findAll("div",{"class":"tgme_widget_message_text"})			
+				for i in mm:
+					aa = i.text
+					try:
+						sitename_bytes = base64.b64decode(aa)
+						sitename = sitename_bytes.decode('utf-8')
+						aac = sitename.split('\n\n')
+						title = aac[0]
+						subtitle = aac[1]
+						webtoon_site = aac[2]
+						webtoon_url = aac[3]
+						webtoon_image = aac[4]
+						webtoon_number = aac[5]
+						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+					except:	
+						logger.info('웹툰 DB 수집 에러 %s', aa)
+				
 			os.remove(check)
 			logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
