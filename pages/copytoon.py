@@ -231,7 +231,7 @@ def tel_send_message(list):
 					#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 				except:
 					logger.info('웹툰 DB 수집 에러 %s', aa)
-					pass	
+					continue	
 			
 			for ii in range(int(page_num)):
 				a = int(page_num) - ii
@@ -259,6 +259,7 @@ def tel_send_message(list):
 						#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 					except:	
 						logger.info('웹툰 DB 수집 에러 %s', aa)
+						continue
 				
 			os.remove(check)
 			logger.info('웹툰 DB정보를 종료합니다.')
