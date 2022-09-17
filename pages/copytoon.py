@@ -198,7 +198,7 @@ def tel_send_message(list):
 		with open(check, 'w'):
 			pass
 		logger.info('웹툰 DB정보를 받아옵니다.')
-		file_path = mydir + '/last_num.json'
+		file_path = root + '/last_num.json'
 		try:
 			with open(file_path, "r") as json_file:
 				json_data = json.load(json_file)
@@ -251,7 +251,7 @@ def tel_send_message(list):
 						except:	
 							continue
 				total -= 20
-		file_path = mydir + '/last_num.json'
+		file_path = root + '/last_num.json'
 		with open(file_path, 'w') as outfile:
 			json.dump(last_num, outfile)		
 
