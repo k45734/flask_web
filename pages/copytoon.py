@@ -284,15 +284,19 @@ def down(compress,cbz):
 			subtitle = i['SUBTITLE']
 			webtoon_image = i[2]
 			webtoon_image_number = i[3]
+			complete = i[4]
 			image_url_last = webtoon_image.split(',')
 			image_number_last = webtoon_image_number.split(',')
-			for ii,iii in zip(image_url_last,image_number_last):
-				url_to_image(title, subtitle,ii,iii)	
-				add_d(subtitle, title,ii)
-			if compress == '0':
-				manazip(title, subtitle,cbz)
+			complete_last = complete.split(',')
+			cnt = complete_last.count('False')
+			if cnt >= 1:
+				for ii,iii in zip(image_url_last,image_number_last):
+					print(title, subtitle, ii,iii)
+					url_to_image(title, subtitle,ii,iii)	
+					add_d(subtitle, title,ii)
+				manazip(title, subtitle)
 			else:
-				pass
+				print('다운완료되었다')
 	except:
 		logger.info('정보가없습니다.')
 	logger.info('웹툰 다운로드를 종료합니다.')	
