@@ -247,7 +247,7 @@ def tel_send_message(list):
 							webtoon_number = aac[5]
 							complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-							#print(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+							logger.info('%s %s %s %s %s %s %s',title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 							
 						except:	
 							continue
