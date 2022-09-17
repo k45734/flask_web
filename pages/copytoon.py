@@ -227,6 +227,7 @@ def tel_send_message(list):
 					break
 				else:
 					PAGE_INFO = {'before': total }
+					logger.info('%s',PAGE_INFO)
 					print(PAGE_INFO)
 					req = s.post(url2, data=PAGE_INFO)
 					html = req.text
