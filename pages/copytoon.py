@@ -326,7 +326,24 @@ def index():
 		except:	
 			i3 = '0'
 			rows.append(i3)
-		return render_template('webtoon.html', rows = rows)	
+		try:
+			cur.execute('select TITLE,SUBTITLE from TOON group by SUBTITLE')
+			rows_list = cur.fetchall()
+			for list in rows_list:
+				t = list['TITLE']
+				w = list['SUBTITLE']
+				keys = ['TITLE','SUBTITLE']
+				values = [t, w]
+				dt = dict(zip(keys, values))
+				wow.append(dt)
+		except:
+			t = '리스트가 없습니다.'
+			w = '리스트가 없습니다.'
+			keys = ['TITLE','SUBTITLE']
+			values = [t, w]
+			dt = dict(zip(keys, values))
+			wow.append(dt)
+		return render_template('webtoon.html', rows = rows, wow = wow)	
 
 @webtoon.route('db_redown', methods=['POST'])
 def db_redown():
