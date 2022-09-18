@@ -13,7 +13,7 @@ import requests
 import zipfile, shutil 
 from distutils.dir_util import copy_tree
 from logging.handlers import RotatingFileHandler
-from pytz import utc
+from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
@@ -89,7 +89,7 @@ executors = {
 	}
 job_defaults = {
 	'coalesce': True,
-	'max_instances': 10,
+	'max_instances': 1,
 	'misfire_grace_time': 10
 	}
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
