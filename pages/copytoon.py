@@ -301,6 +301,7 @@ def index():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
+		wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
