@@ -168,6 +168,14 @@ def login_proc():
 	userid = request.form['user']
 	userpwd = request.form['passwd']	
 	con = sqlite3.connect('./login.db')
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
 	cursor = con.cursor()
 	sql = "select idx, id, pwd from member where id = ?"
 	cursor.execute(sql, (userid,))
@@ -190,8 +198,16 @@ def login_proc():
 def getUser(edit_idx):
 	if session.get('logFlag') != True:
 		return redirect(url_for(login))
-	conn = sqlite3.connect('./login.db')
-	cursor = conn.cursor()
+	con = sqlite3.connect('./login.db')
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	cursor = con.cursor()
 	sql = "select id from member where idx = ?"
 	cursor.execute(sql, (edit_idx,))
 	row = cursor.fetchone()
@@ -206,8 +222,16 @@ def user_info_edit_proc():
 	if len(idx) == 0:
 		return 'Edit Data Not Found!'
 	else:
-		conn = sqlite3.connect('./login.db')
-		cursor = conn.cursor()
+		con = sqlite3.connect('./login.db')
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		cursor = con.cursor()
 		sql = """
 			update member
 				set id = ?, pwd = ?
@@ -215,9 +239,9 @@ def user_info_edit_proc():
 		"""
 		
 		cursor.execute(sql, (userid, userpwd, idx))
-		conn.commit()
+		con.commit()
 		cursor.close()
-		conn.close()
+		con.close()
 		return redirect(url_for('main.index'))
 
 @bp.route("log")

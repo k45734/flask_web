@@ -130,12 +130,14 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
 		con.execute(sql)
-		con.execute("PRAGMA synchronous = OFF")
-		con.execute("PRAGMA journal_mode = MEMORY")
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
 		time.sleep(3) 
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -161,12 +163,14 @@ def add_d(subtitle, title,webtoon_image):
 		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
 		con.execute(sql)
-		con.execute("PRAGMA synchronous = OFF")
-		con.execute("PRAGMA journal_mode = MEMORY")
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
 		time.sleep(3) 
 		#마지막 실행까지 작업안했던 결과물 저장
@@ -267,6 +271,14 @@ def down(compress,cbz,alldown,title, subtitle):
 	logger.info('웹툰 다운로드합니다.')
 	try:
 		con = sqlite3.connect(webtoondb,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur2 = con.cursor()
 		if alldown == 'True':
@@ -311,6 +323,14 @@ def index():
 		rows = []
 		wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:

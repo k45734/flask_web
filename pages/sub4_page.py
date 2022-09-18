@@ -18,14 +18,23 @@ if platform.system() == 'Windows':
 else:
 	sub4db = '/data/shop.db'
 	sub4dbl = '/data'
-#데이타베이스 없으면 생성
-conn = sqlite3.connect(sub4db,timeout=60)
-conn.execute('CREATE TABLE IF NOT EXISTS shop (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
-conn.close()
+
 
 @bp4.route('/')
 @bp4.route('index')
 def second():
+	#데이타베이스 없으면 생성
+	con = sqlite3.connect(sub4db,timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS shop (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -36,6 +45,14 @@ def second():
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
 		con = sqlite3.connect(sub4db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from shop")
@@ -47,7 +64,15 @@ def edit_result():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		c = sqlite3.connect(sub4db,timeout=60)
+		con = sqlite3.connect(sub4db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		idx = request.args.get('idx')
 		MY_DATE = request.args.get('MY_DATE')
 		PRODUCT_NAME = request.args.get('PRODUCT_NAME')
@@ -59,10 +84,10 @@ def edit_result():
 			test = int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
 		#TOTAL = request.args.get('TOTAL')
-		db = c.cursor()
+		db = con.cursor()
 		sql_update = "UPDATE shop SET PRODUCT_NAME= ?, RECEIVING = ?, SHIPPING = ?, TOTAL = ?, MY_DATE = ? WHERE idx = ?"
 		db.execute(sql_update,(PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL, MY_DATE, idx))
-		c.commit()
+		con.commit()
 		return redirect(url_for('sub4.second'))
 	
 @bp4.route("edit", methods=["POST", "GET"])
@@ -86,8 +111,16 @@ def edit():
 		test = int(a) + int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
 		#TOTAL = request.args.get('TOTAL')
-		c = sqlite3.connect(sub4db,timeout=60)
-		db = c.cursor()
+		con = sqlite3.connect(sub4db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		db = con.cursor()
 		contents = "SELECT '{}' FROM shop WHERE idx = '{}'".format(MY_DATE, idx) 
 		db.execute(contents)
 		return render_template('stock_edit.html',MY_DATE=MY_DATE,PRODUCT_NAME=PRODUCT_NAME,RECEIVING=RECEIVING,SHIPPING=SHIPPING,TOTAL=TOTAL,idx=idx)	
@@ -151,6 +184,14 @@ def csv_import():
 		sheet['E1'] = "출고"
 		sheet['F1'] = "합계"
 		con = sqlite3.connect(sub4db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		bables = cur.execute('SELECT * FROM shop')
@@ -180,7 +221,15 @@ def start():
 		PRODUCT_NAME = request.form['PRODUCT_NAME']
 		RECEIVING = request.form['RECEIVING']
 		SHIPPING = request.form['SHIPPING']
-		con = sqlite3.connect(sub4db,timeout=60)	
+		con = sqlite3.connect(sub4db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")		
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute("select * from shop WHERE PRODUCT_NAME = '{}' ORDER BY ROWID DESC LIMIT 1".format(PRODUCT_NAME))
