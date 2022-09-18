@@ -291,7 +291,12 @@ def down(compress,cbz,alldown,title, subtitle):
 					print(title, subtitle, ii,iii)
 					url_to_image(title, subtitle,ii,iii)	
 					add_d(subtitle, title,ii)
-				manazip(title, subtitle)
+				if compress == '0':
+					print('다운완료후 압축하자')
+					manazip(title, subtitle,cbz)
+					
+				else:
+					pass
 			else:
 				print('다운완료되었다')
 	except:
