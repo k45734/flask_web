@@ -263,14 +263,17 @@ def tel_send_message(list):
 	return comp
 
 #다운해보자
-def down(compress,cbz):
+def down(compress,cbz,alldown,title, subtitle):
 	logger.info('웹툰 다운로드합니다.')
 	try:
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.row_factory = sqlite3.Row
 		cur2 = con.cursor()
-		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER) from TOON group by SUBTITLE'
-		#sql2 = "select * from TOON where SUBTITLE = ? and COMPLETE = 'False'"
+		if alldown == 'True':
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by SUBTITLE'
+		else:
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
+		print(sql2)
 		cur2.execute(sql2)
 		itrows = cur2.fetchall()
 		for i in itrows:
@@ -370,12 +373,27 @@ def now():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		alldown = 'True'
+		title = None
+		subtitle = None
 		compress = request.form['compress']
-		cbz = request.form['cbz']	
-		down(compress,cbz)
-	comp = '완료'
-	return comp
+		cbz = request.form['cbz']
+		down(compress,cbz,alldown,title, subtitle)
+	return redirect(url_for('webtoon.index'))
 
+@webtoon.route("one_now", methods=['POST'])
+def one_now():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		alldown = 'False'
+		title = request.form['title']
+		subtitle = request.form['subtitle']
+		compress = request.form['compress']
+		cbz = request.form['cbz']
+		down(compress,cbz,alldown,title, subtitle)
+	return redirect(url_for('webtoon.index'))	
+	
 @webtoon.route('webtoon_list', methods=['POST'])
 def dozi_list():
 	if session.get('logFlag') != True:
@@ -398,12 +416,15 @@ def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+		alldown = 'True'
+		title = None
+		subtitle = None
 		compress = request.form['compress']
 		cbz = request.form['cbz']
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz] )
+			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz,alldown,title, subtitle] )
 			test = scheduler.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:

@@ -10,14 +10,6 @@
 
 <thead>
 <tr>
-<th align="center" class="tg-baqh">만화목록사용불가</td>
-<td align="center" class="tg-baqh" colspan="2">
-<input type="text" name="code" value="all" placeholder="전체다운로드시에는 all 입력하며 구분자는 |" style="width:100%; border: 0;" >
-<p align="center"><font size="2px">전체다운로드시에는 all 입력</font></p>
-<p align="center"><font size="2px">코드입력시에는 예) 나-혼자만-레벨업<font color='red'>|</font>귀환자의-마법은-특별해야-합니다 입력</font></p>
-</td>
-</tr>
-<tr>
 <th align="center" class="tg-baqh">압축여부</td>
 <td align="center" class="tg-baqh" colspan="2">
 
@@ -63,6 +55,7 @@
 <br>
 
 <table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<form method="POST">
 <center><h4>웹툰 리스트 목록</p>
 <thead>
 <tr>
@@ -71,8 +64,18 @@
 </tr>
 {% for i in wow %} 
 <tr>
-<th align="center" class="tg-0lax">{{ i['TITLE'] }}</th>
-<th align="center" class="tg-0lax" colspan="2">{{i['SUBTITLE']}}</th>
+<th align="center" class="tg-0lax"><input type="text" name="title" value="{{ i['TITLE'] }}" style="width:100%; border: 0;" ></th>
+<th align="center" class="tg-0lax" colspan="2"><input type="text" name="subtitle" value="{{i['SUBTITLE']}}" style="width:100%; border: 0;" ></th>
+<td align="center" class="tg-0lax" colspan="4">
+<select name="compress">
+<option value="0">사용</option>
+<option value="1">안함</option></td>
+<td align="center" class="tg-0lax" colspan="5">
+<select name="cbz">
+<option value="0">사용</option>
+<option value="1">안함</option></td>
+<td align="center" class="tg-0lax" colspan="6">
+<input type="submit" value="개별다운" onclick="javascript: form.action='one_now';">
 </tr>
  {% endfor %}
 </center>
