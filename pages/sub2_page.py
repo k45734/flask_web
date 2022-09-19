@@ -403,6 +403,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.close()	
 	comp = '완료'
 	return comp
+	
 @bp2.route('tracking')
 def tracking():
 	#데이타베이스 없으면 생성
@@ -567,6 +568,51 @@ def tracking_del(carrier_id,track_id):
 		cursor.close()
 		con.close()
 	return redirect(url_for('sub2.tracking'))	
+
+@bp2.route("track_api/<carrier_id>/<track_id>", methods=["GET"])
+def track_api(carrier_id, track_id):
+	print(carrier_id, track_id)
+	mytime = mydate()
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	
+	#carrier_id = request.form['carrier_id']
+	#track_id = request.form['track_id']
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	cursor = con.cursor()
+	sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
+	cursor.execute(sql, (carrier_id,track_id))
+	rows = cursor.fetchone()
+	if rows:
+		pass
+	else:
+		sql = """
+			INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
+		"""
+	cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
+	con.commit()
+	cursor.close()
+	con.close()
+	msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
+	return 	msg
 	
 @bp2.route('tracking_ok', methods=['POST'])
 def tracking_ok():
