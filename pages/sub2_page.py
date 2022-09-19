@@ -472,7 +472,7 @@ def tracking():
 		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
 		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
-	con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
