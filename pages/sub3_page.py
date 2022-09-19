@@ -94,7 +94,7 @@ def proc_test(name):
 				bb = a2[1]
 			except:
 				bb = None
-	logger.info(aa, bb)
+	logger.info('%s %s',aa, bb)
 	for proc in psutil.process_iter():
 		# 프로세스 이름, PID값 가져오기
 		processName = proc.name()
@@ -134,8 +134,8 @@ def proc_test(name):
 	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
-	ss = proc_test(FLASKAPPS)
-	logger.info(ss)
+	#ss = proc_test(FLASKAPPS)
+	#logger.info(ss)
 	if FLASKTELGM == 'True' :
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
@@ -306,6 +306,36 @@ def now(FLASKAPPSNAME):
 		FLASKBOTID = row['FLASKBOTID']
 		FLASKALIM = row['FLASKALIM']
 		exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM)
+		return redirect(url_for('sub3.second'))
+
+@bp3.route("kill/<FLASKAPPSNAME>", methods=["GET"])
+def kill(FLASKAPPSNAME):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		con = sqlite3.connect(sub3db,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.row_factory = sqlite3.Row
+		cursor = con.cursor()
+		sql = 'select * from ' + FLASKAPPSNAME + ' where FLASKAPPSNAME = ?'
+		cursor.execute(sql, (FLASKAPPSNAME,))
+		row = cursor.fetchone()
+		FLASKAPPSNAME = row['FLASKAPPSNAME']
+		FLASKAPPS = row['FLASKAPPS']
+		FLASKTIME = row['FLASKTIME']
+		FLASKTELGM = row['FLASKTELGM']
+		FLASKTOKEN = row['FLASKTOKEN']
+		FLASKBOTID = row['FLASKBOTID']
+		FLASKALIM = row['FLASKALIM']
+		proc_test(FLASKAPPS)
 		return redirect(url_for('sub3.second'))
 		
 @bp3.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
