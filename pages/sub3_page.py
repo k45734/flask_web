@@ -134,8 +134,9 @@ def proc_test(name):
 	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
+	msg_end = '{}을 완료합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	#ss = proc_test(FLASKAPPS)
-	#logger.info(ss)
+	logger.info(msg)
 	if FLASKTELGM == 'True' :
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
@@ -143,12 +144,10 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 			subprocess.call(FLASKAPPS, shell=True)
 		else :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
-			subprocess.call(FLASKAPPS, shell=True)
-		
-	else :
-		logger.info(msg)
+			subprocess.call(FLASKAPPS, shell=True)	
+	else:
 		subprocess.call(FLASKAPPS, shell=True)
-
+	logger.info(msg_end)
 	#DB최적화
 	db_optimization()
 	comp = '완료'
