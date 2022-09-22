@@ -703,48 +703,51 @@ def Typhoon():
 	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
 	#태풍 이름
 	name = bs0bj.find("em",{"class":"f_etit ls_1"})
-
-	#태풍 경로 이미지
-	img_map = bs0bj.find("div",{"class":"inner_map"})
-	urls = []
-	for img in img_map("img"):
-		tt = img.get('src')
-		tt_aa = result = tt[-64:]
-		cc = 'http://t1.daumcdn.net/contentshub/kweatherTyphoonReport/' + tt_aa
-		urls.append(cc)
-	for url in urls:
-		if platform.system() == 'Windows':
-			at = os.path.splitdrive(os.getcwd())
-			root = at[0] + '/data'
-		else:
-			root = '/data'
-		dfolder = root + '/'
-		filename = dfolder + '/' + name.text + '_' + str(newdate) + ".jpg"
-		url_to_image2(url, filename)
 	
 	#태풍 경로 텍스트 정보
 	ttitle = bs0bj.find("table",{"class":"tbl"})
-	for i in ttitle.findAll('td'):
-		a1 = i.text.strip()
-		no.append(a1)
-	
-	for i in range(len(no)):
-		try:
-			dict = {'예상일시':no[i],'진행방향':no[i + 1],'진행속도(km/h)':no[i + 2],'최대풍속(m/s)':no[i + 3],'강풍반경(km)':no[i + 4],'강도':no[i + 5],'크기':no[i + 6]}
-			if i % 7 == 0:
-				mydata.append(dict)
-		except:
-			pass
-	for ii in mydata:	
-		a = ii['예상일시']
-		b = ii['진행방향']
-		c = ii['진행속도(km/h)']
-		d = ii['최대풍속(m/s)']
-		e = ii['강풍반경(km)']
-		f = ii['강도']
-		g = ii['크기']
-		msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
-		last.append(msg)
+	if ttitle == None:
+		pass
+	else:
+		#태풍 경로 이미지
+		img_map = bs0bj.find("div",{"class":"inner_map"})
+		urls = []
+		for img in img_map("img"):
+			tt = img.get('src')
+			tt_aa = result = tt[-64:]
+			cc = 'http://t1.daumcdn.net/contentshub/kweatherTyphoonReport/' + tt_aa
+			urls.append(cc)
+		for url in urls:
+			if platform.system() == 'Windows':
+				at = os.path.splitdrive(os.getcwd())
+				root = at[0] + '/data'
+			else:
+				root = '/data'
+			dfolder = root + '/'
+			filename = dfolder + '/' + name.text + '_' + str(newdate) + ".jpg"
+			url_to_image2(url, filename)
+
+		for i in ttitle.findAll('td'):
+			a1 = i.text.strip()
+			no.append(a1)
+		
+		for i in range(len(no)):
+			try:
+				dict = {'예상일시':no[i],'진행방향':no[i + 1],'진행속도(km/h)':no[i + 2],'최대풍속(m/s)':no[i + 3],'강풍반경(km)':no[i + 4],'강도':no[i + 5],'크기':no[i + 6]}
+				if i % 7 == 0:
+					mydata.append(dict)
+			except:
+				pass
+		for ii in mydata:	
+			a = ii['예상일시']
+			b = ii['진행방향']
+			c = ii['진행속도(km/h)']
+			d = ii['최대풍속(m/s)']
+			e = ii['강풍반경(km)']
+			f = ii['강도']
+			g = ii['크기']
+			msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
+			last.append(msg)
 	return [last,filename]
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
