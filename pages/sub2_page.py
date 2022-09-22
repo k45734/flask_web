@@ -78,7 +78,7 @@ def url_to_image(url, dfolder, category, category2, filename):
 	
 def url_to_image2(url, filename):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
-	req = requests.get(url,headers=header,verify=False)	
+	req = requests.get(url,headers=header)	
 
 	if not os.path.isfile(filename):
 		with open(filename, 'wb') as code:
@@ -978,7 +978,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
 		auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
-		rs = requests.get(auth,headers=header,verify=False)
+		rs = requests.get(auth,headers=header)
 		bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
 		posts = bs0bj.findAll("div",{"class":"ani_result"})
 		dates = bs0bj.find('span',{'class':'cal'}).text
@@ -1190,7 +1190,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#for page in u:
 		for page in range(1,11):
 			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			req = requests.get(URL,headers=header,verify=False)
+			req = requests.get(URL,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
 			posts = gogo.findAll("div",{"class":"post-item"})
@@ -1209,12 +1209,16 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			#with requests.Session() as s:
 			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
 			URL = 'https://quizbang.tistory.com' + list_url
-			req = requests.get(URL,headers=header,verify=False)
+			req = requests.get(URL,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
-			posts = gogo.find('h2').text
-			p = re.compile('(?<=\:)(.*)')
-			memo = p.findall(posts)
+			#posts = gogo.find('h2').text
+			#p = re.compile('(?<=\:)(.*)')
+			#memo = p.findall(posts)
+			all_text = gogo.text
+			result_remove_all = re.sub(r"\s", "", all_text)
+			p = re.compile('정답:(.*?)\[')
+			memo = p.findall(result_remove_all)
 			memo_s = ''.join(memo)
 			keys = ['TITLE','MEMO', 'URL']
 			values = [title, memo_s, URL]
