@@ -63,11 +63,11 @@ def createFolder(directory):
 
 #실행할때 로그 전체 삭제
 filepath = logdata + '/flask.log'
-try:
-    with open(filepath, 'r+', encoding='utf-8') as f:
-        f.truncate()
-except IOError:
-    print('Failure')
+#try:
+#    with open(filepath, 'r+', encoding='utf-8') as f:
+ #       f.truncate()
+#except IOError:
+ #   print('Failure')
 #실행할때 웹툰DB 목록 중복
 check = root + '/empty.txt'
 try:
