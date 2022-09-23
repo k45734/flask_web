@@ -1173,6 +1173,8 @@ def quiz_add_go_d(MEMO, COMPLTE):
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('퀴즈정답알림 시작')
+		#퀴즈정답 시작후 10초후 작동시작
+		time.sleep(10)
 		#SQLITE3 DB 없으면 만들다.
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
@@ -1191,7 +1193,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
 		#for page in u:
-		for page in range(1,11):
+		for page in range(1,5):
 			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
 			req = requests.get(URL,headers=header)
 			html = req.text
