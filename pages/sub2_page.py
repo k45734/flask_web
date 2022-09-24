@@ -348,7 +348,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				"USPS":"us.usps"
 				}
 		carrier = code[f'{carrier_id}']
-		url_list = ["http://192.168.0.97:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+		url_list = ["http://192.168.2.31:8085/carriers", "https://apis.tracker.delivery/carriers" ]
 		for url2 in url_list:
 			result = track_url(url2)
 			if result == 9999:	
