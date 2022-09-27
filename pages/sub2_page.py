@@ -98,9 +98,17 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 		if telgm == 'True' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == 'True':
-				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)    
+				try:
+					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+				except ConnectTimeoutError:
+					time.sleep(30)
+					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 			else:
-				bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+				try:
+					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+				except ConnectTimeoutError:
+					time.sleep(30)
+					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 		else:
 			print(text)
 		#time.sleep(10)	
@@ -124,9 +132,16 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				if telgm == 'True' :
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
-						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)    
+						try:
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+						except ConnectTimeoutError:
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True) 
 					else :
-						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+						try:
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+						except ConnectTimeoutError:
+							time.sleep(30)
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 					print(part)
 				else:
 					print(part)
@@ -134,9 +149,17 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				if telgm == 'True' :
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
-						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)    
+						try:
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+						except ConnectTimeoutError:
+							time.sleep(30)
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True) 
 					else :
-						bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+						try:
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+						except ConnectTimeoutError:
+							time.sleep(30)
+							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 					print(part)
 				else:
 					print(part)
@@ -150,9 +173,17 @@ def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg):
 	if telgm == 'True' :
 		bot = telegram.Bot(token = telgm_token)
 		if telgm_alim == 'True':
-			bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)   
+			try:
+				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)
+			except ConnectTimeoutError:
+				time.sleep(30)
+				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)
 		else:
-			bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
+			try:
+				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
+			except ConnectTimeoutError:
+				time.sleep(30)
+				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
 	else:
 		print(msg)
 	
@@ -1580,3 +1611,386 @@ def funmom_ok():
 			pass
 		
 		return redirect(url_for('sub2.funmom'))
+
+
+#뉴스알림		
+def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
+	try:
+		#SQLITE3 DB 없으면 만들다.
+		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.close()	
+		time.sleep(2)
+		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		cur = con.cursor()
+		sql = 'select * from news where TITLE = ? and URL = ?'
+		cur.execute(sql, (TITLE,URL))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			cur.execute('INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
+			con.commit()
+	except:
+		con.rollback()
+	finally:
+		con.close()
+
+	try:
+		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)	
+		con.execute('VACUUM')
+		con.commit()
+		#logger.info('DB최적화를 진행하였습니다.')
+	except:
+		con.rollback()	
+	finally:	
+		con.close()		
+	comp = '완료'
+	return comp
+		
+def addnews_d(CAST,TITLE,URL):
+	try:
+		#마지막 실행까지 작업안했던 결과물 저장
+		time.sleep(2)
+		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
+		cur = con.cursor()
+		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
+		cur.execute(sql,('True',TITLE, URL))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()	
+	comp = '완료'
+	return comp
+
+def vietnews(newdate):
+	try:
+		#with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://www.vinatimes.net/news'
+		req = requests.get(URL,headers=header)	
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"list_title"})
+		for test in posts:
+			if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
+				pass
+			elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
+				pass 
+			elif 'https://www.vinatimes.net/notice/454369' in test.a['href']:
+				pass
+			else:
+				URL = test.a['href']
+				req = requests.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h1")
+				posts = bs0bj.find('div',{'class':'xe_content'})
+				MEMO2 = posts.text.strip()
+				MEMO3 = MEMO2.replace('  ','\n')
+				MEMO = MEMO3.replace("\n", "")
+				TITLE = ttitle.text.strip()
+				CAST = "VIET"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
+	except:
+		pass
+	logger.info('VIET 목록완료')
+	return CAST
+		
+def ytnsnews(newdate):
+	try:
+		#with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
+		req = requests.get(MAIN,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"news-con"})	
+		for i in posts:
+			URL = 'https:' + i.find('a')['href']
+			req = requests.get(URL,headers=header)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			ttitle = bs0bj.find("h1",{"class":"tit"})
+			posts = bs0bj.findAll('p')	
+			memo = []
+			for ii in posts:
+				if '재난포털' in ii.text :
+					pass
+				elif '기사제보' in ii.text :
+					pass
+				elif '자동완성 기능이 켜져 있습니다.' in ii.text:
+					pass
+						
+				else:			
+					memo.append(ii.text.strip())
+			MEMO2 = '\n'.join(memo)
+			MEMO3 = MEMO2.replace('  ','\n')
+			MEMO = MEMO3.replace("\n", "")
+			TITLE = ttitle.text.strip()
+			CAST = "YTN"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:
+		pass
+	logger.info('YTN 목록완료')
+	return CAST
+		
+def esbsnews(newdate):
+	try:
+	#	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
+		req = requests.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.find("div",{"class":"w_news_list"})
+		lists = posts.findAll("a")		
+		for i in lists:
+			URL = 'https://news.sbs.co.kr' + i.attrs['href']
+			req = requests.get(URL,headers=header)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
+			posts = bs0bj.find("div",{"class":"main_text"})
+			MEMO2 = posts.text.strip()
+			MEMO3 = MEMO2.replace('  ','\n')
+			MEMO = MEMO3.replace("\n", "")
+			TITLE = ttitle.text.strip()
+			CAST = "SBS"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:
+		pass
+	logger.info('SBS 목록완료')
+	return CAST
+	
+def ekbsnews(newdate):
+	try:
+	#	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'http://news.kbs.co.kr/common/main.html'
+		req = requests.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
+		lists = posts.findAll("a")
+		for i in lists:
+			URL = 'http://news.kbs.co.kr' + i.attrs['href']
+			req = requests.get(URL,headers=header)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			ttitle = bs0bj.find("h5",{"class":"tit-s"})
+			posts = bs0bj.find("div",{"id":"cont_newstext"})
+			MEMO2 = posts.text.strip()
+			MEMO3 = MEMO2.replace('  ','\n')
+			MEMO = MEMO3.replace("\n", "")
+			TITLE = ttitle.text.strip()
+			CAST = "KBS"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
+	except:
+		pass
+	logger.info('KBS 목록완료')
+	return CAST
+		
+def daumnews(newdate):
+	try:
+		#with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://news.daum.net/'
+		req = requests.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		posts = bs0bj.findAll("div",{"class":"cont_thumb"})
+		for i in posts:
+			lists = i.find("a")
+			if 'https://gallery.v.daum.net/p/viewer' in lists.attrs['href'] :
+				pass
+			else:
+				URL = lists.attrs['href']
+				req = requests.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.find("h3",{"class":"tit_view"})
+				posts = bs0bj.find("div",{"class":"news_view fs_type1"})
+				MEMO2 = posts.text.strip()
+				MEMO3 = MEMO2.replace('  ','\n')
+				MEMO = MEMO3.replace("\n", "")
+				TITLE = ttitle.text.strip()
+				CAST = "DAUM"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	except:
+		pass
+	logger.info('DAUM 목록완료')
+	return CAST
+
+
+def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
+	logger.info('뉴스알림시작')
+	#오늘날짜
+	nowtime1 = datetime.now()
+	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
+	time_old = "%02dH%02dM" % (nowtime1.hour, nowtime1.minute)
+	CAST = []
+	if news == 'YTN':
+		a = ytnsnews(newdate)
+		CAST.append(a)
+	elif news == 'SBS':
+		b = esbsnews(newdate)
+		CAST.append(b)
+	elif news == 'KBS':
+		c = ekbsnews(newdate)
+		CAST.append(c)
+	elif news == 'VIET':
+		d = vietnews(newdate)
+		CAST.append(d)
+	elif news == 'DAUM':
+		e = daumnews(newdate)
+		CAST.append(e)
+	else:
+		a = ytnsnews(newdate)
+		CAST.append(a)
+		time.sleep(1)
+		b = esbsnews(newdate)
+		CAST.append(b)
+		time.sleep(1)
+		c = ekbsnews(newdate)
+		CAST.append(c)
+		time.sleep(1)
+		d = vietnews(newdate)
+		CAST.append(d)
+		time.sleep(1)
+		e = daumnews(newdate)
+		CAST.append(e)
+		time.sleep(1)
+		
+	for i in CAST:
+		logger.info('%s 알림 시작',i)
+		con = sqlite3.connect(sub2db + '/news_' + i + '.db',timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()	
+		sql = 'select * from news where COMPLETE = ?'
+		cur.execute(sql, ('False', ))
+		rows = cur.fetchall()
+		#DB의 정보를 읽어옵니다.
+		for row in rows: 
+			CAST = row['CAST']
+			TITLE = row['TITLE']
+			URL = row['URL']
+			MEMO = row['MEMO']
+			COMPLETE = row['COMPLETE']
+			msg = '{}\n{}\n{}'.format(CAST,TITLE,URL)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			#중복 알림제거
+			addnews_d(CAST,TITLE,URL)
+			time.sleep(8)
+		logger.info('%s 알림 완료',i)
+		con.close()
+	logger.info('뉴스 알림완료')	
+	comp = '완료'
+	return comp
+
+	
+@bp2.route('news')
+def news():
+	#데이타베이스 없으면 생성
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS news (start_time TEXT)')
+	#con.execute("PRAGMA synchronous = OFF")
+	#con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from news")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'
+			start_time = '*/1 * * * *'
+			telgm = 'False'
+			telgm_alim = 'False'
+		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+
+
+@bp2.route('news_ok', methods=['POST'])
+def news_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		now = request.form['now']
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cursor = conn.cursor()
+		cursor.execute("select * from news")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update news
+					set telgm_token = ?
+					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO news 
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		conn.commit()
+		cursor.close()
+		conn.close()
+		try:
+			if now == 'True':
+				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				test = scheduler.get_job(startname).id
+			else:
+				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
+		except:
+			pass
+		return redirect(url_for('sub2.news'))
