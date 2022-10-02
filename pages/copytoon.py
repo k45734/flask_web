@@ -262,7 +262,7 @@ def tel_send_message(list):
 	with open(file_path, 'w') as outfile:
 		json.dump(last_num, outfile)		
 
-	os.remove(check)
+	#os.remove(check)
 	logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
 	
