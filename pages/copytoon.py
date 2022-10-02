@@ -190,11 +190,11 @@ def add_d(subtitle, title,webtoon_image):
 	
 #텔레그램 메시지 암호화 복호화후 DB 저장하기...
 def tel_send_message(list):
-	#if platform.system() == 'Windows':
-	#	at = os.path.splitdrive(os.getcwd())
-	#	root = at[0] + '/data'
-	#else:
-	#	root = '/data'
+	if platform.system() == 'Windows':
+		at = os.path.splitdrive(os.getcwd())
+		root = at[0] + '/data'
+	else:
+		root = '/data'
 	#check = root + '/empty.txt'
 	
 	#if os.path.isfile(check):
