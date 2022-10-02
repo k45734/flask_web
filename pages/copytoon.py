@@ -190,80 +190,80 @@ def add_d(subtitle, title,webtoon_image):
 	
 #텔레그램 메시지 암호화 복호화후 DB 저장하기...
 def tel_send_message(list):
-	if platform.system() == 'Windows':
-		at = os.path.splitdrive(os.getcwd())
-		root = at[0] + '/data'
-	else:
-		root = '/data'
-	check = root + '/empty.txt'
+	#if platform.system() == 'Windows':
+	#	at = os.path.splitdrive(os.getcwd())
+	#	root = at[0] + '/data'
+	#else:
+	#	root = '/data'
+	#check = root + '/empty.txt'
 	
-	if os.path.isfile(check):
-		logger.info('웹툰 DB 중복 실행방지')
-		print('종료')
-	else:
-		with open(check, 'w'):
-			pass
-		logger.info('웹툰 DB정보를 받아옵니다.')
-		file_path = root + '/last_num.json'
+	#if os.path.isfile(check):
+	#	logger.info('웹툰 DB 중복 실행방지')
+	#	print('종료')
+	#else:
+	#	with open(check, 'w'):
+	#		pass
+	logger.info('웹툰 DB정보를 받아옵니다.')
+	file_path = root + '/last_num.json'
+	try:
+		with open(file_path, "r") as json_file:
+			json_data = json.load(json_file)
+	except:
+		pass
+	last_num = []
+	with requests.Session() as s:
+		url2 = 'https://t.me/s/webtoonalim'
+		req = s.get(url2)
+		html = req.text
+		soup = bs(html, "html.parser")
+		aa = soup.find("div",{"class":"tgme_widget_message"})
+		aa1 = soup.findAll("div",{"class":"tgme_widget_message"})
+		mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
+		lastpage1 = aa1[19]['data-post']
+		page_num = lastpage1.strip("webtoonalim/")
+		last_num.append(page_num)
+		#현재페이지의 갯수
 		try:
-			with open(file_path, "r") as json_file:
-				json_data = json.load(json_file)
+			ll = int(json_data[0])
 		except:
-			pass
-		last_num = []
-		with requests.Session() as s:
-			url2 = 'https://t.me/s/webtoonalim'
-			req = s.get(url2)
-			html = req.text
-			soup = bs(html, "html.parser")
-			aa = soup.find("div",{"class":"tgme_widget_message"})
-			aa1 = soup.findAll("div",{"class":"tgme_widget_message"})
-			mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-			lastpage1 = aa1[19]['data-post']
-			page_num = lastpage1.strip("webtoonalim/")
-			last_num.append(page_num)
-			#현재페이지의 갯수
-			try:
-				ll = int(json_data[0])
-			except:
-				ll = 0	
-			total = int(page_num)
-			while True:
-				if total <= ll:
-					break
-				else:
-					PAGE_INFO = {'before': total }
-					logger.info('%s',PAGE_INFO)
-					print(PAGE_INFO)
-					req = s.post(url2, data=PAGE_INFO)
-					html = req.text
-					soup = bs(html, "html.parser")
-					mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
-					for i in mm:
-						aa = i.text
-						try:
-							sitename_bytes = base64.b64decode(aa)
-							sitename = sitename_bytes.decode('utf-8')
-							aac = sitename.split('\n\n')
-							title = aac[0]
-							subtitle = aac[1]
-							webtoon_site = aac[2]
-							webtoon_url = aac[3]
-							webtoon_image = aac[4]
-							webtoon_number = aac[5]
-							complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-							logger.info('%s %s %s %s %s %s %s',title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-							
-						except:	
-							continue
-				total -= 20
-		file_path = root + '/last_num.json'
-		with open(file_path, 'w') as outfile:
-			json.dump(last_num, outfile)		
+			ll = 0	
+		total = int(page_num)
+		while True:
+			if total <= ll:
+				break
+			else:
+				PAGE_INFO = {'before': total }
+				logger.info('%s',PAGE_INFO)
+				print(PAGE_INFO)
+				req = s.post(url2, data=PAGE_INFO)
+				html = req.text
+				soup = bs(html, "html.parser")
+				mm = soup.findAll("div",{"class":"tgme_widget_message_text"})
+				for i in mm:
+					aa = i.text
+					try:
+						sitename_bytes = base64.b64decode(aa)
+						sitename = sitename_bytes.decode('utf-8')
+						aac = sitename.split('\n\n')
+						title = aac[0]
+						subtitle = aac[1]
+						webtoon_site = aac[2]
+						webtoon_url = aac[3]
+						webtoon_image = aac[4]
+						webtoon_number = aac[5]
+						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
+						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						logger.info('%s %s %s %s %s %s %s',title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						
+					except:	
+						continue
+			total -= 20
+	file_path = root + '/last_num.json'
+	with open(file_path, 'w') as outfile:
+		json.dump(last_num, outfile)		
 
-		os.remove(check)
-		logger.info('웹툰 DB정보를 종료합니다.')
+	os.remove(check)
+	logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
 	
 	return comp
