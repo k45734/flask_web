@@ -268,6 +268,25 @@ def tel_send_message(list):
 	
 	return comp
 
+@webtoon.route('db_list_reset', methods=['POST'])	
+def db_list_reset():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		if platform.system() == 'Windows':
+			at = os.path.splitdrive(os.getcwd())
+			root = at[0] + '/data'
+		else:
+			root = '/data'
+		file_path = root + '/last_num.json'
+		try:
+			os.remove(file_path)
+		except:
+			pass
+	logger.info('웹툰 리스트를 처음부터 갱신합니다.')
+	comp = '완료'
+	return comp
+	
 #다운해보자
 def down(compress,cbz,alldown,title, subtitle):
 	logger.info('웹툰 다운로드합니다.')
