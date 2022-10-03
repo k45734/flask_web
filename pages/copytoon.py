@@ -361,6 +361,7 @@ def index():
 			i3 = '0'
 			rows.append(i3)
 		try:
+			wow.clear()
 			cur.execute('select TITLE,SUBTITLE from TOON group by SUBTITLE')
 			rows_list = cur.fetchall()
 			for list in rows_list:
