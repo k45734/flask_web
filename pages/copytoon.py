@@ -314,6 +314,7 @@ def down(compress,cbz,alldown,title, subtitle):
 					pass
 			else:
 				print('다운완료되었다')
+		con.close()	
 	except:
 		logger.info('정보가없습니다.')
 	logger.info('웹툰 다운로드를 종료합니다.')	
@@ -369,6 +370,7 @@ def index():
 				values = [t, w]
 				dt = dict(zip(keys, values))
 				wow.append(dt)
+			con.close()	
 		except:
 			t = '리스트가 없습니다.'
 			w = '리스트가 없습니다.'
