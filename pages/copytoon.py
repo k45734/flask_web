@@ -386,8 +386,10 @@ def index():
 			for list in rows_list:
 				t = list['TITLE']
 				w = list['SUBTITLE']
-				keys = ['TITLE','SUBTITLE']
-				values = [t, w]
+				compress = '0'
+				cbz = '0'
+				keys = ['TITLE','SUBTITLE','COMPRESS','CBZ']
+				values = [t, w,compress,cbz]
 				dt = dict(zip(keys, values))
 				wow.append(dt)
 			con.close()	
@@ -441,8 +443,12 @@ def one_now():
 		title = request.form['title']
 		subtitle = request.form['subtitle']
 		compress = request.form['compress']
+		#compress = '0'
 		cbz = request.form['cbz']
+		#cbz = '0'
 		down(compress,cbz,alldown,title, subtitle)
+		print(compress,cbz,alldown,title, subtitle)
+	#return title
 	return redirect(url_for('webtoon.index'))	
 	
 @webtoon.route('webtoon_list', methods=['POST'])
