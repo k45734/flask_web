@@ -304,9 +304,9 @@ def down(compress,cbz,alldown,title, subtitle):
 		con.row_factory = sqlite3.Row
 		cur2 = con.cursor()
 		if alldown == 'True':
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by SUBTITLE'
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE,SUBTITLE'
 		else:
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by TITLE,SUBTITLE'
 		print(sql2)
 		cur2.execute(sql2)
 		itrows = cur2.fetchall()
