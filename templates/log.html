@@ -4,40 +4,19 @@
 
 <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <META HTTP-EQUIV="refresh" CONTENT="1">
+  <META HTTP-EQUIV="refresh" CONTENT="60">
     <head>
-<style>
-    .wrap {
-      width: 500px;
-    }
-    .wrap textarea {
-      width: 100%;
-      resize: none;
-      overflow-y: hidden; /* prevents scroll bar flash */
-      padding: 1.1em; /* prevents text jump on Enter keypress */
-      padding-bottom: 0.2em;
-      line-height: 1.6;
-    }
-  </style>
-  <script>
-    $(document).ready(function() {
-      $('.wrap').on( 'keyup', 'textarea', function (e){
-        $(this).css('height', 'auto' );
-        $(this).height( this.scrollHeight );
-      });
-      $('.wrap').find( 'textarea' ).keyup();
-    });
-  </script>     
+      
     </head>
     <body>
-<center>
-       
-	<div class="wrap">	
-   <p><textarea>
+        <center>
+		
+   <p><textarea cols="100" rows="50">
    {%for ml in tltl %}
    {{ ml }}
    {% endfor %}
-   </textarea></p><br>	
+   </textarea></p><br>
+		
 {{testDataHtml}}</center>
     </body>
 </html>
