@@ -1223,45 +1223,44 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.close()
 		list = []
 		last = []
-		#with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-		#for page in u:
-		for page in range(1,5):
-			URL = 'https://quizbang.tistory.com/category/?page=' + str(page)
-			req = requests.get(URL,headers=header)
-			html = req.text
-			gogo = bs(html, "html.parser")
-			posts = gogo.findAll("div",{"class":"post-item"})
-		
-			for i in posts:
-				title = i.find('span',{'class':'title'}).text
-				url = i.find('a')["href"]
-				keys = ['TITLE','URL']
-				values = [title, url]
-				dt = dict(zip(keys, values))
-				list.append(dt)
+		URL = 'https://quizbang.tistory.com'
+		req = urllib.request.urlopen(URL).read()
+		soup = bs(req, 'html.parser')
+		posts = soup.select('li')
+		for i in posts:
+			title = i.find('strong',{'class':'tit_blog'}).text
+			url = i.find('a')["href"]
+			keys = ['TITLE','URL']
+			values = [title, url]
+			dt = dict(zip(keys, values))
+			print(title,url)
+			list.append(dt)
 		
 		for i in list:
 			list_url = i['URL']
 			title = i['TITLE']
-			#with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}				
-			URL = 'https://quizbang.tistory.com' + list_url
-			req = requests.get(URL,headers=header)
-			html = req.text
-			gogo = bs(html, "html.parser")
-			#posts = gogo.find('h2').text
-			#p = re.compile('(?<=\:)(.*)')
-			#memo = p.findall(posts)
-			all_text = gogo.text
-			result_remove_all = re.sub(r"\s", "", all_text)
-			p = re.compile('정답:(.*?)\[')
-			memo = p.findall(result_remove_all)
-			memo_s = ''.join(memo)
-			keys = ['TITLE','MEMO', 'URL']
-			values = [title, memo_s, URL]
-			dt = dict(zip(keys, values))
-			last.append(dt)
+			with requests.Session() as s:
+				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
+				URL = 'https://quizbang.tistory.com' + list_url
+				req = urllib.request.urlopen(URL).read()
+				soup = bs(req, 'html.parser')
+				all_text = soup.text
+				result_remove_all = re.sub(r"\s", " ", all_text)
+				
+				p = re.compile('정답 :(.*?)\[')
+				memo = p.findall(result_remove_all)
+				print(memo)	
+							
+				memo_s = ''.join(memo)
+				if '됩니다.' in memo_s :
+					pass
+				elif len(memo_s) == 0 :
+					pass
+				else:
+					keys = ['TITLE','MEMO', 'URL']
+					values = [title, memo_s, URL]
+					dt = dict(zip(keys, values))
+					last.append(dt)
 					
 		for ii in last:
 			title = ii['TITLE']
