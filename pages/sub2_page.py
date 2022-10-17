@@ -421,6 +421,8 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				tracking_del_new(carrier_id,track_id)
 			elif '배달 완료' in msga :
 				tracking_del_new(carrier_id,track_id)
+			elif '배달완료' in msga :
+				tracking_del_new(carrier_id,track_id)
 			else:
 				pass
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
