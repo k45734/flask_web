@@ -1511,7 +1511,7 @@ def funmom_start(startname):
 
 			dfolder = root + '/funmom'
 			url_to_image(image_url, dfolder, category, category2, image_file)
-			add_d(image_url, id)
+			add_d(id, image_url)
 	logger.info('펀맘 알림완료')	
 	try:
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
