@@ -1478,7 +1478,8 @@ def funmom_start(startname):
 		urls = []
 		for img in ex_id_divs:
 			img_url = img.find("img")
-			urls.append(str(img_url["src"]))		
+			#urls.append(str(img_url["src"]))
+			urls.append(str(img_url["srcset"]))
 		jpeg_no = 00
 		for url in urls:
 			filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
