@@ -1424,6 +1424,20 @@ def add_c(title, category, category2, list_url, url, filename):
 	return comp
 	
 def funmom_start(startname):
+	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+	cur = con.cursor()
+	sql = 'SELECT COUNT(*) FROM sqlite_master Where name = "category" '
+	cur.execute(sql)
+	result = cur.fetchone()
+	if result[0] == 1:
+		logger.info('테이블 존재 함')
+	else:
+		con.close()
+		logger.info('테이블 없음 DB삭제후 재생성')
+		file_path = sub2db + '/funmom.db'
+		if os.path.exists(file_path):
+			os.remove(file_path)
+		time.sleep(3)
 	logger.info('펀맘알림 시작')
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS funmom (ID integer primary key autoincrement, title TEXT, category TEXT, category2 TEXT, urltitle TEXT, image_url TEXT, image_file TEXT, complte TEXT)')
