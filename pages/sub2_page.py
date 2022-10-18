@@ -1221,7 +1221,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		req = requests.get(URL).json()
 		check = req['code']
 		if check == 200:
-			for p in range(0,100000):
+			for p in range(0,1):
 				URL = 'https://quizbang.tistory.com/m/entries.json?size=50&page=' + str(p)
 				req = requests.get(URL).json()
 				page = req['result']['nextPage']
@@ -1388,12 +1388,12 @@ def quiz_ok():
 		
 #펀맘 서비스
 #펀맘 DB		
-def add_d(id, go, complte):
+def add_d(id, go):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
-		sql = "UPDATE funmom SET complte = ? WHERE urltitle = ? AND ID = ?"
+		sql = "UPDATE funmom SET complte = ? WHERE image_url = ? AND ID = ?"
 		cur.execute(sql,('True',go,id))
 		con.commit()
 	except:
@@ -1407,12 +1407,13 @@ def add_c(title, category, category2, list_url, url, filename):
 	try:
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
-		sql = "select * from funmom where urltitle = ?"
-		cur.execute(sql, (list_url,))
+		sql = "select * from funmom where image_url = ?"
+		cur.execute(sql, (url,))
 		row = cur.fetchone()
 		if row != None:
 			pass
 		else:
+			complte = 'False'
 			cur.execute("INSERT OR REPLACE INTO funmom (title, category, category2, urltitle, image_url, image_file, complte) VALUES (?, ?, ?, ?, ?, ?, ?)", (title, category, category2, list_url, url, filename, complte))
 			con.commit()
 	except:
