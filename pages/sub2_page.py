@@ -86,12 +86,6 @@ def url_to_image2(url, filename):
 	comp = '완료'
 	return comp		
 	
-#특수문자제거
-def cleanText(readData):
-	#텍스트에 포함되어 있는 특수 문자 제거
-	text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
-	#text = re.sub('[\/:*?"<>|]', '', readData)
-	return text		
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 	if len(text) <= 4096:
@@ -1223,19 +1217,29 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.close()
 		list = []
 		last = []
-		URL = 'https://quizbang.tistory.com'
-		req = urllib.request.urlopen(URL).read()
-		soup = bs(req, 'html.parser')
-		posts = soup.select('li')
-		for i in posts:
-			title = i.find('strong',{'class':'tit_blog'}).text
-			url = i.find('a')["href"]
-			keys = ['TITLE','URL']
-			values = [title, url]
-			dt = dict(zip(keys, values))
-			print(title,url)
-			list.append(dt)
-		
+		URL = 'https://quizbang.tistory.com/m/entries.json?size=50'
+		req = requests.get(URL).json()
+		check = req['code']
+		if check == 200:
+			for p in range(0,100000):
+				URL = 'https://quizbang.tistory.com/m/entries.json?size=50&page=' + str(p)
+				req = requests.get(URL).json()
+				page = req['result']['nextPage']
+				list_r = req['result']['items']
+				if page == None:
+					break
+				else:
+					for i in list_r:
+						title_n = i['title']
+						#all_text = i['summary']
+						url = i['path']
+						keys = ['TITLE','URL']
+						values = [title_n, url]
+						dt = dict(zip(keys, values))
+						list.append(dt)
+		else:
+			print('종료')
+			pass
 		for i in list:
 			list_url = i['URL']
 			title = i['TITLE']
@@ -1244,13 +1248,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				URL = 'https://quizbang.tistory.com' + list_url
 				req = urllib.request.urlopen(URL).read()
 				soup = bs(req, 'html.parser')
-				all_text = soup.text
+				all_text2 = soup.text
+				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
-				
 				p = re.compile('정답 :(.*?)\[')
 				memo = p.findall(result_remove_all)
-				print(memo)	
-							
 				memo_s = ''.join(memo)
 				if '됩니다.' in memo_s :
 					pass
@@ -1401,17 +1403,17 @@ def add_d(id, go, complte):
 	comp = '완료'
 	return comp
 #펀맘 DB	
-def add_c(a,b,c,d):
+def add_c(title, category, category2, list_url, url, filename):
 	try:
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 		cur = con.cursor()
 		sql = "select * from funmom where urltitle = ?"
-		cur.execute(sql, (c,))
+		cur.execute(sql, (list_url,))
 		row = cur.fetchone()
 		if row != None:
 			pass
 		else:
-			cur.execute("INSERT OR REPLACE INTO funmom (ID, title, urltitle, complte) VALUES (?, ?, ?, ?)", (a,b,c,d))
+			cur.execute("INSERT OR REPLACE INTO funmom (title, category, category2, urltitle, image_url, image_file, complte) VALUES (?, ?, ?, ?, ?, ?, ?)", (title, category, category2, list_url, url, filename, complte))
 			con.commit()
 	except:
 		con.rollback()
@@ -1423,7 +1425,7 @@ def add_c(a,b,c,d):
 def funmom_start(startname):
 	logger.info('펀맘알림 시작')
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS funmom (ID TEXT, title TEXT, urltitle TEXT, complte TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS funmom (ID integer primary key autoincrement, title TEXT, category TEXT, category2 TEXT, urltitle TEXT, image_url TEXT, image_file TEXT, complte TEXT)')
 	#con.execute("PRAGMA synchronous = OFF")
 	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
@@ -1434,77 +1436,80 @@ def funmom_start(startname):
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
 	con.close()
-	#with requests.Session() as s:
-	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
-	gogo = 1
-	a = 1
-	while True:
-		dd = "https://funmom.tistory.com/category/?page=" + str(gogo)
-		login = requests.get(dd,headers=header)
-		html = login.text
-		soup = bs(html, 'html.parser')
-		list = soup.find_all(attrs={'class' :'jb-index-title jb-index-title-front'})
-		if len(list) == 0:
-			print("마지막 페이지입니다.\n종료합니다.")
-			break
-		
-		hrefs = []
-		title = []
-		for href in list:
-			t = href.find("a")["href"]
-			hrefs.append(str(t))
-			title.append(href.text)
-			
-		tt = 0
-		for c,b in zip(hrefs,title):
-			d = "False" #처음에 등록할때 무조건 False 로 등록한다.
-			add_c(a,b,c,d)
-			a += 1
-		gogo += 1
-	print('목록을 전부 만들었습니다.')		
-	logger.info('목록을 전부 만들었습니다.')
+	list = []
+	last = []	
+	URL = 'https://funmom.tistory.com/m/entries.json?size=50'
+	req = requests.get(URL).json()
+	check = req['code']
+	if check == 200:
+		#page = req['result']['nextPage'] #?page=0&size=10
+		for p in range(0,100000):
+			URL = 'https://funmom.tistory.com/m/entries.json?size=50&page=' + str(p)
+			req = requests.get(URL).json()
+			page = req['result']['nextPage']
+			list_r = req['result']['items']
+			if page == None:
+				break
+			else:
+				for i in list_r:
+					title_n = i['title']
+					#all_text = i['summary']
+					url = i['path']
+					keys = ['TITLE','URL']
+					values = [title_n, url]
+					dt = dict(zip(keys, values))
+					list.append(dt)
+	else:
+		print('종료')
+		pass
+	for i in list:
+		list_url = i['URL']
+		title = i['TITLE']
+		URL = 'https://funmom.tistory.com' + list_url
+		req = urllib.request.urlopen(URL).read()
+		soup = bs(req, 'html.parser')
+		menu = soup.find(attrs={'class' :'inner_g'}).text #카테고리 이름 div class="list_tag"
+		last_c = menu.split('/')
+		category = last_c[0]
+		category2 = last_c[1]
+		thisdata = cleanText(title)
+		ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
+		urls = []
+		for img in ex_id_divs:
+			img_url = img.find("img")
+			urls.append(str(img_url["src"]))		
+		jpeg_no = 00
+		for url in urls:
+			filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
+			add_c(title, category, category2, list_url, url, filename)
+			jpeg_no += 1
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+	con.row_factory = sqlite3.Row
 	cur = con.cursor()
 	sql = "select * from funmom where complte = ?"
 	cur.execute(sql,('False',))
 	row = cur.fetchall()	
-	for i in row:			
-		id = i[0] #숫자
-		ti = i[1] #제목
-		go = i[2] #url
-		complte = i[3] #완료여부
+	for i in row:
+		id = i['ID']
+		title = i['title']
+		category = i['category']
+		category2 = i['category2']
+		urltitle = i['urltitle']
+		image_url = i['image_url']
+		image_file = i['image_file']
+		complte = i['complte']
 		if complte == 'True':
 			continue
 		else:
-			dd2 = 'https://funmom.tistory.com' + go
-			login2 = requests.get(dd2,headers=header)
-			html = login2.text
-			soup = bs(html, 'html.parser')
-			menu = soup.find(attrs={'class' :'another_category another_category_color_gray'}) #카테고리 이름
-			test = menu.find('h4')
-			ttt = test('a')
-			category = ttt[0].text
-			category2 = ttt[1].text
 			if platform.system() == 'Windows':
 				at = os.path.splitdrive(os.getcwd())
 				root = at[0] + '/data'
 			else:
 				root = '/data'
 
-			dfolder = root + '/funmom'# + category + '/' + category2
-			title = soup.find('title')	
-			thisdata = cleanText(title.text)
-			ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-			urls = []
-			for img in ex_id_divs:
-				img_url = img.find("img")
-				urls.append(str(img_url["src"]))		
-			jpeg_no = 00
-			for url in urls:
-				filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
-				url_to_image(url, dfolder, category, category2, filename)
-				jpeg_no += 1
-			add_d(id, go, complte)
+			dfolder = root + '/funmom'
+			url_to_image(image_url, dfolder, category, category2, image_file)
+			add_d(image_url, id)
 	logger.info('펀맘 알림완료')	
 	try:
 		con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
