@@ -60,19 +60,26 @@ def index():
 		return render_template('sub2_index.html', tltl = tltl)
 
 def url_to_image(url, dfolder, category, category2, filename):
-	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
-	with requests.Session() as s:
-		req = s.get(url,headers=header)
-		fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
-		print(fifi)
-		if not os.path.exists('{}'.format(dfolder)):
-			os.makedirs('{}'.format(dfolder))
-		if not os.path.exists('{}/{}'.format(dfolder,category)):
-			os.makedirs('{}/{}'.format(dfolder,category))
-		if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
-			os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
-		with open(fifi, 'wb') as code:
-			code.write(req.content)
+	list_url = url.split()
+	for l in list_url:
+		res = urllib.request.urlopen(l)
+		if res.status == 200:	
+			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
+			with requests.Session() as s:
+				req = s.get(l,headers=header)
+				fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
+				print(fifi)
+				if not os.path.exists('{}'.format(dfolder)):
+					os.makedirs('{}'.format(dfolder))
+				if not os.path.exists('{}/{}'.format(dfolder,category)):
+					os.makedirs('{}/{}'.format(dfolder,category))
+				if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
+					os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
+				with open(fifi, 'wb') as code:
+					code.write(req.content)
+			break
+		else:
+			pass
 	comp = '완료'
 	return comp
 	
@@ -1251,9 +1258,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				all_text2 = soup.text
 				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
-				p = re.compile('정답 :(.*?)\[')
+				#p = re.compile('정답 :(.*?)\[')
+				p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
 				memo = p.findall(result_remove_all)
-				memo_s = ''.join(memo)
+				memo_s = ''.join(memo).lstrip()
 				if '됩니다.' in memo_s :
 					pass
 				elif len(memo_s) == 0 :
@@ -1424,20 +1432,25 @@ def add_c(title, category, category2, list_url, url, filename):
 	return comp
 	
 def funmom_start(startname):
+	ccc = []
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
+	con.row_factory = sqlite3.Row
 	cur = con.cursor()
-	sql = 'SELECT COUNT(*) FROM sqlite_master Where name = "category" '
+	sql = 'PRAGMA table_info(funmom)'
 	cur.execute(sql)
-	result = cur.fetchone()
-	if result[0] == 1:
+	result = cur.fetchall()
+	for i in result:
+		checking = i['name']
+		ccc.append(checking)
+	con.close()	
+	last_check = ' '.join(ccc)
+	if 'category' in last_check:
 		logger.info('테이블 존재 함')
 	else:
-		con.close()
 		logger.info('테이블 없음 DB삭제후 재생성')
 		file_path = sub2db + '/funmom.db'
 		if os.path.exists(file_path):
 			os.remove(file_path)
-		time.sleep(3)
 	logger.info('펀맘알림 시작')
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS funmom (ID integer primary key autoincrement, title TEXT, category TEXT, category2 TEXT, urltitle TEXT, image_url TEXT, image_file TEXT, complte TEXT)')
@@ -1492,13 +1505,18 @@ def funmom_start(startname):
 		urls = []
 		for img in ex_id_divs:
 			img_url = img.find("img")
-			#urls.append(str(img_url["src"]))
-			urls.append(str(img_url["srcset"]))
+			url1 = str(img_url["src"])
+			url2 = str(img_url["srcset"])
+			dt = [url1, url2]
+			urls.append(dt)
+		
 		jpeg_no = 00
 		for url in urls:
+			last_url = ' '.join(url)
 			filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
-			add_c(title, category, category2, list_url, url, filename)
+			add_c(title, category, category2, list_url, last_url, filename)
 			jpeg_no += 1
+			
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
