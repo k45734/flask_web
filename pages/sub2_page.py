@@ -62,24 +62,24 @@ def index():
 def url_to_image(url, dfolder, category, category2, filename):
 	list_url = url.split()
 	for l in list_url:
-		res = urllib.request.urlopen(l)
-		if res.status == 200:	
-			header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
-			with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
+		with requests.Session() as s:
+			try:
 				req = s.get(l,headers=header)
-				fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
-				print(fifi)
-				if not os.path.exists('{}'.format(dfolder)):
-					os.makedirs('{}'.format(dfolder))
-				if not os.path.exists('{}/{}'.format(dfolder,category)):
-					os.makedirs('{}/{}'.format(dfolder,category))
-				if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
-					os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
-				with open(fifi, 'wb') as code:
-					code.write(req.content)
-			break
-		else:
-			pass
+			except:
+				continue
+			fifi = dfolder + '/' + category + '/' + category2 + '/' + filename
+			print(fifi)
+			if not os.path.exists('{}'.format(dfolder)):
+				os.makedirs('{}'.format(dfolder))
+			if not os.path.exists('{}/{}'.format(dfolder,category)):
+				os.makedirs('{}/{}'.format(dfolder,category))
+			if not os.path.exists('{}/{}/{}'.format(dfolder,category,category2)):
+				os.makedirs('{}/{}/{}'.format(dfolder,category,category2))
+			with open(fifi, 'wb') as code:
+				code.write(req.content)
+		break
+		
 	comp = '완료'
 	return comp
 	
