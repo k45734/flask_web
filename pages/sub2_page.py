@@ -763,6 +763,8 @@ def Typhoon():
 				root = '/data'
 			dfolder = root + '/'
 			filename = name.text + ".jpg"
+			category = 'weather'
+			fifi = dfolder + '/' + category + '/' + filename
 			url_to_image2(url, dfolder, filename)
 
 		for i in ttitle.findAll('td'):
@@ -786,7 +788,7 @@ def Typhoon():
 			g = ii['크기']
 			msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
 			last.append(msg)
-	return [last,filename]
+	return [last,fifi]
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
