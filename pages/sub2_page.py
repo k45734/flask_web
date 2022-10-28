@@ -83,15 +83,19 @@ def url_to_image(url, dfolder, category, category2, filename):
 	comp = '완료'
 	return comp
 	
-def url_to_image2(url, filename):
+def url_to_image2(url, dfolder, filename):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
-	req = requests.get(url,headers=header)	
-
-	if not os.path.isfile(filename):
-		with open(filename, 'wb') as code:
-			code.write(req.content)
+	req = requests.get(url,headers=header)
+	category = 'weather'
+	fifi = dfolder + '/' + category + '/' + filename
+	if not os.path.exists('{}'.format(dfolder)):
+		os.makedirs('{}'.format(dfolder))
+	if not os.path.exists('{}/{}'.format(dfolder,category)):
+		os.makedirs('{}/{}'.format(dfolder,category))
+	with open(fifi, 'wb') as code:
+		code.write(req.content)
 	comp = '완료'
-	return comp		
+	return comp	
 	
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
@@ -758,8 +762,8 @@ def Typhoon():
 			else:
 				root = '/data'
 			dfolder = root + '/'
-			filename = dfolder + '/' + name.text + ".jpg"
-			url_to_image2(url, filename)
+			filename = name.text + ".jpg"
+			url_to_image2(url, dfolder, filename)
 
 		for i in ttitle.findAll('td'):
 			a1 = i.text.strip()
