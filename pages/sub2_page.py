@@ -758,7 +758,7 @@ def Typhoon():
 			else:
 				root = '/data'
 			dfolder = root + '/'
-			filename = dfolder + '/' + name.text + '_' + str(newdate) + ".jpg"
+			filename = dfolder + '/' + name.text + ".jpg"
 			url_to_image2(url, filename)
 
 		for i in ttitle.findAll('td'):
