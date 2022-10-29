@@ -788,7 +788,7 @@ def Typhoon():
 			g = ii['크기']
 			msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
 			last.append(msg)
-	return [last,fifi]
+	return [last,fifi,name]
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('날씨알림시작')
@@ -834,9 +834,9 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 	big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
 	msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
 	try:
-		msg4,filename = Typhoon()
+		msg4,filename,name = Typhoon()
 		msg3 = " ".join(msg4)
-		msg = '{}\n\n{}\n\n태풍 정보\n{}'.format(msg1,msg2,msg3)	
+		msg = '{}\n\n{}\n\n태풍 정보 ({})\n{}'.format(msg1,msg2,name.text,msg3)		
 	except:
 		msg = '{}\n\n{}'.format(msg1,msg2)
 	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
