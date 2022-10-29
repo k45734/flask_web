@@ -39,6 +39,7 @@
 <input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
 <input type="submit" value="1회 다운로드시작" onclick="javascript: form.action='now';">
 <input type="submit" value="목록갱신처음부터시작" onclick="javascript: form.action='db_list_reset';">
+<button type="button" onclick="location.href='{{ url_for('webtoon.index_list') }}';">웹툰목록관리</button>
 </th>
 <br>
 
@@ -53,38 +54,4 @@
 <td align="center" class="tg-0lax">{{ rows[0] }}</td>
 <td align="center" class="tg-0lax">{{ rows[1] }}</td>
 </thead>
-<br>
-
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-
-<center><h4>웹툰 리스트 목록</p>
-<thead>
-<tr>
-<th align="center" class="tg-baqh">제목</th>
-<th align="center" class="tg-baqh" colspan="2">회차</th>
-</tr>
-{% for i in wow %} 
-<form method="POST">
-<tr>
-<th align="center" class="tg-0lax"><input type="text" name="title" value="{{ i['TITLE'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax" colspan="2"><input type="text" name="subtitle" value="{{i['SUBTITLE']}}" style="width:100%; border: 0;" readonly></th>
-<td align="center" class="tg-0lax" colspan="3">
-<select name="compress" readonly>
-<option value="{{i['COMPRESS']}}">{{i['COMPRESS']}}</option>
-<option value="0">압축사용</option>
-<option value="1">압축안함</option></td>
-<td align="center" class="tg-0lax" colspan="4">
-<select name="cbz" readonly>
-<option value="{{i['CBZ']}}">{{i['CBZ']}}</option>
-<option value="0">CBZ사용</option>
-<option value="1">ZIP사용</option></td>
-<td align="center" class="tg-0lax" colspan="5">
-<input type="submit" value="개별다운" onclick="javascript: form.action='one_now';">
-</tr>
-</form>
- {% endfor %}
-</center>
-</tr>
-</tbody>
-</table>
 {% endblock %}

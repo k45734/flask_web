@@ -344,7 +344,6 @@ def index():
 		return redirect(url_for('main.index'))
 	else:
 		rows = []
-		wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		#con.execute("PRAGMA synchronous = OFF")
 		#con.execute("PRAGMA journal_mode = MEMORY")
@@ -379,6 +378,26 @@ def index():
 		except:	
 			i3 = '0'
 			rows.append(i3)
+		return render_template('webtoon.html', rows = rows)	
+
+@webtoon.route('index_list')
+def index_list():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		wow = []
+		con = sqlite3.connect(webtoondb,timeout=60)
+		#con.execute("PRAGMA synchronous = OFF")
+		#con.execute("PRAGMA journal_mode = MEMORY")
+		con.execute("PRAGMA cache_size = 10000")
+		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
 		try:
 			#wow.clear()
 			cur.execute('select TITLE,SUBTITLE from TOON group by TITLE,SUBTITLE')
@@ -400,7 +419,7 @@ def index():
 			values = [t, w]
 			dt = dict(zip(keys, values))
 			wow.append(dt)
-		return render_template('webtoon.html', rows = rows, wow = wow)	
+		return render_template('webtoon_list.html', wow = wow)	
 
 @webtoon.route('db_redown', methods=['POST'])
 def db_redown():
