@@ -357,27 +357,34 @@ def index():
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
-			cur.execute("select * from TOON where COMPLETE = 'False'")
+			#cur.execute("select * from TOON where COMPLETE = 'False'")
+			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE')
 			rows1 = cur.fetchall()
-			count = 1
+			title_count = 1
+			true_count_total = []
+			false_count_total = []
+
 			for i in rows1:
-				i = count
-				count += 1
-			rows.append(i)
+				title = i[0]
+				subtitle = i[1]
+				webtoon_image = i[2]
+				webtoon_image_number = i[3]
+				complete = i[4]
+				complete_last = complete.split(',')
+				false_count = complete_last.count('False')
+				true_count = complete_last.count('True')
+				i = title_count
+				false_count_total.append(false_count)
+				true_count_total.append(true_count)
+				title_count += 1
+			rows.append(sum(false_count_total))
+			rows.append(sum(true_count_total))
+			rows.append(title_count)	
 		except:
-			i = '0'
-			rows.append(i)
-		try:
-			count3 = 1
-			cur.execute("select * from TOON where COMPLETE = 'True'")
-			rows3 = cur.fetchall()
-			for i3 in rows3:
-				i3 = count3
-				count3 += 1
-			rows.append(i3)
-		except:	
-			i3 = '0'
-			rows.append(i3)
+			no_count = 0
+			rows.append(no_count)
+			rows.append(no_count)
+			rows.append(no_count)
 		return render_template('webtoon.html', rows = rows)	
 
 @webtoon.route('index_list')
