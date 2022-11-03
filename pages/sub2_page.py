@@ -1195,14 +1195,14 @@ def quiz_add_go_d(MEMO, COMPLTE):
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		cur = con.cursor()
-		sql = "select * from quiz where MEMO = ? and COMPLTE = ?"
-		cur.execute(sql, (MEMO,COMPLTE))
+		sql = "select * from quiz where MEMO = ? and URL = ?"
+		cur.execute(sql, (MEMO,URL))
 		row = cur.fetchone()
 		if row == None:
 			print("해당 내용은 DB에 없습니다.")
 		else:
-			sql = "UPDATE quiz SET COMPLTE = ? WHERE MEMO = ?"	
-			cur.execute(sql,('True', MEMO))
+			sql = "UPDATE quiz SET COMPLTE = ? WHERE MEMO = ? and URL = ?"	
+			cur.execute(sql,('True', MEMO,URL))
 			con.commit()
 	except:
 		con.rollback()	
@@ -1264,28 +1264,33 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				all_text2 = soup.text
 				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
-				#p = re.compile('정답 :(.*?)\[')
-				p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
+				p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
+				check = p1.findall(result_remove_all)
+				if len(check) == 0:
+					p = re.compile('정답 :(.*?)\[')
+				else:
+					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
 				memo = p.findall(result_remove_all)
 				memo_s = ''.join(memo).lstrip()
-				if '됩니다.' in memo_s :
-					pass
-				elif len(memo_s) == 0 :
-					pass
-				else:
-					keys = ['TITLE','MEMO', 'URL']
-					values = [title, memo_s, URL]
-					dt = dict(zip(keys, values))
-					last.append(dt)
+				#if '됩니다.' in memo_s :
+				#	pass
+				#elif len(memo_s) == 0 :
+				#	pass
+				#else:
+				keys = ['TITLE','MEMO', 'URL']
+				values = [title, memo_s, URL]
+				dt = dict(zip(keys, values))
+				print(dt)
+				last.append(dt)
 					
 		for ii in last:
 			title = ii['TITLE']
 			memo_s = ii['MEMO']
 			URL = ii['URL']
-			quiz_add_go(title, memo_s, URL)
-		
+			quiz_add_go(title, memo_s, URL)		
+		lllast = []		
 		#알려준다.
-		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+		con = sqlite3.connect(BASE_DIR + '/quiz.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = "select * from quiz where COMPLTE = ?"
@@ -1295,23 +1300,26 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			for row in rows:
 				TITLE = row['TITLE']
 				MEMO = row['MEMO']
-				COMPLTE = row['COMPLTE']
-				msg = '{}\n정답 : {}'.format(TITLE,MEMO)
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-				quiz_add_go_d(MEMO, COMPLTE)
+				URL = row['URL']
+				keys = ['TITLE','MEMO', 'URL']
+				values = [TITLE, MEMO, URL]
+				dt = dict(zip(keys, values))
+				lllast.append(dt)
+			con.close()
 		else:
-			logger.info('퀴즈정답 신규내용이 없습니다.')
+			pass
+			
+		for aa in lllast:
+			TITLE = aa['TITLE']
+			MEMO = aa['MEMO']
+			URL = aa['URL']
+			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
+			print(msg)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			quiz_add_go_d(MEMO, URL)
 	except:	
 		pass
-	try:
-		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-		con.execute('VACUUM')
-		con.commit()
-		logger.info('DB최적화를 진행하였습니다.')
-	except:
-		con.rollback()	
-	finally:	
-		con.close()	
+	
 	comp = '완료'
 	return comp		
 @bp2.route('quiz')
