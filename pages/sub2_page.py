@@ -1271,16 +1271,16 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
 				memo = p.findall(result_remove_all)
 				memo_s = ''.join(memo).lstrip()
-				#if '됩니다.' in memo_s :
-				#	pass
-				#elif len(memo_s) == 0 :
-				#	pass
-				#else:
-				keys = ['TITLE','MEMO', 'URL']
-				values = [title, memo_s, URL]
-				dt = dict(zip(keys, values))
-				print(dt)
-				last.append(dt)
+				if '됩니다.' in memo_s :
+					pass
+				elif len(memo_s) == 0 :
+					pass
+				else:
+					keys = ['TITLE','MEMO', 'URL']
+					values = [title, memo_s, URL]
+					dt = dict(zip(keys, values))
+					print(dt)
+					last.append(dt)
 					
 		for ii in last:
 			title = ii['TITLE']
