@@ -1221,8 +1221,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		#con.execute("PRAGMA synchronous = OFF")
 		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
-		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
@@ -1301,22 +1300,14 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				TITLE = row['TITLE']
 				MEMO = row['MEMO']
 				URL = row['URL']
-				keys = ['TITLE','MEMO', 'URL']
-				values = [TITLE, MEMO, URL]
-				dt = dict(zip(keys, values))
-				lllast.append(dt)
-			con.close()
+				msg = '{}\n정답 : {}'.format(TITLE,MEMO)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+				quiz_add_go_d(MEMO, URL)
+			logger.info('퀴즈정답 완료했습니다.')
 		else:
+			logger.info('퀴즈정답 신규내용이 없습니다.')
 			pass
-			
-		for aa in lllast:
-			TITLE = aa['TITLE']
-			MEMO = aa['MEMO']
-			URL = aa['URL']
-			msg = '{}\n정답 : {}'.format(TITLE,MEMO)
-			print(msg)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-			quiz_add_go_d(MEMO, URL)
+		con.close()
 	except:	
 		pass
 	
