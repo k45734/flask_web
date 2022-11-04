@@ -1190,7 +1190,7 @@ def quiz_add_go(title, memo_s, URL):
 	comp = '완료'
 	return comp
 #알리미 완료
-def quiz_add_go_d(MEMO, COMPLTE):
+def quiz_add_go_d(MEMO, URL):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
@@ -1199,7 +1199,7 @@ def quiz_add_go_d(MEMO, COMPLTE):
 		cur.execute(sql, (MEMO,URL))
 		row = cur.fetchone()
 		if row == None:
-			print("해당 내용은 DB에 없습니다.")
+			pass
 		else:
 			sql = "UPDATE quiz SET COMPLTE = ? WHERE MEMO = ? and URL = ?"	
 			cur.execute(sql,('True', MEMO,URL))
