@@ -1264,26 +1264,30 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
 				if '오퀴즈' in title:
-					print('오퀴즈')
 					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
 				elif '캐시워크' in title:
-					print('캐시워크')
 					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 				elif '홈플러스' in title:
-					print('홈플러스')
 					p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[')
 				elif '신한' in title:
-					print('신한')
 					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드로이(.*?)\[')
 				elif '리브메이트' in title:
-					print('리브메이트')
-					p = re.compile('●(.*?)\[')
+					p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
+					check = p1.findall(result_remove_all)
+					if len(check) == 0:
+						#print(result_remove_all)
+						p = re.compile('●(.*?)\[')
+					else:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
 				elif '토스' in title:
-					print('토스')
 					p = re.compile('퀴즈가 안보이면 업데이트 해주세요.\)   로 (.*?) \[')
-				#elif '우리WON멤버스' in title:
-				#	print('우리WON멤버스')
-				#	p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드로이(.*?)\[')
+				elif '우리WON멤버스' in title:
+					p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[')
+					check = p1.findall(result_remove_all)
+					if len(check) == 0:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
+					else:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[')
 				else:	
 					p = re.compile('정답 :(.*?)\[')
 				memo = p.findall(result_remove_all)
