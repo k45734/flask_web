@@ -2086,7 +2086,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			addnews_d(CAST,TITLE,URL)
 			#if count % 5 == 0:
-			time.sleep(10)
+				#time.sleep(10)
 			count += 1
 		con.close()	
 		logger.info('%s 알림 종료',i)
