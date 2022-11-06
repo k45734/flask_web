@@ -2082,7 +2082,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			MEMO = row['MEMO']
 			COMPLETE = row['COMPLETE']
 			keys = ['CAST','TITLE','URL','MEMO','COMPLETE']
-			values = [AST,TITLE,URL,MEMO,COMPLETE]
+			values = [CAST,TITLE,URL,MEMO,COMPLETE]
 			dt = dict(zip(keys, values))
 			coco.append(dt)
 		con.close()	
