@@ -169,7 +169,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				else:
 					print(part)
 			#time.sleep(10)
-			#time.sleep(0.5)
+			time.sleep(0.5)
 	comp = '완료'
 	return comp	
 
