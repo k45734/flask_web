@@ -2077,11 +2077,11 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			URL = row['URL']
 			MEMO = row['MEMO']
 			COMPLETE = row['COMPLETE']
-			msg = '{}\n{}\n{}'.format(CAST,TITLE,URL)
+			msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			#중복 알림제거
 			addnews_d(CAST,TITLE,URL)
-			time.sleep(8)
+			#time.sleep(8)
 		logger.info('%s 알림 완료',i)
 		con.close()
 	logger.info('뉴스 알림완료')	
