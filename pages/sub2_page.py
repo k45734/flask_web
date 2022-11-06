@@ -40,6 +40,8 @@ else:
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+#텔레그램 에러 오류 해결??
+os.system('pip install urllib3==1.24.1')
 
 def mydate():
 	nowtime = time.localtime()
