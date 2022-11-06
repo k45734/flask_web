@@ -2063,7 +2063,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		sql = 'select * from ' + i + ' where COMPLETE = ?'
 		cur.execute(sql, ('False', ))
 		rows = cur.fetchall()
-		
+		count = 1
 		#DB의 정보를 읽어옵니다.
 		for row in rows: 
 			CAST = row['CAST']
@@ -2074,6 +2074,9 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 			addnews_d(CAST,TITLE,URL)
+			if count % 5 == 0:
+				time.sleep(10)
+			count += 1
 		con.close()	
 		logger.info('%s 알림 종료',i)
 	logger.info('뉴스 알림완료')	
