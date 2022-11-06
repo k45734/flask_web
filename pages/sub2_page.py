@@ -127,7 +127,7 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 				first_lnbr = part.rfind('\n')
 				if first_lnbr != -1: # 가능하면 개행문자를 기준으로 자릅니다.
 					parts.append(part[:first_lnbr])
-					text = text[first_lnbr:]
+					text = text[(first_lnbr+1):]
 				else:
 					parts.append(part)
 					text = text[4080:]
