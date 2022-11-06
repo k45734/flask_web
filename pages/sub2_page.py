@@ -140,15 +140,15 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)
 						except ConnectTimeoutError:
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True) 
+							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True) 
 					else :
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
 						except ConnectTimeoutError:
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
 					print(part)
 				else:
 					print(part)
@@ -157,16 +157,16 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=True)
 						except ConnectTimeoutError:
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True) 
+							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=True) 
 					else :
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=False)
 						except ConnectTimeoutError:
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=False)
 					print(part)
 				else:
 					print(part)
