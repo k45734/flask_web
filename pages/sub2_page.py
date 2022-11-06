@@ -2055,7 +2055,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		e = daumnews(newdate)
 		CAST.append(e)
 		time.sleep(1)
-		
+	coco = []	
 	for i in CAST:
 		logger.info('%s 알림 시작',i)
 		con = sqlite3.connect(sub2db + '/news_' + i + '.db',timeout=60)
@@ -2073,6 +2073,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		sql = 'select * from news where COMPLETE = ?'
 		cur.execute(sql, ('False', ))
 		rows = cur.fetchall()
+		
 		#DB의 정보를 읽어옵니다.
 		for row in rows: 
 			CAST = row['CAST']
@@ -2080,13 +2081,22 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			URL = row['URL']
 			MEMO = row['MEMO']
 			COMPLETE = row['COMPLETE']
-			msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-			#중복 알림제거
-			addnews_d(CAST,TITLE,URL)
-			#time.sleep(8)
-		logger.info('%s 알림 완료',i)
-		#con.close()
+			keys = ['CAST','TITLE','URL','MEMO','COMPLETE']
+			values = [AST,TITLE,URL,MEMO,COMPLETE]
+			dt = dict(zip(keys, values))
+			coco.append(dt)
+		con.close()	
+			
+	for row in coco: 
+		CAST = row['CAST']
+		TITLE = row['TITLE']
+		URL = row['URL']
+		MEMO = row['MEMO']
+		COMPLETE = row['COMPLETE']		
+		msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		addnews_d(CAST,TITLE,URL)		
+	
 	logger.info('뉴스 알림완료')	
 	comp = '완료'
 	return comp
