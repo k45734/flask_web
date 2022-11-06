@@ -2034,9 +2034,9 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	elif news == 'VIET':
 		d = vietnews(newdate)
 		CAST.append(d)
-	#elif news == 'DAUM':
-		#e = daumnews(newdate)
-		#CAST.append(e)
+	elif news == 'DAUM':
+		e = daumnews(newdate)
+		CAST.append(e)
 	else:
 		a = ytnsnews(newdate)
 		CAST.append(a)
@@ -2050,9 +2050,9 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		d = vietnews(newdate)
 		CAST.append(d)
 		time.sleep(1)
-		#e = daumnews(newdate)
-		#CAST.append(e)
-		#time.sleep(1)
+		e = daumnews(newdate)
+		CAST.append(e)
+		time.sleep(1)
 		
 	for i in CAST:
 		logger.info('%s 알림 시작',i)
@@ -2083,7 +2083,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			addnews_d(CAST,TITLE,URL)
 			#time.sleep(8)
 		logger.info('%s 알림 완료',i)
-		con.close()
+		#con.close()
 	logger.info('뉴스 알림완료')	
 	comp = '완료'
 	return comp
