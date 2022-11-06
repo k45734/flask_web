@@ -1797,8 +1797,8 @@ def funmom_ok():
 def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 	try:
 		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS news (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		con.execute('CREATE TABLE IF NOT EXISTS ' + CAST + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
 		#con.execute("PRAGMA synchronous = OFF")
 		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
@@ -1810,7 +1810,7 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()	
 		time.sleep(2)
-		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		#con.execute("PRAGMA synchronous = OFF")
 		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
@@ -1821,28 +1821,18 @@ def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		cur = con.cursor()
-		sql = 'select * from news where TITLE = ? and URL = ?'
+		sql = 'select * from ' + CAST + ' where TITLE = ? and URL = ?'
 		cur.execute(sql, (TITLE,URL))
 		row = cur.fetchone()
 		if row != None:
 			pass
 		else:
-			cur.execute('INSERT OR REPLACE INTO news (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
+			cur.execute('INSERT OR REPLACE INTO ' + CAST + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
 			con.commit()
 	except:
 		con.rollback()
 	finally:
-		con.close()
-
-	try:
-		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)	
-		con.execute('VACUUM')
-		con.commit()
-		#logger.info('DB최적화를 진행하였습니다.')
-	except:
-		con.rollback()	
-	finally:	
-		con.close()		
+		con.close()	
 	comp = '완료'
 	return comp
 		
@@ -1850,9 +1840,9 @@ def addnews_d(CAST,TITLE,URL):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		time.sleep(2)
-		con = sqlite3.connect(sub2db + '/news_' + CAST + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		cur = con.cursor()
-		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
+		sql = 'UPDATE ' + CAST + ' SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
 		cur.execute(sql,('True',TITLE, URL))
 		con.commit()
 	except:
@@ -2027,38 +2017,38 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	if news == 'YTN':
 		a = ytnsnews(newdate)
 		CAST.append(a)
-	elif news == 'SBS':
-		b = esbsnews(newdate)
-		CAST.append(b)
-	elif news == 'KBS':
-		c = ekbsnews(newdate)
-		CAST.append(c)
+	#elif news == 'SBS':
+	#	b = esbsnews(newdate)
+	#	CAST.append(b)
+	#elif news == 'KBS':
+	#	c = ekbsnews(newdate)
+	#	CAST.append(c)
 	elif news == 'VIET':
 		d = vietnews(newdate)
 		CAST.append(d)
-	elif news == 'DAUM':
-		e = daumnews(newdate)
-		CAST.append(e)
+	#elif news == 'DAUM':
+	#	e = daumnews(newdate)
+	#	CAST.append(e)
 	else:
 		a = ytnsnews(newdate)
 		CAST.append(a)
 		time.sleep(1)
-		b = esbsnews(newdate)
-		CAST.append(b)
-		time.sleep(1)
-		c = ekbsnews(newdate)
-		CAST.append(c)
-		time.sleep(1)
+		#b = esbsnews(newdate)
+		#CAST.append(b)
+		#time.sleep(1)
+		#c = ekbsnews(newdate)
+		#CAST.append(c)
+		#time.sleep(1)
 		d = vietnews(newdate)
 		CAST.append(d)
 		time.sleep(1)
-		e = daumnews(newdate)
-		CAST.append(e)
-		time.sleep(1)
+		#e = daumnews(newdate)
+		#CAST.append(e)
+		#time.sleep(1)
 	coco = []	
 	for i in CAST:
 		logger.info('%s 알림 시작',i)
-		con = sqlite3.connect(sub2db + '/news_' + i + '.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
 		#con.execute("PRAGMA synchronous = OFF")
 		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
@@ -2070,7 +2060,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()	
-		sql = 'select * from news where COMPLETE = ?'
+		sql = 'select * from ' + i + ' where COMPLETE = ?'
 		cur.execute(sql, ('False', ))
 		rows = cur.fetchall()
 		
@@ -2081,22 +2071,11 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			URL = row['URL']
 			MEMO = row['MEMO']
 			COMPLETE = row['COMPLETE']
-			keys = ['CAST','TITLE','URL','MEMO','COMPLETE']
-			values = [CAST,TITLE,URL,MEMO,COMPLETE]
-			dt = dict(zip(keys, values))
-			coco.append(dt)
+			msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			addnews_d(CAST,TITLE,URL)
 		con.close()	
-			
-	for row in coco: 
-		CAST = row['CAST']
-		TITLE = row['TITLE']
-		URL = row['URL']
-		MEMO = row['MEMO']
-		COMPLETE = row['COMPLETE']		
-		msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		addnews_d(CAST,TITLE,URL)		
-	
+		logger.info('%s 알림 종료',i)
 	logger.info('뉴스 알림완료')	
 	comp = '완료'
 	return comp
