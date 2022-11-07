@@ -1989,8 +1989,10 @@ def daumnews(newdate):
 	return CAST
 
 
-def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
+def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid,broadcaster):
 	logger.info('뉴스알림시작')
+	news = broadcaster
+	print(news)
 	#오늘날짜
 	nowtime1 = datetime.now()
 	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
@@ -1999,42 +2001,39 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	if news == 'YTN':
 		a = ytnsnews(newdate)
 		CAST.append(a)
-	#elif news == 'SBS':
-	#	b = esbsnews(newdate)
-	#	CAST.append(b)
-	#elif news == 'KBS':
-	#	c = ekbsnews(newdate)
-	#	CAST.append(c)
+	elif news == 'SBS':
+		b = esbsnews(newdate)
+		CAST.append(b)
+	elif news == 'KBS':
+		c = ekbsnews(newdate)
+		CAST.append(c)
 	elif news == 'VIET':
 		d = vietnews(newdate)
 		CAST.append(d)
-	#elif news == 'DAUM':
-	#	e = daumnews(newdate)
-	#	CAST.append(e)
+	elif news == 'DAUM':
+		e = daumnews(newdate)
+		CAST.append(e)
 	else:
 		a = ytnsnews(newdate)
 		CAST.append(a)
 		time.sleep(1)
-		#b = esbsnews(newdate)
-		#CAST.append(b)
-		#time.sleep(1)
-		#c = ekbsnews(newdate)
-		#CAST.append(c)
-		#time.sleep(1)
+		b = esbsnews(newdate)
+		CAST.append(b)
+		time.sleep(1)
+		c = ekbsnews(newdate)
+		CAST.append(c)
+		time.sleep(1)
 		d = vietnews(newdate)
 		CAST.append(d)
 		time.sleep(1)
-		#e = daumnews(newdate)
-		#CAST.append(e)
-		#time.sleep(1)
+		e = daumnews(newdate)
+		CAST.append(e)
+		time.sleep(1)
 	coco = []	
 	for i in CAST:
 		logger.info('%s 알림 시작',i)
 		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -2118,6 +2117,7 @@ def news_ok():
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
 		now = request.form['now']
+		broadcaster = request.form['broadcaster']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from news")
@@ -2143,10 +2143,10 @@ def news_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,broadcaster])
 				test = scheduler.get_job(startname).id
 			else:
-				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid)
+				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid,broadcaster)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
