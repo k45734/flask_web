@@ -1900,31 +1900,47 @@ def ytnsnews(newdate):
 	try:
 		#with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
-		req = requests.get(MAIN,headers=header)
+		#MAIN = 'https://www.yna.co.kr/news?site=navi_latest_depth01'
+		#req = requests.get(MAIN,headers=header)
+		#bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		#posts = bs0bj.findAll("div",{"class":"news-con"})	
+		#for i in posts:
+		#	URL = 'https:' + i.find('a')['href']
+		#	req = requests.get(URL,headers=header)
+		#	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		#	ttitle = bs0bj.find("h1",{"class":"tit"})
+		#	posts = bs0bj.findAll('p')	
+		#	memo = []
+		#	for ii in posts:
+		#		if '재난포털' in ii.text :
+		#			pass
+		#		elif '기사제보' in ii.text :
+		#			pass
+		#		elif '자동완성 기능이 켜져 있습니다.' in ii.text:
+		#			pass
+		#				
+		#		else:			
+		#			memo.append(ii.text.strip())
+		#	MEMO2 = '\n'.join(memo)
+		#	MEMO3 = MEMO2.replace('  ','\n')
+		#	MEMO = MEMO3.replace("\n", "")
+		#	TITLE = ttitle.text.strip()
+		#	CAST = "YTN"
+		#	COMPLETE = 'False'
+		#	addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+		MAIN = 'https://m.ytn.co.kr/newslist/news_list.php?s_mcd=9999'
+		req = s.get(MAIN,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.findAll("div",{"class":"news-con"})	
+		posts = bs0bj.findAll("a",{"class":"news_list"})	
 		for i in posts:
-			URL = 'https:' + i.find('a')['href']
-			req = requests.get(URL,headers=header)
+			URL = i['href']
+			req = s.get(URL,headers=header)
 			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h1",{"class":"tit"})
-			posts = bs0bj.findAll('p')	
-			memo = []
-			for ii in posts:
-				if '재난포털' in ii.text :
-					pass
-				elif '기사제보' in ii.text :
-					pass
-				elif '자동완성 기능이 켜져 있습니다.' in ii.text:
-					pass
-						
-				else:			
-					memo.append(ii.text.strip())
-			MEMO2 = '\n'.join(memo)
-			MEMO3 = MEMO2.replace('  ','\n')
-			MEMO = MEMO3.replace("\n", "")
+			ttitle = bs0bj.find("h1",{"id":"h1"})
+			post = bs0bj.find('div',{'id':'article_content_text'})	
+			movie = bs0bj.findAll('iframe',{'id':'zumFrame'})
 			TITLE = ttitle.text.strip()
+			MEMO = post.text.strip()
 			CAST = "YTN"
 			COMPLETE = 'False'
 			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
