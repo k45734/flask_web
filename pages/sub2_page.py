@@ -1944,6 +1944,7 @@ def ytnsnews(newdate):
 			CAST = "YTN"
 			COMPLETE = 'False'
 			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+		return CAST
 	except:
 		pass
 	logger.info('YTN 목록완료')
