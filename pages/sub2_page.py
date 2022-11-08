@@ -1894,24 +1894,25 @@ def vietnews(newdate):
 	return CAST
 		
 def ytnsnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}	
-	MAIN = 'https://m.ytn.co.kr/newslist/news_list.php?s_mcd=9999'
-	req = requests.get(MAIN,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("a",{"class":"news_list"})	
-	for i in posts:
-		URL = i['href']
-		req = requests.get(URL,headers=header)
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		MAIN = 'https://m.ytn.co.kr/newslist/news_list.php?s_mcd=9999'
+		req = s.get(MAIN,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		ttitle = bs0bj.find("h1",{"id":"h1"})
-		post = bs0bj.find('div',{'id':'article_content_text'})	
-		movie = bs0bj.findAll('iframe',{'id':'zumFrame'})
-		TITLE = ttitle.text.strip()
-		MEMO = post.text.strip()
-		CAST = "YTN"
-		COMPLETE = 'False'
-		print(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-		addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+		posts = bs0bj.findAll("a",{"class":"news_list"})	
+		for i in posts:
+			URL = i['href']
+			req = s.get(URL,headers=header)
+			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+			ttitle = bs0bj.find("h1",{"id":"h1"})
+			post = bs0bj.find('div',{'id':'article_content_text'})	
+			movie = bs0bj.findAll('iframe',{'id':'zumFrame'})
+			TITLE = ttitle.text.strip()
+			MEMO = post.text.strip()
+			CAST = "YTN"
+			COMPLETE = 'False'
+			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+			print(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	logger.info('YTN 목록완료')
 	return CAST
 		
@@ -1940,25 +1941,27 @@ def esbsnews(newdate):
 	return CAST
 	
 def ekbsnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	URL = 'http://news.kbs.co.kr/common/main.html'
-	req = requests.get(URL,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.find("div",{"class":"fl col-box col-recent"})
-	lists = posts.findAll("a")
-	for i in lists:
-		URL = 'http://news.kbs.co.kr' + i.attrs['href']
-		req = requests.get(URL,headers=header)
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://news.kbs.co.kr/mobile/main.html'
+		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		ttitle = bs0bj.find("h5",{"class":"tit-s"})
-		posts = bs0bj.find("div",{"id":"cont_newstext"})
-		MEMO2 = posts.text.strip()
-		MEMO3 = MEMO2.replace('  ','\n')
-		MEMO = MEMO3.replace("\n", "")
-		TITLE = ttitle.text.strip()
-		CAST = "KBS"
-		COMPLETE = 'False'
-		addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
+		lists = bs0bj.select("ul > li > a")
+		for i in lists:
+			check = i.attrs['href']
+			if '/mobile/news/view.do' not in check:
+				pass
+			else:
+				URL = 'https://news.kbs.co.kr' + i.attrs['href']
+				req = s.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.select('h2 > strong')
+				posts = bs0bj.select('#cont_newstext')
+				MEMO = posts[0].text.strip()
+				TITLE = ttitle[0].text.strip()
+				CAST = "KBS"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	logger.info('KBS 목록완료')
 	return CAST
 		
