@@ -1864,7 +1864,7 @@ def addnews_d(CAST,TITLE,URL):
 	return comp
 
 def vietnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	URL = 'https://www.vinatimes.net/news'
 	req = requests.get(URL,headers=header)	
 	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -1895,7 +1895,7 @@ def vietnews(newdate):
 		
 def ytnsnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		MAIN = 'https://m.ytn.co.kr/newslist/news_list.php?s_mcd=9999'
 		req = s.get(MAIN,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -1912,37 +1912,38 @@ def ytnsnews(newdate):
 			CAST = "YTN"
 			COMPLETE = 'False'
 			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-			print(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	logger.info('YTN 목록완료')
 	return CAST
 		
 def esbsnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	URL = 'https://news.sbs.co.kr/news/newsMain.do?div=pc_news'
-	req = requests.get(URL,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.find("div",{"class":"w_news_list"})
-	lists = posts.findAll("a")		
-	for i in lists:
-		URL = 'https://news.sbs.co.kr' + i.attrs['href']
-		req = requests.get(URL,headers=header)
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://mnews.sbs.co.kr/news/newsMain.do'
+		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-		ttitle = bs0bj.find("h3",{"id":"vmNewsTitle"})
-		posts = bs0bj.find("div",{"class":"main_text"})
-		MEMO2 = posts.text.strip()
-		MEMO3 = MEMO2.replace('  ','\n')
-		MEMO = MEMO3.replace("\n", "")
-		TITLE = ttitle.text.strip()
-		CAST = "SBS"
-		COMPLETE = 'False'
-		addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-	
+		lists = bs0bj.select('ul > li > a')
+		for i in lists:
+			check = i.attrs['href']
+			print(check)
+			if 'endPage.do' not in check:
+				pass
+			else:
+				URL = 'https://mnews.sbs.co.kr/news/' + i.attrs['href']
+				req = s.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.select('#subTitleText')
+				posts = bs0bj.select('#contentText')
+				TITLE = ttitle[0].text.strip()
+				MEMO = posts[0].text.strip()
+				CAST = "SBS"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
 	logger.info('SBS 목록완료')
 	return CAST
 	
 def ekbsnews(newdate):
 	with requests.Session() as s:
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://news.kbs.co.kr/mobile/main.html'
 		req = s.get(URL,headers=header)
 		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
@@ -1966,28 +1967,30 @@ def ekbsnews(newdate):
 	return CAST
 		
 def daumnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	URL = 'https://news.daum.net/'
-	req = requests.get(URL,headers=header)
-	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("div",{"class":"cont_thumb"})
-	for i in posts:
-		lists = i.find("a")
-		if 'https://gallery.v.daum.net/p/viewer' in lists.attrs['href'] :
-			pass
-		else:
-			URL = lists.attrs['href']
-			req = requests.get(URL,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h3",{"class":"tit_view"})
-			posts = bs0bj.find("div",{"class":"news_view fs_type1"})
-			MEMO2 = posts.text.strip()
-			MEMO3 = MEMO2.replace('  ','\n')
-			MEMO = MEMO3.replace("\n", "")
-			TITLE = ttitle.text.strip()
-			CAST = "DAUM"
-			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://news.daum.net/?nil_top=mobile'
+		req = s.get(URL,headers=header)
+		bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+		lists = bs0bj.select("main > section > div > div > div > ul > li > div > div") #body > div.container-doc > main > section > div > div.content-article > div.box_g.box_news_issue > ul > li:nth-child(1) > div > div
+		for i in lists:	
+			try:
+				link = i.select('strong > a')
+				URL = link[0]['href'] + '/?nil_top=mobile'
+				req = s.get(URL,headers=header)
+				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
+				ttitle = bs0bj.select('h3.tit_view')
+				posts = bs0bj.select('div.article_view')
+				MEME = []
+				for i in posts[0].findAll('p'):
+					MEME.append(i.text)
+				TITLE = ttitle[0].text.strip()
+				MEMO = ' '.join(MEME)
+				CAST = "DAUM"
+				COMPLETE = 'False'
+				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
+			except:
+				continue
 	logger.info('DAUM 목록완료')
 	return CAST
 
