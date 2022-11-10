@@ -77,7 +77,7 @@ except:
 if not os.path.isfile(filepath):
 	f = open(logdata + '/flask.log','a', encoding='utf-8')
 fileMaxByte = 1024*50
-rfh = logging.handlers.RotatingFileHandler(filename=logdata + '/flask.log', mode='a', maxBytes=fileMaxByte, backupCount=5, encoding='utf-8', delay=0)
+rfh = logging.handlers.RotatingFileHandler(filename=filepath, mode='a', maxBytes=fileMaxByte, backupCount=5, encoding='utf-8', delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(asctime)s %(filename)s:%(lineno)d %(levelname)s] - %(message)s",datefmt='%Y-%m-%d %H:%M:%S',handlers=[rfh])
 logger = logging.getLogger()
 logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
