@@ -36,22 +36,6 @@ def sizeof_fmt(num, suffix='Bytes'):
 		num /= 1024.0
 	return "%.1f%s%s" % (num, 'Y', suffix)
 	
-def mem_check():
-	tmp = psutil.virtual_memory()
-	test = tmp[2]
-	if test >= 90 :
-		logger.info('현재 메모리를 %s 사용하고 있어서 재시작을 합니다.', test)
-		if platform.system() == 'Windows':
-			os.system("flask run --reload")
-		else:
-			os.system("cat /dev/null > " + logdata + "/flask.log")
-			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
-	else:
-		logger.info('현재 메모리를 %s 사용하고 있습니다.', test)
-	comp = '완료'
-	return comp
-	
 def createFolder(directory):
 	try:
 		if not os.path.exists(directory):
@@ -75,7 +59,7 @@ try:
 except:
 	pass
 if not os.path.isfile(filepath):
-	f = open(logdata + '/flask.log','a', encoding='utf-8')
+	f = open(filepath,'a', encoding='utf-8')
 fileMaxByte = 1024*50
 rfh = logging.handlers.RotatingFileHandler(filename=filepath, mode='a', maxBytes=fileMaxByte, backupCount=5, encoding='utf-8', delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(asctime)s %(filename)s:%(lineno)d %(levelname)s] - %(message)s",datefmt='%Y-%m-%d %H:%M:%S',handlers=[rfh])
@@ -96,12 +80,6 @@ job_defaults = {
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
 scheduler.start()
 
-#try:	
-#	scheduler.add_job(mem_check, trigger=CronTrigger.from_crontab('*/5 * * * *'), id='system_check')
-#	logger.info('시스템 체크 시작')
-#except:	
-#	logger.info('시스템 체크 시작(이미등록되었습니다.)')
-#	pass
 @bp.route("/")
 @bp.route("index")
 def index():
