@@ -120,6 +120,7 @@ def index():
 		values = [job_id, job_next_time]
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
+	logger.info('%s', request.remote_addr)
 	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
