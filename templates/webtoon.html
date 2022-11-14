@@ -24,6 +24,13 @@
 <option value="0">사용</option>
 <option value="1">안함</option></td></tr>
 <tr>
+<th align="center" class="tg-baqh">웹툰선택</td>
+<td align="center" class="tg-baqh" colspan="2">
+
+<select name="gbun">
+<option value="adult">성인웹툰</option>
+<option value="normal">일반웹툰</option></td></tr>
+<tr>
 <th align="center" class="tg-baqh">스케줄이름</td>
 <td align="center" class="tg-0lax"><input type="text" name="startname" value="webtoon" style="width:100%; border: 0;" ></td>
 </tr>
@@ -39,12 +46,12 @@
 <input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
 <input type="submit" value="1회 다운로드시작" onclick="javascript: form.action='now';">
 <input type="submit" value="목록갱신처음부터시작" onclick="javascript: form.action='db_list_reset';">
-<button type="button" onclick="location.href='{{ url_for('webtoon.index_list') }}';">웹툰목록관리</button>
+<input type="submit" value="웹툰목록관리" onclick="javascript: form.action='index_list';">
 </th>
 <br>
 
 <table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center><h4>웹툰 다운/실패</p>
+<center><h4>성인웹툰 다운/실패</p>
 <thead>
 <tr>
 <th align="center" class="tg-0lax">다운실패</th>
@@ -55,5 +62,17 @@
 <td align="center" class="tg-0lax">{{ rows[0] }}</td>
 <td align="center" class="tg-0lax">{{ rows[1] }}</td>
 <td align="center" class="tg-0lax">{{ rows[2] }}</td>
+<table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center><h4>일반웹툰 다운/실패</p>
+<thead>
+<tr>
+<th align="center" class="tg-0lax">다운실패</th>
+<th align="center" class="tg-0lax">다운완료</th>
+<th align="center" class="tg-0lax">총갯수</th>
+</tr>
+<tr>
+<td align="center" class="tg-0lax">{{ rows2[0] }}</td>
+<td align="center" class="tg-0lax">{{ rows2[1] }}</td>
+<td align="center" class="tg-0lax">{{ rows2[2] }}</td>
 </thead>
 {% endblock %}

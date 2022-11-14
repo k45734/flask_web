@@ -124,11 +124,15 @@ def manazip(title, subtitle,cbz):
 	comp = '완료'
 	return comp	
 	
-def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete):
+def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun):
+	if gbun == 'adult':
+		DB_NAME = 'TOON'
+	else:
+		DB_NAME = 'TOON_NORMAL'
 	try:
 		#데이타베이스 없으면 생성
 		con = sqlite3.connect(webtoondb,timeout=60)
-		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
+		sql = 'CREATE TABLE IF NOT EXISTS ' + DB_NAME + ' (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)'
 		con.execute(sql)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
@@ -155,11 +159,15 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 	comp = '완료'
 	return comp
 
-def add_d(subtitle, title,webtoon_image):
+def add_d(subtitle, title,webtoon_image,gbun):
+	if gbun == 'adult':
+		DB_NAME = 'TOON'
+	else:
+		DB_NAME = 'TOON_NORMAL'
 	try:
 		#데이타베이스 없으면 생성
 		con = sqlite3.connect(webtoondb,timeout=60)
-		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
+		sql = 'CREATE TABLE IF NOT EXISTS ' + DB_NAME + ' (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)'
 		con.execute(sql)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
@@ -172,7 +180,7 @@ def add_d(subtitle, title,webtoon_image):
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
-		sql = "UPDATE TOON SET COMPLETE = ? WHERE SUBTITLE = ? AND TITLE = ? AND WEBTOON_IMAGE = ?"
+		sql = 'UPDATE ' + DB_NAME + ' SET COMPLETE = ? WHERE SUBTITLE = ? AND TITLE = ? AND WEBTOON_IMAGE = ?'
 		cur.execute(sql,('True',subtitle, title,webtoon_image))
 		con.commit()
 	except:
@@ -231,6 +239,10 @@ def tel_send_message(list):
 						sitename_bytes = base64.b64decode(aa)
 						sitename = sitename_bytes.decode('utf-8')
 						aac = sitename.split('\n\n')
+						if len(aac) != 6:
+							gbun = aac[6]
+						else:
+							gbun = 'adult'
 						title = aac[0]
 						subtitle = aac[1]
 						webtoon_site = aac[2]
@@ -238,7 +250,7 @@ def tel_send_message(list):
 						webtoon_image = aac[4]
 						webtoon_number = aac[5]
 						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
+						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
 						
 					except:	
 						continue
@@ -271,7 +283,11 @@ def db_list_reset():
 	return comp
 	
 #다운해보자
-def down(compress,cbz,alldown,title, subtitle):
+def down(compress,cbz,alldown,title, subtitle,gbun):
+	if gbun == 'adult':
+		DB_NAME = 'TOON'
+	else:
+		DB_NAME = 'TOON_NORMAL'
 	logger.info('웹툰 다운로드합니다.')
 	try:
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -284,9 +300,9 @@ def down(compress,cbz,alldown,title, subtitle):
 		con.row_factory = sqlite3.Row
 		cur2 = con.cursor()
 		if alldown == 'True':
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE,SUBTITLE'
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' group by TITLE,SUBTITLE'
 		else:
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by TITLE,SUBTITLE'
+			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
 		print(sql2)
 		cur2.execute(sql2)
 		itrows = cur2.fetchall()
@@ -334,8 +350,19 @@ def index():
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
+		con = sqlite3.connect(webtoondb,timeout=60)
+		sql = "CREATE TABLE IF NOT EXISTS TOON_NORMAL (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
+		con.execute(sql)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.close()
 		time.sleep(3)
 		rows = []
+		rows2 = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
@@ -345,6 +372,7 @@ def index():
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
+		#성인웹툰
 		try:
 			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE')
 			rows1 = cur.fetchall()
@@ -373,10 +401,44 @@ def index():
 			rows.append(no_count)
 			rows.append(no_count)
 			rows.append(no_count)
-		return render_template('webtoon.html', rows = rows)	
+		#일반웹툰
+		try:
+			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON_NORMAL group by TITLE')
+			rows1 = cur.fetchall()
+			title_count = 1
+			true_count_total = []
+			false_count_total = []
 
-@webtoon.route('index_list')
+			for i in rows1:
+				title = i[0]
+				subtitle = i[1]
+				webtoon_image = i[2]
+				webtoon_image_number = i[3]
+				complete = i[4]
+				complete_last = complete.split(',')
+				false_count = complete_last.count('False')
+				true_count = complete_last.count('True')
+				i = title_count
+				false_count_total.append(false_count)
+				true_count_total.append(true_count)
+				title_count += 1
+			rows2.append(sum(false_count_total))
+			rows2.append(sum(true_count_total))
+			rows2.append(title_count)	
+		except:
+			no_count = 0
+			rows2.append(no_count)
+			rows2.append(no_count)
+			rows2.append(no_count)
+		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
+
+@webtoon.route('index_list', methods=['POST'])
 def index_list():
+	gbun = request.form['gbun']
+	if gbun == 'adult':
+		DB_NAME = 'TOON'
+	else:
+		DB_NAME = 'TOON_NORMAL'
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -391,7 +453,7 @@ def index_list():
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
-			cur.execute('select TITLE,SUBTITLE from TOON group by TITLE,SUBTITLE')
+			cur.execute('select TITLE,SUBTITLE from ' + DB_NAME + ' group by TITLE,SUBTITLE')
 			rows_list = cur.fetchall()
 			for list in rows_list:
 				t = list['TITLE']
@@ -417,10 +479,15 @@ def db_redown():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		gbun = request.form['gbun']
+		if gbun == 'adult':
+			DB_NAME = 'TOON'
+		else:
+			DB_NAME = 'TOON_NORMAL'
 		try:
 			con = sqlite3.connect(webtoondb,timeout=60)
 			cur = con.cursor()
-			sql = "UPDATE TOON SET COMPLETE = ?"
+			sql = 'UPDATE ' + DB_NAME + ' SET COMPLETE = ?'
 			cur.execute(sql,('False',))
 			con.commit()
 		except:
@@ -436,12 +503,13 @@ def now():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		gbun = request.form['gbun']
 		alldown = 'True'
 		title = None
 		subtitle = None
 		compress = request.form['compress']
 		cbz = request.form['cbz']
-		down(compress,cbz,alldown,title, subtitle)
+		down(compress,cbz,alldown,title, subtitle,gbun)
 	return redirect(url_for('webtoon.index'))
 
 @webtoon.route("one_now", methods=['POST'])
@@ -450,11 +518,12 @@ def one_now():
 		return redirect(url_for('main.index'))
 	else:
 		alldown = 'False'
+		gbun = request.form['gbun']
 		title = request.form['title']
 		subtitle = request.form['subtitle']
 		compress = request.form['compress']
 		cbz = request.form['cbz']
-		down(compress,cbz,alldown,title, subtitle)
+		down(compress,cbz,alldown,title, subtitle,gbun)
 	return redirect(url_for('webtoon.index'))	
 	
 @webtoon.route('webtoon_list', methods=['POST'])
@@ -479,6 +548,7 @@ def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
+		gbun = request.form['gbun']
 		alldown = 'True'
 		title = None
 		subtitle = None
@@ -487,7 +557,7 @@ def dozi_down():
 		startname = request.form['startname']
 		start_time = request.form['start_time']
 		try:
-			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz,alldown,title, subtitle] )
+			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz,alldown,title, subtitle,gbun] )
 			test = scheduler.get_job(startname).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
