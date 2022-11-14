@@ -130,10 +130,7 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
 		con.execute(sql)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -164,10 +161,7 @@ def add_d(subtitle, title,webtoon_image):
 		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
 		con.execute(sql)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -195,14 +189,6 @@ def tel_send_message(list):
 		root = at[0] + '/data'
 	else:
 		root = '/data'
-	#check = root + '/empty.txt'
-	
-	#if os.path.isfile(check):
-	#	logger.info('웹툰 DB 중복 실행방지')
-	#	print('종료')
-	#else:
-	#	with open(check, 'w'):
-	#		pass
 	logger.info('웹툰 DB정보를 받아옵니다.')
 	file_path = root + '/last_num.json'
 	try:
@@ -253,7 +239,6 @@ def tel_send_message(list):
 						webtoon_number = aac[5]
 						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
 						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
-						#logger.info('%s %s %s %s %s %s %s',title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete)
 						
 					except:	
 						continue
@@ -261,8 +246,6 @@ def tel_send_message(list):
 	file_path = root + '/last_num.json'
 	with open(file_path, 'w') as outfile:
 		json.dump(last_num, outfile)		
-
-	#os.remove(check)
 	logger.info('웹툰 DB정보를 종료합니다.')
 	comp = '완료'
 	
@@ -292,10 +275,7 @@ def down(compress,cbz,alldown,title, subtitle):
 	logger.info('웹툰 다운로드합니다.')
 	try:
 		con = sqlite3.connect(webtoondb,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -343,12 +323,21 @@ def index():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		#데이타베이스 없으면 생성
+		con = sqlite3.connect(webtoondb,timeout=60)
+		sql = "CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
+		con.execute(sql)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.close()
+		time.sleep(3)
 		rows = []
 		con = sqlite3.connect(webtoondb,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -357,7 +346,6 @@ def index():
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
-			#cur.execute("select * from TOON where COMPLETE = 'False'")
 			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE')
 			rows1 = cur.fetchall()
 			title_count = 1
@@ -394,10 +382,7 @@ def index_list():
 	else:
 		wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -406,7 +391,6 @@ def index_list():
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		try:
-			#wow.clear()
 			cur.execute('select TITLE,SUBTITLE from TOON group by TITLE,SUBTITLE')
 			rows_list = cur.fetchall()
 			for list in rows_list:
@@ -469,12 +453,8 @@ def one_now():
 		title = request.form['title']
 		subtitle = request.form['subtitle']
 		compress = request.form['compress']
-		#compress = '0'
 		cbz = request.form['cbz']
-		#cbz = '0'
 		down(compress,cbz,alldown,title, subtitle)
-		print(compress,cbz,alldown,title, subtitle)
-	#return title
 	return redirect(url_for('webtoon.index'))	
 	
 @webtoon.route('webtoon_list', methods=['POST'])
