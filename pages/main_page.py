@@ -120,6 +120,15 @@ def index():
 		values = [job_id, job_next_time]
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
+	#IP가져오기
+	ip_file = logdata + '/ip_list.txt'
+	if not os.path.isfile(filepath):
+		f = open(ip_file,'a', encoding='utf-8')
+	get_ip = get('https://api.ipify.org').text
+	with open(ip_file, 'a', encoding='utf-8') as fp:
+		fp.write(get_ip + '\n')
+		fp.close()
+	logger.info('%s', get_ip)
 	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
