@@ -380,63 +380,27 @@ def index():
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		#성인웹툰
-		try:
-			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE')
-			rows1 = cur.fetchall()
-			title_count = 1
-			true_count_total = []
-			false_count_total = []
-
-			for i in rows1:
-				title = i[0]
-				subtitle = i[1]
-				webtoon_image = i[2]
-				webtoon_image_number = i[3]
-				complete = i[4]
-				complete_last = complete.split(',')
-				false_count = complete_last.count('False')
-				true_count = complete_last.count('True')
-				i = title_count
-				false_count_total.append(false_count)
-				true_count_total.append(true_count)
-				title_count += 1
-			rows.append(sum(false_count_total))
-			rows.append(sum(true_count_total))
-			rows.append(title_count)	
-		except:
-			no_count = 0
-			rows.append(no_count)
-			rows.append(no_count)
-			rows.append(no_count)
+		cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON group by TITLE')
+		TOTAL = cur.fetchall()
+		cur.execute('select * from TOON WHERE COMPLETE = "False"')
+		false_toon = cur.fetchall()
+		cur.execute('select * from TOON WHERE COMPLETE = "True"')
+		true_toon = cur.fetchall()
+		keys = ['TOTAL','False','True']
+		values = [len(TOTAL), len(false_toon), len(true_toon)]
+		dt = dict(zip(keys, values))
+		rows.append(dt)
 		#일반웹툰
-		try:
-			cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON_NORMAL group by TITLE')
-			rows1 = cur.fetchall()
-			title_count = 1
-			true_count_total = []
-			false_count_total = []
-
-			for i in rows1:
-				title = i[0]
-				subtitle = i[1]
-				webtoon_image = i[2]
-				webtoon_image_number = i[3]
-				complete = i[4]
-				complete_last = complete.split(',')
-				false_count = complete_last.count('False')
-				true_count = complete_last.count('True')
-				i = title_count
-				false_count_total.append(false_count)
-				true_count_total.append(true_count)
-				title_count += 1
-			rows2.append(sum(false_count_total))
-			rows2.append(sum(true_count_total))
-			rows2.append(title_count)	
-		except:
-			no_count = 0
-			rows2.append(no_count)
-			rows2.append(no_count)
-			rows2.append(no_count)
+		cur.execute('select group_concat(TITLE),group_concat(SUBTITLE), group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from TOON_NORMAL group by TITLE')
+		TOTAL = cur.fetchall()
+		cur.execute('select * from TOON_NORMAL WHERE COMPLETE = "False"')
+		false_toon_normal = cur.fetchall()
+		cur.execute('select * from TOON_NORMAL WHERE COMPLETE = "True"')
+		true_toon_normal = cur.fetchall()
+		keys = ['TOTAL','False','True']
+		values = [len(TOTAL), len(false_toon_normal), len(true_toon_normal)]
+		dt = dict(zip(keys, values))
+		rows2.append(dt)
 		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
 
 @webtoon.route('index_list/<gbun>', methods=["GET","POST"])

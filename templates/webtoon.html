@@ -59,9 +59,11 @@
 <th align="center" class="tg-0lax">총갯수</th>
 </tr>
 <tr>
-<td align="center" class="tg-0lax">{{ rows[0] }}</td>
-<td align="center" class="tg-0lax">{{ rows[1] }}</td>
-<td align="center" class="tg-0lax">{{ rows[2] }}</td>
+{% for row in rows %}
+<td align="center" class="tg-0lax">{{ row['False'] }}</td>
+<td align="center" class="tg-0lax">{{ row['True'] }}</td>
+<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
+{% endfor %}
 <table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
 <center><h4>일반웹툰 다운/실패</p>
 <thead>
@@ -71,8 +73,10 @@
 <th align="center" class="tg-0lax">총갯수</th>
 </tr>
 <tr>
-<td align="center" class="tg-0lax">{{ rows2[0] }}</td>
-<td align="center" class="tg-0lax">{{ rows2[1] }}</td>
-<td align="center" class="tg-0lax">{{ rows2[2] }}</td>
+{% for row in rows2 %}
+<td align="center" class="tg-0lax">{{ row['False'] }}</td>
+<td align="center" class="tg-0lax">{{ row['True'] }}</td>
+<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
+{% endfor %}
 </thead>
 {% endblock %}
