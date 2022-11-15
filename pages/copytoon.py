@@ -451,9 +451,8 @@ def index_list(gbun):
 			DB_NAME = 'TOON'
 		else:
 			DB_NAME = 'TOON_NORMAL'
-		per_page = 2
+		per_page = 10
 		page, _, offset = get_page_args(per_page=per_page)
-		#wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
