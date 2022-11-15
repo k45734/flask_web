@@ -3,131 +3,137 @@
 		<title>원격 알리미 서비스 관리</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style type="text/css">
-@import url('https://fonts.googleapis.com/css?family=Roboto');
-/*body 초기화*/
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+<style>
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,700,500);
+
+/* main Styles */
+
+html { box-sizing: border-box; }
+
+*, *:before, *:after { box-sizing: inherit; }
+
 body {
+  background: #fafafa;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+a { text-decoration: none; }
+
+.container {
+  width: 1000px;
+  margin: auto;
+}
+
+h1 { text-align:center; margin-top:150px;}
+
+/* Navigation Styles */
+
+nav { background: #2ba0db; }
+
+nav ul {
+  font-size: 0;
   margin: 0;
   padding: 0;
-  font-family: "Roboto", serif;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  overflow-x: hidden;  
 }
 
-h1 {
-  margin: 2em 0 1.5em 0;
-}
-
-nav {
-  width: 100%;
-  display: flex;
-  position: relative;
-  justify-content: center;
-  background: linear-gradient(90deg, #051937, #004d7a, #008793, #00bf72, #a8eb12);
-}
-
-ul, li {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-#main-menu > li {
-  float: left;
+nav ul li {
+  display: inline-block;
   position: relative;
 }
 
-#main-menu > li > a {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.85);
-  text-align: center;
-  text-decoration: none;
-  letter-spacing: 0.05em;
+nav ul li a {
+  color: #fff;
   display: block;
-  padding: 14px 36px;
-  border-right: 1px solid rgba(0,0,0,0.15);
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+  font-size: 14px;
+  padding: 15px 14px;
+  transition: 0.3s linear;
 }
 
-#main-menu > li:nth-child(1) > a {
-  border-left: 1px solid rgba(0,0,0,0.15);
-}
+nav ul li:hover { background: #126d9b;  }
 
-#sub-menu {
+nav ul li ul {
+  border-bottom: 5px solid #2ba0db;
+  display: none;
   position: absolute;
-  background: #182952;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.15s ease-in;
+  width: 250px;
+  
 }
 
-#sub-menu > li {
-  padding: 16px 28px;
-  border-bottom: 1px solid rgba(0,0,0,0.15);
+nav ul li ul li {
+  border-top: 1px solid #444;
+  display: block;
 }
 
-#sub-menu > li >  a {
-  color: rgba(255,255,255,0.6);
-  text-decoration: none;
+nav ul li ul li:first-child { border-top: none; }
+
+nav ul li ul li a {
+  background: #373737;
+  display: block;
+  padding: 10px 14px;
 }
 
-#main-menu > li:hover #sub-menu {
-  opacity: 1;
-  visibility: visible;
-}
+nav ul li ul li a:hover { background: #126d9b; }
 
-#sub-menu > li >  a:hover {
- text-decoration: underline;
-}
+nav .fa.fa-angle-down { margin-left: 6px; }
 
-section {
-  column-width: 15em;
-  background: #dadadf;
-  padding: 2em 12em;
+.pagination {
+  width: 350px;
+  margin: auto;
 }
+.pagination a { text-decoration: none; color: inherit;}
+.page-item .page-link:hover { color: #6c757d; }
+.page-item.active .page-link { background-color: #6c757d; border-color: #6c757d; }
+.page-item.active .page-link:hover { color: white; }
 </style>
 
   </head>
   <body>
-<nav role="navigation">
-  <ul id="main-menu">
-    <li><a href="{{ url_for('main.index') }}">홈</a></li>
-    <li><a href="#">일반</a>
-      <ul id="sub-menu">
-		<li><a href="{{ url_for('sub2.funmom') }}" aria-label="subemnu">아이들색칠공부다운로더</a></li>
-		<li><a href="{{ url_for('sub2.news') }}" aria-label="subemnu">뉴스알림</a></li>
-		<li><a href="{{ url_for('sub2.weather') }}" aria-label="subemnu">날씨알림</a></li>		
-		<li><a href="{{ url_for('sub2.unse') }}" aria-label="subemnu">운세알림</a></li>		
-		<li><a href="{{ url_for('sub2.quiz') }}" aria-label="subemnu">퀴즈정답</a></li>
-		<li><a href="{{ url_for('sub2.tracking') }}" aria-label="subemnu">택배조회</a></li>
-      </ul>
-    </li>
+<nav>
+<div class="container" align="center">
+	<ul>
+		<li><a href="{{ url_for('main.index') }}">홈</a></li>
+		<li> <a href="#">일반<i class='fa fa-angle-down'></i></a>
+		<ul>
+			<li><a href="{{ url_for('sub2.funmom') }}">아이들색칠공부다운로더</a></li>
+			<li><a href="{{ url_for('sub2.news') }}">뉴스알림</a></li>
+			<li><a href="{{ url_for('sub2.weather') }}">날씨알림</a></li>		
+			<li><a href="{{ url_for('sub2.unse') }}">운세알림</a></li>		
+			<li><a href="{{ url_for('sub2.quiz') }}">퀴즈정답</a></li>
+			<li><a href="{{ url_for('sub2.tracking') }}">택배조회</a></li>
+		</ul>
+	</li>
 	<li><a href="{{ url_for('webtoon.index') }}">웹툰</a></li>
 	{% if session.get('logFlag') %}
-    <li><a href="#">시스템</a>
-      <ul id="sub-menu">     
-        <li><a href="{{ url_for('sub3.second') }}" aria-label="subemnu">프로그램</a></li>
-        <li><a href="{{ url_for('sub4.second') }}" aria-label="subemnu">재고관리</a></li>
-        <li><a href="{{ url_for('main.log') }}" aria-label="subemnu">로그</a></li>
-	  <li><a href="{{ url_for('main.restart') }}" aria-label="subemnu">재시작</a></li>
-	      <li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
-	<li><a href="/logout">로그아웃</a></li>
-      </ul>
-    </li>
+	<li class='sub-menu'> <a href="#">시스템<i class='fa fa-angle-down'></i></a>
+        <ul>
+			<li><a href="{{ url_for('sub3.second') }}">프로그램</a></li>
+			<li><a href="{{ url_for('sub4.second') }}">재고관리</a></li>
+			<li><a href="{{ url_for('main.log') }}">로그</a></li>
+			<li><a href="{{ url_for('main.restart') }}">재시작</a></li>
+			<li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>
+			<li><a href="/logout">로그아웃</a></li>
+		</ul>
+	</li>
 	{% else %}
     <li><a href="/login">로그인</a></li>
 	{% endif %}
-  </ul>
+  </div>
 </nav>
-			
 
-			
-
-			
-	
-	{% block content %}{% endblock %}
-  </body>
+<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script> 
+<script>
+$('nav li').hover(
+  function() {
+      $('ul', this).stop().slideDown(200);
+  },
+    function() {
+    $('ul', this).stop().slideUp(200);
+  }
+);
+</script>
+{% block content %}{% endblock %}
+</body>
 </html>
