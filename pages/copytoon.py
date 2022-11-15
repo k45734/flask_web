@@ -28,6 +28,13 @@ from pages.main_page import scheduler
 from pages.main_page import logger
 from apscheduler.triggers.cron import CronTrigger
 
+#페이지 기능
+try:
+	from flask_paginate import Pagination, get_page_args
+except ImportError:
+	os.system('pip install flask_paginate')
+	from flask_paginate import Pagination, get_page_args
+	
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	webtoondb = at[0] + '/data/webtoon_new.db'
@@ -432,17 +439,21 @@ def index():
 			rows2.append(no_count)
 		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
 
-@webtoon.route('index_list', methods=['POST'])
-def index_list():
-	gbun = request.form['gbun']
-	if gbun == 'adult':
-		DB_NAME = 'TOON'
-	else:
-		DB_NAME = 'TOON_NORMAL'
+@webtoon.route('index_list/<gbun>', methods=["GET","POST"])
+def index_list(gbun):
+	print(gbun)
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		wow = []
+		#gbun = request.args.get('gbun')
+		#print(len(gbun), gbun)
+		if gbun == 'adult':
+			DB_NAME = 'TOON'
+		else:
+			DB_NAME = 'TOON_NORMAL'
+		per_page = 2
+		page, _, offset = get_page_args(per_page=per_page)
+		#wow = []
 		con = sqlite3.connect(webtoondb,timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
@@ -452,27 +463,12 @@ def index_list():
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		try:
-			cur.execute('select TITLE,SUBTITLE from ' + DB_NAME + ' group by TITLE,SUBTITLE')
-			rows_list = cur.fetchall()
-			for list in rows_list:
-				t = list['TITLE']
-				w = list['SUBTITLE']
-				compress = '0'
-				cbz = '0'
-				keys = ['TITLE','SUBTITLE','COMPRESS','CBZ']
-				values = [t, w,compress,cbz]
-				dt = dict(zip(keys, values))
-				wow.append(dt)
-			con.close()	
-		except:
-			t = '리스트가 없습니다.'
-			w = '리스트가 없습니다.'
-			keys = ['TITLE','SUBTITLE']
-			values = [t, w]
-			dt = dict(zip(keys, values))
-			wow.append(dt)
-		return render_template('webtoon_list.html', wow = wow)	
+		cur.execute('select TITLE,SUBTITLE from ' + DB_NAME + ' group by TITLE,SUBTITLE')
+		total2 = cur.fetchall()
+		total = len(total2)
+		cur.execute('select TITLE,SUBTITLE from ' + DB_NAME + ' group by TITLE,SUBTITLE ORDER BY TITLE,SUBTITLE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		wow = cur.fetchall()		
+		return render_template('webtoon_list.html', gbun = gbun, wow = wow, pagination=Pagination(page=page, total=total, per_page=per_page))
 
 @webtoon.route('db_redown', methods=['POST'])
 def db_redown():
@@ -512,19 +508,20 @@ def now():
 		down(compress,cbz,alldown,title, subtitle,gbun)
 	return redirect(url_for('webtoon.index'))
 
-@webtoon.route("one_now", methods=['POST'])
-def one_now():
+@webtoon.route("index_list/<gbun>/one_now", methods=["GET"])
+def one_now(gbun):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
 		alldown = 'False'
-		gbun = request.form['gbun']
-		title = request.form['title']
-		subtitle = request.form['subtitle']
-		compress = request.form['compress']
-		cbz = request.form['cbz']
+		gbun = request.args.get('gbun')
+		title = request.args.get('title')
+		subtitle = request.args.get('subtitle')
+		compress = request.args.get('compress')
+		cbz = request.args.get('cbz')
 		down(compress,cbz,alldown,title, subtitle,gbun)
-	return redirect(url_for('webtoon.index'))	
+		print(compress,cbz,alldown,title, subtitle,gbun)
+	return redirect(url_for('webtoon.index'))
 	
 @webtoon.route('webtoon_list', methods=['POST'])
 def dozi_list():
