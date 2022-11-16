@@ -302,17 +302,99 @@ def track_url(url):
 			print ("Website is working fine %s "% url)
 			return 9999
 		return response.status
+		
+#택배구동
+def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id):
+	url = []
+	code = { "DHL":"de.dhl",
+			"Sagawa":"jp.sagawa",
+			"Kuroneko Yamato":"jp.yamato",
+			"Japan Post":"jp.yuubin",
+			"천일택배":"kr.chunilps",
+			"CJ대한통운":"kr.cjlogistics",
+			"CU 편의점택배":"kr.cupost",
+			"GS Postbox 택배":"kr.cvsnet",
+			"CWAY (Woori Express)":"kr.cway",
+			"대신택배":"kr.daesin",
+			"우체국 택배":"kr.epost",
+			"한의사랑택배":"kr.hanips",
+			"한진택배":"kr.hanjin",
+			"합동택배":"kr.hdexp",
+			"홈픽":"kr.homepick",
+			"한서호남택배":"kr.honamlogis",
+			"일양로지스":"kr.ilyanglogis",
+			"경동택배":"kr.kdexp",
+			"건영택배":"kr.kunyoung",
+			"로젠택배":"kr.logen",
+			"롯데택배":"kr.lotte",
+			"SLX":"kr.slx",
+			"성원글로벌카고":"kr.swgexp",
+			"TNT":"nl.tnt",
+			"EMS":"un.upu.ems",
+			"Fedex":"us.fedex",
+			"UPS":"us.ups",
+			"USPS":"us.usps"
+			}
+	carrier = code[f'{carrier_id}']
+	url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+	for url2 in url_list:
+		result = track_url(url2)
+		if result == 9999:	
+			#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
+			keys = ['url','carrier','track_id','carrier_id']
+			values = [url2,carrier,track_id,carrier_id]
+			dt = dict(zip(keys, values))
+			url.append(dt)
+			break
+	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
+	#with requests.Session() as s:
+	for a in url:
+		main_url = a['url']
+		carrier = a['carrier']
+		track_id = a['track_id']
+		carrier_id = a['carrier_id']
+		aa = main_url + '/' +  carrier + '/tracks/' + track_id
+		url = requests.get(aa, headers=h)
+		resp = url.json()
+		print(resp)
+		check = resp.get('from', None)
+		
+		if check == None:
+			msga = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+			
+		else:
+			json_string = check.get("name", None) #누가 보냈냐			
+			json_string2 = resp.get("to").get("name") #누가 받냐
+			json_string3 = resp.get("state").get("text") #배송현재상태
+			#json_string4 = resp.get("carrier").get("name") #택배사이름
+			#json_string5 = resp.get("carrier").get("id") #택배사송장번호
+			json_string_m = resp.get("progresses") #배송상황
+			msg2 = flfl(json_string_m)
+			gg = ff(msg2,json_string,json_string2,carrier_id,track_id)
+			ms = '\n'.join(gg)
+			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,carrier_id,track_id,ms)
+			if '배송완료' in msga :
+				tracking_del_new(carrier_id,track_id)
+			elif '배달 완료' in msga :
+				tracking_del_new(carrier_id,track_id)
+			elif '배달완료' in msga :
+				tracking_del_new(carrier_id,track_id)
+			else:
+				pass
+			print(msga)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+	logger.info('택배 알림완료')
+	comp = '완료'
+	return msga
+	
 #택배조회 구동	
 def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('택배알림시작')
-	url = []
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -358,97 +440,12 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	sql = "select * from tracking where COMPLTE = ?"
 	cur.execute(sql, ('False',))
 	rows = cur.fetchall()
+	print(len(rows))
 	for row in rows:
 		carrier_id = row['PARCEL']
-		track_id = row['NUMBER']	
-		code = { "DHL":"de.dhl",
-				"Sagawa":"jp.sagawa",
-				"Kuroneko Yamato":"jp.yamato",
-				"Japan Post":"jp.yuubin",
-				"천일택배":"kr.chunilps",
-				"CJ대한통운":"kr.cjlogistics",
-				"CU 편의점택배":"kr.cupost",
-				"GS Postbox 택배":"kr.cvsnet",
-				"CWAY (Woori Express)":"kr.cway",
-				"대신택배":"kr.daesin",
-				"우체국 택배":"kr.epost",
-				"한의사랑택배":"kr.hanips",
-				"한진택배":"kr.hanjin",
-				"합동택배":"kr.hdexp",
-				"홈픽":"kr.homepick",
-				"한서호남택배":"kr.honamlogis",
-				"일양로지스":"kr.ilyanglogis",
-				"경동택배":"kr.kdexp",
-				"건영택배":"kr.kunyoung",
-				"로젠택배":"kr.logen",
-				"롯데택배":"kr.lotte",
-				"SLX":"kr.slx",
-				"성원글로벌카고":"kr.swgexp",
-				"TNT":"nl.tnt",
-				"EMS":"un.upu.ems",
-				"Fedex":"us.fedex",
-				"UPS":"us.ups",
-				"USPS":"us.usps"
-				}
-		carrier = code[f'{carrier_id}']
-		url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
-		for url2 in url_list:
-			result = track_url(url2)
-			if result == 9999:	
-				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-				keys = ['url','carrier','track_id','carrier_id']
-				values = [url2,carrier,track_id,carrier_id]
-				dt = dict(zip(keys, values))
-				url.append(dt)
-				break
-	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
-	#with requests.Session() as s:
-	for a in url:
-		main_url = a['url']
-		carrier = a['carrier']
-		track_id = a['track_id']
-		carrier_id = a['carrier_id']
-		aa = main_url + '/' +  carrier + '/tracks/' + track_id
-		url = requests.get(aa, headers=h)
-		resp = url.json()
-		print(resp)
-		check = resp.get('from', None)
-		
-		if check == None:
-			msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		else:
-			json_string = check.get("name", None) #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("state").get("text") #배송현재상태
-			#json_string4 = resp.get("carrier").get("name") #택배사이름
-			#json_string5 = resp.get("carrier").get("id") #택배사송장번호
-			
-			json_string_m = resp.get("progresses") #배송상황
-			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,carrier_id,track_id)
-			ms = '\n'.join(gg)
-			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,carrier_id,track_id,ms)
-			if '배송완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달 완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			else:
-				pass
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-	logger.info('택배 알림완료')
-	try:
-		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)		
-		con.execute('VACUUM')
-		con.commit()
-		logger.info('DB최적화를 진행하였습니다.')
-	except:
-		con.rollback()	
-	finally:	
-		con.close()	
-	comp = '완료'
+		track_id = row['NUMBER']
+		print(carrier_id,track_id)
+		comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
 	return comp
 	
 @bp2.route('tracking')
@@ -554,7 +551,7 @@ def tracking_list():
 		view = cur.fetchall()
 		return render_template('tracking_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
-@bp2.route('tracking_add', methods=['POST'])
+@bp2.route('tracking/tracking_add', methods=['GET'])
 def tracking_add():
 	mytime = mydate()
 	#SQLITE3 DB 없으면 만들다.
@@ -570,38 +567,38 @@ def tracking_add():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		try:
-			carrier_id = request.form['carrier_id']
-			track_id = request.form['track_id']
-			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-			con.execute("PRAGMA cache_size = 10000")
-			con.execute("PRAGMA locking_mode = NORMAL")
-			con.execute("PRAGMA temp_store = MEMORY")
-			con.execute("PRAGMA auto_vacuum = 1")
-			con.execute("PRAGMA journal_mode=WAL")
-			con.execute("PRAGMA synchronous=NORMAL")
-			cursor = con.cursor()
-			sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
-			cursor.execute(sql, (carrier_id,track_id))
-			rows = cursor.fetchone()
-			if rows:
-				pass
-			else:
-				sql = """
-					INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
-				"""
-			cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
-			con.commit()
-			cursor.close()
-			con.close()
-			msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
-		except:
+		#try:
+		carrier_id = request.args.get('carrier_id')
+		track_id = request.args.get('track_id')
+		print(carrier_id, track_id, mytime)
+		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		cursor = con.cursor()
+		sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
+		cursor.execute(sql, (carrier_id,track_id))
+		rows = cursor.fetchone()
+		if rows:
 			pass
+		else:
+			sql = """
+				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
+			"""
+			cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
+		con.commit()
+		cursor.close()
+		con.close()
+		msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
+		#except:
+		#	pass
 	return redirect(url_for('sub2.tracking'))
 
 @bp2.route('tracking_list/tracking_one/<carrier_id>/<track_id>', methods=["GET"])
 def tracking_one(carrier_id, track_id):
-	
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
@@ -622,86 +619,8 @@ def tracking_one(carrier_id, track_id):
 		#carrier_id = request.args.get('PARCEL')
 		#track_id = request.args.get('NUMBER')
 		print(carrier_id,track_id )
-		url = []
-		code = { "DHL":"de.dhl",
-				"Sagawa":"jp.sagawa",
-				"Kuroneko Yamato":"jp.yamato",
-				"Japan Post":"jp.yuubin",
-				"천일택배":"kr.chunilps",
-				"CJ대한통운":"kr.cjlogistics",
-				"CU 편의점택배":"kr.cupost",
-				"GS Postbox 택배":"kr.cvsnet",
-				"CWAY (Woori Express)":"kr.cway",
-				"대신택배":"kr.daesin",
-				"우체국 택배":"kr.epost",
-				"한의사랑택배":"kr.hanips",
-				"한진택배":"kr.hanjin",
-				"합동택배":"kr.hdexp",
-				"홈픽":"kr.homepick",
-				"한서호남택배":"kr.honamlogis",
-				"일양로지스":"kr.ilyanglogis",
-				"경동택배":"kr.kdexp",
-				"건영택배":"kr.kunyoung",
-				"로젠택배":"kr.logen",
-				"롯데택배":"kr.lotte",
-				"SLX":"kr.slx",
-				"성원글로벌카고":"kr.swgexp",
-				"TNT":"nl.tnt",
-				"EMS":"un.upu.ems",
-				"Fedex":"us.fedex",
-				"UPS":"us.ups",
-				"USPS":"us.usps"
-				}
-		carrier = code[f'{carrier_id}']
-		url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
-		for url2 in url_list:
-			result = track_url(url2)
-			if result == 9999:	
-				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-				keys = ['url','carrier','track_id','carrier_id']
-				values = [url2,carrier,track_id,carrier_id]
-				dt = dict(zip(keys, values))
-				url.append(dt)
-				break
-	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
-	#with requests.Session() as s:
-	for a in url:
-		main_url = a['url']
-		carrier = a['carrier']
-		track_id = a['track_id']
-		carrier_id = a['carrier_id']
-		aa = main_url + '/' +  carrier + '/tracks/' + track_id
-		url = requests.get(aa, headers=h)
-		resp = url.json()
-		print(resp)
-		check = resp.get('from', None)
-		
-		if check == None:
-			msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-		else:
-			json_string = check.get("name", None) #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("state").get("text") #배송현재상태
-			#json_string4 = resp.get("carrier").get("name") #택배사이름
-			#json_string5 = resp.get("carrier").get("id") #택배사송장번호
-			
-			json_string_m = resp.get("progresses") #배송상황
-			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,carrier_id,track_id)
-			ms = '\n'.join(gg)
-			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,carrier_id,track_id,ms)
-			if '배송완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달 완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			else:
-				pass
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
-	logger.info('택배 알림완료')
-	comp = '완료'
+		msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+
 	return msga	
 	
 @bp2.route('tracking_list/tracking_del/<carrier_id>/<track_id>', methods=["GET"])
@@ -719,8 +638,8 @@ def tracking_del(carrier_id,track_id):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		carrier_id = request.args.get('PARCEL')
-		track_id = request.args.get('NUMBER')
+		#carrier_id = request.args.get('PARCEL')
+		#track_id = request.args.get('NUMBER')
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
@@ -778,20 +697,20 @@ def track_api(carrier_id, track_id):
 	
 	return 	msg
 	
-@bp2.route('tracking_ok', methods=['POST'])
+@bp2.route('tracking/tracking_ok', methods=['GET'])
 def tracking_ok():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		start_time = request.form['start_time']
-		startname = request.form['startname']
-		carrier_id = request.form['carrier_id']
-		track_id = request.form['track_id']
-		telgm = request.form['telgm']
-		telgm_alim = request.form['telgm_alim']
-		telgm_token = request.form['telgm_token']
-		telgm_botid = request.form['telgm_botid']
-		now = request.form['now']
+		start_time = request.args.get('start_time')
+		startname = request.args.get('startname')
+		carrier_id = request.args.get('carrier_id')
+		track_id = request.args.get('track_id')
+		telgm = request.args.get('telgm')
+		telgm_alim = request.args.get('telgm_alim')
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		now = request.args.get('now')
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")
