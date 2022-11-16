@@ -327,7 +327,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 				for ii,iii in zip(image_url_last,image_number_last):
 					print(title, subtitle, ii,iii)
 					url_to_image(title, subtitle,ii,iii)	
-					add_d(subtitle, title,ii)
+					add_d(subtitle, title,ii,gbun)
 				if compress == '0':
 					print('다운완료후 압축하자')
 					manazip(title, subtitle,cbz)
@@ -403,14 +403,12 @@ def index():
 		rows2.append(dt)
 		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
 
-@webtoon.route('index_list/<gbun>', methods=["GET","POST"])
-def index_list(gbun):
-	print(gbun)
+@webtoon.route('index_list', methods=["GET"])
+def index_list():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#gbun = request.args.get('gbun')
-		#print(len(gbun), gbun)
+		gbun = request.args.get('gbun')
 		if gbun == 'adult':
 			DB_NAME = 'TOON'
 		else:
@@ -433,12 +431,12 @@ def index_list(gbun):
 		wow = cur.fetchall()		
 		return render_template('webtoon_list.html', gbun = gbun, wow = wow, pagination=Pagination(page=page, total=total, per_page=per_page))
 
-@webtoon.route('db_redown', methods=['POST'])
+@webtoon.route('db_redown', methods=['GET'])
 def db_redown():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		gbun = request.form['gbun']
+		gbun = request.args.get('gbun')
 		if gbun == 'adult':
 			DB_NAME = 'TOON'
 		else:
@@ -457,17 +455,17 @@ def db_redown():
 	comp = '완료'
 	return comp
 
-@webtoon.route("now", methods=["POST"])
+@webtoon.route("now", methods=["GET"])
 def now():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		gbun = request.form['gbun']
+		gbun = request.args.get('gbun')
 		alldown = 'True'
 		title = None
 		subtitle = None
-		compress = request.form['compress']
-		cbz = request.form['cbz']
+		compress = request.args.get('compress')
+		cbz = request.args.get('cbz')
 		down(compress,cbz,alldown,title, subtitle,gbun)
 	return redirect(url_for('webtoon.index'))
 
@@ -486,13 +484,13 @@ def one_now(gbun):
 		print(compress,cbz,alldown,title, subtitle,gbun)
 	return redirect(url_for('webtoon.index'))
 	
-@webtoon.route('webtoon_list', methods=['POST'])
+@webtoon.route('webtoon_list', methods=['GET'])
 def dozi_list():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
 		list = '웹툰DB'
-		start_time = request.form['start_time']
+		start_time = request.args.get('start_time')
 		try:
 			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id='webtoon_list', args=[list])
 			test = scheduler.get_job('webtoon_list').id
@@ -503,19 +501,19 @@ def dozi_list():
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('webtoon.index'))
 	
-@webtoon.route('webtoon_down', methods=['POST'])
+@webtoon.route('webtoon_down', methods=['GET'])
 def dozi_down():
 	if session.get('logFlag') != True:
 		return redirect(url_for('main.index'))
 	else:
-		gbun = request.form['gbun']
+		gbun = request.args.get('gbun')
 		alldown = 'True'
 		title = None
 		subtitle = None
-		compress = request.form['compress']
-		cbz = request.form['cbz']
-		startname = request.form['startname']
-		start_time = request.form['start_time']
+		compress = request.args.get('compress')
+		cbz = request.args.get('cbz')
+		startname = request.args.get('startname')
+		start_time = request.args.get('start_time')
 		try:
 			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz,alldown,title, subtitle,gbun] )
 			test = scheduler.get_job(startname).id

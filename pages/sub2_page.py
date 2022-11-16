@@ -30,7 +30,12 @@ except ImportError:
 from pages.main_page import scheduler
 from pages.main_page import logger
 from apscheduler.triggers.cron import CronTrigger
-
+#페이지 기능
+try:
+	from flask_paginate import Pagination, get_page_args
+except ImportError:
+	os.system('pip install flask_paginate')
+	from flask_paginate import Pagination, get_page_args
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub2db = at[0] + '/data'
@@ -464,10 +469,7 @@ def tracking():
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -480,10 +482,7 @@ def tracking():
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -505,13 +504,43 @@ def tracking():
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		view = []
+		
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+
+@bp2.route('tracking_list', methods=["GET"])
+def tracking_list():
+	#데이타베이스 없으면 생성
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")	
+	con.close()
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		telgm = request.args.get('telgm')
+		telgm_alim = request.args.get('telgm_alim')
+		per_page = 10
+		page, _, offset = get_page_args(per_page=per_page)
 		#알림
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -519,22 +548,11 @@ def tracking():
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "select * from tracking where COMPLTE = ?"
-		cur.execute(sql, ('False',))
-		rows = cur.fetchall()
-		for row in rows:
-			carrier_id = row['PARCEL']
-			track_id = row['NUMBER']
-			COMPETE = row['COMPLTE']
-			if COMPETE == 'True':
-				wow = '배송완료'
-			else:
-				wow = '배송중'
-			keys = ['PARCEL','NUMBER','COMPLETE']
-			values = [carrier_id, track_id, wow]
-			dt = dict(zip(keys, values))
-			view.append(dt)
-		return render_template('tracking.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+		cur.execute("SELECT COUNT(*) FROM tracking;")
+		total = cur.fetchone()[0]
+		cur.execute('SELECT * FROM tracking ORDER BY PARCEL DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		view = cur.fetchall()
+		return render_template('tracking_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
 @bp2.route('tracking_add', methods=['POST'])
 def tracking_add():
@@ -542,10 +560,7 @@ def tracking_add():
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -559,10 +574,7 @@ def tracking_add():
 			carrier_id = request.form['carrier_id']
 			track_id = request.form['track_id']
 			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-			#con.execute("PRAGMA synchronous = OFF")
-			#con.execute("PRAGMA journal_mode = MEMORY")
 			con.execute("PRAGMA cache_size = 10000")
-			#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 			con.execute("PRAGMA locking_mode = NORMAL")
 			con.execute("PRAGMA temp_store = MEMORY")
 			con.execute("PRAGMA auto_vacuum = 1")
@@ -587,15 +599,13 @@ def tracking_add():
 			pass
 	return redirect(url_for('sub2.tracking'))
 
-@bp2.route('tracking_one/<carrier_id>/<track_id>', methods=["GET"])
-def tracking_one(carrier_id,track_id):
+@bp2.route('tracking_list/tracking_one/<carrier_id>/<track_id>', methods=["GET"])
+def tracking_one(carrier_id, track_id):
+	
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -605,17 +615,13 @@ def tracking_one(carrier_id,track_id):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		sql = "select * from tracking"
-		cur.execute(sql,)
-		rows = cur.fetchall()
-		for i in rows:
-			telgm_token = i['telgm_token']
-			telgm_botid = i['telgm_botid']
-			telgm = i['telgm']
-			telgm_alim = i['telgm_alim']
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		telgm = request.args.get('telgm')
+		telgm_alim = request.args.get('telgm_alim')
+		#carrier_id = request.args.get('PARCEL')
+		#track_id = request.args.get('NUMBER')
+		print(carrier_id,track_id )
 		url = []
 		code = { "DHL":"de.dhl",
 				"Sagawa":"jp.sagawa",
@@ -696,17 +702,14 @@ def tracking_one(carrier_id,track_id):
 			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
 	logger.info('택배 알림완료')
 	comp = '완료'
-	return comp	
+	return msga	
 	
-@bp2.route('tracking_del/<carrier_id>/<track_id>', methods=["GET"])
+@bp2.route('tracking_list/tracking_del/<carrier_id>/<track_id>', methods=["GET"])
 def tracking_del(carrier_id,track_id):
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -716,11 +719,10 @@ def tracking_del(carrier_id,track_id):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		carrier_id = request.args.get('PARCEL')
+		track_id = request.args.get('NUMBER')
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -742,23 +744,15 @@ def track_api(carrier_id, track_id):
 		#SQLITE3 DB 없으면 만들다.
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 		con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
-		#carrier_id = request.form['carrier_id']
-		#track_id = request.form['track_id']
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -799,10 +793,7 @@ def tracking_ok():
 		telgm_botid = request.form['telgm_botid']
 		now = request.form['now']
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
