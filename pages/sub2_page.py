@@ -597,8 +597,8 @@ def tracking_add():
 		#	pass
 	return redirect(url_for('sub2.tracking'))
 
-@bp2.route('tracking_list/tracking_one/<carrier_id>/<track_id>', methods=["GET"])
-def tracking_one(carrier_id, track_id):
+@bp2.route('<carrier_id>/<track_id>/<telgm_token>/<telgm_botid>/<telgm>/<telgm_alim>/tracking_one', methods=["GET"])
+def tracking_one(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
@@ -612,18 +612,11 @@ def tracking_one(carrier_id, track_id):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		telgm_token = request.args.get('telgm_token')
-		telgm_botid = request.args.get('telgm_botid')
-		telgm = request.args.get('telgm')
-		telgm_alim = request.args.get('telgm_alim')
-		#carrier_id = request.args.get('PARCEL')
-		#track_id = request.args.get('NUMBER')
-		print(carrier_id,track_id )
 		msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
 
-	return msga	
+	return redirect(url_for('sub2.tracking'))	
 	
-@bp2.route('tracking_list/tracking_del/<carrier_id>/<track_id>', methods=["GET"])
+@bp2.route('<carrier_id>/<track_id>/tracking_del', methods=["GET"])
 def tracking_del(carrier_id,track_id):
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -638,8 +631,6 @@ def tracking_del(carrier_id,track_id):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#carrier_id = request.args.get('PARCEL')
-		#track_id = request.args.get('NUMBER')
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
 		con.execute("PRAGMA locking_mode = NORMAL")

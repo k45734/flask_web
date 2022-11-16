@@ -27,8 +27,8 @@
 <th align="center" class="tg-0lax" colspan="2"><input type='text' name='NUMBER' value="{{row['NUMBER']}}" style="width:100%; border: 0;" readonly></th>
 <td align="center" class="tg-0lax" colspan="3"><input type='text' name='COMPLTE' value="{{row['COMPLTE']}}" style="width:100%; border: 0;" readonly></td>
 <td align="center" class="tg-0lax" colspan="4">
-<input type="button" value="삭제" onclick="location.href='tracking_list/tracking_del/{{row['PARCEL']}}/{{row['NUMBER']}}'">
-<input type="button" value="조회" onclick="location.href='tracking_list/tracking_one/{{row['PARCEL']}}/{{row['NUMBER']}}'">
+<input type="button" value="삭제" onclick="location.href='{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_del'">
+<input type="button" value="조회" onclick="location.href='{{row['PARCEL']}}/{{row['NUMBER']}}/{{ telgm_token }}/{{ telgm_botid }}/{{ telgm }}/{{ telgm_alim }}/tracking_one'">
 </td>
 </tr>
  {% endfor %}
