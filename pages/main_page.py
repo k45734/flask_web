@@ -220,7 +220,7 @@ def log():
 	createFolder(logdata)
 	filepath = logdata + '/flask.log'
 	if not os.path.isfile(filepath):
-		f = open('./log/flask.log','a', encoding='utf-8')
+		f = open(filepath,'a', encoding='utf-8')
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
