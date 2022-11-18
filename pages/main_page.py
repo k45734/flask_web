@@ -215,6 +215,8 @@ def user_info_edit_proc():
 
 @bp.route("log")
 def log():
+	now = time.localtime()
+	test = "{}년{}월{}일{}시{}분{}초".format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
 	createFolder(logdata)
 	filepath = logdata + '/flask.log'
 	if not os.path.isfile(filepath):
@@ -222,45 +224,37 @@ def log():
 	if not session.get('logFlag'):
 		return render_template('login.html')
 	else:
-		if platform.system() == 'Windows':
-			filepath = logdata + '/flask.log'
-			tltl = []
-			with open(filepath, 'rt', encoding='cp949') as fp:
-				fp.seek (0, 2)
-				fsize = fp.tell()
-				fp.seek (max (fsize-1024, 0), 0)
-				try:
-					lines = fp.readlines()
-				except:
-					time.sleep(1)
-					lines = fp.readlines()
-			lines = lines[-10:]
+		filepath = logdata + '/flask.log'
+		tltl2 = []
+		ip_addr = []
+		with open(filepath, 'rt', encoding='utf-8') as fp:
+			lines = fp.readlines()
+			p1 = re.compile(r"(\d+)[.](\d+)[.](\d+)[.](\d+)")
 			for i in lines:
-				test = i.strip()
-				if '/log' in test:
+				m1 = p1.search(i)
+				if m1 != None:
+					ip_msg = m1.group(1) + '.' + m1.group(2) + '.' + m1.group(3) + '.' + m1.group(4)
+					if '192.168.0.' in ip_msg:
+						pass
+					elif '127.0.0.1' in ip_msg:
+						pass
+					elif '0.0.0.0' in ip_msg:
+						pass
+					else:
+						keys = ['DATE','IP_ADDRESS']
+						values = [test,ip_msg]
+						dt = dict(zip(keys, values))
+						ip_addr.append(dt)
+				else:
+					pass
+				if '/log' in i:
 					pass
 				else:
-					tltl.append(test)
-					
-		else:
-			filepath = logdata + '/flask.log'
-			tltl = []
-			with open(filepath, 'rt', encoding='utf-8') as fp:
-				fp.seek (0, 2)
-				fsize = fp.tell()
-				fp.seek (max (fsize-1024, 0), 0)
-				try:
-					lines = fp.readlines()
-				except:
-					time.sleep(1)
-					lines = fp.readlines()
-			lines = lines[-10:]
-			for i in lines:
-				test = i.strip()
-				if '/log' in test:
-					pass
-				else:
-					tltl.append(test)				
+					tltl2.append(i)
+		tltl = tltl2[-20:]
+		ip_file = logdata + "/ip_address.json"
+		with open(ip_file, 'a') as outfile:
+			json.dump(ip_addr, outfile, indent=4)
 		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
