@@ -442,6 +442,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	rows = cur.fetchall()
 	print(len(rows))
 	for row in rows:
+		global comp
 		carrier_id = row['PARCEL']
 		track_id = row['NUMBER']
 		print(carrier_id,track_id)
