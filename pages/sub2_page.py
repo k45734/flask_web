@@ -447,6 +447,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		track_id = row['NUMBER']
 		print(carrier_id,track_id)
 		comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+	logger.info('택배알림완료')
 	return comp
 	
 @bp2.route('tracking')
