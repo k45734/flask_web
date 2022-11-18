@@ -26,10 +26,7 @@ def second():
 	#데이타베이스 없으면 생성
 	con = sqlite3.connect(sub4db,timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS shop (idx integer primary key autoincrement, MY_DATE TEXT, PRODUCT_NAME TEXT, RECEIVING TEXT, SHIPPING TEXT, TOTAL TEXT)')
-	#con.execute("PRAGMA synchronous = OFF")
-	#con.execute("PRAGMA journal_mode = MEMORY")
 	con.execute("PRAGMA cache_size = 10000")
-	#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
@@ -46,10 +43,7 @@ def second():
 		SHIPPING = request.args.get('SHIPPING')
 		TOTAL = request.args.get('TOTAL')
 		con = sqlite3.connect(sub4db,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -67,10 +61,7 @@ def edit_result():
 		return redirect(url_for('main.index'))
 	else:
 		con = sqlite3.connect(sub4db,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -86,7 +77,6 @@ def edit_result():
 		else :
 			test = int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
-		#TOTAL = request.args.get('TOTAL')
 		db = con.cursor()
 		sql_update = "UPDATE shop SET PRODUCT_NAME= ?, RECEIVING = ?, SHIPPING = ?, TOTAL = ?, MY_DATE = ? WHERE idx = ?"
 		db.execute(sql_update,(PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL, MY_DATE, idx))
@@ -103,22 +93,16 @@ def edit():
 		PRODUCT_NAME = request.args.get('PRODUCT_NAME')
 		RECEIVING = request.args.get('RECEIVING')
 		SHIPPING = request.args.get('SHIPPING')
-		#if SHIPPING == 0:
-		#	test = int(RECEIVING) - 0
-		#else :
-	#		test = int(RECEIVING) - int(SHIPPING)
+		
 		if not SHIPPING:
 			SHIPPING = 0
 		if not RECEIVING:
 			RECEIVING = 0
 		test = int(a) + int(RECEIVING) - int(SHIPPING)
 		TOTAL = test
-		#TOTAL = request.args.get('TOTAL')
+		
 		con = sqlite3.connect(sub4db,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -188,10 +172,7 @@ def csv_import():
 		sheet['E1'] = "출고"
 		sheet['F1'] = "합계"
 		con = sqlite3.connect(sub4db,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -227,10 +208,7 @@ def start():
 		RECEIVING = request.form['RECEIVING']
 		SHIPPING = request.form['SHIPPING']
 		con = sqlite3.connect(sub4db,timeout=60)
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
 		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
 		con.execute("PRAGMA locking_mode = NORMAL")
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
@@ -252,7 +230,6 @@ def start():
 		try:
 			with sqlite3.connect(sub4db,timeout=60) as con:
 				if session.get('logFlag'):
-					#print(SHIPPING)
 					print(a)
 					if not SHIPPING:
 						SHIPPING = 0
@@ -263,7 +240,6 @@ def start():
 					con.row_factory = sqlite3.Row
 					cur = con.cursor()
 					cur.execute("INSERT INTO shop (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL) VALUES (?, ?, ?, ?, ?)", (MY_DATE, PRODUCT_NAME, RECEIVING, SHIPPING, TOTAL))
-					#cur.execute("select * from database2")
 					con.commit()
 					rows = cur.fetchall()
 	
