@@ -149,7 +149,7 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 		subprocess.call(FLASKAPPS, shell=True)
 	logger.info(msg_end)
 	#DB최적화
-	db_optimization()
+	#db_optimization()
 	comp = '완료'
 	return comp		
 @bp3.route('/')
