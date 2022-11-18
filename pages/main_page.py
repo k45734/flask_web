@@ -254,7 +254,8 @@ def log():
 		tltl = tltl2[-20:]
 		ip_file = logdata + "/ip_address.json"
 		with open(ip_file, 'a') as outfile:
-			json.dump(ip_addr, outfile, indent=4)
+			if len(ip_addr) != 0:
+				json.dump(ip_addr, outfile, indent=4)
 		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
