@@ -440,13 +440,14 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	sql = "select * from tracking where COMPLTE = ?"
 	cur.execute(sql, ('False',))
 	rows = cur.fetchall()
-	print(len(rows))
-	for row in rows:
-		global comp
-		carrier_id = row['PARCEL']
-		track_id = row['NUMBER']
-		print(carrier_id,track_id)
-		comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+	if len(rows) != 0 :
+		for row in rows:
+			carrier_id = row['PARCEL']
+			track_id = row['NUMBER']
+			print(carrier_id,track_id)
+			comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+	else:
+		comp = '정보없음'
 	logger.info('택배알림완료')
 	return comp
 	
