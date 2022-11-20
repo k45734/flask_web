@@ -1264,8 +1264,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
 				if '오퀴즈' in title:
-					#p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
-					p = re.compile('(.*?)')
+					if 'Liiv' in result_remove_all:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
+					else:
+						p = re.compile('(.*?)')	
 				elif '캐시워크' in title:
 					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 				elif '홈플러스' in title:
