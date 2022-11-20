@@ -268,7 +268,7 @@ def tel_send_message(list):
 	
 	return comp
 
-@webtoon.route('db_list_reset', methods=['POST'])	
+@webtoon.route('db_list_reset', methods=['GET'])	
 def db_list_reset():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
