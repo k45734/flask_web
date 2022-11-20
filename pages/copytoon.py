@@ -132,10 +132,7 @@ def manazip(title, subtitle,cbz):
 	return comp	
 	
 def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun):
-	if gbun == 'adult':
-		DB_NAME = 'TOON'
-	else:
-		DB_NAME = 'TOON_NORMAL'
+	DB_NAME = gbun
 	try:
 		#데이타베이스 없으면 생성
 		con = sqlite3.connect(webtoondb,timeout=60)
