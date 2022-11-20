@@ -148,13 +148,13 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		time.sleep(3) 
 		con = sqlite3.connect(webtoondb,timeout=60)
 		cur = con.cursor()
-		sql = "select * from TOON where WEBTOON_IMAGE = ? and TITLE = ? and SUBTITLE = ?"
+		sql = 'select * from ' + DB_NAME + ' where WEBTOON_IMAGE = ? and TITLE = ? and SUBTITLE = ?'
 		cur.execute(sql, (webtoon_image,title, subtitle))
 		row = cur.fetchone()
 		if row != None:
 			pass
 		else:
-			cur.execute("INSERT OR REPLACE INTO TOON (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE) VALUES (?, ?, ?, ?, ?, ?, ?)", (title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
+			cur.execute('INSERT OR REPLACE INTO ' + DB_NAME + ' (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE) VALUES (?, ?, ?, ?, ?, ?, ?)', (title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
 			con.commit()
 			logger.info('%s %s %s %s',title, subtitle, webtoon_number, gbun)
 	except:
