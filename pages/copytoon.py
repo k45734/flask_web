@@ -222,6 +222,7 @@ def tel_send_message(list):
 		page_num = lastpage1.strip("webtoonalim/")
 		last_num.append(page_num)
 		#현재페이지의 갯수
+		
 		try:
 			ll = int(json_data[0])
 		except:
@@ -232,8 +233,9 @@ def tel_send_message(list):
 				break
 			else:
 				PAGE_INFO = {'before': total }
-				logger.info('%s',PAGE_INFO)
-				print(PAGE_INFO)
+				#logger.info('%s',PAGE_INFO)
+				logger.info('현재시작 페이지 : %s / 과거페이지 : %s / 진행중페이지 : %s',last_num[0], json_data[0], total)
+				print('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(last_num[0], json_data[0],total))
 				req = s.post(url2, data=PAGE_INFO)
 				html = req.text
 				soup = bs(html, "html.parser")
