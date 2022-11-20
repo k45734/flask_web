@@ -72,7 +72,7 @@ def cleanText(readData):
 	text = re.sub("\s{2,}", ' ', text)
 	return text	
 	
-def url_to_image(title, subtitle, webtoon_image, webtoon_number):
+def url_to_image(title, subtitle, webtoon_image, webtoon_number,gbun):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	req = requests.get(webtoon_image,headers=header)	
 	title2 = title.strip()
@@ -86,7 +86,7 @@ def url_to_image(title, subtitle, webtoon_image, webtoon_number):
 		root = '/data'
 	packege = 'webtoon'
 	filename = webtoon_number + '.jpg'
-	dfolder = root + '/' + packege
+	dfolder = root + '/' + packege + '/' + gbun
 	fifi = dfolder + '/' + parse + '/' + parse2 + '/' + filename
 	#폴더 없으면 만들다
 	if not os.path.exists('{}/{}/{}'.format(dfolder,parse,parse2)):
@@ -324,7 +324,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 			if cnt >= 1:
 				for ii,iii in zip(image_url_last,image_number_last):
 					print(title, subtitle, ii,iii)
-					url_to_image(title, subtitle,ii,iii)	
+					url_to_image(title, subtitle,ii,iii,gbun)	
 					add_d(subtitle, title,ii,gbun)
 				if compress == '0':
 					print('다운완료후 압축하자')
