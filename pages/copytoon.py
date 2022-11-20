@@ -156,7 +156,7 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		else:
 			cur.execute('INSERT OR REPLACE INTO ' + DB_NAME + ' (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE) VALUES (?, ?, ?, ?, ?, ?, ?)', (title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
 			con.commit()
-			logger.info('%s %s %s %s',title, subtitle, webtoon_number, gbun)
+			#logger.info('%s %s %s %s',title, subtitle, webtoon_number, gbun)
 	except:
 		con.rollback()
 	finally:		
