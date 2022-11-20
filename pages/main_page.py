@@ -19,7 +19,12 @@ from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-
+#페이지 기능
+try:
+	from flask_paginate import Pagination, get_page_args
+except ImportError:
+	os.system('pip install flask_paginate')
+	from flask_paginate import Pagination, get_page_args
 bp = Blueprint('main', __name__, url_prefix='/')
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
@@ -214,7 +219,31 @@ def getUser(edit_idx):
 	row = cursor.fetchone()
 	edit_id = row[0]
 	return render_template('users/user_info.html', edit_idx=edit_idx, edit_id=edit_id)
-	
+
+@bp.route('ip_list', methods=['GET'])
+def ip_list_get():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		per_page = 10
+		page, _, offset = get_page_args(per_page=per_page)
+		con = sqlite3.connect(ip_client,timeout=60)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from IP_LIST")
+		total2 = cur.fetchall()
+		total = len(total2)
+		cur.execute('select * from IP_LIST ORDER BY idx DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		wow = cur.fetchall()		
+		return render_template('ip_list.html', wow = wow, pagination=Pagination(page=page, total=total, per_page=per_page))
+
+		
 @bp.route('user_info_edit_proc', methods=['POST'])
 def user_info_edit_proc():
 	idx = request.form['idx']

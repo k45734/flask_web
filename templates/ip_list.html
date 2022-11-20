@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+
+<center><h4>접속자 리스트 목록</p>
+<thead>
+<tr>
+<th align="center" class="tg-baqh">번호</th>
+<th align="center" class="tg-baqh" colspan="2">IP</th>
+<th align="center" class="tg-baqh" colspan="3">날짜</th>
+</tr>
+{% for i in wow %}
+<tr>
+<th align="center" class="tg-0lax"><input type="text" name="title" value="{{ i['idx'] }}" style="width:100%; border: 0;" readonly></th>
+<th align="center" class="tg-0lax" colspan="2"><input type="text" name="subtitle" value="{{i['접속IP']}}" style="width:100%; border: 0;" readonly></th>
+<th align="center" class="tg-0lax" colspan="3"><input type="text" name="subtitle" value="{{i['접속날짜']}}" style="width:100%; border: 0;" readonly></th>
+</tr>
+{% endfor %}
+</center>
+</tr>
+</tbody>
+</table>
+{{ pagination.links | safe }}
+{% endblock %}

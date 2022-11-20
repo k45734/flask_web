@@ -7,12 +7,17 @@
     <head> 
     </head>
     <body>
-        <form action="/user_info_edit_proc" method="POST">
+	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+        <form action="/user_info_edit_proc" method="POST"><center><br>
 		수정
 		<input type='hidden' name='idx' value="{{ edit_idx }}">
 		ID : <input type='text' name='user' value="{{ edit_id }}">
-		PWD : <input type='password' name='passwd' value="">
+		PWD : <input type='password' name='passwd' value=""><br>
 		<br><input type='submit' value="수정">
+		<br><br><br>
+		<input type="button" value="접속자 목록보기" onclick="location.href='/ip_list'">
+		</table>
+		
     </body>
 </html>
 {% endblock %}
