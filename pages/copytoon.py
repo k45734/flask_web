@@ -101,7 +101,7 @@ def url_to_image(title, subtitle, webtoon_image, webtoon_number,gbun):
 	comp = '완료'
 	return comp	
 	
-def manazip(title, subtitle,cbz):
+def manazip(title, subtitle,cbz,gbun):
 	title2 = title.strip()
 	subtitle2 = subtitle.strip()
 	parse = cleanText(title2)
@@ -112,7 +112,7 @@ def manazip(title, subtitle,cbz):
 	else:
 		root = '/data'
 	packege = 'webtoon'
-	dfolder = root + '/' + packege
+	dfolder = root + '/' + packege + '/' + gbun
 	if os.path.isdir(dfolder + '/{}/{}'.format(parse,parse2)):
 		if cbz == '0':
 			fantasy_zip = zipfile.ZipFile(dfolder + '/{}/{}.cbz'.format(parse,parse2), 'w')   
@@ -328,7 +328,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 					add_d(subtitle, title,ii,gbun)
 				if compress == '0':
 					print('다운완료후 압축하자')
-					manazip(title, subtitle,cbz)
+					manazip(title, subtitle,cbz,gbun)
 					
 				else:
 					pass
