@@ -263,18 +263,7 @@ def log():
 					tltl2.append(i)
 		tltl = tltl2[-20:]
 		return render_template('log.html', tltl=tltl)	
-
-@bp.route("update")
-def update(file_name = None):
-	if not session.get('logFlag'):
-		return render_template('login.html')
-	else:
-		if platform.system() == 'Windows':
-			os.system("flask run --reload")
-		else:
-			os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
-		return redirect(url_for('main.index'))
-		
+	
 @bp.route("restart")
 def restart():
 	if not session.get('logFlag'):
@@ -283,7 +272,5 @@ def restart():
 		if platform.system() == 'Windows':
 			os.system("flask run --reload")
 		else:
-			os.system("cat /dev/null > " + logdata + "/flask.log")
-			os.system("chmod 777 * -R")
-			os.system("kill -9 `ps -ef|grep app.py|awk '{print $1}'`")
+			os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
 		return redirect(url_for('main.index'))
