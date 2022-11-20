@@ -25,9 +25,11 @@ if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	logdata = at[0] + '/data/log'
 	root = at[0] + '/data'
+	ip_client = at[0] + '/data/ip_list.db'
 else:
 	logdata = '/data/log'
 	root = '/data'
+	ip_client = '/data/ip_list.db'
 
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
@@ -44,8 +46,36 @@ def createFolder(directory):
 		print ('Error: Creating directory. ' +  directory)
 	comp = '완료'
 	return comp
+	
+def ip_cli(IP,DATE):
+	#데이타베이스 없으면 생성
+	con = sqlite3.connect(ip_client,timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS IP_LIST (idx integer primary key autoincrement, 접속IP TEXT, 접속날짜 TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	#try:
+	with sqlite3.connect(ip_client,timeout=60) as con:
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("INSERT INTO IP_LIST (접속IP, 접속날짜) VALUES (?, ?)", (IP,DATE))
+		con.commit()
+	#except:
+	#	con.rollback()
+	#finally:
+		#con.close()
+	print(IP,DATE)
+	return
 
-
+def mydate():
+	now = datetime.now()
+	date = now.strftime('%Y-%m-%d %H:%M:%S')
+	return date
+	
 filepath = logdata + '/flask.log'
 
 #실행할때 웹툰DB 목록 중복
@@ -79,9 +109,11 @@ scheduler.start()
 @bp.route("/")
 @bp.route("index")
 def index():
-	now = time.localtime()
-	test = "{}년{}월{}일{}시{}분{}초".format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-
+	date = mydate()
+	ip = request.remote_addr
+	#접속자 DB저장
+	ip_cli(ip,date)
+	
 	if platform.system() == 'Windows':
 		s = os.path.splitdrive(os.getcwd())
 		root = s[0]
@@ -116,7 +148,7 @@ def index():
 		values = [job_id, job_next_time]
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
-	return render_template('main.html', test = test, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
+	return render_template('main.html', test = date, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
 def cancle(FLASKAPPSNAME):
@@ -125,8 +157,6 @@ def cancle(FLASKAPPSNAME):
 	else:
 		scheduler.remove_job(FLASKAPPSNAME)
 		logger.info('%s 스케줄러를 삭제하였습니다.', FLASKAPPSNAME)
-		
-
 		return redirect(url_for('main.index'))
 			
 @bp.route('login')
@@ -215,8 +245,6 @@ def user_info_edit_proc():
 
 @bp.route("log")
 def log():
-	now = time.localtime()
-	test = "{}년{}월{}일{}시{}분{}초".format(now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
 	createFolder(logdata)
 	filepath = logdata + '/flask.log'
 	if not os.path.isfile(filepath):
@@ -226,36 +254,14 @@ def log():
 	else:
 		filepath = logdata + '/flask.log'
 		tltl2 = []
-		ip_addr = []
 		with open(filepath, 'rt', encoding='utf-8') as fp:
 			lines = fp.readlines()
-			p1 = re.compile(r"(\d+)[.](\d+)[.](\d+)[.](\d+)")
 			for i in lines:
-				m1 = p1.search(i)
-				if m1 != None:
-					ip_msg = m1.group(1) + '.' + m1.group(2) + '.' + m1.group(3) + '.' + m1.group(4)
-					if '192.168.0.' in ip_msg:
-						pass
-					elif '127.0.0.1' in ip_msg:
-						pass
-					elif '0.0.0.0' in ip_msg:
-						pass
-					else:
-						keys = ['DATE','IP_ADDRESS']
-						values = [test,ip_msg]
-						dt = dict(zip(keys, values))
-						ip_addr.append(dt)
-				else:
-					pass
 				if '/log' in i:
 					pass
 				else:
 					tltl2.append(i)
 		tltl = tltl2[-20:]
-		ip_file = logdata + "/ip_address.json"
-		with open(ip_file, 'a') as outfile:
-			if len(ip_addr) != 0:
-				json.dump(ip_addr, outfile, indent=4)
 		return render_template('log.html', tltl=tltl)	
 
 @bp.route("update")
