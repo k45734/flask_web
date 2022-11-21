@@ -1358,7 +1358,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			posts = gogo.findAll("div",{"class":"conts"})
 								
 			for i in posts:
-				title = i.find('span',{'class':'title'}).text
+				title_old = i.find('span',{'class':'title'}).find_all(text = True)
+				title = title_old[0] + title_old[1]
 				url = i.find('a')["href"]
 				keys = ['TITLE','URL']
 				values = [title, url]
