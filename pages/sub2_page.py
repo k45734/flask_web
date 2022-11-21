@@ -1236,7 +1236,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		time.sleep(10)
 		list = []
 		last = []
-		MAIN = ['https://gaecheon.tistory.com' , 'https://quizbang.tistory.com' ]
+		MAIN = ['https://gaecheon.tistory.com' , 'https://quizbang.tistory.com' , 'https://luckyquiz4.tistory.com' ]
 		url_count = 0
 		for mi in MAIN:
 			MAINURL = mi + '/m/entries.json?size=50'
@@ -1275,8 +1275,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				URL = MYURL + list_url
 				req = urllib.request.urlopen(URL).read()
 				soup = bs(req, 'html.parser')
-				all_text2 = soup.text
-				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
+				try:
+					all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
+				except:
+					all_text = soup.find('div',{'class':'blogview_content editor_daum'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
 				
 				if 'gaecheon' in URL:
@@ -1287,6 +1289,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					values = [title, memo_check, URL,MYURL]
 					dt = dict(zip(keys, values))
 					last.append(dt)
+					
+				elif 'luckyquiz4' in URL:
+					p = re.compile('정답은 (.*?)입니다.')
+					memo = p.findall(result_remove_all)
+					memo_check = '  '.join(memo).lstrip()
+					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+					values = [title, memo_check, URL,MYURL]
+					dt = dict(zip(keys, values))
+					last.append(dt)					
 					
 				else:
 					if '오퀴즈' in title:
