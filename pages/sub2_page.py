@@ -1164,13 +1164,34 @@ def unse_ok():
 	
 #퀴즈정답알림
 #DB 알리미
-def quiz_add_go(title, memo_s, URL):
+def quiz_add_go(title, memo_s, URL,SITE_NAME):
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	#데이터베이스 컬럼 추가하기
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)	
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%SITE_NAME%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column SITE_NAME TEXT"
+		cur.execute(sql)
+	else:
+		pass
 	try: #URL TEXT, SEL TEXT, SELNUM TEXT
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
-		sql = "select * from quiz where URL = ? "
-		cur.execute(sql, (URL,))
+		sql = "select * from quiz where URL = ? AND SITE_NAME = ?"
+		cur.execute(sql, (URL,SITE_NAME))
 		row = cur.fetchone()
 		if row != None:
 			MEMO = row['MEMO']
@@ -1178,143 +1199,150 @@ def quiz_add_go(title, memo_s, URL):
 			if memo_s == MEMO and title == old_title:
 				pass
 			else:
-				cur.execute("update quiz set MEMO = ?, COMPLTE = ?, TITLE = ? where URL = ? ",(memo_s,'False',title,URL))
+				cur.execute("update quiz set MEMO = ?, COMPLTE = ?, TITLE = ? where URL = ? AND SITE_NAME = ?",(memo_s,'False',title,URL,SITE_NAME))
 				con.commit()
-				#logger.info('해당 내용은 DB에 있어서 %s %s -> %s %s 수정합니다.', old_title, MEMO, title, memo_s)
-				#print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title, MEMO, title, memo_s))
+				#print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title,MEMO, title,memo_s))
 		else:
-			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title, URL, memo_s, 'False'))
+			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE, SITE_NAME) VALUES (?,?,?,?,?)", (title, URL, memo_s, 'False',SITE_NAME))
 			con.commit()
 	except:
 		con.rollback()	
 	finally:
 		con.close()
-	comp = '완료'
-	return comp
 #알리미 완료
-def quiz_add_go_d(MEMO, URL):
+def quiz_add_go_d(MEMO, URL,SITE_NAME):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		cur = con.cursor()
-		sql = "select * from quiz where MEMO = ? and URL = ?"
-		cur.execute(sql, (MEMO,URL))
+		sql = "select * from quiz where MEMO = ? and URL = ? AND SITE_NAME = ?"
+		cur.execute(sql, (MEMO,URL,SITE_NAME))
 		row = cur.fetchone()
 		if row == None:
 			pass
 		else:
-			sql = "UPDATE quiz SET COMPLTE = ? WHERE MEMO = ? and URL = ?"	
-			cur.execute(sql,('True', MEMO,URL))
+			sql = "UPDATE quiz SET COMPLTE = ? WHERE MEMO = ? and URL = ? and SITE_NAME = ?"	
+			cur.execute(sql,('True', MEMO,URL,SITE_NAME))
 			con.commit()
 	except:
 		con.rollback()	
 	finally:	
 		con.close()
-	comp = '완료'
-	return comp	
+		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	try:
 		logger.info('퀴즈정답알림 시작')
 		#퀴즈정답 시작후 10초후 작동시작
 		time.sleep(10)
-		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = EXCLUSIVE")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()
 		list = []
 		last = []
-		URL = 'https://quizbang.tistory.com/m/entries.json?size=50'
-		req = requests.get(URL).json()
-		check = req['code']
-		if check == 200:
-			for p in range(0,1):
-				URL = 'https://quizbang.tistory.com/m/entries.json?size=50&page=' + str(p)
-				req = requests.get(URL).json()
-				page = req['result']['nextPage']
-				list_r = req['result']['items']
-				if page == None:
-					break
-				else:
-					for i in list_r:
-						title_n = i['title']
-						#all_text = i['summary']
-						url = i['path']
-						keys = ['TITLE','URL']
-						values = [title_n, url]
-						dt = dict(zip(keys, values))
-						list.append(dt)
+		MAIN = ['https://gaecheon.tistory.com' , 'https://quizbang.tistory.com' ]
+		url_count = 0
+		for mi in MAIN:
+			MAINURL = mi + '/m/entries.json?size=50'
+			req = requests.get(MAINURL).json()
+			check = req['code']
+			if check == 200:
+				for p in range(0,1):
+					URL = MAINURL + '&page=' + str(p)
+					print(URL)
+					req = requests.get(URL).json()
+					page = req['result']['nextPage']
+					list_r = req['result']['items']
+					if page == None:
+						break
+					else:
+						for i in list_r:
+							title_n = i['title']
+							#all_text = i['summary']
+							url = i['path']
+							keys = ['MYURL','TITLE','URL']
+							values = [mi,title_n, url]
+							dt = dict(zip(keys, values))
+							#print(dt)
+							list.append(dt)
+					url_count += 1
 		else:
 			print('종료')
 			pass
+		#cnt = 1
 		for i in list:
+			MYURL = i['MYURL']
 			list_url = i['URL']
 			title = i['TITLE']
 			with requests.Session() as s:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
-				URL = 'https://quizbang.tistory.com' + list_url
+				URL = MYURL + list_url
 				req = urllib.request.urlopen(URL).read()
 				soup = bs(req, 'html.parser')
 				all_text2 = soup.text
 				all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
 				result_remove_all = re.sub(r"\s", " ", all_text)
-				if '오퀴즈' in title:
-					if 'Liiv' in result_remove_all:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[')
-					else:
-						p = re.compile('(.*?)')	
-				elif '캐시워크' in title:
-					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
-				elif '홈플러스' in title:
-					p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[')
-				elif '신한' in title:
-					p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드로이(.*?)\[')
-				elif '리브메이트' in title:
-					p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
-					check = p1.findall(result_remove_all)
-					if len(check) == 0:
-						#print(result_remove_all)
-						p = re.compile('●(.*?)\[')
-					else:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
-				elif '토스' in title:
-					p = re.compile('퀴즈가 안보이면 업데이트 해주세요.\)   로 (.*?) \[')
-				elif '우리WON멤버스' in title:
-					p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[')
-					check = p1.findall(result_remove_all)
-					if len(check) == 0:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[')
-					else:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[')
-				else:	
-					p = re.compile('정답 :(.*?)\[')
-				memo = p.findall(result_remove_all)
-				memo_check = ''.join(memo).lstrip()
-				if 'Liiv Mate' in memo_check:
-					memo_s = memo_check.replace('는 지속적으로 확대할 예정입니다. - Liiv Mate 앱내에서도 잠금화면/보 고쌓기(안드로이 ', '')
-				else:
-					memo_s = ''.join(memo).lstrip()
-				if '됩니다.' in memo_s :
-					pass
-				elif len(memo_s) == 0 :
-					pass
-				else:
-					keys = ['TITLE','MEMO', 'URL']
-					values = [title, memo_s, URL]
+				
+				if 'gaecheon' in URL:
+					p = re.compile('정답 : (.*?) ') 
+					memo = p.findall(result_remove_all)
+					memo_check = '  '.join(memo).lstrip().replace('[', '').replace('문제.', '').replace('문제2.', '').replace('문제3.', '').replace('문제4.', '').replace('정답', '')
+					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+					values = [title, memo_check, URL,MYURL]
 					dt = dict(zip(keys, values))
 					last.append(dt)
 					
+				else:
+					if '오퀴즈' in title:
+						if 'Liiv' in result_remove_all:
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[ 파')
+						else:
+							p = re.compile('(.*?)')			
+						
+					elif '캐시워크' in title:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[ 파')
+					elif '홈플러스' in title:
+						p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[')
+					elif '신한' in title:
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드로이(.*?)\[ 파')
+					elif '리브메이트' in title:
+						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+						check = p1.findall(result_remove_all)
+						if len(check) == 0:
+							print(result_remove_all)
+							p = re.compile('●(.*?)\[')
+						else:
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+					elif '토스' in title:
+						p = re.compile('퀴즈가 안보이면 업데이트 해주세요.\)   로 (.*?) \[ 파')
+					elif '우리WON멤버스' in title:
+						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[ 파')
+						check = p1.findall(result_remove_all)
+						if len(check) == 0:
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+						else:
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[ 파')
+					else:	
+						p = re.compile('정답 :(.*?)\[ 파')
+					memo = p.findall(result_remove_all)
+					memo_check = ''.join(memo).lstrip()
+					if 'Liiv Mate' in memo_check:
+						memo_s = memo_check.replace('는 지속적으로 확대할 예정입니다. - Liiv Mate 앱내에서도 잠금화면/보 고쌓기(안드로이 ', '')
+					else:
+						memo_s = ''.join(memo).lstrip()
+					if '됩니다.' in memo_s :
+						pass
+					elif len(memo_s) == 0 :
+						pass
+					else:
+						keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+						values = [title, memo_s, URL,MYURL]
+						dt = dict(zip(keys, values))
+						last.append(dt)
+		
 		for ii in last:
 			title = ii['TITLE']
 			memo_s = ii['MEMO']
 			URL = ii['URL']
-			quiz_add_go(title, memo_s, URL)		
-		lllast = []		
+			SITE_NAME = ii['SITE_NAME']
+			quiz_add_go(title, memo_s, URL,SITE_NAME)
+			
 		#알려준다.
 		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 		con.row_factory = sqlite3.Row
@@ -1327,19 +1355,20 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				TITLE = row['TITLE']
 				MEMO = row['MEMO']
 				URL = row['URL']
+				SITE_NAME = row['SITE_NAME']
 				msg = '{}\n정답 : {}'.format(TITLE,MEMO)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-				quiz_add_go_d(MEMO, URL)
+				quiz_add_go_d(MEMO, URL,SITE_NAME)
 			logger.info('퀴즈정답 완료했습니다.')
 		else:
 			logger.info('퀴즈정답 신규내용이 없습니다.')
 			pass
 		con.close()
 	except:	
-		pass
-	
+		pass	
 	comp = '완료'
 	return comp		
+	
 @bp2.route('quiz')
 def quiz():
 	#데이타베이스 없으면 생성
