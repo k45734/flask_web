@@ -1360,6 +1360,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			for i in posts:
 				title_old = i.find('span',{'class':'title'}).find_all(text = True)
 				title = title_old[0] + title_old[1]
+				#print(title)
 				url = i.find('a')["href"]
 				keys = ['TITLE','URL']
 				values = [title, url]
@@ -1373,13 +1374,20 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				html = req.text
 				gogo = bs(html, "html.parser")
 				memo_old = gogo.findAll("table",{"class":"pic_bg"})
-				memo_new = memo_old[2].find('b')
-				if memo_new != None:
-					memo = memo_new.text
-					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-					values = [title, memo, sec,'https://www.ppomppu.co.kr']
-					dt = dict(zip(keys, values))
-					last.append(dt)		
+				memo_new = memo_old[2].findAll('b')
+				memo_list = []
+				for af in memo_new:
+					a = af.text
+					f = a.replace(u'\xa0',u'')
+					memo_list.append(f)
+				memo = ' '.join(memo_list).lstrip()
+				p = re.compile('(.*?)  ')
+				memo_last = p.findall(memo)
+				memos = '  '.join(memo_last).lstrip()
+				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+				values = [title, memos, sec,'https://www.ppomppu.co.kr']
+				dt = dict(zip(keys, values))
+				last.append(dt)
 		for ii in last:
 			title = ii['TITLE']
 			memo_s = ii['MEMO']
