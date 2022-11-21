@@ -1335,7 +1335,39 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 						values = [title, memo_s, URL,MYURL]
 						dt = dict(zip(keys, values))
 						last.append(dt)
-		
+
+		#기존 리스트 목록 삭제
+		list.clear()
+		with requests.Session() as s:
+			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+			URL = 'https://www.ppomppu.co.kr/search_bbs.php?bbs_cate=2&keyword=%BF%C0%C4%FB%C1%EE&search_type=sub_memo&order_typedate'
+			req = s.get(URL,headers=header)
+			html = req.text
+			gogo = bs(html, "html.parser")
+			posts = gogo.findAll("div",{"class":"conts"})
+								
+			for i in posts:
+				title = i.find('span',{'class':'title'}).text
+				url = i.find('a')["href"]
+				keys = ['TITLE','URL']
+				values = [title, url]
+				dt = dict(zip(keys, values))
+				list.append(dt)
+			
+			for ii in list:
+				title = ii['TITLE']
+				sec = 'https://www.ppomppu.co.kr' + ii['URL']
+				req = s.get(sec,headers=header)
+				html = req.text
+				gogo = bs(html, "html.parser")
+				memo_old = gogo.findAll("table",{"class":"pic_bg"})
+				memo_new = memo_old[2].find('b')
+				if memo_new != None:
+					memo = memo_new.text
+					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+					values = [title, memo, sec,'https://www.ppomppu.co.kr']
+					dt = dict(zip(keys, values))
+					last.append(dt)		
 		for ii in last:
 			title = ii['TITLE']
 			memo_s = ii['MEMO']
