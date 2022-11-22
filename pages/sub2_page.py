@@ -1859,7 +1859,10 @@ def ytnsnews(newdate):
 			ttitle = bs0bj.find("h1",{"id":"h1"})
 			post = bs0bj.find('div',{'id':'article_content_text'})	
 			movie = bs0bj.findAll('iframe',{'id':'zumFrame'})
-			TITLE = ttitle.text.strip()
+			try:
+				TITLE = ttitle.text.strip()
+			except:
+				continue
 			MEMO = post.text.strip()
 			CAST = "YTN"
 			COMPLETE = 'False'
