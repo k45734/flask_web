@@ -296,49 +296,49 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 	else:
 		DB_NAME = 'TOON_NORMAL'
 	logger.info('웹툰 다운로드합니다.')
-	try:
-		con = sqlite3.connect(webtoondb,timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.row_factory = sqlite3.Row
-		cur2 = con.cursor()
-		if alldown == 'True':
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' group by TITLE,SUBTITLE'
-		else:
-			sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
-		print(sql2)
-		cur2.execute(sql2)
-		itrows = cur2.fetchall()
-		for i in itrows:
-			title = i['TITLE']
-			subtitle = i['SUBTITLE']
-			webtoon_image = i[2]
-			webtoon_image_number = i[3]
-			complete = i[4]
-			image_url_last = webtoon_image.split(',')
-			image_number_last = webtoon_image_number.split(',')
-			complete_last = complete.split(',')
-			cnt = complete_last.count('False')
-			if cnt >= 1:
-				for ii,iii in zip(image_url_last,image_number_last):
-					print(title, subtitle, ii,iii)
-					url_to_image(title, subtitle,ii,iii,gbun)	
-					add_d(subtitle, title,ii,gbun)
-				if compress == '0':
-					print('다운완료후 압축하자')
-					manazip(title, subtitle,cbz,gbun)
-					
-				else:
-					pass
+	#try:
+	con = sqlite3.connect(webtoondb,timeout=60)
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.row_factory = sqlite3.Row
+	cur2 = con.cursor()
+	if alldown == 'True':
+		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' group by TITLE,SUBTITLE'
+	else:
+		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
+	print(sql2)
+	cur2.execute(sql2)
+	itrows = cur2.fetchall()
+	for i in itrows:
+		title = i['TITLE']
+		subtitle = i['SUBTITLE']
+		webtoon_image = i[2]
+		webtoon_image_number = i[3]
+		complete = i[4]
+		image_url_last = webtoon_image.split(',')
+		image_number_last = webtoon_image_number.split(',')
+		complete_last = complete.split(',')
+		cnt = complete_last.count('False')
+		if cnt >= 1:
+			for ii,iii in zip(image_url_last,image_number_last):
+				print(title, subtitle, ii,iii)
+				url_to_image(title, subtitle,ii,iii,gbun)	
+				add_d(subtitle, title,ii,gbun)
+			if compress == '0':
+				print('다운완료후 압축하자')
+				manazip(title, subtitle,cbz,gbun)
+				
 			else:
-				print('다운완료되었다')
-		con.close()	
-	except:
-		logger.info('정보가없습니다.')
+				pass
+		else:
+			print('다운완료되었다')
+	con.close()	
+	#except:
+	#	logger.info('정보가없습니다.')
 	logger.info('웹툰 다운로드를 종료합니다.')	
 @webtoon.route('/')
 @webtoon.route('index')
