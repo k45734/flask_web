@@ -367,7 +367,7 @@ def index():
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
-		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
+		return render_template('webtoon.html')	
 		
 @webtoon.route('alim_list', methods=["GET"])
 def alim_list():
