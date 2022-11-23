@@ -307,9 +307,9 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 	con.row_factory = sqlite3.Row
 	cur2 = con.cursor()
 	if alldown == 'True':
-		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' group by TITLE,SUBTITLE'
+		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE,"\n"),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' group by TITLE,SUBTITLE'
 	else:
-		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
+		sql2 = 'select TITLE,SUBTITLE, group_concat(WEBTOON_IMAGE,"\n"),group_concat(WEBTOON_IMAGE_NUMBER),group_concat(COMPLETE) from ' + DB_NAME + ' WHERE TITLE="' + title  + '" and SUBTITLE="' + subtitle + '" group by SUBTITLE'
 	print(sql2)
 	cur2.execute(sql2)
 	itrows = cur2.fetchall()
@@ -319,7 +319,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		webtoon_image = i[2]
 		webtoon_image_number = i[3]
 		complete = i[4]
-		image_url_last = webtoon_image.split(',')
+		image_url_last = webtoon_image.split('\n')
 		image_number_last = webtoon_image_number.split(',')
 		complete_last = complete.split(',')
 		cnt = complete_last.count('False')
