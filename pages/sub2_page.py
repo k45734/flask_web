@@ -1302,39 +1302,41 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				else:
 					if '오퀴즈' in title:
 						if 'Liiv' in result_remove_all:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드(.*?)\[ 파')
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 						else:
-							p = re.compile('(.*?)')			
-						
+							p = re.compile('(.*?)')	
 					elif '캐시워크' in title:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[ 파')
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 					elif '홈플러스' in title:
-						p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[')
-					elif '신한' in title:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 고쌓기\(안드로이(.*?)\[ 파')
+						p = re.compile('Lii14v Mate 앱내에서도 잠금화면 (.*?)\[')
+					elif '신한' in title:	
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보  고쌓기\/\(안드로이(.*?)\[')
 					elif '리브메이트' in title:
-						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면/보고쌓기\(안드로이 (.*?)\[')
 						check = p1.findall(result_remove_all)
 						if len(check) == 0:
-							print(result_remove_all)
 							p = re.compile('●(.*?)\[')
 						else:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면/보고쌓기\(안드로이 (.*?)\[')
 					elif '토스' in title:
-						p = re.compile('퀴즈가 안보이면 업데이트 해주세요.\)   로 (.*?) \[ 파')
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 					elif '우리WON멤버스' in title:
-						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[ 파')
+						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 						check = p1.findall(result_remove_all)
 						if len(check) == 0:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 						else:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 퀴즈\)(.*?)\[ 파')
+							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
 					else:	
 						p = re.compile('정답 :(.*?)\[ 파')
 					memo = p.findall(result_remove_all)
 					memo_check = ''.join(memo).lstrip()
 					if 'Liiv Mate' in memo_check:
 						memo_s = memo_check.replace('는 지속적으로 확대할 예정입니다. - Liiv Mate 앱내에서도 잠금화면/보 고쌓기(안드로이 ', '')
+					elif '고쌓기(안드로이' in memo_check:
+						memo_s = memo_check.replace('고쌓기(안드로이', '')
+					elif '고쌓기(안드' in memo_check:
+						memo_s = memo_check.replace('고쌓기(안드', '')
 					else:
 						memo_s = ''.join(memo).lstrip()
 					if '됩니다.' in memo_s :
