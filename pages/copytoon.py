@@ -256,8 +256,11 @@ def tel_send_message(list):
 						webtoon_url = aac[3]
 						webtoon_image = aac[4]
 						webtoon_number = aac[5]
-						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.	
-						add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
+						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.
+						if 'jp' in webtoon_image:
+							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
+						else:
+							logger.info('%s %s %s',title, subtitle,webtoon_image)
 						
 					except:	
 						continue
@@ -325,9 +328,9 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		cnt = complete_last.count('False')
 		if cnt >= 1:
 			for ii,iii in zip(image_url_last,image_number_last):
-				print(title, subtitle, ii,iii)
-				url_to_image(title, subtitle,ii,iii,gbun)	
-				add_d(subtitle, title,ii,gbun)
+				if 'jp' in ii:
+					url_to_image(title, subtitle,ii,iii,gbun)	
+					add_d(subtitle, title,ii,gbun)
 			if compress == '0':
 				print('다운완료후 압축하자')
 				manazip(title, subtitle,cbz,gbun)
