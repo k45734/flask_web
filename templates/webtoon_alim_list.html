@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>웹툰서버관리</p>
+<table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center><h4>성인웹툰알림 완료/실패</p>
+<thead>
+<tr>
+<th align="center" class="tg-0lax">알림실패</th>
+<th align="center" class="tg-0lax">알림완료</th>
+<th align="center" class="tg-0lax">총갯수</th>
+</tr>
+<tr>
+{% for row in rows %}
+<td align="center" class="tg-0lax">{{ row['False'] }}</td>
+<td align="center" class="tg-0lax">{{ row['True'] }}</td>
+<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
+{% endfor %}
+<table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center><h4>일반웹툰알림 완료/실패</p>
+<thead>
+<tr>
+<th align="center" class="tg-0lax">알림실패</th>
+<th align="center" class="tg-0lax">알림완료</th>
+<th align="center" class="tg-0lax">총갯수</th>
+</tr>
+<tr>
+{% for row in rows2 %}
+<td align="center" class="tg-0lax">{{ row['False'] }}</td>
+<td align="center" class="tg-0lax">{{ row['True'] }}</td>
+<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
+{% endfor %}
+{% endblock %}

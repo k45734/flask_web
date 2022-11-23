@@ -367,7 +367,13 @@ def index():
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		con.close()
-		time.sleep(3)
+		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
+		
+@webtoon.route('alim_list', methods=["GET"])
+def alim_list():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
 		rows = []
 		rows2 = []
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -401,8 +407,8 @@ def index():
 		values = [len(TOTAL), len(false_toon_normal), len(true_toon_normal)]
 		dt = dict(zip(keys, values))
 		rows2.append(dt)
-		return render_template('webtoon.html', rows = rows, rows2 = rows2)	
-
+		return render_template('webtoon_alim_list.html', rows = rows, rows2 = rows2)	
+		
 @webtoon.route('index_list', methods=["GET"])
 def index_list():
 	if not session.get('logFlag'):
