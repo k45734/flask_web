@@ -1322,7 +1322,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 						pass					
 					else:
 						keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-						values = [title, memo_s, URL,MYURL]
+						values = [title, memo_check, URL,MYURL]
 						dt = dict(zip(keys, values))
 						last.append(dt)
 
