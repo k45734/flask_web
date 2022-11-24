@@ -1300,49 +1300,26 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					last.append(dt)					
 					
 				else:
-					if '오퀴즈' in title:
-						if 'Liiv' in result_remove_all:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
-						else:
-							p = re.compile('(.*?)')	
-					elif '캐시워크' in title:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
+					if '토스' in title:
+						p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
+					#elif '캐시워크' in title:
+					#	p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
+					elif '신한플레이' in title:
+						p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
 					elif '홈플러스' in title:
-						p = re.compile('Lii14v Mate 앱내에서도 잠금화면 (.*?)\[')
-					elif '신한' in title:	
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보  고쌓기\/\(안드로이(.*?)\[')
-					elif '리브메이트' in title:
-						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면/보고쌓기\(안드로이 (.*?)\[')
-						check = p1.findall(result_remove_all)
-						if len(check) == 0:
-							p = re.compile('●(.*?)\[')
-						else:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면/보고쌓기\(안드로이 (.*?)\[')
-					elif '토스' in title:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
+						p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[ 파')
 					elif '우리WON멤버스' in title:
-						p1 = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
-						check = p1.findall(result_remove_all)
-						if len(check) == 0:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
-						else:
-							p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보 (.*?)\[')
-					else:	
-						p = re.compile('정답 :(.*?)\[ 파')
+						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+					else:
+						p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
 					memo = p.findall(result_remove_all)
 					memo_check = ''.join(memo).lstrip()
-					if 'Liiv Mate' in memo_check:
-						memo_s = memo_check.replace('는 지속적으로 확대할 예정입니다. - Liiv Mate 앱내에서도 잠금화면/보 고쌓기(안드로이 ', '')
-					elif '고쌓기(안드로이' in memo_check:
-						memo_s = memo_check.replace('고쌓기(안드로이', '')
-					elif '고쌓기(안드' in memo_check:
-						memo_s = memo_check.replace('고쌓기(안드', '')
-					else:
-						memo_s = ''.join(memo).lstrip()
-					if '됩니다.' in memo_s :
+					if memo == None:
 						pass
-					elif len(memo_s) == 0 :
-						pass
+					elif 'Liiv' in memo_check:
+						memo_check = None
+					if memo_check == None:
+						pass					
 					else:
 						keys = ['TITLE','MEMO', 'URL','SITE_NAME']
 						values = [title, memo_s, URL,MYURL]
