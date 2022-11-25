@@ -42,7 +42,7 @@ try:
 except ImportError:
 	os.system('pip install feedparser')
 	import feedparser
-	
+from html import unescape	
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub2db = at[0] + '/data'
@@ -1861,7 +1861,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		title = row['TITLE']
 		memo = row['MEMO']
 		text = re.sub('<.+?>', '', memo, 0, re.I|re.S)
-		last_memo = cleanText_uniti(text)
+		last_memo = unescape(text)
 		news_name = row['NEWS_NAME']
 		msg = '{}\n{}'.format(title,last_memo)
 		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
