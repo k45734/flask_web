@@ -1827,7 +1827,14 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		'http://rss.nocutnews.co.kr/nocutnews.xml',
 		'http://www.mediatoday.co.kr/rss/allArticle.xml',
 		'http://biz.heraldm.com/rss/010000000000.xml',
-		'http://www.newsdaily.kr/rss/allArticle.xml'
+		'http://www.newsdaily.kr/rss/allArticle.xml',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=02&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=03&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=07&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=08&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=14&plink=RSSREADER',
+		'https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=09&plink=RSSREADER',
 		]
 	for i in url:
 		parsed_data = get_data(i)
