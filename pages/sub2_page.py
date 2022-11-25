@@ -295,7 +295,7 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 		b = msg2[i]['상품위치']
 		c = msg2[i]['현재상태']
 		d = msg2[i]['상품상태']
-		if '대신택배' in json_string4:
+		if '연락처' in d:
 			total = '{} {}'.format(c,d)
 		else:
 			total = '{}'.format(d)
