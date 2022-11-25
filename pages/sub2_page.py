@@ -36,6 +36,13 @@ try:
 except ImportError:
 	os.system('pip install flask_paginate')
 	from flask_paginate import Pagination, get_page_args
+#RSS 모듈
+try:
+	import feedparser
+except ImportError:
+	os.system('pip install feedparser')
+	import feedparser
+	
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	sub2db = at[0] + '/data'
@@ -1306,10 +1313,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					#	p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
 					elif '신한플레이' in title:
 						p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
-					elif '홈플러스' in title:
-						p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[ 파')
-					elif '우리WON멤버스' in title:
-						p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
+					#elif '홈플러스' in title:
+					#	p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[ 파')
+					#elif '우리WON멤버스' in title:
+					#	p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
 					else:
 						p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
 					memo = p.findall(result_remove_all)
@@ -1736,276 +1743,131 @@ def funmom_ok():
 
 
 #뉴스알림		
-def addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE):
-	try:
-		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS ' + CAST + ' (CAST TEXT, TITLE TEXT, URL TEXT, MEMO TEXT, DATE TEXT, COMPLETE TEXT)')	
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()	
-		time.sleep(2)
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		cur = con.cursor()
-		sql = 'select * from ' + CAST + ' where TITLE = ? and URL = ?'
-		cur.execute(sql, (TITLE,URL))
-		row = cur.fetchone()
-		if row != None:
-			pass
-		else:
-			cur.execute('INSERT OR REPLACE INTO ' + CAST + ' (CAST, TITLE, URL, MEMO, DATE,COMPLETE) VALUES (?,?,?,?,?,?)', (CAST, TITLE, URL, MEMO, newdate, COMPLETE))
-			con.commit()
-	except:
-		con.rollback()
-	finally:
-		con.close()	
-	comp = '완료'
-	return comp
-		
-def addnews_d(CAST,TITLE,URL):
+def addnews(news_name, title, memo, link):
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS news (NEWS_NAME TEXT, TITLE TEXT, MEMO TEXT, URL TEXT,COMPLETE TEXT)')
+	con.execute("PRAGMA synchronous = OFF")
+	con.execute("PRAGMA journal_mode = MEMORY")
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.close()	
+	#데이터베이스 컬럼 추가하기
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)	
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%NEWS_NAME%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table news add column NEWS_NAME TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	cur = con.cursor()
+	sql = 'select * from news where TITLE = ? and MEMO = ? and NEWS_NAME = ?'
+	cur.execute(sql, (title,memo,news_name))
+	row = cur.fetchone()
+	if row != None:
+		pass
+	else:
+		try:
+			COMPLETE = 'False'
+			cur.execute('INSERT OR REPLACE INTO news (NEWS_NAME, TITLE, MEMO, URL, COMPLETE) VALUES (?,?,?,?,?)', (news_name, title, memo, link, COMPLETE))
+			con.commit()	
+		except:
+			con.rollback()
+		finally:
+			con.close()		
+
+def addnews_d(title, memo, news_name ):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		time.sleep(2)
 		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
 		cur = con.cursor()
-		sql = 'UPDATE ' + CAST + ' SET COMPLETE = ? WHERE TITLE = ? AND URL = ?'
-		cur.execute(sql,('True',TITLE, URL))
+		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND MEMO = ? AND NEWS_NAME = ?'
+		cur.execute(sql,('True',title, memo,news_name))
 		con.commit()
 	except:
 		con.rollback()
-	finally:	
-		con.close()	
-	comp = '완료'
-	return comp
-
-def vietnews(newdate):
-	header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	URL = 'https://www.vinatimes.net/news'
-	req = requests.get(URL,headers=header)	
-	bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("div",{"class":"list_title"})
-	for test in posts:
-		if 'https://www.vinatimes.net/notice/461808' in test.a['href']:
-			pass
-		elif 'https://www.vinatimes.net/notice/456598' in test.a['href']:
-			pass 
-		elif 'https://www.vinatimes.net/notice/454369' in test.a['href']:
-			pass
-		else:
-			URL = test.a['href']
-			req = requests.get(URL,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			ttitle = bs0bj.find("h1")
-			posts = bs0bj.find('div',{'class':'xe_content'})
-			MEMO2 = posts.text.strip()
-			MEMO3 = MEMO2.replace('  ','\n')
-			MEMO = MEMO3.replace("\n", "")
-			TITLE = ttitle.text.strip()
-			CAST = "VIET"
-			COMPLETE = 'False'
-			addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)	
-
-	logger.info('VIET 목록완료')
-	return CAST
+	finally:
+		con.close()
 		
-def ytnsnews(newdate):
-	CAST = "YTN"
-	COMPLETE = 'False'
-	try:
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			MAIN = 'https://m.ytn.co.kr/newslist/news_list.php?s_mcd=9999'
-			req = s.get(MAIN,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			posts = bs0bj.findAll("a",{"class":"news_list"})	
-			for i in posts:
-				URL = i['href']
-				req = s.get(URL,headers=header)
-				bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-				ttitle = bs0bj.find("h1",{"id":"h1"})
-				post = bs0bj.find('div',{'id':'article_content_text'})	
-				movie = bs0bj.findAll('iframe',{'id':'zumFrame'})
-				TITLE = ttitle.text.strip()
-				MEMO = post.text.strip()
-				addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-		logger.info('YTN 목록완료')
-	except:
-		logger.info('YTN 목록실패')
-	return CAST
-		
-def esbsnews(newdate):
-	CAST = "SBS"
-	COMPLETE = 'False'
-	try:
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			URL = 'https://mnews.sbs.co.kr/news/newsMain.do'
-			req = s.get(URL,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			lists = bs0bj.select('ul > li > a')
-			for i in lists:
-				check = i.attrs['href']
-				print(check)
-				if 'endPage.do' not in check:
-					pass
-				else:
-					URL = 'https://mnews.sbs.co.kr/news/' + i.attrs['href']
-					req = s.get(URL,headers=header)
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.select('#subTitleText')
-					posts = bs0bj.select('#contentText')
-					TITLE = ttitle[0].text.strip()
-					MEMO = posts[0].text.strip()
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-			logger.info('SBS 목록완료')
-	except:		
-		logger.info('SBS 목록실패')
-	return CAST
+def cleanText_uniti(readData):
+	test = readData.replace('&lt;', '<').replace('&gt;', '>').replace('&amp;', '&').replace('&quot;', '“').replace('&#035;', '#').replace('&#039;', '‘').replace('&nbsp;', ' ').replace('&hellip;', '…').replace('&middot;', '·').replace('&lsquo;', '‘').replace('&rsquo;', '’')
+	return test
 	
-def ekbsnews(newdate):
-	CAST = "KBS"
-	COMPLETE = 'False'
-	try:
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			URL = 'https://news.kbs.co.kr/mobile/main.html'
-			req = s.get(URL,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			lists = bs0bj.select("ul > li > a")
-			for i in lists:
-				check = i.attrs['href']
-				if '/mobile/news/view.do' not in check:
-					pass
-				else:
-					URL = 'https://news.kbs.co.kr' + i.attrs['href']
-					req = s.get(URL,headers=header)
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.select('h2 > strong')
-					posts = bs0bj.select('#cont_newstext')
-					MEMO = posts[0].text.strip()
-					TITLE = ttitle[0].text.strip()
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-		logger.info('KBS 목록완료')
-	except:
-		logger.info('KBS 목록실패')
-	return CAST
+def get_data(url):
+    try:
+        res = requests.get(url)
+        html = res.text
+        data = feedparser.parse(html)
+        return data
+    except:
+        return None
 		
-def daumnews(newdate):
-	CAST = "DAUM"
-	COMPLETE = 'False'	
-	try:
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			URL = 'https://news.daum.net/?nil_top=mobile'
-			req = s.get(URL,headers=header)
-			bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-			lists = bs0bj.select("main > section > div > div > div > ul > li > div > div") #body > div.container-doc > main > section > div > div.content-article > div.box_g.box_news_issue > ul > li:nth-child(1) > div > div
-			for i in lists:	
-				try:
-					link = i.select('strong > a')
-					URL = link[0]['href'] + '/?nil_top=mobile'
-					req = s.get(URL,headers=header)
-					bs0bj = bs(req.content.decode('utf-8','replace'),'html.parser')
-					ttitle = bs0bj.select('h3.tit_view')
-					posts = bs0bj.select('div.article_view')
-					MEME = []
-					for i in posts[0].findAll('p'):
-						MEME.append(i.text)
-					TITLE = ttitle[0].text.strip()
-					MEMO = ' '.join(MEME)
-					addnews(CAST, TITLE, URL, MEMO, newdate, COMPLETE)
-				except:
-					continue
-		logger.info('DAUM 목록완료')
-	except:
-		logger.info('DAUM 목록실패')
-	return CAST
-
-
-def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid,broadcaster):
+def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 	logger.info('뉴스알림시작')
-	news = broadcaster
-	#오늘날짜
-	nowtime1 = datetime.now()
-	newdate = "%04d-%02d-%02d" % (nowtime1.year, nowtime1.month, nowtime1.day)
-	time_old = "%02dH%02dM" % (nowtime1.hour, nowtime1.minute)
-	CAST = []
-	if news == 'YTN':
-		a = ytnsnews(newdate)
-		CAST.append(a)
-	elif news == 'SBS':
-		b = esbsnews(newdate)
-		CAST.append(b)
-	elif news == 'KBS':
-		c = ekbsnews(newdate)
-		CAST.append(c)
-	elif news == 'VIET':
-		d = vietnews(newdate)
-		CAST.append(d)
-	elif news == 'DAUM':
-		e = daumnews(newdate)
-		CAST.append(e)
-	else:
-		a = ytnsnews(newdate)
-		CAST.append(a)
-		time.sleep(1)
-		b = esbsnews(newdate)
-		CAST.append(b)
-		time.sleep(1)
-		c = ekbsnews(newdate)
-		CAST.append(c)
-		time.sleep(1)
-		d = vietnews(newdate)
-		CAST.append(d)
-		time.sleep(1)
-		e = daumnews(newdate)
-		CAST.append(e)
-		time.sleep(1)
+	url = [
+		'https://www.yonhapnewstv.co.kr/category/news/headline/feed/',
+		'https://www.yonhapnewstv.co.kr/browse/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/politics/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/economy/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/society/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/local/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/international/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/culture/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/sports/feed/',
+		'http://www.yonhapnewstv.co.kr/category/news/weather/feed/',
+		'http://www.khan.co.kr/rss/rssdata/total_news.xml',
+		'http://rss.nocutnews.co.kr/nocutnews.xml',
+		'http://rss.donga.com/total.xml',
+		'http://rss.nocutnews.co.kr/nocutnews.xml',
+		'http://www.mediatoday.co.kr/rss/allArticle.xml',
+		'http://biz.heraldm.com/rss/010000000000.xml',
+		'http://www.newsdaily.kr/rss/allArticle.xml'
+		]
+	for i in url:
+		parsed_data = get_data(i)
+		news_name = parsed_data['feed']['title']
+		count = len(parsed_data['entries'])
+		for i in range(count):
+			article = parsed_data['entries'][i]
+			title = article['title']
+			link = article['link']
+			if 'yonhapnewstv' in link:
+				memo_list = article['content']
+			else:
+				memo_list = article['description']
+			for i in memo_list:
+				
+				try:
+					memo = i['value']
+				except:
+					memo = memo_list
+			addnews(news_name, title, memo, link)
+	#알림시작
+	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()	
+	sql = 'select * from news where COMPLETE = ?'
+	cur.execute(sql, ('False', ))
+	rows = cur.fetchall()
 	
-	for i in CAST:
-		#logger.info('%s 알림 시작',i)
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()	
-		sql = 'select * from ' + i + ' where COMPLETE = ?'
-		cur.execute(sql, ('False', ))
-		rows = cur.fetchall()
-		count = 1
-		#DB의 정보를 읽어옵니다.
-		for row in rows: 
-			CAST = row['CAST']
-			TITLE = row['TITLE']
-			URL = row['URL']
-			MEMO = row['MEMO']
-			COMPLETE = row['COMPLETE']
-			msg = '{}\n{}\n{}'.format(CAST,TITLE,MEMO)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-			addnews_d(CAST,TITLE,URL)
-			count += 1
-		con.close()	
-		#logger.info('%s 알림 종료',i)
+	#DB의 정보를 읽어옵니다.
+	for row in rows:
+		title = row['TITLE']
+		memo = row['MEMO']
+		text = re.sub('<.+?>', '', memo, 0, re.I|re.S)
+		last_memo = cleanText_uniti(text)
+		news_name = row['NEWS_NAME']
+		msg = '{}\n{}'.format(title,last_memo)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		#중복 알림에거
+		addnews_d(title, memo, news_name)
+	con.close()	
 	logger.info('뉴스 알림완료')	
 	comp = '완료'
 	return comp
@@ -2015,7 +1877,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid,broadcaster):
 def news():
 	#데이타베이스 없으면 생성
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS news (start_time TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS news (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
@@ -2060,7 +1922,6 @@ def news_ok():
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
 		now = request.form['now']
-		broadcaster = request.form['broadcaster']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
 		cursor.execute("select * from news")
@@ -2086,10 +1947,10 @@ def news_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,broadcaster])
+				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
 				test = scheduler.get_job(startname).id
 			else:
-				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid,broadcaster)
+				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
