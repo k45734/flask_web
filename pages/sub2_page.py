@@ -1357,7 +1357,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			
 			for ii in list:
 				title = ii['TITLE']
-				sec = 'https://www.ppomppu.co.kr' + ii['URL']
+				url_c = ii['URL']
+				if 'https' in url_c:
+					continue
+				else:
+					sec = 'https://www.ppomppu.co.kr' + ii['URL']
 				req = s.get(sec,headers=header)
 				html = req.text
 				gogo = bs(html, "html.parser")
