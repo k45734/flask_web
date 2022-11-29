@@ -1408,7 +1408,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					site = '토실행운퀴즈'
 				elif 'quizbang' in SITE_NAME :
 					site = '퀴즈방'
-				msg = '{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
+				msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
 				quiz_add_go_d(MEMO, URL,SITE_NAME)
 			logger.info('퀴즈정답 완료했습니다.')
