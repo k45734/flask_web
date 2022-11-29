@@ -1856,7 +1856,10 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		count = len(parsed_data['entries'])
 		for i in range(count):
 			article = parsed_data['entries'][i]
-			title = article['title']
+			try:
+				title = article['title']
+			except:
+				continue
 			link = article['link']
 			if 'yonhapnewstv' in link:
 				memo_list = article['content']
