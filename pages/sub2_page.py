@@ -1852,7 +1852,10 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		]
 	for i in url:
 		parsed_data = get_data(i)
-		news_name = parsed_data['feed']['title']
+		try:
+			news_name = parsed_data['feed']['title']
+		except:
+			continue
 		count = len(parsed_data['entries'])
 		for i in range(count):
 			article = parsed_data['entries'][i]
