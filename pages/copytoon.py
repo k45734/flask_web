@@ -221,21 +221,45 @@ def tel_send_message(list):
 		lastpage1 = aa1[19]['data-post']
 		page_num = lastpage1.strip("webtoonalim/")
 		last_num.append(page_num)
-		#현재페이지의 갯수
+		print(int(last_num[0]))
+		file_check = root + '/now_num.json'
+		if os.path.isfile(file_check):
+			with open(file_check, 'r', encoding='utf-8') as f:
+				data = json.load(f)
+				now_list = data[0]['NOW']
+				old_list = data[0]['OLD']
+				new_list = data[0]['NEW']
+				real_now = int(last_num[0])
+			print('파일')
 		
-		try:
-			ll = int(json_data[0])
-		except:
-			ll = 0	
-		total = int(page_num)
+		else:
+			now_list = int(last_num[0])
+			old_list = 0
+			new_list = int(page_num)
+		print('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(now_list, old_list,new_list))
 		while True:
-			if total <= ll:
+			if new_list <= old_list:
+				wow = []
+				keys = ['NOW','OLD','NEW']
+				values = [real_now, int(json_data[0]),real_now]
+				dt = dict(zip(keys, values))
+				wow.append(dt)
+				file_now = root + '/now_num.json'
+				with open(file_now, 'w') as outfile:
+					json.dump(wow, outfile)
 				break
 			else:
-				PAGE_INFO = {'before': total }
-				#logger.info('%s',PAGE_INFO)
-				logger.info('현재시작 페이지 : %s / 과거페이지 : %s / 진행중페이지 : %s',last_num[0], json_data[0], total)
-				print('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(last_num[0], json_data[0],total))
+				wow = []
+				PAGE_INFO = {'before': new_list }
+				logger.info('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(now_list, old_list,new_list))
+				print('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(now_list, old_list,new_list))
+				keys = ['NOW','OLD','NEW']
+				values = [now_list, old_list,new_list]
+				dt = dict(zip(keys, values))
+				wow.append(dt)
+				file_now = root + '/now_num.json'
+				with open(file_now, 'w') as outfile:
+					json.dump(wow, outfile)
 				req = s.post(url2, data=PAGE_INFO)
 				html = req.text
 				soup = bs(html, "html.parser")
