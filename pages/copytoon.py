@@ -229,13 +229,26 @@ def tel_send_message(list):
 				now_list = data[0]['NOW']
 				old_list = data[0]['OLD']
 				new_list = data[0]['NEW']
-				real_now = int(last_num[0])
 			print('파일')
-		
 		else:
-			now_list = int(last_num[0])
-			old_list = 0
-			new_list = int(page_num)
+			if os.path.isfile(file_path):
+				wow = []
+				keys = ['NOW','OLD','NEW']
+				values = [real_now, int(json_data[0]),real_now]
+				dt = dict(zip(keys, values))
+				wow.append(dt)
+				file_now = root + '/now_num.json'
+				with open(file_now, 'w') as outfile:
+					json.dump(wow, outfile)
+				with open(file_check, 'r', encoding='utf-8') as f:
+					data = json.load(f)
+					now_list = data[0]['NOW']
+					old_list = data[0]['OLD']
+					new_list = data[0]['NEW']
+			else:
+				now_list = int(last_num[0])
+				old_list = 0
+				new_list = int(page_num)
 		print('현재시작 페이지 : {} / 과거페이지 : {} / 진행중페이지 : {}'.format(now_list, old_list,new_list))
 		while True:
 			if new_list <= old_list:
