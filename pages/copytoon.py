@@ -204,11 +204,14 @@ def tel_send_message(list):
 		root = '/data'
 	logger.info('웹툰 DB정보를 받아옵니다.')
 	file_path = root + '/last_num.json'
-	try:
+	if os.path.isfile(file_path):
 		with open(file_path, "r") as json_file:
 			json_data = json.load(json_file)
-	except:
-		pass
+	else:
+		t = []
+		t.append('0')
+		json_save = json.dumps(t)
+		json_data = json.loads(json_save)
 	last_num = []
 	with requests.Session() as s:
 		url2 = 'https://t.me/s/webtoonalim'
@@ -322,8 +325,10 @@ def db_list_reset():
 		else:
 			root = '/data'
 		file_path = root + '/last_num.json'
+		file_path2 = root + '/now_num.json'
 		try:
 			os.remove(file_path)
+			os.remove(file_path2)
 		except:
 			pass
 	logger.info('웹툰 리스트를 처음부터 갱신합니다.')
