@@ -221,6 +221,7 @@ def tel_send_message(list):
 		lastpage1 = aa1[19]['data-post']
 		page_num = lastpage1.strip("webtoonalim/")
 		last_num.append(page_num)
+		real_now = int(last_num[0])
 		print(int(last_num[0]))
 		file_check = root + '/now_num.json'
 		if os.path.isfile(file_check):
