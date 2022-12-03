@@ -302,7 +302,7 @@ def tel_send_message(list):
 						
 					except:	
 						continue
-			total -= 20
+			new_list -= 20
 	file_path = root + '/last_num.json'
 	with open(file_path, 'w') as outfile:
 		json.dump(last_num, outfile)		
