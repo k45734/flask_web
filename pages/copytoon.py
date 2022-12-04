@@ -258,7 +258,7 @@ def tel_send_message(list):
 			if new_list <= old_list:
 				wow = []
 				keys = ['NOW','OLD','NEW']
-				values = [real_now, int(json_data[0]),real_now]
+				values = [real_now, now_list,real_now]
 				dt = dict(zip(keys, values))
 				wow.append(dt)
 				file_now = root + '/now_num.json'
