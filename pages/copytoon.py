@@ -371,7 +371,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		cnt = complete_last.count('False')
 		if cnt >= 1:
 			for ii,iii in zip(image_url_last,image_number_last):
-				if 'jp' in ii:
+				if 'jp' in ii and 'pn' in ii:
 					url_to_image(title, subtitle,ii,iii,gbun)
 					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 					time.sleep(3)
