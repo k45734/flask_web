@@ -169,29 +169,29 @@ def add_d(subtitle, title,webtoon_image,gbun):
 		DB_NAME = 'TOON'
 	else:
 		DB_NAME = 'TOON_NORMAL'
-	#try:
-	#데이타베이스 없으면 생성
-	con = sqlite3.connect(webtoondb,timeout=60)
-	sql = 'CREATE TABLE IF NOT EXISTS ' + DB_NAME + ' (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)'
-	con.execute(sql)
-	con.execute("PRAGMA cache_size = 10000")
-	con.execute("PRAGMA locking_mode = NORMAL")
-	con.execute("PRAGMA temp_store = MEMORY")
-	con.execute("PRAGMA auto_vacuum = 1")
-	con.execute("PRAGMA journal_mode=WAL")
-	con.execute("PRAGMA synchronous=NORMAL")
-	con.close()
-	time.sleep(3) 
-	#마지막 실행까지 작업안했던 결과물 저장
-	con = sqlite3.connect(webtoondb,timeout=60)
-	cur = con.cursor()
-	sql = 'UPDATE ' + DB_NAME + ' SET COMPLETE = ? WHERE SUBTITLE = ? AND TITLE = ? AND WEBTOON_IMAGE = ?'
-	cur.execute(sql,('True',subtitle, title,webtoon_image))
-	con.commit()
-	#except:
-	#	con.rollback()
-	#finally:	
-	con.close()	
+	try:
+		#데이타베이스 없으면 생성
+		con = sqlite3.connect(webtoondb,timeout=60)
+		sql = 'CREATE TABLE IF NOT EXISTS ' + DB_NAME + ' (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)'
+		con.execute(sql)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.close()
+		time.sleep(3)
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect(webtoondb,timeout=60)
+		cur = con.cursor()
+		sql = 'UPDATE ' + DB_NAME + ' SET COMPLETE = ? WHERE SUBTITLE = ? AND TITLE = ? AND WEBTOON_IMAGE = ?'
+		cur.execute(sql,('True',subtitle, title,webtoon_image))
+		con.commit()
+	except:
+		con.rollback()
+	finally:	
+		con.close()	
 	comp = '완료'
 	return comp	
 	
@@ -372,7 +372,9 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		if cnt >= 1:
 			for ii,iii in zip(image_url_last,image_number_last):
 				if 'jp' in ii:
-					url_to_image(title, subtitle,ii,iii,gbun)	
+					url_to_image(title, subtitle,ii,iii,gbun)
+					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+					time.sleep(3)
 					add_d(subtitle, title,ii,gbun)
 			if compress == '0':
 				print('다운완료후 압축하자')
