@@ -1411,7 +1411,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 					for i in check_len:
 						if i in msg:
 							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-							quiz_add_go_d(MEMO, URL,SITE_NAME)
+						quiz_add_go_d(MEMO, URL,SITE_NAME)
+						
 			logger.info('퀴즈정답 완료했습니다.')
 		else:
 			logger.info('퀴즈정답 신규내용이 없습니다.')
