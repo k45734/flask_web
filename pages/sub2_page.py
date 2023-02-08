@@ -1362,6 +1362,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 				gogo = bs(html, "html.parser")
 				memo_old = gogo.findAll("table",{"class":"pic_bg"})
 				memo_new = memo_old[2].findAll('b')
+				if len(memo_new) == 0:
+					memo_new = memo_old[2].findAll('p')
+				else:
+					pass
 				memo_list = []
 				for af in memo_new:
 					a = af.text
@@ -1371,6 +1375,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 				p = re.compile('(.*?)  ')
 				memo_last = p.findall(memo)
 				memos = '  '.join(memo_last).lstrip()
+				if len(memos) == 0:
+					memos = memo
+				else:
+					pass
 				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
 				values = [title, memos, sec,'https://www.ppomppu.co.kr']
 				dt = dict(zip(keys, values))
