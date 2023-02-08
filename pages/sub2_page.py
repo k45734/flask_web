@@ -1238,7 +1238,7 @@ def quiz_add_go_d(MEMO, URL,SITE_NAME):
 	finally:	
 		con.close()
 		
-def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
+def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 	try:
 		logger.info('퀴즈정답알림 시작')
 		#퀴즈정답 시작후 10초후 작동시작
@@ -1311,14 +1311,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				else:
 					if '토스' in title:
 						p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
-					#elif '캐시워크' in title:
-					#	p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
 					elif '신한플레이' in title:
 						p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
-					#elif '홈플러스' in title:
-					#	p = re.compile('Lii14v Mate 앱내에서도 잠금화면(.*?)\[ 파')
-					#elif '우리WON멤버스' in title:
-					#	p = re.compile('Liiv Mate 앱내에서도 잠금화면\/보고쌓기\(안드로이 (.*?)\[ 파')
 					else:
 						p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
 					memo = p.findall(result_remove_all)
@@ -1409,8 +1403,15 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 				elif 'quizbang' in SITE_NAME :
 					site = '퀴즈방'
 				msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
-				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
-				quiz_add_go_d(MEMO, URL,SITE_NAME)
+				check_len = myalim.split('|')
+				check_alim = len(check_len)
+				if check_alim == 0:
+					pass
+				elif check_alim > 0:
+					for i in check_len:
+						if i in msg:
+							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+							quiz_add_go_d(MEMO, URL,SITE_NAME)
 			logger.info('퀴즈정답 완료했습니다.')
 		else:
 			logger.info('퀴즈정답 신규내용이 없습니다.')
@@ -1425,13 +1426,25 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid):
 def quiz():
 	#데이타베이스 없으면 생성
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS quiz (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT, myalim TEXT)')
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%myalim%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column myalim TEXT"
+		cur.execute(sql)
+	else:
+		pass
 	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -1449,13 +1462,15 @@ def quiz():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
+			myalim = rows['myalim']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		return render_template('quiz.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+			myalim = '오퀴즈'
+		return render_template('quiz.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, myalim = myalim)
 
 
 @bp2.route('quiz_ok', methods=['POST'])
@@ -1469,6 +1484,7 @@ def quiz_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		myalim = request.form['myalim']
 		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
@@ -1482,23 +1498,24 @@ def quiz_ok():
 					, start_time = ?
 					, telgm = ?
 					, telgm_alim = ?
+					, myalim = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO quiz 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim) VALUES (?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim))
 		conn.commit()
 		cursor.close()
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim])
 				test = scheduler.get_job(startname).id
 			else:
-				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid)
+				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
