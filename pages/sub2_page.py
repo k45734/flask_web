@@ -1309,25 +1309,26 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 					last.append(dt)					
 					
 				else:
-					if '토스' in title:
-						p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
-					elif '신한플레이' in title:
-						p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
-					else:
-						p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
+					#if '토스' in title:
+					#	p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
+					#elif '신한플레이' in title:
+					#	p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
+					#else:
+					#	p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
+					p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
 					memo = p.findall(result_remove_all)
 					memo_check = ''.join(memo).lstrip()
-					if memo == None:
-						pass
-					elif 'Liiv' in memo_check:
-						memo_check = None
-					if memo_check == None:
-						pass					
-					else:
-						keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-						values = [title, memo_check, URL,MYURL]
-						dt = dict(zip(keys, values))
-						last.append(dt)
+					#if memo == None:
+					#	pass
+					#elif 'Liiv' in memo_check:
+					#	memo_check = None
+					#if memo_check == None:
+					#	pass					
+					#else:
+					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+					values = [title, memo_check, URL,MYURL]
+					dt = dict(zip(keys, values))
+					last.append(dt)
 
 		#기존 리스트 목록 삭제
 		list.clear()
