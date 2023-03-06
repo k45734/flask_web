@@ -544,6 +544,7 @@ def dozi_list():
 		return redirect(url_for('main.index'))
 	else:
 		list = '웹툰DB'
+		gbun = request.args.get('gbun')
 		start_time = request.args.get('start_time')
 		sss = 'webtoon_list' + gbun
 		try:
