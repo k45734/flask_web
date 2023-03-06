@@ -37,7 +37,11 @@ from requests.packages.urllib3.util.retry import Retry
 
 from pages.main_page import scheduler
 from pages.main_page import logger
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
