@@ -568,7 +568,7 @@ def dozi_down():
 		subtitle = None
 		compress = request.args.get('compress')
 		cbz = request.args.get('cbz')
-		startname = request.args.get('startname')
+		startname = 'webtoon_down' + gbun
 		start_time = request.args.get('start_time')
 		try:
 			scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[compress,cbz,alldown,title, subtitle,gbun] )
