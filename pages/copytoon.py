@@ -545,13 +545,14 @@ def dozi_list():
 	else:
 		list = '웹툰DB'
 		start_time = request.args.get('start_time')
+		sss = 'webtoon_list' + gbun
 		try:
-			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id='webtoon_list', args=[list])
-			test = scheduler.get_job('webtoon_list').id
+			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id=sss, args=[list])
+			test = scheduler.get_job(sss).id
 			logger.info('%s 스케줄러에 등록하였습니다.', test)
 		except ConflictingIdError:
-			test = scheduler.get_job('webtoon_list').id
-			test2 = scheduler.modify_job('webtoon_list').id
+			test = scheduler.get_job(sss).id
+			test2 = scheduler.modify_job(sss).id
 			logger.info('%s가 %s 스케줄러로 수정되었습니다.', test,test2)
 		return redirect(url_for('webtoon.index'))
 	
