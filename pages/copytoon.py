@@ -546,7 +546,7 @@ def dozi_list():
 		list = '웹툰DB'
 		gbun = request.args.get('gbun')
 		start_time = request.args.get('start_time')
-		sss = 'webtoon_list' + gbun
+		sss = 'webtoon_list' # + gbun
 		try:
 			scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id=sss, args=[list])
 			test = scheduler.get_job(sss).id
