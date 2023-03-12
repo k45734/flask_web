@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body>
+<!-- edit.html -->
+<div class="col-4 d-flex justify-content-center">
+<br><center><h4>프로그램 수정</p>
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<form action="/rclone/edit_result/{{ RCLONENAME }}" method="POST">
+<center>
+<tr>
+<th align="center">프로그램명</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONENAME" value="{{ RCLONENAME }}" readonly></td>
+</tr>
+<tr>
+<th align="center">설정파일</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_CONFIG" value="{{ RCLONE_CONFIG }}"></td>
+<tr>
+<th align="center">로컬경로</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_LOCAL" value="{{ RCLONE_LOCAL }}"></td>
+<tr>
+<th align="center">원격경로</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_REMOTE" value="{{ RCLONE_REMOTE }}"></td>
+</tr>
+<tr>
+<th align="center">시간(CRON)</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
+</tr>
+<tr>
+<td align="center" colspan="8"><input type="submit" value="수정"><input type="button" value="취소" onclick="history.back(-1);">
+</tr>
+</table>
+</center>
+</div>
+</form>
+</body>
+</html>
+{% endblock %}

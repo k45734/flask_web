@@ -111,6 +111,7 @@ nav .fa.fa-angle-down { margin-left: 6px; }
         <ul>
 			<li><a href="{{ url_for('sub3.second') }}">프로그램</a></li>
 			<li><a href="{{ url_for('sub4.second') }}">재고관리</a></li>
+			<li><a href="{{ url_for('rclone.second') }}">RCLONE</a></li>
 			<li><a href="{{ url_for('main.log') }}">로그</a></li>
 			<li><a href="{{ url_for('main.restart') }}">재시작</a></li>
 			<li><a href="/user_info_edit/{{ session['idx'] }}">{{ session.get('userid')}}</a></li>

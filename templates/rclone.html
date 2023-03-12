@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>RCLONE</p>
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form action="start" method="POST">
+<thead>
+  <tr>
+    <th align="center" class="tg-baqh">RCLONE 설정파일</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_CONFIG" placeholder="RCLONE_CONFIG" style="width:100%; border: 0;" ></td>
+  </tr>
+<tbody>
+  <tr>
+    <th align="center" class="tg-baqh">설정이름</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONENAME" placeholder="RCLONENAME" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">로컬드라이브</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_LOCAL" placeholder="RCLONE_LOCAL" style="width:100%; border: 0;" ></td>
+  </tr>
+<tr>
+    <th align="center" class="tg-baqh">원격드라이브</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_REMOTE" placeholder="RCLONE_REMOTE" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">시간(CRON)</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value="*/1 * * * *" name="FLASKTIME" placeholder="FLASKTIME" style="width:100%; border: 0;" ></td>
+  </tr>
+<tr>
+<th align="center" colspan="8" ><input type="submit" value="추가"></th>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+	<center><h4>목록보기</p>
+	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+		<thead>
+		{% for row in rows %}
+  <tr>
+    <th align="center" class="tg-0lax">프로그램명</th>
+    <td align="center" class="tg-0lax" colspan="2">{{ row["RCLONENAME"] }}</td>
+    <td align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok/{{ row["RCLONENAME"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["RCLONENAME"] }}'"><input type="button" value="수정" onClick="location.href='edit/{{ row["RCLONENAME"] }}'"><input type="button" value="바로실행" onClick="location.href='now/{{ row["RCLONENAME"] }}'"></th>
+  </tr>
+</thead>
+		
+		{% endfor %}
+ 
+</center>
+
+{% endblock %}

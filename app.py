@@ -30,11 +30,13 @@ def create_app():
 	from pages import sub3_page
 	from pages import sub4_page
 	from pages import copytoon
+	from pages import rclone
 	app.register_blueprint(main_page.bp)
 	app.register_blueprint(sub2_page.bp2)
 	app.register_blueprint(sub3_page.bp3)
 	app.register_blueprint(sub4_page.bp4)
 	app.register_blueprint(copytoon.webtoon)
+	app.register_blueprint(rclone.rclone)
 	app.run(host="0.0.0.0", debug=False, threaded=True, use_reloader=False)
 	return app
 	
