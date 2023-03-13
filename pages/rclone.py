@@ -137,10 +137,9 @@ def proc_test(name):
 	return msg
 	
 def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include):
-	FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-size 1m --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "3M"'
+	FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ':' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-size 1m --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "3M"'
 	print(FLASKAPPS)
-	logger.info('%s 스케줄러를 삭제하였습니다.', FLASKAPPS)
-	subprocess.call(FLASKAPPS, shell=True)
+	#subprocess.call(FLASKAPPS, shell=True)
 	comp = '완료'
 	return comp	
 	
@@ -329,15 +328,18 @@ def start():
 		RCLONE_C_M = request.form['RCLONE_C_M']
 		RCLONE_include= request.form['RCLONE_include']
 		#데이타베이스 없으면 생성
-		con = sqlite3.connect(sub3db,timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS ' + RCLONENAME +' (RCLONENAME TEXT, FLASKTIME TEXT, RCLONE_CONFIG TEXT, RCLONE_LOCAL TEXT, RCLONE_REMOTE TEXT, RCLONE_C_M TEXT, RCLONE_include TEXT)')
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()
+		try:
+			con = sqlite3.connect(sub3db,timeout=60)
+			con.execute('CREATE TABLE IF NOT EXISTS ' + RCLONENAME + ' (RCLONENAME TEXT, FLASKTIME TEXT, RCLONE_CONFIG TEXT, RCLONE_LOCAL TEXT, RCLONE_REMOTE TEXT, RCLONE_C_M TEXT, RCLONE_include TEXT)')
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = NORMAL")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.execute("PRAGMA journal_mode=WAL")
+			con.execute("PRAGMA synchronous=NORMAL")
+			con.close()
+		except:
+			return redirect(url_for('rclone.second'))
 		try:		
 			print(RCLONENAME)
 			con = sqlite3.connect(sub3db,timeout=60)

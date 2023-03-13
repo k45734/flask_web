@@ -18,9 +18,13 @@
 <th align="center">프로그램명</th>
 <td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONENAME" value="{{ RCLONENAME }}" readonly></td>
 </tr>
-<tr>
-<th align="center">COPY or MOVE</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_C_M" value="{{ RCLONE_C_M }}"></td>
+  <tr>
+    <th align="center">COPY or MOVE</th>
+    <td class="tg-baqh"><select name="RCLONE_C_M">
+	<option value="{{ RCLONE_C_M }}">{{ RCLONE_C_M }}</option>
+	<option value="copy">COPY</option>
+    <option value="move">MOVE</option>
+    </td>
 </tr>
 <tr>
 <th align="center">RCLONE_INCLUDE</th>
