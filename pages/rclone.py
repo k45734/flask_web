@@ -138,9 +138,9 @@ def proc_test(name):
 	
 def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include):
 	if RCLONE_C_M == 'move':
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "1M" --log-file /data/rclone.log'
+		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "1M" --log-file /data/log/rclone.log'
 	else:
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "1M" --log-file /data/rclone.log'
+		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --transfers=1 --checkers=8 --delete-after --drive-chunk-size=32M --bwlimit "1M" --log-file /data/log/rclone.log'
 	print(FLASKAPPS)
 	logger.info(FLASKAPPS)	
 	subprocess.call(FLASKAPPS, shell=True)
