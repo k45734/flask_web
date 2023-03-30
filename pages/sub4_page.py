@@ -13,11 +13,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 dfolder = os.path.dirname(os.path.abspath(__file__)) + '/log'
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	sub4db = at[0] + '/data/shop.db'
-	sub4dbl = at[0] + '/data'
+	sub4db = at[0] + '/data/db/shop.db'
+	sub4dbl = at[0] + '/data/db'
 else:
-	sub4db = '/data/shop.db'
-	sub4dbl = '/data'
+	sub4db = '/data/db/shop.db'
+	sub4dbl = '/data/db'
 
 
 @bp4.route('/')

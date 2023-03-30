@@ -30,11 +30,11 @@ if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	logdata = at[0] + '/data/log'
 	root = at[0] + '/data'
-	ip_client = at[0] + '/data/ip_list.db'
+	ip_client = at[0] + '/data/db/ip_list.db'
 else:
 	logdata = '/data/log'
 	root = '/data'
-	ip_client = '/data/ip_list.db'
+	ip_client = '/data/db/ip_list.db'
 
 def sizeof_fmt(num, suffix='Bytes'):
 	for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:

@@ -45,9 +45,9 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	sub3db = at[0] + '/data/database.db'
+	sub3db = at[0] + '/data/db/database.db'
 else:
-	sub3db = '/data/database.db'
+	sub3db = '/data/db/database.db'
 	
 bp3 = Blueprint('sub3', __name__, url_prefix='/sub3')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

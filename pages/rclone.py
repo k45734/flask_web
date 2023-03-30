@@ -45,9 +45,9 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	sub3db = at[0] + '/data/rclone.db'
+	sub3db = at[0] + '/data/db/rclone.db'
 else:
-	sub3db = '/data/rclone.db'
+	sub3db = '/data/db/rclone.db'
 	
 rclone = Blueprint('rclone', __name__, url_prefix='/rclone')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

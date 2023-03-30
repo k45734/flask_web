@@ -7,12 +7,15 @@ except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 import platform
-import os.path, os
+import os.path, os,shutil
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
 	logdata = at[0] + '/data/log'
+	dbdata = at[0] + '/data/db'
 else:
 	logdata = '/data/log'
+	dbdata = '/data/db'
+	
 def createFolder(directory):
     try:
         if not os.path.exists(directory):
@@ -41,4 +44,112 @@ def create_app():
 	return app
 	
 if __name__ == '__main__':
+	#2023-03-30 DB파일 이전
+	if platform.system() == 'Windows':
+		at = os.path.splitdrive(os.getcwd())
+		wwin = at[0] + '/data'
+	else:
+		wwin = '/data'
+	current_path = os.getcwd()
+	output_save_folder_path = dbdata
+	if not os.path.exists(output_save_folder_path):
+		os.mkdir(output_save_folder_path)
+		print('폴더 생성완료')
+		try:
+			shutil.move(wwin + '/jobs.sqlite' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/database.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/telegram.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/news.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/funmom.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/quiz.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/unse.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/delivery.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/rclone.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/webtoon_new.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/ip_list.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/shop.db' , output_save_folder_path)
+		except:
+			pass
+	else:
+		try:
+			shutil.move(wwin + '/jobs.sqlite' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/database.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/telegram.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/news.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/funmom.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/quiz.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/unse.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/delivery.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/rclone.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/webtoon_new.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/ip_list.db' , output_save_folder_path)
+		except:
+			pass
+		try:
+			shutil.move(wwin + '/shop.db' , output_save_folder_path)
+		except:
+			pass
 	create_app()

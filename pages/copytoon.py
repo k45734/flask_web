@@ -41,10 +41,10 @@ except ImportError:
 	
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	webtoondb = at[0] + '/data/webtoon_new.db'
+	webtoondb = at[0] + '/data/db/webtoon_new.db'
 
 else:
-	webtoondb = '/data/webtoon_new.db'
+	webtoondb = '/data/db/webtoon_new.db'
 
 	
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -49,9 +49,9 @@ except ImportError:
 from html import unescape	
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
-	sub2db = at[0] + '/data'
+	sub2db = at[0] + '/data/db'
 else:
-	sub2db = '/data'
+	sub2db = '/data/db'
 	
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
