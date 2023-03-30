@@ -97,7 +97,7 @@ logging.basicConfig(level=logging.INFO,format="[%(asctime)s %(filename)s:%(linen
 logger = logging.getLogger()
 logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
 jobstores = {
-	'default': SQLAlchemyJobStore(url='sqlite:////data/jobs.sqlite', tablename='main')
+	'default': SQLAlchemyJobStore(url='sqlite:////data/db/jobs.sqlite', tablename='main')
 	}
 executors = {
 	'default': ThreadPoolExecutor(max_workers=20),
