@@ -566,7 +566,7 @@ def tracking_list():
 		cur = con.cursor()
 		cur.execute("SELECT COUNT(*) FROM tracking;")
 		total = cur.fetchone()[0]
-		cur.execute('SELECT * FROM tracking ORDER BY PARCEL DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		cur.execute('SELECT * FROM tracking ORDER BY DATE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
 		view = cur.fetchall()
 		return render_template('tracking_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
