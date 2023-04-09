@@ -1252,12 +1252,12 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 		MAIN = ['https://gaecheon.tistory.com' , 'https://quizbang.tistory.com' , 'https://luckyquiz4.tistory.com' ]
 		url_count = 0
 		for mi in MAIN:
-			MAINURL = mi + '/m/entries.json?size=50'
+			MAINURL = mi + '/m/entries.json?page=0&size=30'
 			req = requests.get(MAINURL).json()
 			check = req['code']
 			if check == 200:
 				for p in range(0,1):
-					URL = MAINURL + '&page=' + str(p)
+					URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
 					print(URL)
 					req = requests.get(URL).json()
 					page = req['result']['nextPage']
@@ -1604,12 +1604,12 @@ def funmom_start(startname):
 	con.close()
 	list = []
 	last = []	
-	URL = 'https://funmom.tistory.com/m/entries.json?size=50'
+	URL = 'https://funmom.tistory.com/m/entries.json?page=0&size=30'
 	req = requests.get(URL).json()
 	check = req['code']
 	if check == 200:
 		for p in range(0,100000):
-			URL = 'https://funmom.tistory.com/m/entries.json?size=50&page=' + str(p)
+			URL = 'https://funmom.tistory.com/m/entries.json?page=' + str(p) + '&size=30'
 			req = requests.get(URL).json()
 			page = req['result']['nextPage']
 			list_r = req['result']['items']
