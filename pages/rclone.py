@@ -136,11 +136,11 @@ def proc_test(name):
 	msg = '{} {} 동일 프로세스 확인 완료....'.format(aa,bb)
 	return msg
 	
-def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include):
+def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include, RCLONE_UPLOAD):
 	if RCLONE_C_M == 'move':
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --log-file /data/log/rclone.log --transfers=4 --checkers=8 --delete-empty-src-dirs --create-empty-src-dirs --delete-after --drive-chunk-size=1M --bwlimit=512K'
+		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --log-file /data/log/rclone.log --transfers=4 --checkers=8 --delete-empty-src-dirs --create-empty-src-dirs --delete-after --drive-chunk-size=1M --bwlimit=' + RCLONE_UPLOAD
 	else:
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --log-file /data/log/rclone.log --transfers=4 --checkers=8 --create-empty-src-dirs --delete-after --drive-chunk-size=1m --bwlimit=512K'
+		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --log-file /data/log/rclone.log --transfers=4 --checkers=8 --create-empty-src-dirs --delete-after --drive-chunk-size=1m --bwlimit=' + RCLONE_UPLOAD
 	print(FLASKAPPS)
 	logger.info(FLASKAPPS)	
 	subprocess.call(FLASKAPPS, shell=True)
@@ -176,6 +176,19 @@ def edit(RCLONENAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
+		#데이터베이스 컬럼 추가하기
+		conn = sqlite3.connect(sub3db,timeout=60)
+		cur = conn.cursor()
+		sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%RCLONE_UPLOAD%'"
+		cur.execute(sql)
+		rows = cur.fetchall()
+		if len(rows) == 0:
+			sql = "alter table " + RCLONENAME + " add column RCLONE_UPLOAD TEXT"
+			cur.execute(sql)
+		else:
+			pass
+		conn.commit()
+		conn.close()
 		conn = sqlite3.connect(sub3db,timeout=60)
 		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
@@ -189,8 +202,9 @@ def edit(RCLONENAME):
 		RCLONE_LOCAL = row['RCLONE_LOCAL']
 		RCLONE_C_M = row['RCLONE_C_M']
 		RCLONE_include = row['RCLONE_include']
+		RCLONE_UPLOAD = row['RCLONE_UPLOAD']
 		cursor.close()
-		return render_template('rclone_edit.html', RCLONE_C_M=RCLONE_C_M, RCLONE_include=RCLONE_include, RCLONENAME=RCLONENAME, RCLONE_CONFIG=RCLONE_CONFIG,RCLONE_REMOTE=RCLONE_REMOTE,RCLONE_LOCAL=RCLONE_LOCAL,FLASKTIME=FLASKTIME)	
+		return render_template('rclone_edit.html', RCLONE_C_M=RCLONE_C_M, RCLONE_include=RCLONE_include, RCLONENAME=RCLONENAME, RCLONE_CONFIG=RCLONE_CONFIG,RCLONE_REMOTE=RCLONE_REMOTE,RCLONE_LOCAL=RCLONE_LOCAL,FLASKTIME=FLASKTIME, RCLONE_UPLOAD=RCLONE_UPLOAD)
 
 @rclone.route("edit_result/<RCLONENAME>", methods=['POST'])
 def edit_result(RCLONENAME):
@@ -204,11 +218,12 @@ def edit_result(RCLONENAME):
 		RCLONE_LOCAL = request.form['RCLONE_LOCAL']
 		RCLONE_C_M = request.form['RCLONE_C_M']
 		RCLONE_include = request.form['RCLONE_include']
+		RCLONE_UPLOAD = request.form['RCLONE_UPLOAD']
 		conn = sqlite3.connect(sub3db,timeout=60)
 		cursor = conn.cursor()
 		try:
-			sql_update = "UPDATE " + RCLONENAME + " SET RCLONE_C_M = ? , RCLONE_include = ?, FLASKTIME = ?, RCLONE_REMOTE = ?, RCLONE_CONFIG = ?, RCLONE_LOCAL =? WHERE RCLONENAME = ?"
-			cursor.execute(sql_update,(RCLONE_C_M, RCLONE_include, FLASKTIME, RCLONE_REMOTE, RCLONE_CONFIG, RCLONE_LOCAL, RCLONENAME))
+			sql_update = "UPDATE " + RCLONENAME + " SET RCLONE_C_M = ? , RCLONE_include = ?, FLASKTIME = ?, RCLONE_REMOTE = ?, RCLONE_CONFIG = ?, RCLONE_LOCAL =? , RCLONE_UPLOAD=? WHERE RCLONENAME = ?"
+			cursor.execute(sql_update,(RCLONE_C_M, RCLONE_include, FLASKTIME, RCLONE_REMOTE, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_UPLOAD, RCLONENAME))
 			conn.commit()
 		except:
 			conn.rollback()
@@ -259,8 +274,9 @@ def ok(RCLONENAME):
 		RCLONE_REMOTE = row['RCLONE_REMOTE']
 		RCLONE_C_M = row['RCLONE_C_M']
 		RCLONE_include= row['RCLONE_include']
+		RCLONE_UPLOAD = row['RCLONE_UPLOAD']
 		try:
-			scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=RCLONENAME, args=[RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include] )
+			scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=RCLONENAME, args=[RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include, RCLONE_UPLOAD] )
 			test2 = scheduler.get_job(RCLONENAME).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		except ConflictingIdError:
@@ -293,7 +309,8 @@ def now(RCLONENAME):
 		RCLONE_REMOTE = row['RCLONE_REMOTE']
 		RCLONE_C_M = row['RCLONE_C_M']
 		RCLONE_include= row['RCLONE_include']
-		exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include)
+		RCLONE_UPLOAD = row['RCLONE_UPLOAD']
+		exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include,RCLONE_UPLOAD)
 		return redirect(url_for('rclone.second'))
 		
 @rclone.route("cancle/<RCLONENAME>", methods=["GET"])
@@ -331,10 +348,11 @@ def start():
 		RCLONE_REMOTE = request.form['RCLONE_REMOTE']
 		RCLONE_C_M = request.form['RCLONE_C_M']
 		RCLONE_include= request.form['RCLONE_include']
+		RCLONE_UPLOAD = request.form['RCLONE_UPLOAD']
 		#데이타베이스 없으면 생성
 		try:
 			con = sqlite3.connect(sub3db,timeout=60)
-			con.execute('CREATE TABLE IF NOT EXISTS ' + RCLONENAME + ' (RCLONENAME TEXT, FLASKTIME TEXT, RCLONE_CONFIG TEXT, RCLONE_LOCAL TEXT, RCLONE_REMOTE TEXT, RCLONE_C_M TEXT, RCLONE_include TEXT)')
+			con.execute('CREATE TABLE IF NOT EXISTS ' + RCLONENAME + ' (RCLONENAME TEXT, FLASKTIME TEXT, RCLONE_CONFIG TEXT, RCLONE_LOCAL TEXT, RCLONE_REMOTE TEXT, RCLONE_C_M TEXT, RCLONE_include TEXT, RCLONE_UPLOAD TEXT)')
 			con.execute("PRAGMA cache_size = 10000")
 			con.execute("PRAGMA locking_mode = NORMAL")
 			con.execute("PRAGMA temp_store = MEMORY")
@@ -342,13 +360,26 @@ def start():
 			con.execute("PRAGMA journal_mode=WAL")
 			con.execute("PRAGMA synchronous=NORMAL")
 			con.close()
+			#데이터베이스 컬럼 추가하기
+			conn = sqlite3.connect(sub3db,timeout=60)
+			cur = conn.cursor()
+			sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%RCLONE_UPLOAD%'"
+			cur.execute(sql)
+			rows = cur.fetchall()
+			if len(rows) == 0:
+				sql = "alter table " + RCLONENAME + " add column RCLONE_UPLOAD TEXT"
+				cur.execute(sql)
+			else:
+				pass
+			conn.commit()
+			conn.close()
 		except:
 			return redirect(url_for('rclone.second'))
 		try:		
 			print(RCLONENAME)
 			con = sqlite3.connect(sub3db,timeout=60)
 			cur = con.cursor()
-			cur.execute("INSERT OR REPLACE INTO " + RCLONENAME + "  (RCLONENAME, FLASKTIME, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include) VALUES (?, ?, ?, ?, ?, ? , ?)", (RCLONENAME, FLASKTIME, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include))
+			cur.execute("INSERT OR REPLACE INTO " + RCLONENAME + "  (RCLONENAME, FLASKTIME, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include,RCLONE_UPLOAD) VALUES (?, ?, ?, ?, ?, ? , ?, ?)", (RCLONENAME, FLASKTIME, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M,RCLONE_include,RCLONE_UPLOAD))
 			con.commit()		
 		except:
 			con.rollback()
