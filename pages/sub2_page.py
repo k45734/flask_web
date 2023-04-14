@@ -300,9 +300,9 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 		c = msg2[i]['현재상태']
 		d = msg2[i]['상품상태']
 		if '연락처' in d:
-			total = '{} {}'.format(c,d)
+			total = '{} {} {}'.format(a, c, d)
 		else:
-			total = '{}'.format(d)
+			total = '{} {} {}'.format(a, b, d)
 		msg.append(total)
 	return msg
 #택배조회 확인
