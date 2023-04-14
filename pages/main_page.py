@@ -153,7 +153,14 @@ def index():
 		values = [job_id, job_next_time]
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
-	return render_template('main.html', test = date, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save)
+	#vnstat 트래픽 윈도우 않됨
+	if platform.system() == 'Windows':
+		download_data = u'윈도우모드는 지원안함'
+		upload_data = u'윈도우모드는 지원안함'
+	else:
+		data = vnstat_tr()
+		logger.info('%s', data)
+	return render_template('main.html', test = date, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save, data = data)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
 def cancle(FLASKAPPSNAME):
@@ -282,10 +289,12 @@ def vnstat_tr():
 			my_data = json.loads(f)
 			data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
 			data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+			data_in_check3 = my_data['interfaces'][0]['updated']['date']
 			download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
 			upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
-			keys = ['DOWNLOAD','UPLOAD']
-			values = [download_data, upload_data]
+			update_vnstat = u'%s-%s-%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'])
+			keys = ['DOWNLOAD','UPLOAD','DATE']
+			values = [download_data, upload_data,update_vnstat]
 			dt = dict(zip(keys, values))
 			data.append(dt)
 	except:	
@@ -311,15 +320,7 @@ def log():
 				else:
 					tltl2.append(i)
 		tltl = tltl2[-20:]
-		#vnstat 트래픽 윈도우 않됨
-		if platform.system() == 'Windows':
-			download_data = u'윈도우모드는 지원안함'
-			upload_data = u'윈도우모드는 지원안함'
-		else:
-			data = vnstat_tr()
-			
-			logger.info('%s', data)
-		return render_template('log.html', tltl=tltl, data=data)	
+		return render_template('log.html', tltl=tltl)	
 	
 @bp.route("restart")
 def restart():

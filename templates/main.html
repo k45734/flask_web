@@ -35,6 +35,12 @@
 <td align="center"> 디스크</td>
 <td align="center"> {{disk_percent}}</td>
 </tr>
+{% for row in data %} 
+<tr>
+<td align="center"> 트래픽사용량</td>
+<td align="center">{{row['DATE']}}<br>{{row['DOWNLOAD']}}<br> {{row['UPLOAD']}}</td>
+</tr>
+ {% endfor %} 
 </table><br>
 <center><h4>현재 스케줄러에 있는 목록보기</p>
 <table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
