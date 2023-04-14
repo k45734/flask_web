@@ -296,6 +296,12 @@ def log():
 			vnstat_data = '윈도우모드'
 		else:
 			for i in range(1,10):
+				if os.path.exists('/usr/bin/vnstat'):
+					subprocess.call('apk update', shell=True)
+					subprocess.call('apk add vnstat', shell=True)
+				else:
+					subprocess.call('/usr/bin/vnstatd -d', shell=True)
+					pass
 				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
 				subprocess.call(vnstat_start, shell=True)
 				if os.path.isfile(vnstat_start):
