@@ -272,6 +272,22 @@ def user_info_edit_proc():
 		con.close()
 		return redirect(url_for('main.index'))
 
+def vnstat_tr():
+	for i in range(1,10):
+		vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
+		os.system(vnstat_start)
+		if os.path.isfile(vnstat_start):
+			with open('/data/vnstat.json', 'r', encoding='utf8') as f:
+				f = f.read()
+				my_data = json.loads(f)
+				data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
+				data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
+				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
+				break
+			else:
+		pass
+	return [download_data,upload_data]
 @bp.route("log")
 def log():
 	createFolder(logdata)
@@ -296,20 +312,7 @@ def log():
 			download_data = u'윈도우모드는 지원안함'
 			upload_data = u'윈도우모드는 지원안함'
 		else:
-			for i in range(1,10):
-				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
-				os.system(vnstat_start)
-				if os.path.isfile(vnstat_start):
-					with open('/data/vnstat.json', 'r', encoding='utf8') as f:
-						f = f.read()
-						my_data = json.loads(f)
-						data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
-						data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
-					break
-				else:
-					pass
-			download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
-			upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
+			download_data,upload_data = vnstat_tr()
 			logger.info('%s %s', download_data,upload_data)
 		return render_template('log.html', tltl=tltl, download_data = download_data, upload_data = upload_data)	
 	
