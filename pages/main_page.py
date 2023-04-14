@@ -297,13 +297,13 @@ def log():
 		else:
 			for i in range(1,10):
 				if os.path.exists('/usr/bin/vnstat'):
-					subprocess.call('apk update', shell=True)
-					subprocess.call('apk add vnstat', shell=True)
+					os.system('apk update')
+					os.system('apk add vnstat')
 				else:
-					subprocess.call('/usr/bin/vnstatd -d', shell=True)
+					os.system('/usr/bin/vnstatd -d')
 					pass
 				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
-				subprocess.call(vnstat_start, shell=True)
+				os.system(vnstat_start)
 				if os.path.isfile(vnstat_start):
 					with open('/data/vnstat.json', 'r', encoding='utf8') as f:
 						f = f.read()
