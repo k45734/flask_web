@@ -377,7 +377,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 			for ii,iii in zip(image_url_last,image_number_last):
 				if 'jp' in ii or 'pn' in ii:
 					url_to_image(title, subtitle,ii,iii,gbun)
-					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+					#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 					time.sleep(3)
 					add_d(subtitle, title,ii,gbun)
 			if compress == '0':
