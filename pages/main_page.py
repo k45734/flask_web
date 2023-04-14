@@ -308,11 +308,15 @@ def log():
 					with open('/data/vnstat.json', 'r', encoding='utf8') as f:
 						f = f.read()
 						my_data = json.loads(f)
-						logger.info('%s', my_data)
+						data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
+						data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+						download_data = '다운로드 데이터 {}'.format(sizeof_fmt(data_in_check, suffix='G'))
+						upload_data = '업로드 데이터 {}'.format(sizeof_fmt(data_in_check2, suffix='G'))
+						logger.info('%s', vnstat_data)
 					break
 				else:
 					pass
-		return render_template('log.html', tltl=tltl)	
+		return render_template('log.html', tltl=tltl, download_data=download_data, upload_data=upload_data)	
 	
 @bp.route("restart")
 def restart():
