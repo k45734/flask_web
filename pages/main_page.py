@@ -285,9 +285,10 @@ def vnstat_tr():
 				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
 				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
 				break
-			else:
-		pass
+		else:
+			pass
 	return [download_data,upload_data]
+	
 @bp.route("log")
 def log():
 	createFolder(logdata)
