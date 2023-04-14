@@ -274,24 +274,22 @@ def user_info_edit_proc():
 
 def vnstat_tr():
 	data = []
-	for i in range(1,10):
+	try:
 		vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
 		subprocess.call(vnstat_start, shell=True)
-		if os.path.isfile(vnstat_start):
-			with open('/data/vnstat.json', 'r', encoding='utf8') as f:
-				f = f.read()
-				my_data = json.loads(f)
-				data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
-				data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
-				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
-				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
-				keys = ['DOWNLOAD','UPLOAD']
-				values = [download_data, upload_data]
-				dt = dict(zip(keys, values))
-				data.append(dt)
-				break
-		else:
-			pass
+		with open('/data/vnstat.json', 'r', encoding='utf8') as f:
+			f = f.read()
+			my_data = json.loads(f)
+			data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
+			data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+			download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
+			upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
+			keys = ['DOWNLOAD','UPLOAD']
+			values = [download_data, upload_data]
+			dt = dict(zip(keys, values))
+			data.append(dt)
+	except:	
+		pass
 	return data
 	
 @bp.route("log")
