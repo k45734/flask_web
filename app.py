@@ -158,9 +158,9 @@ if __name__ == '__main__':
 			pass
 		else:
 			if os.path.exists('/usr/bin/vnstat'):
-				subprocess.call('apk update', shell=True)
-				subprocess.call('apk add vnstat', shell=True)
 				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 			else:
+				subprocess.call('apk update', shell=True)
+				subprocess.call('apk add vnstat', shell=True)
 				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 	create_app()
