@@ -152,11 +152,15 @@ if __name__ == '__main__':
 			shutil.move(wwin + '/shop.db' , output_save_folder_path)
 		except:
 			pass
+		
 		#VNSTAT 설치 및 실행
-		if os.path.exists('/usr/bin/vnstat'):
-			subprocess.call('apk update', shell=True)
-			subprocess.call('apk add vnstat', shell=True)
-			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
+		if platform.system() == 'Windows':
+			pass
 		else:
-			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
+			if os.path.exists('/usr/bin/vnstat'):
+				subprocess.call('apk update', shell=True)
+				subprocess.call('apk add vnstat', shell=True)
+				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
+			else:
+				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 	create_app()

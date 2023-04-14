@@ -10,20 +10,13 @@
     </head>
     <body>
         <center>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<thead>
-  <tr>
-    <th align="center" class="tg-baqh">다운로드</td>
-    <td align="center" class="tg-baqh" colspan="2">{{download_data}}
-	</td>
-  </tr>
-    <tr>
-    <th align="center" class="tg-baqh">업로드</td>
-    <td align="center" class="tg-baqh" colspan="2">{{upload_data}}
-	</td>
-  </tr>
- </table> 
+{% for row in data %} 
+<tr>
+<th align="center" class="tg-0lax">{{row['DOWNLOAD']}}</th>
+<th align="center" class="tg-0lax" colspan="2">{{row['UPLOAD']}}</th>
+</td>
+</tr>
+ {% endfor %} 
    <p><textarea cols="100" rows="50">
    {%for ml in tltl %}
    {{ ml }}
