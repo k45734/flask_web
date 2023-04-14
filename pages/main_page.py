@@ -292,9 +292,13 @@ def log():
 					tltl2.append(i)
 		tltl = tltl2[-20:]
 		#vnstat 트래픽 윈도우 않됨
+		#download_rx = []
+		#upload_tx = []
 		if platform.system() == 'Windows':
-			download_data = '윈도우모드는 지원안함'
-			upload_data = '윈도우모드는 지원안함'
+			download_data = u'윈도우모드는 지원안함'
+			upload_data = u'윈도우모드는 지원안함'
+			#download_data.append(download_rx)
+			#upload_data.append(upload_tx)
 		else:
 			for i in range(1,10):
 				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
@@ -305,13 +309,15 @@ def log():
 						my_data = json.loads(f)
 						data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
 						data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
-						download_data = '다운로드 데이터 {}'.format(sizeof_fmt(data_in_check, suffix='G'))
-						upload_data = '업로드 데이터 {}'.format(sizeof_fmt(data_in_check2, suffix='G'))
+						download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
+						upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
+						#download_data.append(download_rx)
+						#upload_data.append(upload_tx)
 						logger.info('%s %s', download_data,upload_data)
 					break
 				else:
 					pass
-		return render_template('log.html', tltl=tltl, download_data=download_data, upload_data=upload_data)	
+		return render_template('log.html', tltl=tltl, download_data = download_data, upload_data = upload_data)	
 	
 @bp.route("restart")
 def restart():

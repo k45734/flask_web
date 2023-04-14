@@ -6,7 +6,7 @@ try:
 except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
-import platform
+import platform,subprocess
 import os.path, os,shutil
 if platform.system() == 'Windows':
 	at = os.path.splitdrive(os.getcwd())
@@ -154,8 +154,8 @@ if __name__ == '__main__':
 			pass
 		#VNSTAT 설치 및 실행
 		if os.path.exists('/usr/bin/vnstat'):
-			os.system('apk update')
-			os.system('apk add vnstat')
+			subprocess.call('apk update', shell=True)
+			subprocess.call('apk add vnstat', shell=True)
 		else:
-			os.system('/usr/bin/vnstatd -d')
+			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 	create_app()
