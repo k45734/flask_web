@@ -5,7 +5,7 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-import os, os.path, sqlite3, time , psutil, platform, logging,re,json
+import os, os.path, sqlite3, time , psutil, platform, logging,re,json,subprocess
 from datetime import datetime, timedelta
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
 from requests import get
@@ -276,7 +276,7 @@ def vnstat_tr():
 	data = []
 	for i in range(1,10):
 		vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
-		os.system(vnstat_start)
+		subprocess.call(vnstat_start, shell=True)
 		if os.path.isfile(vnstat_start):
 			with open('/data/vnstat.json', 'r', encoding='utf8') as f:
 				f = f.read()
