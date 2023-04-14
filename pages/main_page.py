@@ -306,7 +306,7 @@ def log():
 						data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
 						download_data = '다운로드 데이터 {}'.format(sizeof_fmt(data_in_check, suffix='G'))
 						upload_data = '업로드 데이터 {}'.format(sizeof_fmt(data_in_check2, suffix='G'))
-						logger.info('%s', vnstat_data)
+						logger.info('%s %s', download_data,upload_data)
 					break
 				else:
 					pass
