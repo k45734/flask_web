@@ -152,4 +152,10 @@ if __name__ == '__main__':
 			shutil.move(wwin + '/shop.db' , output_save_folder_path)
 		except:
 			pass
+		#VNSTAT 설치 및 실행
+		if os.path.exists('/usr/bin/vnstat'):
+			os.system('apk update')
+			os.system('apk add vnstat')
+		else:
+			os.system('/usr/bin/vnstatd -d')
 	create_app()
