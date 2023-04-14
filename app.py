@@ -153,14 +153,14 @@ if __name__ == '__main__':
 		except:
 			pass
 		
-		#VNSTAT 설치 및 실행
-		if platform.system() == 'Windows':
-			pass
+	#VNSTAT 설치 및 실행
+	if platform.system() == 'Windows':
+		pass
+	else:
+		if os.path.exists('/usr/bin/vnstat'):
+			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 		else:
-			if os.path.exists('/usr/bin/vnstat'):
-				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
-			else:
-				subprocess.call('apk update', shell=True)
-				subprocess.call('apk add vnstat', shell=True)
-				subprocess.call('/usr/sbin/vnstatd -d', shell=True)
+			subprocess.call('apk update', shell=True)
+			subprocess.call('apk add vnstat', shell=True)
+			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 	create_app()
