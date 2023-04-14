@@ -293,7 +293,7 @@ def vnstat_tr():
 			data_in_check4 = my_data['interfaces'][0]['updated']['time']
 			download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
 			upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
-			update_vnstat = u'%s-%s-%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
+			update_vnstat = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
 			keys = ['DOWNLOAD','UPLOAD','DATE']
 			values = [download_data, upload_data,update_vnstat]
 			dt = dict(zip(keys, values))
