@@ -293,7 +293,8 @@ def log():
 		tltl = tltl2[-20:]
 		#vnstat 트래픽 윈도우 않됨
 		if platform.system() == 'Windows':
-			vnstat_data = '윈도우모드'
+			download_data = '윈도우모드는 지원안함'
+			upload_data = '윈도우모드는 지원안함'
 		else:
 			for i in range(1,10):
 				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
