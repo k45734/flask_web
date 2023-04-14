@@ -291,6 +291,21 @@ def log():
 				else:
 					tltl2.append(i)
 		tltl = tltl2[-20:]
+		#vnstat 트래픽 윈도우 않됨
+		if platform.system() == 'Windows':
+			vnstat_data = '윈도우모드'
+		else:
+			for i in range(1,10):
+				vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
+				subprocess.call(vnstat_start, shell=True)
+				if os.path.isfile(vnstat_start):
+					with open('/data/vnstat.json', 'r', encoding='utf8') as f:
+						f = f.read()
+						my_data = json.loads(f)
+						logger.info('%s', my_data)
+					break
+				else:
+					pass
 		return render_template('log.html', tltl=tltl)	
 	
 @bp.route("restart")
