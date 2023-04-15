@@ -155,7 +155,7 @@ def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE
 		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include_F + ' --log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --log-file /data/log/rclone.log --transfers=4 --checkers=8' + CREATE_FF + DELETE_FF + ' --delete-after --drive-chunk-size=1M --bwlimit=' + RCLONE_UPLOAD
 	print(FLASKAPPS)
 	logger.info(FLASKAPPS)	
-	#subprocess.call(FLASKAPPS, shell=True)
+	subprocess.call(FLASKAPPS, shell=True)
 	comp = '완료'
 	return comp	
 	
