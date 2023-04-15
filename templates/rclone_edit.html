@@ -26,6 +26,23 @@
     <option value="move">MOVE</option>
     </td>
 </tr>
+  <tr>
+    <th align="center">폴더없으면생성</th>
+    <td class="tg-baqh"><select name="CREATE_F">
+	<option value="{{ CREATE_F }}">{{ CREATE_F }}</option>
+	<option value="True">네</option>
+    <option value="False">아니요</option>
+	
+    </td>
+</tr>
+  <tr>
+    <th align="center">작업후폴더삭제</th>
+    <td class="tg-baqh"><select name="DELETE_F">
+	<option value="{{ DELETE_F }}">{{ DELETE_F }}</option>
+	<option value="True">네</option>
+    <option value="False">아니요</option>
+    </td>
+</tr>
 <tr>
 <th align="center">RCLONE_INCLUDE</th>
 <td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_include" value="{{ RCLONE_include }}"></td>
