@@ -302,7 +302,7 @@ def tel_send_message(list):
 						webtoon_image = aac[4]
 						webtoon_number = aac[5]
 						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.
-						if 'jp' in webtoon_image:
+						if 'jpg' in webtoon_image or 'png' in webtoon_image or 'gif' in webtoon_image:
 							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
 						else:
 							logger.info('%s %s %s',title, subtitle,webtoon_image)
@@ -375,7 +375,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		cnt = complete_last.count('False')
 		if cnt >= 1:
 			for ii,iii in zip(image_url_last,image_number_last):
-				if 'jp' in ii or 'pn' in ii:
+				if 'jpg' in ii or 'png' in ii or 'gif' in ii:
 					url_to_image(title, subtitle,ii,iii,gbun)
 					#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 					time.sleep(3)
