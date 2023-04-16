@@ -147,7 +147,7 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.close()
 		time.sleep(3) 
 		con = sqlite3.connect(webtoondb,timeout=60)
@@ -183,7 +183,7 @@ def add_d(subtitle, title,webtoon_image,gbun):
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.close()
 		time.sleep(3)
 		#마지막 실행까지 작업안했던 결과물 저장
@@ -353,7 +353,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.execute("PRAGMA journal_mode=WAL")
-	con.execute("PRAGMA synchronous=NORMAL")
+	con.execute("PRAGMA synchronous=FULL")
 	con.row_factory = sqlite3.Row
 	cur2 = con.cursor()
 	if alldown == 'True':
@@ -407,7 +407,7 @@ def index():
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.close()
 		con = sqlite3.connect(webtoondb,timeout=60)
 		sql = "CREATE TABLE IF NOT EXISTS TOON_NORMAL (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)"
@@ -417,7 +417,7 @@ def index():
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.close()
 		return render_template('webtoon.html')	
 		
@@ -434,7 +434,7 @@ def alim_list():
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		#성인웹툰
@@ -479,7 +479,7 @@ def index_list():
 		con.execute("PRAGMA temp_store = MEMORY")
 		con.execute("PRAGMA auto_vacuum = 1")
 		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
+		con.execute("PRAGMA synchronous=FULL")
 		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		cur.execute('select TITLE,SUBTITLE from ' + DB_NAME + ' group by TITLE,SUBTITLE')
