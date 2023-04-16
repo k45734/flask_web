@@ -302,10 +302,12 @@ def tel_send_message(list):
 						webtoon_image = aac[4]
 						webtoon_number = aac[5]
 						complete = "False" #처음에 등록할때 무조건 False 로 등록한다.
-						if 'jpg' in webtoon_image or 'png' in webtoon_image or 'gif' in webtoon_image:
+						complete2 = "True" #처음에 등록할때 이미지 확장자가 com 이면 무조건 True 로 등록한다.
+						check_img = re.compile(r"https:\/\/.*\/.*.com").search(webtoon_image)
+						if check_img == None:
 							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
 						else:
-							logger.info('%s %s %s',title, subtitle,webtoon_image)
+							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete2,gbun)
 						
 					except:	
 						continue
@@ -375,11 +377,15 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		cnt = complete_last.count('False')
 		if cnt >= 1:
 			for ii,iii in zip(image_url_last,image_number_last):
-				if 'jpg' in ii or 'png' in ii or 'gif' in ii:
+				check_img = re.compile(r"https:\/\/.*\/.*.com").search(ii)
+				if check_img == None:
 					url_to_image(title, subtitle,ii,iii,gbun)
 					#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 					time.sleep(3)
 					add_d(subtitle, title,ii,gbun)
+				else:
+					add_d(subtitle, title,ii,gbun)
+					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 			if compress == '0':
 				print('다운완료후 압축하자')
 				manazip(title, subtitle,cbz,gbun)
