@@ -347,7 +347,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 		DB_NAME = 'TOON'
 	else:
 		DB_NAME = 'TOON_NORMAL'
-	logger.info('웹툰 다운로드합니다.')
+	logger.info('웹툰 %s 다운로드합니다.',gbun)
 	#try:
 	con = sqlite3.connect(webtoondb,timeout=60)
 	con.execute("PRAGMA cache_size = 10000")
@@ -397,7 +397,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 	con.close()	
 	#except:
 	#	logger.info('정보가없습니다.')
-	logger.info('웹툰 다운로드를 종료합니다.')	
+	logger.info('웹툰 %s 다운로드를 종료합니다.',gbun)	
 @webtoon.route('/')
 @webtoon.route('index')
 def index():
