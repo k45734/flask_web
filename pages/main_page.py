@@ -153,13 +153,8 @@ def index():
 		values = [job_id, job_next_time]
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
-	#vnstat 트래픽 윈도우 않됨
-	if platform.system() == 'Windows':
-		download_data = u'윈도우모드는 지원안함'
-		upload_data = u'윈도우모드는 지원안함'
-	else:
-		data = vnstat_tr()
-		logger.info('%s', data)
+	data = vnstat_tr()
+	logger.info('%s', data)
 	return render_template('main.html', test = date, oos = oos, oocpu = oocpu, mem_percent = mem_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save, data = data)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
@@ -281,25 +276,34 @@ def user_info_edit_proc():
 
 def vnstat_tr():
 	data = []
-	try:
-		vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
-		subprocess.call(vnstat_start, shell=True)
-		with open('/data/vnstat.json', 'r', encoding='utf8') as f:
-			f = f.read()
-			my_data = json.loads(f)
-			data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
-			data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
-			data_in_check3 = my_data['interfaces'][0]['updated']['date']
-			data_in_check4 = my_data['interfaces'][0]['updated']['time']
-			download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
-			upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
-			update_vnstat = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
-			keys = ['DOWNLOAD','UPLOAD','DATE']
-			values = [download_data, upload_data,update_vnstat]
-			dt = dict(zip(keys, values))
-			data.append(dt)
-	except:	
-		pass
+	if platform.system() == 'Windows':
+		download_data = u'윈도우모드는 지원안함'
+		upload_data = u'윈도우모드는 지원안함'
+		update_vnstat = u'윈도우모드는 지원안함'
+		keys = ['DOWNLOAD','UPLOAD','DATE']
+		values = [download_data, upload_data,update_vnstat]
+		dt = dict(zip(keys, values))
+		data.append(dt)
+	else:
+		try:
+			vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
+			subprocess.call(vnstat_start, shell=True)
+			with open('/data/vnstat.json', 'r', encoding='utf8') as f:
+				f = f.read()
+				my_data = json.loads(f)
+				data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
+				data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+				data_in_check3 = my_data['interfaces'][0]['updated']['date']
+				data_in_check4 = my_data['interfaces'][0]['updated']['time']
+				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check, suffix='G'))
+				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2, suffix='G'))
+				update_vnstat = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
+				keys = ['DOWNLOAD','UPLOAD','DATE']
+				values = [download_data, upload_data,update_vnstat]
+				dt = dict(zip(keys, values))
+				data.append(dt)
+		except:	
+			pass
 	return data
 	
 @bp.route("log")
