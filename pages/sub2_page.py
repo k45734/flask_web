@@ -121,13 +121,11 @@ def url_to_image2(url, dfolder, filename):
 	return comp	
 
 #텔레그램 특정시간 조용하게
-def tel_mute(start_time2,end_time,telgm_botid,text,bot):
-	print('123')
-	print(start_time2, end_time)
-	print(type(start_time2))
+def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
 	mynow = mytime()
-	if int(start_time2) > int(end_time)+1:
+	if int(start_time2) > int(end_time):
+		print('시작시간 크다')
 		for i in range(int(end_time), int(start_time2)+1):
 			print(i)
 			a = str(i).zfill(2)
@@ -141,8 +139,16 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot):
 		else:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 			print('무음')
-
+	
+	elif int(start_time2) == int(end_time):
+		print('시작시간과 종료시간 같음')
+		if telgm_alim == 'True':
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+		else:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			
 	else:
+		print('시작시간 작다')
 		for i in range(int(start_time2), int(end_time)+1):
 			print(i)
 			a = str(i).zfill(2)
@@ -158,7 +164,7 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot):
 			print('시끄럽게')
 
 #텔레그램 특정시간 조용하게
-def tel_mute2(start_time2,end_time,telgm_botid,text,bot):
+def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
 	mynow = mytime()
 	for i in range(int(start_time2), int(end_time)+1):
@@ -181,6 +187,11 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot):
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
 			print('시끄럽게')
 
+	elif int(start_time2) == int(end_time)+1:
+		if telgm_alim == 'True':
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+		else:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
 	else:
 		for i in range(int(start_time2), int(end_time)+1):
 			print(i)
@@ -202,18 +213,18 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == 'True':
 				try:
-					tel_mute(start_time2,end_time,telgm_botid,text,bot)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
 				except Exception as e:
 					logger.error(e)
 					time.sleep(30)
-					tel_mute(start_time2,end_time,telgm_botid,text,bot)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
 			else:
 				try:
-					tel_mute(start_time2,end_time,telgm_botid,text,bot)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
 				except Exception as e:
 					logger.error(e)
 					time.sleep(30)
-					tel_mute(start_time2,end_time,telgm_botid,text,bot)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
 		else:
 			print(text)
 		#time.sleep(10)	
@@ -238,18 +249,18 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot) 
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim) 
 					else :
 						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 					print(part)
 				else:
 					print(part)
@@ -258,18 +269,18 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 					else :
 						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
 					print(part)
 				else:
 					print(part)
@@ -284,18 +295,18 @@ def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time):
 		bot = telegram.Bot(token = telgm_token)
 		if telgm_alim == 'True':
 			try:
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
 			except Exception as e:
 				logger.error(e)
 				time.sleep(30)
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
 		else:
 			try:
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
 			except Exception as e:
 				logger.error(e)
 				time.sleep(30)
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
 	else:
 		print(msg)	
 	comp = '완료'
@@ -1030,6 +1041,18 @@ def weather():
 	else:
 		pass
 	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='weather' AND sql LIKE '%location%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table weather add column location TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:	
@@ -1048,6 +1071,7 @@ def weather():
 			telgm_alim = rows['telgm_alim']
 			start_time2 = rows['start_time2']
 			end_time = rows['end_time']
+			location = rows['location']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
@@ -1056,7 +1080,8 @@ def weather():
 			telgm_alim = 'False'
 			start_time2 = '10'
 			end_time = '06'
-		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
+			location = '서울'
+		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time, location = location)
 
 @bp2.route('weather_ok', methods=['POST'])
 def weather_ok():
@@ -1093,14 +1118,15 @@ def weather_ok():
 					, telgm_alim = ?
 					, start_time2 = ?
 					, end_time = ?
+					, location =?
 			"""
 		else:
 			sql = """
 				INSERT INTO weather 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time,location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time, location))
 		con.commit()
 		cursor.close()
 		con.close()
