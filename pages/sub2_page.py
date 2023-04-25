@@ -64,6 +64,11 @@ def mydate():
 	mytime = "%04d-%02d-%02d" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday)
 	return mytime
 	
+def mytime():
+	nowtime = time.localtime()
+	mytime = "%02d" % (nowtime.tm_hour)
+	return mytime	
+	
 @bp2.route('/')
 @bp2.route('index')
 def index():
@@ -114,26 +119,101 @@ def url_to_image2(url, dfolder, filename):
 		code.write(req.content)
 	comp = '완료'
 	return comp	
-	
+
+#텔레그램 특정시간 조용하게
+def tel_mute(start_time2,end_time,telgm_botid,text,bot):
+	print('123')
+	print(start_time2, end_time)
+	print(type(start_time2))
+	alim_start_end = []
+	mynow = mytime()
+	if int(start_time2) > int(end_time)+1:
+		for i in range(int(end_time), int(start_time2)+1):
+			print(i)
+			a = str(i).zfill(2)
+			alim_start_end.append(a)
+		check = ' '.join(alim_start_end)
+		#포함
+		if mynow in check:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			print('시끄럽게')
+		#미포함
+		else:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+			print('무음')
+
+	else:
+		for i in range(int(start_time2), int(end_time)+1):
+			print(i)
+			a = str(i).zfill(2)
+			alim_start_end.append(a)
+		check = ' '.join(alim_start_end)
+		#포함
+		if mynow in check:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+			print('무음')
+		#미포함
+		else:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			print('시끄럽게')
+
+#텔레그램 특정시간 조용하게
+def tel_mute2(start_time2,end_time,telgm_botid,text,bot):
+	alim_start_end = []
+	mynow = mytime()
+	for i in range(int(start_time2), int(end_time)+1):
+		a = str(i).zfill(2)
+		alim_start_end.append(a)
+	check = ' '.join(alim_start_end)
+
+	if int(start_time2) > int(end_time)+1:
+		for i in range(int(end_time), int(start_time2)+1):
+			print(i)
+			a = str(i).zfill(2)
+			alim_start_end.append(a)
+		check = ' '.join(alim_start_end)
+		#포함
+		if mynow in check:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+			print('무음')
+		#미포함
+		else:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+			print('시끄럽게')
+
+	else:
+		for i in range(int(start_time2), int(end_time)+1):
+			print(i)
+			a = str(i).zfill(2)
+			alim_start_end.append(a)
+		check = ' '.join(alim_start_end)
+		#포함
+		if mynow in check:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+			print('무음')
+		#미포함
+		else:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+			print('시끄럽게')		
 #텔레그램 알림
-def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
+def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
 	if len(text) <= 4096:
 		if telgm == 'True' :
 			bot = telegram.Bot(token = telgm_token)
 			if telgm_alim == 'True':
 				try:
-					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot)
 				except Exception as e:
 					logger.error(e)
 					time.sleep(30)
-					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot)
 			else:
 				try:
-					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot)
 				except Exception as e:
 					logger.error(e)
 					time.sleep(30)
-					bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+					tel_mute(start_time2,end_time,telgm_botid,text,bot)
 		else:
 			print(text)
 		#time.sleep(10)	
@@ -158,18 +238,18 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=True) 
+							tel_mute(start_time2,end_time,telgm_botid,part,bot) 
 					else :
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text=part, disable_notification=False)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 					print(part)
 				else:
 					print(part)
@@ -178,47 +258,46 @@ def tel(telgm,telgm_alim,telgm_token,telgm_botid,text):
 					bot = telegram.Bot(token = telgm_token)
 					if telgm_alim == 'True':
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=True)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=True) 
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 					else :
 						try:
-							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=False)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 						except Exception as e:
 							logger.error(e)
 							time.sleep(30)
-							bot.sendMessage(chat_id = telgm_botid, text='(Continuing...)\n' + part, disable_notification=False)
+							tel_mute(start_time2,end_time,telgm_botid,part,bot)
 					print(part)
 				else:
 					print(part)
 			#time.sleep(10)
 			time.sleep(0.5)
 	comp = '완료'
-	return comp	
+	return comp
 
 #텔레그램 알림
-def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg):
+def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time):
 	if telgm == 'True' :
 		bot = telegram.Bot(token = telgm_token)
 		if telgm_alim == 'True':
 			try:
-				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
 			except Exception as e:
 				logger.error(e)
 				time.sleep(30)
-				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=True)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
 		else:
 			try:
-				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
 			except Exception as e:
 				logger.error(e)
 				time.sleep(30)
-				bot.send_photo(chat_id = telgm_botid, photo=open(msg,'rb'), disable_notification=False)
+				tel_mute2(start_time2,end_time,telgm_botid,msg,bot)
 	else:
-		print(msg)
-	
+		print(msg)	
 	comp = '완료'
 	return comp	
 	
@@ -323,7 +402,7 @@ def track_url(url):
 		return response.status
 		
 #택배구동
-def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id):
+def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,start_time2,end_time):
 	url = []
 	code = { "DHL":"de.dhl",
 			"Sagawa":"jp.sagawa",
@@ -380,7 +459,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id):
 		
 		if check == None:
 			msga = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
 			
 		else:
 			json_string = check.get("name", None) #누가 보냈냐			
@@ -402,13 +481,13 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id):
 			else:
 				pass
 			print(msga)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
 	logger.info('택배 알림완료')
 	comp = '완료'
 	return msga
 	
 #택배조회 구동	
-def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
+def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid,start_time2,end_time):
 	logger.info('택배알림시작')
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -464,7 +543,7 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			carrier_id = row['PARCEL']
 			track_id = row['NUMBER']
 			print(carrier_id,track_id)
-			comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+			comp = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,start_time2,end_time)
 	else:
 		comp = '정보없음'
 	logger.info('택배알림완료')
@@ -492,6 +571,30 @@ def tracking():
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")	
 	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='tracking' AND sql LIKE '%start_time2%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table tracking add column start_time2 TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='tracking' AND sql LIKE '%end_time%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table tracking add column end_time TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -514,14 +617,18 @@ def tracking():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
+			start_time2 = '10'
+			end_time = '06'
 		
-		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 @bp2.route('tracking_list', methods=["GET"])
 def tracking_list():
@@ -631,7 +738,9 @@ def tracking_one(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id)
+		start_time2 = '23'
+		end_time = '6'
+		msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id, start_time2, end_time)
 
 	return redirect(url_for('sub2.tracking'))	
 	
@@ -720,6 +829,8 @@ def tracking_ok():
 		telgm_alim = request.args.get('telgm_alim')
 		telgm_token = request.args.get('telgm_token')
 		telgm_botid = request.args.get('telgm_botid')
+		start_time2 = request.args.get('start_time2')
+		end_time = request.args.get('end_time')
 		now = request.args.get('now')
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
@@ -739,23 +850,25 @@ def tracking_ok():
 					, start_time = ?
 					, telgm = ?
 					, telgm_alim = ?
+					, start_time2 = ?
+					, end_time = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO tracking 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time))
 		con.commit()
 		cursor.close()
 		con.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
 				test = scheduler.get_job(startname).id
 			else:
-				tracking_start(telgm,telgm_alim,telgm_token,telgm_botid)
+				tracking_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -823,7 +936,7 @@ def Typhoon():
 			last.append(msg)
 	return [last,fifi,name]
 		
-def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
+def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid,start_time2,end_time):
 	logger.info('날씨알림시작')
 	headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
 	#with requests.Session() as s:
@@ -872,9 +985,9 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 		msg = '{}\n\n{}\n\n태풍 정보 ({})\n{}'.format(msg1,msg2,name.text,msg3)		
 	except:
 		msg = '{}\n\n{}'.format(msg1,msg2)
-	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 	try:
-		tel_img(telgm,telgm_alim,telgm_token,telgm_botid,filename)
+		tel_img(telgm,telgm_alim,telgm_token,telgm_botid,filename,start_time2,end_time)
 	except:
 		pass
 	logger.info('날씨 알림완료')
@@ -885,13 +998,37 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid):
 def weather():
 	#데이타베이스 없으면 생성
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS weather (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT, start_time2 TEXT, end_time TEXT)')
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='weather' AND sql LIKE '%start_time2%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table weather add column start_time2 TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='weather' AND sql LIKE '%end_time%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table weather add column end_time TEXT"
+		cur.execute(sql)
+	else:
+		pass
 	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
@@ -909,13 +1046,17 @@ def weather():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+			start_time2 = '10'
+			end_time = '06'
+		return render_template('weather.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 @bp2.route('weather_ok', methods=['POST'])
 def weather_ok():
@@ -929,6 +1070,8 @@ def weather_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		start_time2 = request.form['start_time2']
+		end_time = request.form['end_time']
 		now = request.form['now']
 		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		con.execute("PRAGMA cache_size = 10000")
@@ -948,23 +1091,25 @@ def weather_ok():
 					, start_time = ?
 					, telgm = ?
 					, telgm_alim = ?
+					, start_time2 = ?
+					, end_time = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO weather 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time))
 		con.commit()
 		cursor.close()
 		con.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
 				test = scheduler.get_job(startname).id
 			else:
-				weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid)
+				weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1022,7 +1167,7 @@ def add_unse_d(a, b, c, d, e):
 		con.close()	
 	comp = '완료'
 	return comp	
-def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
+def unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2 ,end_time):
 	try:
 		logger.info('운세알림시작')
 		#SQLITE3 DB 없으면 만들다.
@@ -1076,7 +1221,7 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			d = row['MEMO'] #띠별상세운세
 			e = row['COMPLTE'] #완료여부
 			msg = b + ' (' + c + ')\n' + d
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
 			add_unse_d(a, b, c, d, e)
 		logger.info('운세 알림완료')	
 	except:
@@ -1104,6 +1249,30 @@ def unse():
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
 	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='unse' AND sql LIKE '%start_time2%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table unse add column start_time2 TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='unse' AND sql LIKE '%end_time%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table unse add column end_time TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -1120,13 +1289,17 @@ def unse():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+			start_time2 = '10'
+			end_time = '06'
+		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 
 @bp2.route('unse_ok', methods=['POST'])
@@ -1140,6 +1313,8 @@ def unse_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		start_time2 = request.form['start_time2']
+		end_time = request.form['end_time']
 		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
@@ -1153,23 +1328,25 @@ def unse_ok():
 					, start_time = ?
 					, telgm = ?
 					, telgm_alim = ?
+					, start_time2 = ?
+					, end_time = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO unse 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time))
 		conn.commit()
 		cursor.close()
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
 				test = scheduler.get_job(startname).id
 			else:
-				unse_start(telgm,telgm_alim,telgm_token,telgm_botid)
+				unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1242,7 +1419,7 @@ def quiz_add_go_d(MEMO, URL,SITE_NAME):
 	finally:	
 		con.close()
 		
-def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
+def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time):
 	try:
 		logger.info('퀴즈정답알림 시작')
 		#퀴즈정답 시작후 10초후 작동시작
@@ -1423,7 +1600,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim):
 				elif check_alim > 0:
 					for i in check_len:
 						if i in msg:
-							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
 						quiz_add_go_d(MEMO, URL,SITE_NAME)
 						
 			logger.info('퀴즈정답 완료했습니다.')
@@ -1460,6 +1637,30 @@ def quiz():
 	else:
 		pass
 	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%start_time2%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column start_time2 TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%end_time%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column end_time TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -1477,6 +1678,8 @@ def quiz():
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
 			myalim = rows['myalim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
@@ -1484,7 +1687,9 @@ def quiz():
 			telgm = 'False'
 			telgm_alim = 'False'
 			myalim = '오퀴즈'
-		return render_template('quiz.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, myalim = myalim)
+			start_time2 = '10'
+			end_time = '06'
+		return render_template('quiz.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, myalim = myalim, start_time2 = start_time2, end_time = end_time)
 
 
 @bp2.route('quiz_ok', methods=['POST'])
@@ -1498,6 +1703,8 @@ def quiz_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		start_time2 = request.form['start_time2']
+		end_time = request.form['end_time']
 		myalim = request.form['myalim']
 		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
@@ -1513,23 +1720,25 @@ def quiz_ok():
 					, telgm = ?
 					, telgm_alim = ?
 					, myalim = ?
+					, start_time2 = ?
+					, end_time = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO quiz 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim) VALUES (?, ?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim, start_time2, end_time))
 		conn.commit()
 		cursor.close()
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim])
+				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time])
 				test = scheduler.get_job(startname).id
 			else:
-				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim)
+				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1922,7 +2131,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 		last_memo = unescape(text)
 		news_name = row['NEWS_NAME']
 		msg = '{}\n{}'.format(title,last_memo)
-		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg)
+		tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 		#중복 알림에거
 		addnews_d(title, memo, news_name)
 	con.close()	
@@ -1943,6 +2152,30 @@ def news():
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
 	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%start_time2%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table news add column start_time2 TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%end_time%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table news add column end_time TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
@@ -1959,13 +2192,17 @@ def news():
 			start_time = rows['start_time']
 			telgm = rows['telgm']
 			telgm_alim = rows['telgm_alim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
 		else:
 			telgm_token='입력하세요'
 			telgm_botid='입력하세요'
 			start_time = '*/1 * * * *'
 			telgm = 'False'
 			telgm_alim = 'False'
-		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim)
+			start_time2 = '10'
+			end_time = '06'
+		return render_template('news.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 
 @bp2.route('news_ok', methods=['POST'])
@@ -1979,6 +2216,8 @@ def news_ok():
 		telgm_alim = request.form['telgm_alim']
 		telgm_token = request.form['telgm_token']
 		telgm_botid = request.form['telgm_botid']
+		start_time2 = request.form['start_time2']
+		end_time = request.form['end_time']
 		now = request.form['now']
 		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 		cursor = conn.cursor()
@@ -1992,23 +2231,25 @@ def news_ok():
 					, start_time = ?
 					, telgm = ?
 					, telgm_alim = ?
+					, start_time2 = ?
+					, end_time = ?
 			"""
 		else:
 			sql = """
 				INSERT INTO news 
-				(telgm_token, telgm_botid, start_time, telgm, telgm_alim) VALUES (?, ?, ?, ?, ?)
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)
 			"""
 		
-		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim))
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, start_time2, end_time))
 		conn.commit()
 		cursor.close()
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid])
+				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
 				test = scheduler.get_job(startname).id
 			else:
-				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid)
+				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
