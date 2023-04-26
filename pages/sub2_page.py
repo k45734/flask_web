@@ -126,8 +126,9 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	mynow = mytime()
 	if int(start_time2) > int(end_time):
 		print('시작시간 크다')
+		logger.info('시작시간 크다')
 		for i in range(int(end_time), int(start_time2)+1):
-			print(i)
+			#print(i)
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
 		check = ' '.join(alim_start_end)
@@ -135,13 +136,16 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		if mynow in check:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 			print('시끄럽게')
+			logger.info('시끄럽게')
 		#미포함
 		else:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 			print('무음')
+			logger.info('무음')
 	
 	elif int(start_time2) == int(end_time):
 		print('시작시간과 종료시간 같음')
+		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 		else:
@@ -149,6 +153,7 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 			
 	else:
 		print('시작시간 작다')
+		logger.info('시작시간 작다')
 		for i in range(int(start_time2), int(end_time)+1):
 			print(i)
 			a = str(i).zfill(2)
@@ -158,10 +163,12 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		if mynow in check:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 			print('무음')
+			logger.info('무음')
 		#미포함
 		else:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 			print('시끄럽게')
+			logger.info('시끄럽게')
 
 #텔레그램 특정시간 조용하게
 def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
