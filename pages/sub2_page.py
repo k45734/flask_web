@@ -179,9 +179,9 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		alim_start_end.append(a)
 	check = ' '.join(alim_start_end)
 
-	if int(start_time2) > int(end_time)+1:
+	if int(start_time2) > int(end_time):
+		logger.info('시작시간 크다')
 		for i in range(int(end_time), int(start_time2)+1):
-			print(i)
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
 		check = ' '.join(alim_start_end)
@@ -189,19 +189,22 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		if mynow in check:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
 			print('무음')
+			logger.info('무음')
 		#미포함
 		else:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
 			print('시끄럽게')
+			logger.info('시끄럽게')
 
-	elif int(start_time2) == int(end_time)+1:
+	elif int(start_time2) == int(end_time):
+		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
 		else:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
 	else:
+		logger.info('시작시간 작다')
 		for i in range(int(start_time2), int(end_time)+1):
-			print(i)
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
 		check = ' '.join(alim_start_end)
@@ -209,10 +212,12 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		if mynow in check:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
 			print('무음')
+			logger.info('무음')
 		#미포함
 		else:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
-			print('시끄럽게')		
+			print('시끄럽게')	
+			logger.info('시끄럽게')
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
 	if len(text) <= 4096:
