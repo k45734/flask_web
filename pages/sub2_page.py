@@ -125,8 +125,10 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
 	alim_start_end2 = []
 	mynow = mytime()
+	time_start = start_time2.zfill(2)
+	time_end = end_time.zfill(2)
 	
-	if int(start_time2) == int(end_time):
+	if int(time_start) == int(time_end):
 		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
@@ -135,11 +137,11 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
 	
 	else:
-		for i in range(0 , int(end_time)+1):
+		for i in range(0 , int(time_end)+1):
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
 			
-		for i in range(int(start_time2) , 25):
+		for i in range(int(time_start) , 25):
 			a = str(i).zfill(2)
 			alim_start_end2.append(a)
 		
@@ -160,8 +162,10 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
 	alim_start_end2 = []
 	mynow = mytime()
+	time_start = start_time2.zfill(2)
+	time_end = end_time.zfill(2)
 	
-	if int(start_time2) == int(end_time):
+	if int(time_start) == int(time_end):
 		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
@@ -170,11 +174,11 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
 	
 	else:
-		for i in range(0 , int(end_time)+1):
+		for i in range(0 , int(time_end)+1):
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
 			
-		for i in range(int(start_time2) , 25):
+		for i in range(int(time_start) , 25):
 			a = str(i).zfill(2)
 			alim_start_end2.append(a)
 		
