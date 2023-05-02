@@ -123,101 +123,72 @@ def url_to_image2(url, dfolder, filename):
 #텔레그램 특정시간 조용하게
 def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
+	alim_start_end2 = []
 	mynow = mytime()
-	if int(start_time2) > int(end_time):
-		print('시작시간 크다')
-		logger.info('시작시간 크다')
-		for i in range(int(end_time), int(start_time2)+1):
-			print(i)
-			a = str(i).zfill(2)
-			alim_start_end.append(a)
-		check = ' '.join(alim_start_end)
-		#포함
-		if mynow in check:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
-			print('일반알림 시끄럽게')
-			logger.info('일반알림 시끄럽게')
-		#미포함
-		else:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
-			print('일반알림 무음')
-			logger.info('일반알림 무음')
 	
-	elif int(start_time2) == int(end_time):
+	if int(start_time2) == int(end_time):
 		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
 		else:
 			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
-			
+	
 	else:
-		print('시작시간 작다')
-		logger.info('시작시간 작다')
-		for i in range(int(start_time2), int(end_time)+1):
-			print(i)
+		for i in range(0 , int(end_time)+1):
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
-		check = ' '.join(alim_start_end)
-		#포함
-		if mynow in check:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
-			print('일반알림 무음')
-			logger.info('일반알림 무음')
+			
+		for i in range(int(start_time2) , 25):
+			a = str(i).zfill(2)
+			alim_start_end2.append(a)
+		
+		list = alim_start_end + alim_start_end2
+		if mynow not in list:
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			print('시끄럽게')
+			logger.info('일반알림 시끄럽게')
+			
 		#미포함
 		else:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
-			print('일반알림 시끄럽게')
-			logger.info('일반알림 시끄럽게')
+			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+			print('무음')
+			logger.info('일반알림 무음')
 
 #텔레그램 특정시간 조용하게
 def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	alim_start_end = []
+	alim_start_end2 = []
 	mynow = mytime()
-	for i in range(int(start_time2), int(end_time)+1):
-		a = str(i).zfill(2)
-		alim_start_end.append(a)
-	check = ' '.join(alim_start_end)
-
-	if int(start_time2) > int(end_time):
-		logger.info('시작시간 크다')
-		for i in range(int(end_time), int(start_time2)+1):
-			a = str(i).zfill(2)
-			alim_start_end.append(a)
-		check = ' '.join(alim_start_end)
-		#포함
-		if mynow in check:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
-			print('사진알림 무음')
-			logger.info('사진알림 무음')
-		#미포함
-		else:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
-			print('사진알림 시끄럽게')
-			logger.info('사진알림 시끄럽게')
-
-	elif int(start_time2) == int(end_time):
+	
+	if int(start_time2) == int(end_time):
+		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
 		else:
 			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+	
 	else:
-		logger.info('시작시간 작다')
-		for i in range(int(start_time2), int(end_time)+1):
+		for i in range(0 , int(end_time)+1):
 			a = str(i).zfill(2)
 			alim_start_end.append(a)
-		check = ' '.join(alim_start_end)
-		#포함
-		if mynow in check:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
-			print('사진알림 무음')
-			logger.info('사진알림 무음')
+			
+		for i in range(int(start_time2) , 25):
+			a = str(i).zfill(2)
+			alim_start_end2.append(a)
+		
+		list = alim_start_end + alim_start_end2
+		if mynow not in list:
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+			print('시끄럽게')
+			logger.info('포토알림 시끄럽게')
+			
 		#미포함
 		else:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
-			print('사진알림 시끄럽게')	
-			logger.info('사진알림 시끄럽게')
+			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+			print('무음')
+			logger.info('포토알림 무음')
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
 	if len(text) <= 4096:
