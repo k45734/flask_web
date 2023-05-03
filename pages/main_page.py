@@ -299,7 +299,7 @@ def vnstat_tr():
 				data_in_check2 = data_in_check['timestamp']
 				data_in_check3 = data_in_check['rx']
 				data_in_check4 = data_in_check['tx']
-				last_update = datetime.fromtimestamp(data_in_check2).strftime('%Y-%m-%d %H:%M:%S')
+				last_update = datetime.fromtimestamp(data_in_check2).strftime('%Y-%m-%d')
 				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check3))
 				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check4))
 				now = datetime.now()
