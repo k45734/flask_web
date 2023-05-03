@@ -295,8 +295,8 @@ def vnstat_tr():
 				data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
 				data_in_check3 = my_data['interfaces'][0]['updated']['date']
 				data_in_check4 = my_data['interfaces'][0]['updated']['time']
-				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check)
-				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2)
+				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check))
+				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2))
 				now = datetime.now()
 				update_vnstat_old = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
 				update_vnstat = now.strptime(update_vnstat_old, "%Y-%m-%d %H:%M").strftime("%Y-%m-%d %H:%M")
