@@ -286,22 +286,27 @@ def vnstat_tr():
 		data.append(dt)
 	else:
 		try:
-			vnstat_start = '/usr/bin/vnstat --json -i eth0 > /data/vnstat.json'
+			vnstat_start = '/usr/bin/vnstat --json d -i eth0 > /data/vnstat.json'
 			subprocess.call(vnstat_start, shell=True)
 			with open('/data/vnstat.json', 'r', encoding='utf8') as f:
 				f = f.read()
 				my_data = json.loads(f)
-				data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
-				data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
-				data_in_check3 = my_data['interfaces'][0]['updated']['date']
-				data_in_check4 = my_data['interfaces'][0]['updated']['time']
-				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check))
-				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check2))
+				#data_in_check = my_data['interfaces'][0]['traffic']['total']['rx']
+				#data_in_check2 = my_data['interfaces'][0]['traffic']['total']['tx']
+				#data_in_check3 = my_data['interfaces'][0]['updated']['date']
+				#data_in_check4 = my_data['interfaces'][0]['updated']['time']
+				data_in_check = my_data['interfaces'][0]['traffic']['day'][-1]
+				data_in_check2 = data_in_check['timestamp']
+				data_in_check3 = data_in_check['rx']
+				data_in_check4 = data_in_check['tx']
+				last_update = datetime.fromtimestamp(data_in_check2).strftime('%Y-%m-%d %H:%M:%S')
+				download_data = u'다운로드 데이터 %s' % (sizeof_fmt(data_in_check3))
+				upload_data = u'업로드 데이터 %s' % (sizeof_fmt(data_in_check4))
 				now = datetime.now()
-				update_vnstat_old = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
-				update_vnstat = now.strptime(update_vnstat_old, "%Y-%m-%d %H:%M").strftime("%Y-%m-%d %H:%M")
+				#update_vnstat_old = u'%s-%s-%s %s:%s' % (data_in_check3['year'],data_in_check3['month'],data_in_check3['day'],data_in_check4['hour'],data_in_check4['minute'])
+				#update_vnstat = now.strptime(update_vnstat_old, "%Y-%m-%d %H:%M").strftime("%Y-%m-%d %H:%M")
 				keys = ['DOWNLOAD','UPLOAD','DATE']
-				values = [download_data, upload_data,update_vnstat]
+				values = [download_data, upload_data,last_update]
 				dt = dict(zip(keys, values))
 				data.append(dt)
 		except:	
