@@ -1597,24 +1597,27 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				MEMO = row['MEMO']
 				URL = row['URL']
 				SITE_NAME = row['SITE_NAME']
-				if 'ppomppu' in SITE_NAME :
-					site = '뽐뿌'
-				elif 'gaecheon' in SITE_NAME :
-					site = '단델리온 더스트'
-				elif 'luckyquiz4' in SITE_NAME :
-					site = '토실행운퀴즈'
-				elif 'quizbang' in SITE_NAME :
-					site = '퀴즈방'
-				msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
-				check_len = myalim.split('|')
-				check_alim = len(check_len)
-				if check_alim == 0:
+				if '공유' in MEMO:
 					pass
-				elif check_alim > 0:
-					for i in check_len:
-						if i in msg:
-							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
-						quiz_add_go_d(MEMO, URL,SITE_NAME)
+				else:	
+					if 'ppomppu' in SITE_NAME :
+						site = '뽐뿌'
+					elif 'gaecheon' in SITE_NAME :
+						site = '단델리온 더스트'
+					elif 'luckyquiz4' in SITE_NAME :
+						site = '토실행운퀴즈'
+					elif 'quizbang' in SITE_NAME :
+						site = '퀴즈방'
+					msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
+					check_len = myalim.split('|')
+					check_alim = len(check_len)
+					if check_alim == 0:
+						pass
+					elif check_alim > 0:
+						for i in check_len:
+							if i in msg:
+								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
+							quiz_add_go_d(MEMO, URL,SITE_NAME)
 						
 			logger.info('퀴즈정답 완료했습니다.')
 		else:
