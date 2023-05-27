@@ -140,7 +140,7 @@ def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE
 	if len(RCLONE_include) == 0:
 		RCLONE_include_F = ''
 	else:
-		RCLONE_include_F = RCLONE_include
+		RCLONE_include_F = RCLONE_include + ' '
 	if CREATE_F == 'True':
 		CREATE_FF = ' --create-empty-src-dirs'
 	else:
