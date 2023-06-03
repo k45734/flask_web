@@ -2015,7 +2015,8 @@ def funmom_ok():
 #뉴스알림		
 def addnews(news_name, title, memo, link):
 	#SQLITE3 DB 없으면 만들다.
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	mytime = mydate()
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS news (NEWS_NAME TEXT, TITLE TEXT, MEMO TEXT, URL TEXT,COMPLETE TEXT)')
 	con.execute("PRAGMA synchronous = OFF")
 	con.execute("PRAGMA journal_mode = MEMORY")
@@ -2025,7 +2026,8 @@ def addnews(news_name, title, memo, link):
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.close()	
 	#데이터베이스 컬럼 추가하기
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)	
+	mytime = mydate()
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
 	cur = con.cursor()
 	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%NEWS_NAME%'"
 	cur.execute(sql)
@@ -2035,7 +2037,8 @@ def addnews(news_name, title, memo, link):
 		cur.execute(sql)
 	else:
 		pass
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	mytime = mydate()
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
 	cur = con.cursor()
 	sql = 'select * from news where TITLE = ? and MEMO = ? and NEWS_NAME = ?'
 	cur.execute(sql, (title,memo,news_name))
@@ -2055,7 +2058,8 @@ def addnews(news_name, title, memo, link):
 def addnews_d(title, memo, news_name ):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
-		con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+		mytime = mydate()
+		con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND MEMO = ? AND NEWS_NAME = ?'
 		cur.execute(sql,('True',title, memo,news_name))
@@ -2132,7 +2136,8 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 					memo = memo_list
 			addnews(news_name, title, memo, link)
 	#알림시작
-	con = sqlite3.connect(sub2db + '/news.db',timeout=60)
+	mytime = mydate()
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
 	sql = 'select * from news where COMPLETE = ?'
