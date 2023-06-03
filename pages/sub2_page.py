@@ -2016,7 +2016,7 @@ def funmom_ok():
 def addnews(news_name, title, memo, link):
 	#SQLITE3 DB 없으면 만들다.
 	mytime = mydate()
-	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS news (NEWS_NAME TEXT, TITLE TEXT, MEMO TEXT, URL TEXT,COMPLETE TEXT)')
 	con.execute("PRAGMA synchronous = OFF")
 	con.execute("PRAGMA journal_mode = MEMORY")
@@ -2026,8 +2026,7 @@ def addnews(news_name, title, memo, link):
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.close()	
 	#데이터베이스 컬럼 추가하기
-	mytime = mydate()
-	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '.db',timeout=60)
 	cur = con.cursor()
 	sql = "SELECT sql FROM sqlite_master WHERE name='news' AND sql LIKE '%NEWS_NAME%'"
 	cur.execute(sql)
@@ -2037,8 +2036,7 @@ def addnews(news_name, title, memo, link):
 		cur.execute(sql)
 	else:
 		pass
-	mytime = mydate()
-	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '.db',timeout=60)
 	cur = con.cursor()
 	sql = 'select * from news where TITLE = ? and MEMO = ? and NEWS_NAME = ?'
 	cur.execute(sql, (title,memo,news_name))
@@ -2059,7 +2057,7 @@ def addnews_d(title, memo, news_name ):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		mytime = mydate()
-		con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
+		con = sqlite3.connect(sub2db + '/news_' + mytime + '.db',timeout=60)
 		cur = con.cursor()
 		sql = 'UPDATE news SET COMPLETE = ? WHERE TITLE = ? AND MEMO = ? AND NEWS_NAME = ?'
 		cur.execute(sql,('True',title, memo,news_name))
@@ -2082,7 +2080,7 @@ def get_data(url):
     except:
         return None
 		
-def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
+def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time):
 	logger.info('뉴스알림시작')
 	url = [
 		'https://www.yonhapnewstv.co.kr/category/news/headline/feed/',
@@ -2137,7 +2135,7 @@ def newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid):
 			addnews(news_name, title, memo, link)
 	#알림시작
 	mytime = mydate()
-	con = sqlite3.connect(sub2db + '/news_' + mytime + '_.db',timeout=60)
+	con = sqlite3.connect(sub2db + '/news_' + mytime + '.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()	
 	sql = 'select * from news where COMPLETE = ?'
