@@ -2273,3 +2273,194 @@ def news_ok():
 		except:
 			pass
 		return redirect(url_for('sub2.news'))
+		
+#뽐뿌알림
+#DB 알리미
+def hotdeal_add_go(title, memo_list, link):
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/hotdeal.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS hotdeal (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	
+	try: #URL TEXT, SEL TEXT, SELNUM TEXT
+		con = sqlite3.connect(sub2db + '/hotdeal.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		sql = "select * from hotdeal where TITLE = ? AND URL = ?"
+		cur.execute(sql, (title,link))
+		row = cur.fetchone()
+		if row != None:
+			pass
+		else:
+			cur.execute("INSERT OR REPLACE INTO hotdeal (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?,?)", (title , link, memo_list, 'False'))
+			con.commit()
+	except:
+		con.rollback()	
+	finally:
+		con.close()
+		
+def hotdeal_add_go_d(title, memo_list, link):
+	try:
+		#마지막 실행까지 작업안했던 결과물 저장
+		con = sqlite3.connect(sub2db + '/hotdeal.db',timeout=60)
+		cur = con.cursor()
+		sql = "select * from hotdeal where MEMO = ? and URL = ? AND TITLE = ?"
+		cur.execute(sql, (memo_list,link,title))
+		row = cur.fetchone()
+		if row == None:
+			pass
+		else:
+			sql = "UPDATE hotdeal SET COMPLTE = ? WHERE MEMO = ? and URL = ? and TITLE = ?"	
+			cur.execute(sql,('True', memo_list,link,title))
+			con.commit()
+	except:
+		con.rollback()	
+	finally:	
+		con.close()
+
+def hotdeal_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time):
+	url = [
+		'http://www.ppomppu.co.kr/rss.php?id=ppomppu',
+		'https://www.ppomppu.co.kr/rss.php?id=pmarket',
+		'http://www.ppomppu.co.kr/rss.php?id=ppomppu4',
+		]
+	for i in url:
+		parsed_data = get_data(i)
+		try:
+			news_name = parsed_data['feed']['title']
+		except:
+			continue
+		count = len(parsed_data['entries'])
+		for i in range(count):
+			article = parsed_data['entries'][i]
+			try:
+				title = article['title']
+			except:
+				continue
+			link = article['link']
+			memo_list = article['description']
+			hotdeal_add_go(title, memo_list, link)
+			
+	#알림
+	con = sqlite3.connect(sub2db + '/hotdeal.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from hotdeal where COMPLTE = ?"
+	cur.execute(sql, ('False',))
+	rows = cur.fetchall()
+	if len(rows) != 0:
+		for row in rows:
+			TITLE = row['TITLE']
+			MEMO = row['MEMO']
+			URL = row['URL']
+			check_len = myalim.split('|')
+			check_alim = len(check_len)
+			if check_alim == 0:
+				pass
+			elif check_alim > 0:
+				for i in check_len:
+					if i in msg:
+						tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
+					hotdeal_add_go_d(TITLE, MEMO, URL)
+
+
+@bp2.route('hotdeal')
+def hotdeal():
+	#데이타베이스 없으면 생성
+	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS hotdeal (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT, myalim TEXT, start_time2 TEXT, end_time TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		telgm_token = request.args.get('telgm_token')
+		telgm_botid = request.args.get('telgm_botid')
+		con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute("select * from hotdeal")
+		rows = cur.fetchone()
+		if rows:
+			telgm_token = rows['telgm_token']
+			telgm_botid = rows['telgm_botid']
+			start_time = rows['start_time']
+			telgm = rows['telgm']
+			telgm_alim = rows['telgm_alim']
+			myalim = rows['myalim']
+			start_time2 = rows['start_time2']
+			end_time = rows['end_time']
+		else:
+			telgm_token='입력하세요'
+			telgm_botid='입력하세요'
+			start_time = '*/1 * * * *'
+			telgm = 'False'
+			telgm_alim = 'False'
+			myalim = '11번가,옥션'
+			start_time2 = '10'
+			end_time = '06'
+		return render_template('hotdeal.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, myalim = myalim, start_time2 = start_time2, end_time = end_time)
+
+
+@bp2.route('hotdeal_ok', methods=['POST'])
+def hotdeal_ok():
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		start_time = request.form['start_time']
+		startname = request.form['startname']
+		telgm = request.form['telgm']
+		telgm_alim = request.form['telgm_alim']
+		telgm_token = request.form['telgm_token']
+		telgm_botid = request.form['telgm_botid']
+		start_time2 = request.form['start_time2']
+		end_time = request.form['end_time']
+		myalim = request.form['myalim']
+		now = request.form['now']
+		conn = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
+		cursor = conn.cursor()
+		cursor.execute("select * from hotdeal")
+		rows = cursor.fetchone()
+		if rows:
+			sql = """
+				update hotdeal
+					set telgm_token = ?
+					, telgm_botid = ?
+					, start_time = ?
+					, telgm = ?
+					, telgm_alim = ?
+					, myalim = ?
+					, start_time2 = ?
+					, end_time = ?
+			"""
+		else:
+			sql = """
+				INSERT INTO hotdeal 
+				(telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim, start_time2, end_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+			"""
+		
+		cursor.execute(sql, (telgm_token, telgm_botid, start_time, telgm, telgm_alim, myalim, start_time2, end_time))
+		conn.commit()
+		cursor.close()
+		conn.close()
+		try:
+			if now == 'True':
+				scheduler.add_job(hotdeal_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time])
+				test = scheduler.get_job(startname).id
+			else:
+				hotdeal_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
+			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
+		except:
+			pass
+		return redirect(url_for('sub2.hotdeal'))
