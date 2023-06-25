@@ -2298,7 +2298,7 @@ def hotdeal_add_go(title, memo_list, link):
 		if row != None:
 			pass
 		else:
-			cur.execute("INSERT OR REPLACE INTO hotdeal (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?,?)", (title , link, memo_list, 'False'))
+			cur.execute("INSERT OR REPLACE INTO hotdeal (TITLE, URL, MEMO, COMPLTE) VALUES (?,?,?,?)", (title , link, memo_list, 'False'))
 			con.commit()
 	except:
 		con.rollback()	
@@ -2361,6 +2361,7 @@ def hotdeal_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, 
 			URL = row['URL']
 			check_len = myalim.split('|')
 			check_alim = len(check_len)
+			msg = '{}\n{}'.format(TITLE,URL)
 			if check_alim == 0:
 				pass
 			elif check_alim > 0:
