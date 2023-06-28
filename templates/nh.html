@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<center><h4>농협택배 예약및 조회</p>
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<center>
+<form method="get|post">
+<thead>
+{% if session.get('logFlag') %}
+  <tr>
+    <th align="center" class="tg-baqh">농협택배 아이디</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ nh_id }}' name="nh_id" style="width:100%; border: 0;" ></td>
+  </tr>
+
+  <tr>
+    <th align="center" class="tg-baqh">농협택배 비밀번호</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="password" value='{{ nh_pwd }}' name="nh_pwd" style="width:100%; border: 0;" ></td>
+  </tr>
+
+  <tr>
+    <th align="center" class="tg-baqh">보내는사람</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndNm }}' name="sndNm" style="width:100%; border: 0;" ></td>
+  </tr>
+
+<tr>
+    <th align="center" class="tg-baqh">보내는사람 휴대폰번호</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndHpno }}' name="sndHpno" style="width:100%; border: 0;" ></td>
+  </tr>
+<tr>
+    <th align="center" class="tg-baqh">보내는사람 주소</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndAddr }}' name="sndAddr" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">보내는사람 상세주소</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndAddrDtl }}' name="sndAddrDtl" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr><td align="center" class="tg-baqh" colspan="2"><br></td></tr>
+
+ {% endif %} 
+  <tr>
+    <th align="center" class="tg-baqh">받는사람</td>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvNm" style="width:100%; border: 0;" ></td>
+  </tr>
+
+<tr>
+    <th align="center" class="tg-baqh">받는사람 휴대폰번호</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvHpno" style="width:100%; border: 0;" ></td>
+  </tr>
+<tr>
+    <th align="center" class="tg-baqh">받는사람 주소</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvAddr" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">받는사람 상세주소</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvAddrDtl" style="width:100%; border: 0;" ></td>
+  </tr>
+  <tr>
+    <th align="center" class="tg-baqh">물품명</th>
+    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="prodNm" style="width:100%; border: 0;" ></td>
+  </tr>
+<tr>
+    <th align="center">택배요금</th>
+    <td class="tg-baqh"><select name="priceTypeNm">
+	<option value="선불">선불(미리계산)</option>
+    <option value="착불">착불</option>
+    </td>
+</tr>
+<tr>
+<td align="center" class="tg-baqh" colspan="2">
+<input type="submit" value="택배예약(퀵)" onclick="javascript: form.action='nh_add';">
+<input type="submit" value="택배예약(대기)" onclick="javascript: form.action='nh_add_wait';">
+<input type="button" value="택배예약보기" onclick="location.href='index_list'">
+{% if session.get('logFlag') %}
+<input type="submit" value="기본정보입력" onclick="javascript: form.action='nh_login';">
+{% endif %}
+</td>
+</thead>
+</center>
+</tr>
+</form>
+</tbody>
+</table> 
+</thead>
+</center>
+
+{% endblock %}
