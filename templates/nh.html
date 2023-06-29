@@ -69,10 +69,10 @@
 </tr>
 <tr>
 <td align="center" class="tg-baqh" colspan="2">
-<input type="submit" value="택배예약(퀵)" onclick="javascript: form.action='nh_add';">
 <input type="submit" value="택배예약(대기)" onclick="javascript: form.action='nh_add_wait';">
 <input type="button" value="택배예약보기" onclick="location.href='index_list'">
 {% if session.get('logFlag') %}
+<input type="submit" value="택배예약(퀵)" onclick="javascript: form.action='nh_add';">
 <input type="submit" value="기본정보입력" onclick="javascript: form.action='nh_login';">
 {% endif %}
 </td>

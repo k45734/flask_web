@@ -69,30 +69,29 @@ def cleanText(readData):
 	return text	
 
 #농협택배 예약을 위한 사전 DB	
-def add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v):
-	try:
-		con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		cur = con.cursor()
-		sql = "select * from nh where rcvNm = ? and date = ? and prodNm = ? and amount = ?"
-		cur.execute(sql, (a,t,r,u))
-		row = cur.fetchone()
-		if row != None:
-			pass
-		else:
-			cur.execute("INSERT OR REPLACE INTO nh (rcvNm, rcvTelno, rcvHpno, rcvPostno, rcvAddr, rcvAddrDtl, prodTypeNm, prodAmt, priceTypeNm, rmk, sndNm, sndTelno, sndHpno, sndPostno, sndAddr, sndAddrDtl, boxQ, prodNm, surcharge, date, amount, rsvNo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v))
-			con.commit()
-	except:
-		con.rollback()
-	finally:	
-		con.execute('VACUUM')
-		con.close()
+def add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w):
+	#try:
+	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	cur = con.cursor()
+	sql = "select * from nh where rcvNm = ? and date = ? and prodNm = ? and amount = ? and rcpNo = ?"
+	cur.execute(sql, (a,t,r,u,w))
+	row = cur.fetchone()
+	print(row)
+	if row != None:
+		pass
+	else:
+		cur.execute("INSERT OR REPLACE INTO nh (rcvNm, rcvTelno, rcvHpno, rcvPostno, rcvAddr, rcvAddrDtl, prodTypeNm, prodAmt, priceTypeNm, rmk, sndNm, sndTelno, sndHpno, sndPostno, sndAddr, sndAddrDtl, boxQ, prodNm, surcharge, date, amount, rsvNo, rcpNo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w))
+		con.commit()
+		print('DB 없다.')
+	con.close()
 	comp = '완료'
+	print(comp)
 	return comp
 	
 #농협택배 회원아이디와 기본보내는 사람의 정보DB	
@@ -260,6 +259,7 @@ def jsonfile(numt, a, r, u):
 		t = row['date']
 		u = row['amount']
 		v = row['rsvNo']
+		w = row['rcpNo']
 		if '착불' in i:
 			priceType = '02'
 		else:
@@ -268,6 +268,7 @@ def jsonfile(numt, a, r, u):
 		values = [k,l,k,m,l,n,o, p,a, c, b, d, e, f, j, g, i, h, r, q, '', '07', priceType, '', '']
 		dt = dict(zip(keys, values))
 		mydata.append(dt)	
+	print(mydata)
 	#JSON 변환		
 	#with open(mydir + '/users.json', 'w+') as f:
 	#	json.dump(mydata, f, ensure_ascii=False, indent=4)		
@@ -328,11 +329,11 @@ def rezcomp(st_json):
 			rezcomp_data = []
 				#data2 = json.load(f)
 			data2 = json.loads(st_json)
-			#print(json_data)
 			for ii in data2:
 				print(ii['rmk'])
 				add_go = 'https://ex.nhlogis.co.kr/resrv/reg/save.json'
 				add_list = s.post(add_go, data=ii).json()
+				print(add_list['data'])
 				ck = add_list['result'] #성공여부
 				if ck == True:
 					aa = '성공'
@@ -343,10 +344,11 @@ def rezcomp(st_json):
 				ck3 = ii['rcvAddrDtl'] #받는분상세주소
 				ck4 = ii['rcvHpno'] #받는분전화번호
 				ck6 = ii['priceTypeNm'] #선불/착불
-				ck5 = add_list['data']['rsvNo'] #예약번호
+				ck5 = add_list['data']['rsvNo'] #농협택배 예약번호
 				ck7 = ii['rcvPostno'] #우편번호
-				keys = ['rcvNm','rcvAddr','rcvAddrDtl','rcvHpno','priceTypeNm','complte','rsvNo','rcvPostno']
-				values = [ck1,ck4,ck2,ck3,ck6,aa,ck5,ck7]
+				ck8 = add_list['data']['rcpNo'] #농협택배 접수번호
+				keys = ['rcvNm','rcvAddr','rcvAddrDtl','rcvHpno','priceTypeNm','complte','rsvNo','rcvPostno','rcpNo']
+				values = [ck1,ck4,ck2,ck3,ck6,aa,ck5,ck7,ck8]
 				dt = dict(zip(keys, values))
 				rezcomp_data.append(dt)
 			con.execute('VACUUM')
@@ -377,13 +379,26 @@ def adduse(context):
 	now,num,myday,nowtime,mytime = mydate()
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS nh (rcvNm TEXT, rcvTelno TEXT,rcvHpno TEXT,rcvPostno TEXT,rcvAddr TEXT,rcvAddrDtl TEXT,prodTypeNm TEXT,prodAmt TEXT,priceTypeNm TEXT,rmk TEXT,sndNm TEXT,sndTelno TEXT,sndHpno TEXT,sndPostno TEXT,sndAddr TEXT,sndAddrDtl TEXT,boxQ TEXT,prodNm TEXT,surcharge TEXT,date TEXT,amount TEXT,rsvNo TEXT)')	
+	con.execute('CREATE TABLE IF NOT EXISTS nh (rcvNm TEXT, rcvTelno TEXT,rcvHpno TEXT,rcvPostno TEXT,rcvAddr TEXT,rcvAddrDtl TEXT,prodTypeNm TEXT,prodAmt TEXT,priceTypeNm TEXT,rmk TEXT,sndNm TEXT,sndTelno TEXT,sndHpno TEXT,sndPostno TEXT,sndAddr TEXT,sndAddrDtl TEXT,boxQ TEXT,prodNm TEXT,surcharge TEXT,date TEXT,amount TEXT,rsvNo TEXT, rcpNo TEXT)')	
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
 	con.execute("PRAGMA auto_vacuum = 1")
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	#데이터베이스 컬럼 추가하기
+	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='nh' AND sql LIKE '%rcpNo%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table nh add column rcpNo TEXT"
+		cur.execute(sql)
+	else:
+		pass
 	con.close()
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
@@ -429,13 +444,15 @@ def adduse(context):
 	else:
 		u = '일반'
 	v = 'NULL'
-	add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v)
+	w = 'NULL'
+	print(v,w)
+	add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w)
 	all = '{}\n{}\n{} {}\n{} {}'.format(a,b,e,f,r,u)
-	print(all)
+	logger.info(all)
 	return all
 
 #서버에 DB를 예약번호를 저장합니다.
-def adduse2(rsvno):
+def adduse2(rsvno,rcpNo):
 	now,num,myday,nowtime,mytime = mydate()
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
@@ -443,8 +460,8 @@ def adduse2(rsvno):
 	sql = "SELECT * FROM nh ORDER BY ROWID DESC LIMIT 1"
 	cur.execute(sql)
 	rows = cur.fetchone()
-	sql = "UPDATE nh SET rsvNo = ? where rcvNm = ? and date = ? and amount = ? and prodNm = ?"
-	cur.execute(sql,(rsvno,rows['rcvNm'],rows['date'],rows['amount'],rows['prodNm']))
+	sql = "UPDATE nh SET rsvNo = ?, rcpNo = ? where rcvNm = ? and date = ? and amount = ? and prodNm = ?"
+	cur.execute(sql,(rsvno,rcpNo,rows['rcvNm'],rows['date'],rows['amount'],rows['prodNm']))
 	con.commit()
 	con.close()
 	comp = '완료'
@@ -833,7 +850,8 @@ def nh_add():
 		ck7 = i['rcvPostno']
 		aa = i['complte']
 		rsvno = i['rsvNo']
-	adduse2(rsvno)
+		rcpNo = i['rcpNo']
+	adduse2(rsvno,rcpNo)
 	ff = texter[1]
 	af = len(ff)
 	if af == 11:		
@@ -856,7 +874,8 @@ def nh_add_wait():
 	f = request.args.get('prodNm') #물품명
 	g = request.args.get('priceTypeNm') #택배 선불/착불
 	texter = [a,b,c,d,e,f,g]
-	adduse(texter)
+	test = adduse(texter)
+	logger.info('test')	
 	return redirect(url_for('nh.index_list'))
 	
 #예약확인후 실제 예약	
@@ -871,12 +890,14 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 	f = prodNm
 	g = priceTypeNm
 	texter = [a,b,c,d,e,f,g]
+	adduse(texter)
 	a = texter[0]
 	r = texter[4]
 	u = texter[5]
 	numt = num
 	st_json = jsonfile(numt, a, r, u)
 	all2 = rezcomp(st_json)
+	print(st_json)
 	for i in all2:
 		ck1 = i['rcvNm']
 		ck4 = i['rcvAddr']
@@ -886,7 +907,9 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 		ck7 = i['rcvPostno']
 		aa = i['complte']
 		rsvno = i['rsvNo']
-	adduse2(rsvno)
+		rcpNo = i['rcpNo']
+	print(rsvno, rcpNo)
+	adduse2(rsvno,rcpNo)
 	ff = texter[1]
 	af = len(ff)
 	if af == 11:		
@@ -894,5 +917,6 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 	else:
 		mydata = '처음구매자입니다.'
 	not_addr = addr_not(ck7)
-	msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
+	msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n접수번호는 {} 예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rcpNo,rsvno)
+	print(msg)
 	return redirect(url_for('nh.index_list'))
