@@ -35,7 +35,7 @@
 <th align="center" class="tg-0lax"><input type="text" name="rsvNo" value="{{ i['rsvNo'] }}" style="width:100%; border: 0;" readonly></th>
 <th align="center" class="tg-0lax"><input type="text" name="date" value="{{ i['date'] }}" style="width:100%; border: 0;" readonly></th>
 {% if session.get('logFlag') %}
-<th align="center" class="tg-0lax"><input type="button" value="예약" onclick="location.href='{{i['rcvNm']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['prodNm']}}/{{i['priceTypeNm']}}/nh_add2'"><input type="button" value="예약취소" onclick="location.href='{{i['rsvNo']}}/{{i['rcvNm']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['prodNm']}}/{{i['priceTypeNm']}}/{{i['date']}}/nh_del'"></th>
+<th align="center" class="tg-0lax"><input type="button" value="예약취소" onclick="location.href='{{i['rsvNo']}}/{{i['rcvNm']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['prodNm']}}/{{i['priceTypeNm']}}/{{i['date']}}/nh_del'"></th>
 {% else %}
 <th align="center" class="tg-0lax">예약취소</th>
 {% endif %}

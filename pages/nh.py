@@ -747,22 +747,25 @@ def index():
 #농협택배 리스트 목록 보기
 @nh.route('index_list', methods=["GET"])
 def index_list():
-	per_page = 10
-	page, _, offset = get_page_args(per_page=per_page)
-	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
-	con.execute("PRAGMA cache_size = 10000")
-	con.execute("PRAGMA locking_mode = NORMAL")
-	con.execute("PRAGMA temp_store = MEMORY")
-	con.execute("PRAGMA auto_vacuum = 1")
-	con.execute("PRAGMA journal_mode=WAL")
-	con.execute("PRAGMA synchronous=NORMAL")
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()
-	cur.execute('SELECT COUNT(*) FROM nh')
-	total = cur.fetchone()[0]
-	cur.execute('select * from nh ORDER BY date DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
-	wow = cur.fetchall()		
-	return render_template('nh_list.html', wow = wow, pagination=Pagination(page=page, total=total, per_page=per_page))
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		per_page = 10
+		page, _, offset = get_page_args(per_page=per_page)
+		con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+		con.execute("PRAGMA cache_size = 10000")
+		con.execute("PRAGMA locking_mode = NORMAL")
+		con.execute("PRAGMA temp_store = MEMORY")
+		con.execute("PRAGMA auto_vacuum = 1")
+		con.execute("PRAGMA journal_mode=WAL")
+		con.execute("PRAGMA synchronous=NORMAL")
+		con.row_factory = sqlite3.Row
+		cur = con.cursor()
+		cur.execute('SELECT COUNT(*) FROM nh')
+		total = cur.fetchone()[0]
+		cur.execute('select * from nh ORDER BY date DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		wow = cur.fetchall()		
+		return render_template('nh_list.html', wow = wow, pagination=Pagination(page=page, total=total, per_page=per_page))
 
 #농협택배 기본정보 입력및 저장
 @nh.route('nh_login', methods=["GET"])
@@ -865,7 +868,7 @@ def nh_add():
 			mydata = '처음구매자입니다.'
 		not_addr = addr_not(ck7)
 		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
-	return redirect(url_for('nh.index_list'))
+	return redirect(url_for('nh.index'))
 
 #DB 에만 저장한다.
 @nh.route('nh_add_wait', methods=["GET"])
@@ -881,7 +884,7 @@ def nh_add_wait():
 	texter = [a,b,c,d,e,f,g]
 	test = adduse(texter)
 	logger.info('test')	
-	return redirect(url_for('nh.index_list'))
+	return redirect(url_for('nh.index'))
 	
 #예약확인후 실제 예약	
 @nh.route('<rcvNm>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<prodNm>/<priceTypeNm>/nh_add2', methods=["GET"])
@@ -926,4 +929,4 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 		not_addr = addr_not(ck7)
 		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n접수번호는 {} 예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rcpNo,rsvno)
 		print(msg)
-	return redirect(url_for('nh.index_list'))
+	return redirect(url_for('nh.index'))
