@@ -452,16 +452,18 @@ def adduse(context):
 	return [v,w]
 
 #서버에 DB를 예약번호를 저장합니다.
-def adduse2(rsvno,rcpNo):
+def adduse2(rsvno,rcpNo,numt, a, r, u):
 	now,num,myday,nowtime,mytime = mydate()
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
-	sql = "SELECT * FROM nh ORDER BY ROWID DESC LIMIT 1"
-	cur.execute(sql)
+	#sql = "SELECT * FROM nh ORDER BY ROWID DESC LIMIT 1"
+	sql = "select * from nh where rcvNm = ? and date = ? and prodNm = ? and amount = ?"
+	#cur.execute(sql)
+	cur.execute(sql, (a,numt,r,u))
 	rows = cur.fetchone()
-	sql = "UPDATE nh SET rsvNo = ?, rcpNo = ? where rcvNm = ? and date = ? and amount = ? and prodNm = ?"
-	cur.execute(sql,(rsvno,rcpNo,rows['rcvNm'],rows['date'],rows['amount'],rows['prodNm']))
+	sql = "UPDATE nh SET rsvNo = ?, rcpNo = ? where rcvNm = ? and date = ? and prodNm = ? and amount = ?"
+	cur.execute(sql,(rsvno,rcpNo,a,numt,r,u))
 	con.commit()
 	con.close()
 	comp = '완료'
@@ -854,7 +856,7 @@ def nh_add():
 			aa = i['complte']
 			rsvno = i['rsvNo']
 			rcpNo = i['rcpNo']
-		adduse2(rsvno,rcpNo)
+		adduse2(rsvno,rcpNo,numt, a, r, u)
 		ff = texter[1]
 		af = len(ff)
 		if af == 11:		
@@ -914,7 +916,7 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 			rsvno = i['rsvNo']
 			rcpNo = i['rcpNo']
 		print(rsvno, rcpNo)
-		adduse2(rsvno,rcpNo)
+		adduse2(rsvno,rcpNo,numt, a, r, u)
 		ff = texter[1]
 		af = len(ff)
 		if af == 11:		
