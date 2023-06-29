@@ -79,20 +79,20 @@ def add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w):
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
 	cur = con.cursor()
-	sql = "select * from nh where rcvNm = ? and date = ? and prodNm = ? and amount = ? and rcpNo = ?"
-	cur.execute(sql, (a,t,r,u,w))
+	sql = "select * from nh where rcvNm = ? and date = ? and prodNm = ? and amount = ?"
+	cur.execute(sql, (a,t,r,u))
 	row = cur.fetchone()
 	print(row)
-	if row != None:
-		pass
-	else:
+	if row == None:
 		cur.execute("INSERT OR REPLACE INTO nh (rcvNm, rcvTelno, rcvHpno, rcvPostno, rcvAddr, rcvAddrDtl, prodTypeNm, prodAmt, priceTypeNm, rmk, sndNm, sndTelno, sndHpno, sndPostno, sndAddr, sndAddrDtl, boxQ, prodNm, surcharge, date, amount, rsvNo, rcpNo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w))
 		con.commit()
-		print('DB 없다.')
-	con.close()
-	comp = '완료'
-	print(comp)
-	return comp
+		con.close()
+		return True
+	else:
+		pass
+		return False
+	
+	return
 	
 #농협택배 회원아이디와 기본보내는 사람의 정보DB	
 def add_data(a,b,c,d,e,f,g):
@@ -227,16 +227,20 @@ def execelfile(numt):
 	return comp
 	
 #엑셀파일과 실제 예약을 하기 위한 작업입니다.
-def jsonfile(numt, a, r, u):
+def jsonfile(numt, a, r, u, v, w):
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
-	sql = "select * from nh where date = ? and rcvNm = ? and prodNm = ? and amount = ?"
-	cur.execute(sql, (numt, a, r, u))
-	rows = cur.fetchall()
-	mydata = []
-	#DB의 정보를 읽어옵니다.
-	for row in rows:
+	sql = "select * from nh where date = ? and rcvNm = ? and prodNm = ? and amount = ? and rsvNo = ? and rcpNo = ?"
+	cur.execute(sql, (numt, a, r, u, v, w))
+	row = cur.fetchone()
+	if row == None:
+		st_json = None
+		pass
+	else:
+		mydata = []
+		#DB의 정보를 읽어옵니다.
+		#for row in rows:
 		a = row['rcvNm']
 		b = row['rcvTelno']
 		c = row['rcvHpno']
@@ -265,15 +269,11 @@ def jsonfile(numt, a, r, u):
 		else:
 			priceType = '01'
 		keys = ['ordNm','ordTelno','sndNm','sndTelno','sndHpno','sndPostno','sndAddr','sndAddrDtl','rcvNm','rcvTelno','rcvHpno','rcvPostno','rcvAddr','rcvAddrDtl','rmk','prodTypeNm','priceTypeNm','prodAmt','prodNm','boxQ','rcpNo','prodType','priceType','addrSeq','maYn']
-		values = [k,l,k,m,l,n,o, p,a, c, b, d, e, f, j, g, i, h, r, q, '', '07', priceType, '', '']
+		values = [k,l,k,m,l,n,o, p,a, c, b, d, e, f, j, g, i, h, r, q, w, '07', priceType, '', '']
 		dt = dict(zip(keys, values))
 		mydata.append(dt)	
-	print(mydata)
-	#JSON 변환		
-	#with open(mydir + '/users.json', 'w+') as f:
-	#	json.dump(mydata, f, ensure_ascii=False, indent=4)		
-	st_json = json.dumps(mydata, indent=4, ensure_ascii = False)
-	comp = '완료'
+		st_json = json.dumps(mydata, indent=4, ensure_ascii = False)
+		comp = '완료'
 	return st_json
 	
 #실제 예약을 합니다.
@@ -325,34 +325,35 @@ def rezcomp(st_json):
 			print("로그인이 않되었습니다.")
 		else:
 			print("로그인이 되었습니다.")
-			#with open(mydir + '/users.json') as f:
 			rezcomp_data = []
-				#data2 = json.load(f)
 			data2 = json.loads(st_json)
-			for ii in data2:
-				print(ii['rmk'])
+			if data2[0]['rcpNo'] == 'NULL':
 				add_go = 'https://ex.nhlogis.co.kr/resrv/reg/save.json'
-				add_list = s.post(add_go, data=ii).json()
+				add_list = s.post(add_go, data=data2[0]).json()
+				print(add_list)
 				print(add_list['data'])
+				
 				ck = add_list['result'] #성공여부
 				if ck == True:
 					aa = '성공'
 				else:
 					aa = '실패'
-				ck1 = ii['rcvNm'] #받는분
-				ck2 = ii['rcvAddr'] #받는분주소
-				ck3 = ii['rcvAddrDtl'] #받는분상세주소
-				ck4 = ii['rcvHpno'] #받는분전화번호
-				ck6 = ii['priceTypeNm'] #선불/착불
+				ck1 = data2[0]['rcvNm'] #받는분
+				ck2 = data2[0]['rcvAddr'] #받는분주소
+				ck3 = data2[0]['rcvAddrDtl'] #받는분상세주소
+				ck4 = data2[0]['rcvHpno'] #받는분전화번호
+				ck6 = data2[0]['priceTypeNm'] #선불/착불
 				ck5 = add_list['data']['rsvNo'] #농협택배 예약번호
-				ck7 = ii['rcvPostno'] #우편번호
+				ck7 = data2[0]['rcvPostno'] #우편번호
 				ck8 = add_list['data']['rcpNo'] #농협택배 접수번호
 				keys = ['rcvNm','rcvAddr','rcvAddrDtl','rcvHpno','priceTypeNm','complte','rsvNo','rcvPostno','rcpNo']
 				values = [ck1,ck4,ck2,ck3,ck6,aa,ck5,ck7,ck8]
 				dt = dict(zip(keys, values))
 				rezcomp_data.append(dt)
-			con.execute('VACUUM')
-			con.close()
+				con.execute('VACUUM')
+				con.close()
+			else:
+				pass
 			return rezcomp_data
 	
 #서버의 DB를 삭제합니다.
@@ -445,11 +446,10 @@ def adduse(context):
 		u = '일반'
 	v = 'NULL'
 	w = 'NULL'
-	print(v,w)
 	add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w)
 	all = '{}\n{}\n{} {}\n{} {}'.format(a,b,e,f,r,u)
 	logger.info(all)
-	return all
+	return [v,w]
 
 #서버에 DB를 예약번호를 저장합니다.
 def adduse2(rsvno,rcpNo):
@@ -831,7 +831,7 @@ def nh_add():
 	c = request.args.get('rcvAddr') #주소
 	d = request.args.get('rcvAddrDtl') #상세주소
 	e = request.args.get('prodNm') #물품명
-	f = request.args.get('prodNm') #물품명
+	f = request.args.get('prodNm') + '_' + num #물품명
 	g = request.args.get('priceTypeNm') #택배 선불/착불
 	texter = [a,b,c,d,e,f,g]
 	adduse(texter)
@@ -840,26 +840,29 @@ def nh_add():
 	u = texter[5]
 	numt = num
 	st_json = jsonfile(numt, a, r, u)
-	all2 = rezcomp(st_json)
-	for i in all2:
-		ck1 = i['rcvNm']
-		ck4 = i['rcvAddr']
-		ck2 = i['rcvAddrDtl']
-		ck3 = i['rcvHpno']
-		ck6 = i['priceTypeNm']
-		ck7 = i['rcvPostno']
-		aa = i['complte']
-		rsvno = i['rsvNo']
-		rcpNo = i['rcpNo']
-	adduse2(rsvno,rcpNo)
-	ff = texter[1]
-	af = len(ff)
-	if af == 11:		
-		mydata = myguest(ff)
+	if st_json == None:
+		pass
 	else:
-		mydata = '처음구매자입니다.'
-	not_addr = addr_not(ck7)
-	msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
+		all2 = rezcomp(st_json)
+		for i in all2:
+			ck1 = i['rcvNm']
+			ck4 = i['rcvAddr']
+			ck2 = i['rcvAddrDtl']
+			ck3 = i['rcvHpno']
+			ck6 = i['priceTypeNm']
+			ck7 = i['rcvPostno']
+			aa = i['complte']
+			rsvno = i['rsvNo']
+			rcpNo = i['rcpNo']
+		adduse2(rsvno,rcpNo)
+		ff = texter[1]
+		af = len(ff)
+		if af == 11:		
+			mydata = myguest(ff)
+		else:
+			mydata = '처음구매자입니다.'
+		not_addr = addr_not(ck7)
+		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
 	return redirect(url_for('nh.index_list'))
 
 #DB 에만 저장한다.
@@ -871,7 +874,7 @@ def nh_add_wait():
 	c = request.args.get('rcvAddr') #주소
 	d = request.args.get('rcvAddrDtl') #상세주소
 	e = request.args.get('prodNm') #물품명
-	f = request.args.get('prodNm') #물품명
+	f = request.args.get('prodNm') + '_' + num #물품명 DB저장용
 	g = request.args.get('priceTypeNm') #택배 선불/착불
 	texter = [a,b,c,d,e,f,g]
 	test = adduse(texter)
@@ -887,36 +890,38 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 	c = rcvAddr
 	d = rcvAddrDtl
 	e = prodNm
-	f = prodNm
+	f = prodNm  + '_' + num
 	g = priceTypeNm
 	texter = [a,b,c,d,e,f,g]
-	adduse(texter)
+	v,w = adduse(texter)
 	a = texter[0]
 	r = texter[4]
 	u = texter[5]
 	numt = num
-	st_json = jsonfile(numt, a, r, u)
-	all2 = rezcomp(st_json)
-	print(st_json)
-	for i in all2:
-		ck1 = i['rcvNm']
-		ck4 = i['rcvAddr']
-		ck2 = i['rcvAddrDtl']
-		ck3 = i['rcvHpno']
-		ck6 = i['priceTypeNm']
-		ck7 = i['rcvPostno']
-		aa = i['complte']
-		rsvno = i['rsvNo']
-		rcpNo = i['rcpNo']
-	print(rsvno, rcpNo)
-	adduse2(rsvno,rcpNo)
-	ff = texter[1]
-	af = len(ff)
-	if af == 11:		
-		mydata = myguest(ff)
+	st_json = jsonfile(numt, a, r, u, v, w)
+	if st_json == None:
+		pass
 	else:
-		mydata = '처음구매자입니다.'
-	not_addr = addr_not(ck7)
-	msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n접수번호는 {} 예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rcpNo,rsvno)
-	print(msg)
+		all2 = rezcomp(st_json)
+		for i in all2:
+			ck1 = i['rcvNm']
+			ck4 = i['rcvAddr']
+			ck2 = i['rcvAddrDtl']
+			ck3 = i['rcvHpno']
+			ck6 = i['priceTypeNm']
+			ck7 = i['rcvPostno']
+			aa = i['complte']
+			rsvno = i['rsvNo']
+			rcpNo = i['rcpNo']
+		print(rsvno, rcpNo)
+		adduse2(rsvno,rcpNo)
+		ff = texter[1]
+		af = len(ff)
+		if af == 11:		
+			mydata = myguest(ff)
+		else:
+			mydata = '처음구매자입니다.'
+		not_addr = addr_not(ck7)
+		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n접수번호는 {} 예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rcpNo,rsvno)
+		print(msg)
 	return redirect(url_for('nh.index_list'))
