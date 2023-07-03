@@ -1180,3 +1180,10 @@ def nh_del_api(rsvno):
 	else:
 		all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at,ai,aa)
 	return jsonify(all)
+	
+#농협택배 주소테스트 API
+@nh.route('<address>/nh_addrtest_api', methods=["GET"])
+def nh_addrtest_api(address):
+	d,e = addr(address)
+	all = '{} {}'.format(d,e)
+	return jsonify(all)
