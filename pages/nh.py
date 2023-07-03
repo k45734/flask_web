@@ -150,6 +150,169 @@ def addr(ein):
 		e = new_addr['value']				
 		return [d,e]
 		
+#택배조회 확인
+def checkURL(url2):
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	try:
+		request = requests.get(url2,headers=header,timeout=3)
+		response = request.status_code
+	except:
+		print('%s 실패하였습니다.'% url2)
+	else:
+		if response == 200:
+			print ("%s 성공하였습니다."% url2)
+			return True      
+		return False
+		
+#업무용 택배조회 알림
+def trdb(track_number,track_date):
+	with requests.Session() as s:
+		headers = {"Cache-Control": "no-cache",   "Pragma": "no-cache",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+		main_url = 'http://kdtc.iptime.org:19998'
+		url = s.get(main_url, headers=headers)
+		check = url.status_code
+		if check == 200:
+			main = main_url + '/sub2/track_api/한진택배/' + track_number	
+			url = s.get(main, headers=headers)
+			print(url)
+
+	comp = '완료'
+	return comp
+
+#택배사에서 직접조회
+def tracking_ok(track_number):
+	with requests.Session() as s:
+		headers = {"Cache-Control": "no-cache",   "Pragma": "no-cache",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+		url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+		for url2 in url_list:
+			result = checkURL(url2)
+			if result == True:
+				main = url2 + '/kr.hanjin/tracks/' + track_number #기본 URL
+				break
+	
+		url = s.get(main, headers=headers)
+		resp = url.json()
+		check = resp.get('from', None)
+		if check == None:
+			msga = '송장번호가 없는거 같습니다.\n'
+		else:
+			json_string = check.get("name", None) #누가 보냈냐			
+			json_string2 = resp.get("to").get("name") #누가 받냐
+			json_string3 = resp.get("state").get("text") #배송현재상태
+			json_string4 = resp.get("carrier").get("name")
+			json_string_m = resp.get("progresses") #배송상황
+			msg2 = flfl(json_string_m)
+			gg = ff(msg2,json_string,json_string2,json_string4,track_number)
+			ms = '\n'.join(gg)
+			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,track_number,ms)
+			
+	return msga	
+	
+def r_delivery(now,test,myday):
+	datelink = now.strptime(test, "%y%m%d").strftime("%Y-%m-%d")
+	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from mydata"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	msg = []
+	for row in rows:
+		id = row['NHID']
+		pw = row['NHPASSWD']
+	LOGIN_INFO = {'userId': id,
+				'pwd': pw,
+				'rurl': '/main.do'
+				}
+	LIST_INFO = {'telNo':'', 
+		'payType': '00',
+		'searchOption': '2',
+		'searchText': '' ,
+		'orderType': '0',
+		'orderYn': 'A',
+		'startDt': datelink,
+		'endDt': datelink,
+		'paging': 'true',
+		'page': '1',
+		'rowCnt': '10'
+		}
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	with requests.Session() as s:
+		url = 'https://ex.nhlogis.co.kr/user/login/doLogin.json'
+		url2 = 'https://ex.nhlogis.co.kr/resrv/inq/list.do'
+		req = s.post(url, data=LOGIN_INFO)
+		
+		req1 = s.get(url2)
+		html = req1.text
+		gogo = bs(html, "html.parser")
+		loginok = gogo.find('div', {'class':'util-box'})
+		if loginok == None:
+			print("로그인이 않되었습니다.")
+		else:
+			list = 'https://ex.nhlogis.co.kr/resrv/inq/selectList.json'
+			req_list = s.post(list, data=LIST_INFO).json()
+			ass = req_list['data']['list']
+			
+			for i in ass:
+				aa = i['totCnt']
+			LIST_INFO_S = {'telNo':'', 
+						'payType': '00',
+						'searchOption': '2',
+						'searchText': '' ,
+						'orderType': '0',
+						'orderYn': 'A',
+						'startDt': datelink,
+						'endDt': datelink,
+						'paging': 'true',
+						'page': '1',
+						'rowCnt': aa
+						}
+			list_s = 'https://ex.nhlogis.co.kr/resrv/inq/selectList.json'
+			req_list_s = s.post(list_s, data=LIST_INFO_S).json()
+			ass_a = req_list_s['data']['list']
+			count = 1
+			for it in ass_a:
+				numdate = it['rsvDt']
+				numbers = re.sub(r'[^0-9]', '', numdate)[2:]
+				TK_INFO = {'invNo':it['invNo']}
+				tk_a = 'https://ex.nhlogis.co.kr/dlvy/dlvy/select.json'
+				req_tk = s.post(tk_a, data=TK_INFO).json()
+				ass_at = req_tk['data']['list']
+				track_number = it.get('invNo', None)#it['invNo']
+				track_date = it.get('rsvDt', None)#it['rsvDt']
+				print(track_number, track_date)
+				if len(ass_at) != 0:
+					for aai in ass_at:
+						pass
+					if numdate in datelink:
+						if track_number != None and track_date != None:
+							trdb(track_number,track_date)
+						else:
+							pass
+						tr_all = tracking_ok(track_number)
+						tracking = '실시간 배송확인\n' + 'http://smile.hanjin.co.kr:9080/eksys/smartinfo/map_web.html?wbl=' + it['invNo']
+						all = '{}. {} {}\n{} 님 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
+						msg.append(all)
+						count += 1
+					else:
+						pass
+				else:
+					if numdate in datelink:
+						if track_number != None and track_date != None:
+							trdb(track_number,track_date)
+						else:
+							pass
+						all = '{} {}\n{} 님 {} 되었습니다.\n배송원이 아직 배정되지 않았습니다.'.format(it['rsvDt'],it['invNo'],it['rcvNm'],it['scanNm'])
+						msg.append(all)
+						count += 1
+			
+			if len(msg) == 0:
+				all = '{} 정보가 없습니다.'.format(datelink)
+				msg.append(all)
+			else:
+				pass					
+	return msg
+	
 #엑셀파일과 실제 예약을 하기 위한 작업입니다.
 def execelfile(numt):
 	#workbook 생성하기(1개의 시트가 생성된 상태)
@@ -886,9 +1049,9 @@ def nh_add_wait():
 	logger.info('test')	
 	return redirect(url_for('nh.index'))
 	
-#예약확인후 실제 예약	
-@nh.route('<rcvNm>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<prodNm>/<priceTypeNm>/nh_add2', methods=["GET"])
-def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
+#예약 api
+@nh.route('<rcvNm>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<prodNm>/<priceTypeNm>/nh_add_api', methods=["GET"])
+def nh_add_api(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 	now,num,myday,nowtime,mytime = mydate()
 	a = rcvNm
 	b = rcvHpno
@@ -929,4 +1092,44 @@ def nh_add2(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm):
 		not_addr = addr_not(ck7)
 		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n접수번호는 {} 예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rcpNo,rsvno)
 		print(msg)
-	return redirect(url_for('nh.index'))
+	return msg
+	
+#DB 예약 검색 api
+@nh.route('<search>/nh_search_api', methods=["GET"])
+def nh_search_api(search):
+	now,num,myday,nowtime,mytime = mydate()
+	texter = [search]
+	a = texter
+	msg = []	
+	numt = texter[0]
+	hangul = re.compile(r'[ㄱ-ㅣ가-힣]')
+	results = re.findall(hangul, numt)
+	if len(results) != 0:
+		str = "".join(results)
+		all = dbfile(numt,now)
+	else:
+		all = dbfile(numt,now)
+	count = 0
+	for ii in all:
+		print(ii)
+		msg.append(ii)
+		count += 1
+	count_total = count * 4500
+	count_all = '총 택배요금은 {}원입니다.'.format(count_total)
+	msg.append(count_all)
+	print(msg)
+	return msg
+		
+#DB 예약 검색 api
+@nh.route('<search>/nh_delivery_api', methods=["GET"])
+def nh_delivery_api(search):
+	msg = []
+	now,num,myday,nowtime,mytime = mydate()
+	mml = [search]
+	test = mml[0]
+	mydata = r_delivery(now,test,myday)
+	for ii in mydata:	
+		print(ii)
+		msg.append(ii)
+	print(msg)
+	return msg
