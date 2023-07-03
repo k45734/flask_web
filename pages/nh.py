@@ -1034,12 +1034,12 @@ def nh_add():
 	f = request.args.get('prodNm') + '_' + num #물품명
 	g = request.args.get('priceTypeNm') #택배 선불/착불
 	texter = [a,b,c,d,e,f,g]
-	adduse(texter)
+	v,w = adduse(texter)
 	a = texter[0]
 	r = texter[4]
 	u = texter[5]
 	numt = num
-	st_json = jsonfile(numt, a, r, u)
+	st_json = jsonfile(numt, a, r, u, v, w)
 	if st_json == None:
 		pass
 	else:
@@ -1064,6 +1064,7 @@ def nh_add():
 		not_addr = addr_not(ck7)
 		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
 	return redirect(url_for('nh.index'))
+
 
 #DB 에만 저장한다.
 @nh.route('nh_add_wait', methods=["GET"])
