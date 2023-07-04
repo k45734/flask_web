@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body> <br><br>{% for i in msg %}
+       <center>{{i}}<br>{% endfor %}<br><br><a href="javascript:window.history.back();">뒤로가기</a></center>
+    </body>
+</html>
+
+{% endblock %}
