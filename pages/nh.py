@@ -1035,9 +1035,10 @@ def nh_del(rsvno,rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm,date):
 			t = date
 			ac = delete_top2(a,t,rsvno)
 			if '없음' in ac:
-				all = '예약하신접수가 없습니다.'
+				total = '예약하신접수가 없습니다.'
 			else:
-				all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(t,rsvno,a)
+				total = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(t,rsvno,a)
+			all = [total]
 		else:
 			now,num,myday,nowtime,mytime = mydate()
 			at,aa,ai = delete_top(rsvno)
@@ -1046,14 +1047,16 @@ def nh_del(rsvno,rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm,date):
 			t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
 			ac = delete_top2(a,t,rsvno)
 			if '없음' in ac:
-				all = '예약하신접수가 없습니다.'
+				total = '예약하신접수가 없습니다.'
 			else:
-				all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at,ai,aa)
-		return redirect(url_for('nh.index_list'))
+				total = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at,ai,aa)
+			all = [total]
+		return render_template('msg.html', msg = all)
 
 #농협택배 예약
 @nh.route('nh_add', methods=["GET"])
 def nh_add():
+	msg = []
 	now,num,myday,nowtime,mytime = mydate()
 	a = request.args.get('rcvNm') #받는사람
 	b = request.args.get('rcvHpno') #휴대폰번호
@@ -1091,8 +1094,16 @@ def nh_add():
 		else:
 			mydata = '처음구매자입니다.'
 		not_addr = addr_not(ck7)
-		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
-	return redirect(url_for('nh.index'))
+		msg_1 = '이름 : {}'.format(ck1)
+		msg_2 = '연락처 : {}'.format(ck4)
+		msg_3 = '주 소 : {} {}'.format(ck2,ck3)
+		msg_4 = '택배비 결재방법은 {} 입니다.'.format(ck6)
+		msg_5 = '예약이 {}하였습니다.'.format(aa)
+		msg_6 = '{} {}'.format(mydata,not_addr)
+		msg_7 = '예약번호는 {}'.format(rsvno)
+		all = [msg_1,msg_2,msg_3,msg_4,msg_5,msg_6,msg_7]
+	
+	return render_template('msg.html', msg = all)
 
 #DB 에만 저장한다.
 @nh.route('nh_add_wait', methods=["GET"])
