@@ -663,6 +663,23 @@ def adduse2(rsvno,rcpNo,numt, a, r, u):
 	con.close()
 	comp = '완료'
 	return comp
+
+def edit_db(rsvno,rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm):
+	now,num,myday,nowtime,mytime = mydate()
+	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	#sql = "SELECT * FROM nh ORDER BY ROWID DESC LIMIT 1"
+	sql = "select * from nh where rsvNo = ?"
+	#cur.execute(sql)
+	cur.execute(sql, (rsvno,))
+	rows = cur.fetchone()
+	sql = "UPDATE nh SET rcvHpno = ?, rcvTelno = ?, rcvPostno = ?, rcvAddr = ?, rcvAddrDtl = ?, priceTypeNm = ? where rsvNo = ?"
+	cur.execute(sql,(rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm, rsvno))
+	con.commit()
+	con.close()
+	comp = '완료'
+	return comp
 	
 #실서버 예약 취소 실구동
 def delete_top(rsvno):
@@ -798,7 +815,7 @@ def myguest(numt):
 	return mydata
 	
 #실서버 예약 수정 실구동
-def edit_top(rsvno):
+def edit_top(rsvno,context):
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
@@ -840,19 +857,30 @@ def edit_top(rsvno):
 			else:
 				ordNm = i['ordNm']
 				ordTelno = i['ordTelno']
-				priceType = i['priceType']
-				priceTypeNm = i['priceTypeNm']
+				#priceType = i['priceType']
+				#priceTypeNm = i['priceTypeNm']
+				#rcvAddr = i['rcvAddr']
+				#rcvAddrDtl = i['rcvAddrDtl']
+				#rcvHpno = i['rcvHpno']
+				#rcvPostno = i['rcvPostno']
+				#rcvTelno = i['rcvTelno']
+				ein = context[1]
+				rcvPostno,rcvAddr = addr(ein)
+				rcvAddrDtl = context[2]
+				rcvHpno = context[0]
+				rcvTelno = rcvHpno
+				if '선불' in context[3]:
+					priceTypeNm = '선불'
+					priceType = '01'
+				else:
+					priceTypeNm = '착불'
+					priceType = '02'	
 				prodAmt = i['prodAmt']
 				prodNm = i['prodNm']
 				prodType = i['prodType']
 				prodTypeNm = i['prodTypeNm']
-				rcpNo = i['rcpNo']
-				rcvAddr = i['rcvAddr']
-				rcvAddrDtl = i['rcvAddrDtl']
-				rcvHpno = i['rcvHpno']
-				rcvNm = i['rcvNm']
-				rcvPostno = i['rcvPostno']
-				rcvTelno = i['rcvTelno']
+				rcpNo = i['rcpNo']				
+				rcvNm = i['rcvNm']				
 				rmk = i['rmk']
 				rsvDt = i['rsvDt']
 				rsvNo = i['rsvNo']
@@ -883,16 +911,17 @@ def edit_top(rsvno):
 							'rmk': rmk,
 							'prodNm': prodNm,
 							'prodType': prodType,
-							'priceType': '02',
+							'priceType': priceType,
 							'prodAmt': prodAmt,
 							'prodTypeNm': prodTypeNm,
-							'priceTypeNm': '착불',
+							'priceTypeNm': priceTypeNm,
 							'boxQ': '1',
 							'maYn': ''
 							}
 				list = 'https://ex.nhlogis.co.kr/resrv/reg/save.json'
-				req_list = s.post(list, data=SAVE_INFO).json() 				
-	return [rcvNm]
+				req_list = s.post(list, data=SAVE_INFO).json()
+				
+	return [rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm]
 	
 @nh.route('/')
 @nh.route('index')
@@ -1065,7 +1094,6 @@ def nh_add():
 		msg = '{}\n{}\n{} {}\n택배비 결재방법은 {} 입니다.\n예약이 {}하였습니다.\n{}\n{}\n예약번호는 {}'.format(ck1,ck4,ck2,ck3,ck6,aa,mydata,not_addr,rsvno)
 	return redirect(url_for('nh.index'))
 
-
 #DB 에만 저장한다.
 @nh.route('nh_add_wait', methods=["GET"])
 def nh_add_wait():
@@ -1188,3 +1216,14 @@ def nh_addrtest_api(address):
 	d,e = addr(address)
 	all = '{} {}'.format(d,e)
 	return jsonify(all)
+	
+#농협택배 예약수정 API
+@nh.route('<rsvno>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<priceTypeNm>/nh_edit_api', methods=["GET"])
+def nh_edit_api(rsvno,rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm):
+	context = [rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm]
+	rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm = edit_top(rsvno,context)
+	edit_db(rsvno,rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm)
+	all = '{} 성공적으로 수정되었습니다.'.format(rsvno)
+	return jsonify(all)
+	
+
