@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<html>
+
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+      
+    </head>
+    <body>
+<!-- edit.html -->
+<div class="col-4 d-flex justify-content-center">
+<br><center><h4>택배예약 수정</p>
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<form action="/nh/edit_result/{{ rsvNo }}/{{ rcvHpno }}/{{ rcvAddr }}/{{ rcvAddrDtl }}/{{ priceTypeNm }}" method="POST">
+<center>
+<tr>
+<th align="center">예약번호</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="rsvNo" value="{{ rsvNo }}" readonly></td>
+</tr>
+  <tr>
+    <th align="center">택배요금</th>
+    <td class="tg-baqh"><select name="priceTypeNm">
+	<option value="{{ priceTypeNm }}">{{ priceTypeNm }}</option>
+	<option value="선불">선불</option>
+    <option value="착불">착불</option>
+    </td>
+</tr>
+<tr>
+<th align="center">휴대폰번호</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="rcvHpno" value="{{ rcvHpno }}"></td>
+</tr>
+<tr>
+<th align="center">받는분주소</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="rcvAddr" value="{{ rcvAddr }}"></td>
+</tr>
+<tr>
+<th align="center">받는분상세주소</th>
+<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="rcvAddrDtl" value="{{ rcvAddrDtl }}"></td>
+<tr>
+<tr>
+<td align="center" colspan="8"><input type="submit" value="수정"><input type="button" value="취소" onclick="history.back(-1);">
+</tr>
+</table>
+</center>
+</div>
+</form>
+</body>
+</html>
+{% endblock %}

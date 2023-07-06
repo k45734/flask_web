@@ -1053,6 +1053,38 @@ def nh_del(rsvno,rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm,date):
 			all = [total]
 		return render_template('msg.html', msg = all)
 
+#농협택배 예약수정(목록에서 가능하다)
+@nh.route('<rsvNo>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<priceTypeNm>/nh_edit', methods=["GET"])
+def nh_edit(rsvNo,rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		#rsvNo = request.args.get('rsvNo')
+		#rcvHpno = request.args.get('rcvHpno')
+		#rcvAddr = request.args.get('rcvAddr')
+		#rcvAddrDtl = request.args.get('rcvAddrDtl')
+		#priceTypeNm = request.args.get('priceTypeNm')
+		#rsvNo = request.form['rsvNo']
+		#rcvHpno = request.form['rcvHpno']
+		#rcvAddr = request.form['rcvAddr']
+		#rcvAddrDtl = request.form['rcvAddrDtl']
+		#priceTypeNm = request.form['priceTypeNm']
+		return render_template('nh_edit.html',rsvNo = rsvNo,rcvHpno = rcvHpno,rcvAddr = rcvAddr,rcvAddrDtl = rcvAddrDtl,priceTypeNm = priceTypeNm)
+
+@nh.route("edit_result/<rsvNo>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<priceTypeNm>", methods=['POST'])
+def edit_result(rsvNo,rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		rsvNo = request.form['rsvNo']
+		rcvHpno = request.form['rcvHpno']
+		rcvAddr = request.form['rcvAddr']
+		rcvAddrDtl = request.form['rcvAddrDtl']
+		priceTypeNm = request.form['priceTypeNm']
+		total = nh_edit_api(rsvNo,rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm)
+		all = [total.get_json()]
+		
+		return render_template('msg.html', msg = all)		
 #농협택배 예약
 @nh.route('nh_add', methods=["GET"])
 def nh_add():
