@@ -100,8 +100,8 @@ jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/db/jobs.sqlite', tablename='main')
 	}
 executors = {
-	'default': ThreadPoolExecutor(max_workers=20),
-	'processpool': ProcessPoolExecutor(max_workers=10)
+	'default': ThreadPoolExecutor(max_workers=50),
+	'processpool': ProcessPoolExecutor(max_workers=30)
 	}
 job_defaults = {
 	'coalesce': True,
