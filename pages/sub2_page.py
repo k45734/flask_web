@@ -362,7 +362,7 @@ def flfl(json_string_m):
 			b = list.get("location").get('name')
 			c = list.get("status").get('text')
 			d = list.get("description")
-			msg = {'시간':new_s,'상품위치':b,'현재상태':c, '상품상태':d}
+			msg = {'시간':new_s,'상품위치':b,'현재상태':c, '상품상태':d.replace('\n\t\t\t\t\t\t\t\t\t\t', '')}
 			test.append(msg)				
 		except:
 			pass
