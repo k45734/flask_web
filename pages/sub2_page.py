@@ -6,7 +6,7 @@ try:
 except:
 	pass
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint
-import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,urllib.request
+import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,urllib.request, asyncio
 from datetime import datetime, timedelta
 
 try:
@@ -56,6 +56,9 @@ else:
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+py_ver = int(f"{sys.version_info.major}{sys.version_info.minor}")
+if py_ver > 37 and sys.platform.startswith('win'):
+	asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 #텔레그램 에러 오류 해결??
 #os.system('pip install urllib3==1.24.1')
 
@@ -132,9 +135,9 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
 		else:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
 	
 	else:
 		for i in range(0 , int(time_end)+1):
@@ -147,13 +150,13 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=False)
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
 			print('시끄럽게')
 			logger.info('일반알림 시끄럽게')
 			
 		#미포함
 		else:
-			bot.sendMessage(chat_id = telgm_botid, text=text, disable_notification=True)
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
 			print('무음')
 			logger.info('일반알림 무음')
 
@@ -169,9 +172,9 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		print('시작시간과 종료시간 같음')
 		logger.info('시작시간과 종료시간 같음')
 		if telgm_alim == 'True':
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
 		else:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
 	
 	else:
 		for i in range(0 , int(time_end)+1):
@@ -184,13 +187,13 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False)
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
 			print('시끄럽게')
 			logger.info('포토알림 시끄럽게')
 			
 		#미포함
 		else:
-			bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True)
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
 			print('무음')
 			logger.info('포토알림 무음')
 #텔레그램 알림
