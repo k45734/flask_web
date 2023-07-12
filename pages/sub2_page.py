@@ -976,7 +976,19 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid,start_time2,
 	resp = url.json()
 	big_date = resp['warn'][0]['announce_date']
 	big_title = resp['warn'][0]['title']
-	big_region = resp['warn'][0]['region']
+	#해당구역
+	s3_big_region = []
+	s_big_region = resp['warn'][0]['region']
+	s2_big_region = re.sub(r"(\(\d\) )",'  ',s_big_region)
+	s4_big_region = s2_big_region.split('  ')
+	for i in s4_big_region:
+		if len(i) == 0:
+			pass
+		else:
+			mm = 'o {}\n'.format(i)
+			s3_big_region.append(mm)
+	big_region = ''.join(s3_big_region)
+	#내용
 	s3_big_efftsatus = []
 	s_big_efftsatus = resp['warn'][0]['efftsatus']
 	s2_big_efftsatus = s_big_efftsatus.split('o ')
@@ -987,7 +999,27 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid,start_time2,
 			mm = 'o {}\n'.format(i)
 			s3_big_efftsatus.append(mm)
 	big_efftsatus = ''.join(s3_big_efftsatus)
-	big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
+	#예비특보
+	s3_big_efftsatus_pre = []
+	s_big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
+	s2_big_efftsatus_pre = re.sub(r"(\(\d\) )",'  ',s_big_efftsatus_pre)
+	s4_big_efftsatus_pre = s2_big_efftsatus_pre.split('  ')
+	for i in s4_big_efftsatus_pre:
+		if len(i) == 0:
+			pass
+		else:
+			mm = 'o {}\n'.format(i)
+			s3_big_efftsatus_pre.append(mm)
+	re3_big_efftsatus_pre = []
+	re2_big_efftsatus_pre = ''.join(s3_big_efftsatus_pre)
+	re_big_efftsatus_pre2 = re2_big_efftsatus_pre.split('o ')
+	for i in re_big_efftsatus_pre2:
+		if len(i) == 0:
+			pass
+		else:
+			mm = 'o {}\n'.format(i)
+			re3_big_efftsatus_pre.append(mm)
+	big_efftsatus_pre = ''.join(re3_big_efftsatus_pre)
 	msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
 	try:
 		msg4,filename,name = Typhoon()
