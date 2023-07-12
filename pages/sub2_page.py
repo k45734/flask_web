@@ -977,7 +977,16 @@ def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid,start_time2,
 	big_date = resp['warn'][0]['announce_date']
 	big_title = resp['warn'][0]['title']
 	big_region = resp['warn'][0]['region']
-	big_efftsatus = resp['warn'][0]['efftsatus']
+	s3_big_efftsatus = []
+	s_big_efftsatus = resp['warn'][0]['efftsatus']
+	s2_big_efftsatus = s_big_efftsatus.split('o ')
+	for i in s2_big_efftsatus:
+		if len(i) == 0:
+			pass
+		else:
+			mm = 'o {}\n'.format(i)
+			s3_big_efftsatus.append(mm)
+	big_efftsatus = ''.join(s3_big_efftsatus)
 	big_efftsatus_pre = resp['warn'][0]['efftsatus_pre']
 	msg2 = '{} {}\n\n* 해당 구역\n\n{}\n\n* 내용\n\n{}\n\n* 예비특보\n\n{}'.format(big_date,big_title,big_region,big_efftsatus,big_efftsatus_pre)
 	try:
@@ -1157,7 +1166,8 @@ def add_unse(lastdate, zodiac, zodiac2, list, complte):
 		con.close()
 	comp = '완료'
 	return comp	
-def add_unse_d(a, b, c, d, e):
+	
+def add_unse_d(a):
 	try:
 		#마지막 실행까지 작업안했던 결과물 저장
 		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
@@ -1168,14 +1178,14 @@ def add_unse_d(a, b, c, d, e):
 		con.execute("PRAGMA journal_mode=WAL")
 		con.execute("PRAGMA synchronous=NORMAL")
 		cur = con.cursor()
-		sql = "select * from unse where DATE = ? AND ZODIAC2 = ? AND MEMO = ?"
-		cur.execute(sql, (a, c, d))
+		sql = "select * from unse where DATE = ?"
+		cur.execute(sql, (a,))
 		row = cur.fetchone()
 		if row == None:
 			print("해당 내용은 DB에 없습니다.")
 		else:
-			sql = "UPDATE unse SET COMPLTE = ? WHERE DATE = ? AND ZODIAC2 = ? AND MEMO = ?"	
-			cur.execute(sql,('True', a, c, d))
+			sql = "UPDATE unse SET COMPLTE = ? WHERE DATE = ?"	
+			cur.execute(sql,('True', a))
 			con.commit()
 	except:
 		con.rollback()	
@@ -1183,74 +1193,68 @@ def add_unse_d(a, b, c, d, e):
 		con.close()	
 	comp = '완료'
 	return comp	
+	
 def unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2 ,end_time):
-	try:
-		logger.info('운세알림시작')
-		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()
-		session = requests.Session()
-		header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
+	logger.info('운세알림시작')
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS unse (DATE TEXT, ZODIAC TEXT, ZODIAC2 TEXT, MEMO TEXT, COMPLTE TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = NORMAL")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
+	session = requests.Session()
+	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
-		auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
-		rs = requests.get(auth,headers=header)
-		bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
-		posts = bs0bj.findAll("div",{"class":"ani_result"})
-		dates = bs0bj.find('span',{'class':'cal'}).text
-		lastdate = " ".join(dates.split())
-		for i in posts:
-			a = i.text
-			test = i.find('dd')
-			title = test.text
-			a2 = " ".join(title.split())
-			aaa = a2.split(maxsplit=1)
-			zodiac = aaa[0]
-			zodiac2 = aaa[1]
-			name = i.find('ul')
-			li = name.text
-			list = " ".join(li.split())
-			#a4 = a2 + '\n' + list
-			a4 = zodiac + '\n' + zodiac2 + '\n' + list
-			complte = 'False'
-			add_unse(lastdate, zodiac, zodiac2, list, complte)
-			
-		#중복 알림 방지
-		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		sql = "select * from unse where COMPLTE = ?"
-		cur.execute(sql,('False',))
-		rows = cur.fetchall()
-		count = 0
-		for row in rows:
-			timestr = time.strftime("%Y%m%d")
-			a = row['DATE'] #생성날짜
-			b = row['ZODIAC'] #띠
-			c = row['ZODIAC2'] #띠별운세
-			d = row['MEMO'] #띠별상세운세
-			e = row['COMPLTE'] #완료여부
-			msg = b + ' (' + c + ')\n' + d
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
-			add_unse_d(a, b, c, d, e)
-		logger.info('운세 알림완료')	
-	except:
-		pass
-	try:
-		con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
-		con.execute('VACUUM')
-		con.commit()
-		logger.info('DB최적화를 진행하였습니다.')
-	except:
-		con.rollback()	
-	finally:	
-		con.close()			
+	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
+	rs = requests.get(auth,headers=header)
+	bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
+	posts = bs0bj.findAll("div",{"class":"ani_result"})
+	dates = bs0bj.find('span',{'class':'cal'}).text
+	lastdate = " ".join(dates.split())
+	for i in posts:
+		a = i.text
+		test = i.find('dd')
+		title = test.text
+		a2 = " ".join(title.split())
+		aaa = a2.split(maxsplit=1)
+		zodiac = aaa[0]
+		zodiac2 = aaa[1]
+		name = i.find('ul')
+		li = name.text
+		list = " ".join(li.split())
+		#a4 = a2 + '\n' + list
+		a4 = zodiac + '\n' + zodiac2 + '\n' + list
+		complte = 'False'
+		add_unse(lastdate, zodiac, zodiac2, list, complte)
+		
+	#중복 알림 방지
+	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from unse where COMPLTE = ?"
+	cur.execute(sql,('False',))
+	rows = cur.fetchall()
+	msg = []
+	for row in rows:
+		timestr = time.strftime("%Y%m%d")
+		a = row['DATE'] #생성날짜
+		b = row['ZODIAC'] #띠
+		c = row['ZODIAC2'] #띠별운세
+		d = row['MEMO'] #띠별상세운세
+		e = row['COMPLTE'] #완료여부
+		a4 = b + ' (' + c + ')\n' + d
+		msg.append(a4)
+		
+	msg_all = "\n\n".join(msg)	
+	tel(telgm,telgm_alim,telgm_token,telgm_botid,msg_all, start_time2, end_time)
+	add_unse_d(a)
+	logger.info('운세 알림완료')	
+
+	
 	comp = '완료'
 	return comp
 @bp2.route('unse')
