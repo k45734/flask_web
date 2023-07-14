@@ -697,33 +697,44 @@ def tracking_add():
 		#try:
 		carrier_id = request.args.get('carrier_id')
 		track_id = request.args.get('track_id')
-		print(carrier_id, track_id, mytime)
-		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		cursor = con.cursor()
-		sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
-		cursor.execute(sql, (carrier_id,track_id))
-		rows = cursor.fetchone()
-		if rows:
+		if len(track_id) == 0:
 			pass
 		else:
-			sql = """
-				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
-			"""
-			cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
-		con.commit()
-		cursor.close()
-		con.close()
-		msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
-		#except:
-		#	pass
+			print(carrier_id, track_id, mytime)
+			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = NORMAL")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.execute("PRAGMA journal_mode=WAL")
+			con.execute("PRAGMA synchronous=NORMAL")
+			cursor = con.cursor()
+			sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
+			cursor.execute(sql, (carrier_id,track_id))
+			rows = cursor.fetchone()
+			if rows:
+				pass
+			else:
+				sql = """
+					INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
+				"""
+				cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
+			con.commit()
+			cursor.close()
+			con.close()
+			msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
+			#except:
+			#	pass
 	return redirect(url_for('sub2.tracking'))
 
+@bp2.route('<carrier_id>/<track_id>/tracking_complte', methods=["GET"])
+def tracking_complte(carrier_id,track_id):
+	if not session.get('logFlag'):
+		return redirect(url_for('main.index'))
+	else:
+		tracking_del_new(carrier_id,track_id)
+	return redirect(url_for('sub2.tracking'))	
+	
 @bp2.route('<carrier_id>/<track_id>/<telgm_token>/<telgm_botid>/<telgm>/<telgm_alim>/tracking_one', methods=["GET"])
 def tracking_one(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	#SQLITE3 DB 없으면 만들다.
@@ -777,44 +788,47 @@ def tracking_del(carrier_id,track_id):
 
 @bp2.route("track_api/<carrier_id>/<track_id>", methods=["GET"])
 def track_api(carrier_id, track_id):
-	print(carrier_id, track_id)
-	mytime = mydate()
-	try:
-		#SQLITE3 DB 없으면 만들다.
-		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()
-		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		cursor = con.cursor()
-		sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
-		cursor.execute(sql, (carrier_id,track_id))
-		rows = cursor.fetchone()
-		if rows:
-			pass
-		else:
-			sql = """
-				INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
-			"""
-		cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
-		con.commit()
-		cursor.close()
-		con.close()
-		msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
-	except:
-		msg = '택배사 {} 송장번호 {} 등록 실패'.format(carrier_id,track_id)
-	
+	if len(track_id) == 0:
+		pass
+	else:
+		print(carrier_id, track_id)
+		mytime = mydate()
+		try:
+			#SQLITE3 DB 없으면 만들다.
+			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+			con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT,COMPLTE TEXT)')
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = NORMAL")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.execute("PRAGMA journal_mode=WAL")
+			con.execute("PRAGMA synchronous=NORMAL")
+			con.close()
+			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA locking_mode = NORMAL")
+			con.execute("PRAGMA temp_store = MEMORY")
+			con.execute("PRAGMA auto_vacuum = 1")
+			con.execute("PRAGMA journal_mode=WAL")
+			con.execute("PRAGMA synchronous=NORMAL")
+			cursor = con.cursor()
+			sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
+			cursor.execute(sql, (carrier_id,track_id))
+			rows = cursor.fetchone()
+			if rows:
+				pass
+			else:
+				sql = """
+					INSERT OR REPLACE INTO tracking (PARCEL, NUMBER, DATE, COMPLTE) VALUES (?,?,?,?)
+				"""
+			cursor.execute(sql, (carrier_id, track_id,mytime,'False'))
+			con.commit()
+			cursor.close()
+			con.close()
+			msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
+		except:
+			msg = '택배사 {} 송장번호 {} 등록 실패'.format(carrier_id,track_id)
+		
 	return 	msg
 	
 @bp2.route('tracking/tracking_ok', methods=['GET'])
