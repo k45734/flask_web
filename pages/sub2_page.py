@@ -893,6 +893,7 @@ def tracking_ok():
 def Typhoon():
 	nowtime = time.localtime()
 	newdate = "%04d-%02d-%02d_%02d시%02d분%02d초" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday, nowtime.tm_hour, nowtime.tm_min, nowtime.tm_sec)
+	Typhoon_date = "%04d-%02d-%02d_%02d시%02d분" % (nowtime.tm_year, nowtime.tm_mon, nowtime.tm_mday, nowtime.tm_hour, nowtime.tm_min)
 	no = []
 	mydata = []
 	last = []
@@ -923,7 +924,7 @@ def Typhoon():
 			else:
 				root = '/data'
 			dfolder = root + '/'
-			filename = name.text + ".jpg"
+			filename = Typhoon_date + '_' + name.text + ".jpg"
 			category = 'weather'
 			fifi = dfolder + '/' + category + '/' + filename
 			url_to_image2(url, dfolder, filename)
@@ -949,6 +950,7 @@ def Typhoon():
 			g = ii['크기']
 			msg = '예상일시 : {} 진행방향 : {} 진행속도(km/h) : {} 최대풍속(m/s) : {} 강풍반경(km) : {} 강도 : {} 크기 : {}\n'.format(a,b,c,d,e,f,g)
 			last.append(msg)
+	time.sleep(1)
 	return [last,fifi,name]
 		
 def weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid,start_time2,end_time):
