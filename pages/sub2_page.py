@@ -1531,7 +1531,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			with requests.Session() as s:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
 				URL = MYURL + list_url
-				req = urllib.request.urlopen(URL).read()
+				#req = urllib.request.urlopen(URL).read()
+				req = s.get(URL).text
 				soup = bs(req, 'html.parser')
 				try:
 					all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
