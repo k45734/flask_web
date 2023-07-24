@@ -1912,7 +1912,8 @@ def funmom_start(startname):
 		list_url = i['URL']
 		title = i['TITLE']
 		URL = 'https://funmom.tistory.com' + list_url
-		req = urllib.request.urlopen(URL).read()
+		#req = urllib.request.urlopen(URL).read()
+		req = requests.get(URL).text
 		soup = bs(req, 'html.parser')
 		menu = soup.find(attrs={'class' :'inner_g'}).text #카테고리 이름 div class="list_tag"
 		last_c = menu.split('/')
