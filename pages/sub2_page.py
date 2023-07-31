@@ -788,9 +788,9 @@ def tracking_del(carrier_id,track_id):
 
 @bp2.route("track_api/<carrier_id>/<track_id>", methods=["GET"])
 def track_api(carrier_id, track_id):
-	if len(track_id) == 0:
-		pass
-	else:
+	logger.info(track_id, len(track_id))
+	match = re.compile(r"^[0-9]+$").search(track_id)
+	if match:
 		print(carrier_id, track_id)
 		mytime = mydate()
 		try:
@@ -828,6 +828,8 @@ def track_api(carrier_id, track_id):
 			msg = '택배사 {} 송장번호 {} 등록 완료'.format(carrier_id,track_id)
 		except:
 			msg = '택배사 {} 송장번호 {} 등록 실패'.format(carrier_id,track_id)
+	else:
+		msg = '송장번호가 없습니다.'
 		
 	return 	msg
 	
