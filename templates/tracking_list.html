@@ -13,8 +13,9 @@
 <tr>
 <th align="center" class="tg-baqh">택배사</th>
 <th align="center" class="tg-baqh" colspan="2">송장번호</th>
-<td align="center" class="tg-baqh" colspan="3">배송완료여부</td>
-<td align="center" class="tg-baqh" colspan="4"><br></td>
+<th align="center" class="tg-baqh" colspan="3">물품명</th>
+<th align="center" class="tg-baqh" colspan="4">배송완료여부</th>
+<th align="center" class="tg-baqh" colspan="5">동작선택</th>
 </tr>
 {% for row in view %} 
 <form method="GET">
@@ -25,8 +26,9 @@
 <tr>
 <th align="center" class="tg-0lax"><input type='text' name='PARCEL' value="{{row['PARCEL']}}" style="width:100%; border: 0;" readonly></th>
 <th align="center" class="tg-0lax" colspan="2"><input type='text' name='NUMBER' value="{{row['NUMBER']}}" style="width:100%; border: 0;" readonly></th>
-<td align="center" class="tg-0lax" colspan="3"><input type='text' name='COMPLTE' value="{{row['COMPLTE']}}" style="width:100%; border: 0;" readonly></td>
-<td align="center" class="tg-0lax" colspan="4">
+<th align="center" class="tg-0lax" colspan="3"><input type='text' name='BOX' value="{{row['BOX']}}" style="width:100%; border: 0;" readonly></th>
+<td align="center" class="tg-0lax" colspan="4"><input type='text' name='COMPLTE' value="{{row['COMPLTE']}}" style="width:100%; border: 0;" readonly></td>
+<td align="center" class="tg-0lax" colspan="5">
 <input type="button" value="삭제" onclick="location.href='{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_del'">
 <input type="button" value="조회" onclick="location.href='{{row['PARCEL']}}/{{row['NUMBER']}}/{{ telgm_token }}/{{ telgm_botid }}/{{ telgm }}/{{ telgm_alim }}/tracking_one'">
 <input type="button" value="수동완료" onclick="location.href='{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_complte'">
