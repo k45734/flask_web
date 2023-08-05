@@ -165,14 +165,14 @@ def checkURL(url2):
 		return False
 		
 #업무용 택배조회 알림
-def trdb(track_number,track_date):
+def trdb(track_number,track_date,box_nun):
 	with requests.Session() as s:
 		headers = {"Cache-Control": "no-cache",   "Pragma": "no-cache",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
 		main_url = 'http://kdtc.iptime.org:19998'
 		url = s.get(main_url, headers=headers)
 		check = url.status_code
 		if check == 200:
-			main = main_url + '/sub2/track_api/한진택배/' + track_number	
+			main = main_url + '/sub2/track_api/한진택배/' + track_number + '/' + box_nun
 			url = s.get(main, headers=headers)
 			print(url)
 
@@ -327,17 +327,16 @@ def r_delivery(now,test,myday):
 				rsv_number = it.get('rsvNo',None)
 				track_date = it.get('rsvDt', None)#it['rsvDt']
 				print(track_number, track_date, rsv_number)
+				box_nun = box_check(rsv_number)
 				if len(ass_at) != 0:
 					for aai in ass_at:
 						pass
 					if numdate in datelink:
 						if track_number != None and track_date != None:
-							trdb(track_number,track_date)
+							trdb(track_number,track_date,box_nun)
 						else:
 							pass
 						tr_all = tracking_ok(track_number)
-						box_nun = box_check(rsv_number)
-						logger.info(box_nun)
 						tracking = '실시간 배송확인\n' + 'http://smile.hanjin.co.kr:9080/eksys/smartinfo/map_web.html?wbl=' + it['invNo']
 						all = '{}. {} {}\n{} 님 물품 {} 은 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],box_nun,it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
 						msg.append(all)
@@ -347,7 +346,7 @@ def r_delivery(now,test,myday):
 				else:
 					if numdate in datelink:
 						if track_number != None and track_date != None:
-							trdb(track_number,track_date)
+							trdb(track_number,track_date,box_nun)
 						else:
 							pass
 						all = '{} {}\n{} 님 {} 되었습니다.\n배송원이 아직 배정되지 않았습니다.'.format(it['rsvDt'],it['invNo'],it['rcvNm'],it['scanNm'])
