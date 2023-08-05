@@ -337,10 +337,9 @@ def r_delivery(now,test,myday):
 							pass
 						tr_all = tracking_ok(track_number)
 						box_nun = box_check(rsv_number)
-						print(box_nun)
 						logger.info(box_nun)
 						tracking = '실시간 배송확인\n' + 'http://smile.hanjin.co.kr:9080/eksys/smartinfo/map_web.html?wbl=' + it['invNo']
-						all = '{}. {} {}\n{} 님 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
+						all = '{}. {} {}\n{} 님 물품 {} 은 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],box_nun,it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
 						msg.append(all)
 						count += 1
 					else:
