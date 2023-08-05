@@ -240,6 +240,19 @@ def tracking_ok(track_number):
 			
 	return msga	
 	
+def box_check(rsv_number):
+	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from nh where rsvNo = ?"
+	cur.execute(sql, (rsv_number,))
+	rows = cur.fetchone()
+	msg = rows['prodNm']
+	
+	print(msg)
+	logger.info(msg)
+	return msg
+	
 def r_delivery(now,test,myday):
 	datelink = now.strptime(test, "%y%m%d").strftime("%Y-%m-%d")
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
@@ -311,8 +324,9 @@ def r_delivery(now,test,myday):
 				req_tk = s.post(tk_a, data=TK_INFO).json()
 				ass_at = req_tk['data']['list']
 				track_number = it.get('invNo', None)#it['invNo']
+				rsv_number = it.get('rsvNo',None)
 				track_date = it.get('rsvDt', None)#it['rsvDt']
-				print(track_number, track_date)
+				print(track_number, track_date, rsv_number)
 				if len(ass_at) != 0:
 					for aai in ass_at:
 						pass
@@ -322,6 +336,9 @@ def r_delivery(now,test,myday):
 						else:
 							pass
 						tr_all = tracking_ok(track_number)
+						box_nun = box_check(rsv_number)
+						print(box_nun)
+						logger.info(box_nun)
 						tracking = '실시간 배송확인\n' + 'http://smile.hanjin.co.kr:9080/eksys/smartinfo/map_web.html?wbl=' + it['invNo']
 						all = '{}. {} {}\n{} 님 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
 						msg.append(all)
