@@ -209,8 +209,8 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 		else:
 			total = '{} {} {}'.format(a, b, d)
 		msg.append(total)
-	gogo = msg[-1]
-	return gogo
+	#gogo = msg[-1]
+	return msg
 	
 #택배사에서 직접조회
 def tracking_ok(track_number):
@@ -236,7 +236,8 @@ def tracking_ok(track_number):
 			json_string_m = resp.get("progresses") #배송상황
 			msg2 = flfl(json_string_m)
 			gg = ff(msg2,json_string,json_string2,json_string4,track_number)
-			ms = '\n'.join(gg)
+			#ms = '\n'.join(gg)
+			ms = gg[-1]
 			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,track_number,ms)
 			
 	return msga	
