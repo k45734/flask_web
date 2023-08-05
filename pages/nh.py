@@ -209,7 +209,8 @@ def ff(msg2, json_string,json_string2,json_string4,json_string5):
 		else:
 			total = '{} {} {}'.format(a, b, d)
 		msg.append(total)
-	return msg
+	gogo = msg[-1]
+	return gogo
 	
 #택배사에서 직접조회
 def tracking_ok(track_number):
