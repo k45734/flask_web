@@ -1512,7 +1512,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		time.sleep(10)
 		list = []
 		last = []
-		MAIN = ['https://gaecheon.tistory.com' , 'https://quizbang.tistory.com' , 'https://luckyquiz4.tistory.com' ]
+		MAIN = ['https://quizbang.tistory.com' ]
 		url_count = 0
 		for mi in MAIN:
 			MAINURL = mi + '/m/entries.json?page=0&size=30'
@@ -1541,7 +1541,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		else:
 			print('종료')
 			pass
-		#cnt = 1
+		text_list = []
 		for i in list:
 			MYURL = i['MYURL']
 			list_url = i['URL']
@@ -1549,55 +1549,23 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			with requests.Session() as s:
 				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
 				URL = MYURL + list_url
-				#req = urllib.request.urlopen(URL).read()
 				req = s.get(URL).text
 				soup = bs(req, 'html.parser')
-				try:
-					all_text = soup.find('div',{'class':'blogview_content useless_p_margin editor_ke'}).text
-				except:
-					all_text = soup.find('div',{'class':'blogview_content editor_daum'}).text
-				result_remove_all = re.sub(r"\s", " ", all_text)
+				tt = re.search(r'<script type=\"application\/ld\+json\">(.*?)<\/script>', req, re.S)
+				json_string = tt.group(0)
+				json_start = json_string.replace('<script type="application/ld+json">', '').strip()
+				json_end = json_start.replace('</script>', '').strip()
+				json_object = json.loads(json_end)
+				result_remove_all = json_object['description']		
+				p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
+				memo = p.findall(result_remove_all)
+				memo_check = ''.join(memo).lstrip()
 				
-				if 'gaecheon' in URL:
-					p = re.compile('정답 : (.*?) ') 
-					memo = p.findall(result_remove_all)
-					memo_check = '  '.join(memo).lstrip().replace('[', '').replace('문제.', '').replace('문제2.', '').replace('문제3.', '').replace('문제4.', '').replace('정답', '')
-					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-					values = [title, memo_check, URL,MYURL]
-					dt = dict(zip(keys, values))
-					last.append(dt)
-					
-				elif 'luckyquiz4' in URL:
-					p = re.compile('정답은 (.*?)입니다.')
-					memo = p.findall(result_remove_all)
-					memo_check = '  '.join(memo).lstrip()
-					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-					values = [title, memo_check, URL,MYURL]
-					dt = dict(zip(keys, values))
-					last.append(dt)					
-					
-				else:
-					#if '토스' in title:
-					#	p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[ 파')
-					#elif '신한플레이' in title:
-					#	p = re.compile('제휴처로 전환도 가능합니다.(.*?)\[ 파')
-					#else:
-					#	p = re.compile('\(글 눌러서 정답 \'복사\' 가능합니다.\)(.*?)\[')
-					p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-					memo = p.findall(result_remove_all)
-					memo_check = ''.join(memo).lstrip()
-					#if memo == None:
-					#	pass
-					#elif 'Liiv' in memo_check:
-					#	memo_check = None
-					#if memo_check == None:
-					#	pass					
-					#else:
-					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-					values = [title, memo_check, URL,MYURL]
-					dt = dict(zip(keys, values))
-					last.append(dt)
-
+				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+				values = [title, memo_check, URL,MYURL]
+				dt = dict(zip(keys, values))
+				last.append(dt)
+		#sys.exit()
 		#기존 리스트 목록 삭제
 		list.clear()
 		with requests.Session() as s:
@@ -1651,6 +1619,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				values = [title, memos, sec,'https://www.ppomppu.co.kr']
 				dt = dict(zip(keys, values))
 				last.append(dt)
+
 		for ii in last:
 			title = ii['TITLE']
 			memo_s = ii['MEMO']
