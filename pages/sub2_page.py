@@ -1506,171 +1506,145 @@ def quiz_add_go_d(MEMO, URL,SITE_NAME):
 		con.close()
 		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time):
-	try:
-		logger.info('퀴즈정답알림 시작')
-		#퀴즈정답 시작후 10초후 작동시작
-		time.sleep(10)
+	logger.info('퀴즈정답알림 시작')
+	#퀴즈정답 시작후 10초후 작동시작
+	time.sleep(10)
 		list = []
-		last = []
-		MAIN = ['https://quizbang.tistory.com' ]
-		url_count = 0
-		for mi in MAIN:
-			MAINURL = mi + '/m/entries.json?page=0&size=30'
-			req = requests.get(MAINURL).json()
-			check = req['code']
-			if check == 200:
-				for p in range(0,1):
-					URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
-					print(URL)
-					req = requests.get(URL).json()
-					page = req['result']['nextPage']
-					list_r = req['result']['items']
-					if page == None:
-						break
-					else:
-						for i in list_r:
-							title_n = i['title']
-							#all_text = i['summary']
-							url = i['path']
-							keys = ['MYURL','TITLE','URL']
-							values = [mi,title_n, url]
-							dt = dict(zip(keys, values))
-							#print(dt)
-							list.append(dt)
-					url_count += 1
+	last = []
+	MAIN = ['https://quizbang.tistory.com' ]
+	url_count = 0
+	for mi in MAIN:
+		MAINURL = mi + '/m/entries.json?page=0&size=30'
+		req = requests.get(MAINURL).json()
+		check = req['code']
+		if check == 200:
+			for p in range(0,1):
+				URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
+				print(URL)
+				req = requests.get(URL).json()
+				page = req['result']['nextPage']
+				list_r = req['result']['items']
+				if page == None:
+					break
+				else:
+					for i in list_r:
+						title_n = i['title']
+						all_text = i['summary']
+						p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
+						memo = p.findall(all_text)
+						memo_check = ''.join(memo).lstrip()
+						url = i['path']
+						keys = ['SITE_NAME','TITLE','URL','MEMO']
+						values = [mi,title_n, url,memo_check]
+						dt = dict(zip(keys, values))
+						#print(all_text)
+						last.append(dt)
+				url_count += 1
 		else:
 			print('종료')
 			pass
-		text_list = []
-		for i in list:
-			MYURL = i['MYURL']
-			list_url = i['URL']
-			title = i['TITLE']
-			with requests.Session() as s:
-				header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}				
-				URL = MYURL + list_url
-				req = s.get(URL).text
-				soup = bs(req, 'html.parser')
-				tt = re.search(r'<script type=\"application\/ld\+json\">(.*?)<\/script>', req, re.S)
-				json_string = tt.group(0)
-				json_start = json_string.replace('<script type="application/ld+json">', '').strip()
-				json_end = json_start.replace('</script>', '').strip()
-				json_object = json.loads(json_end)
-				result_remove_all = json_object['description']		
-				p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-				memo = p.findall(result_remove_all)
-				memo_check = ''.join(memo).lstrip()
-				
-				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-				values = [title, memo_check, URL,MYURL]
-				dt = dict(zip(keys, values))
-				last.append(dt)
-		#sys.exit()
-		#기존 리스트 목록 삭제
-		list.clear()
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			URL = 'https://www.ppomppu.co.kr/search_bbs.php?bbs_cate=2&keyword=%BF%C0%C4%FB%C1%EE&search_type=sub_memo&order_typedate'
-			req = s.get(URL,headers=header)
+
+	#기존 리스트 목록 삭제
+	list.clear()
+	with requests.Session() as s:
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		URL = 'https://www.ppomppu.co.kr/search_bbs.php?bbs_cate=2&keyword=%BF%C0%C4%FB%C1%EE&search_type=sub_memo&order_typedate'
+		req = s.get(URL,headers=header)
+		html = req.text
+		gogo = bs(html, "html.parser")
+		posts = gogo.findAll("div",{"class":"conts"})
+							
+		for i in posts:
+			title_old = i.find('span',{'class':'title'}).find_all(text = True)
+			title = title_old[0] + title_old[1]
+			#print(title)
+			url = i.find('a')["href"]
+			keys = ['TITLE','URL']
+			values = [title, url]
+			dt = dict(zip(keys, values))
+			list.append(dt)
+		
+		for ii in list:
+			title = ii['TITLE']
+			url_c = ii['URL']
+			if 'https' in url_c:
+				continue
+			else:
+				sec = 'https://www.ppomppu.co.kr' + ii['URL']
+			req = s.get(sec,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
-			posts = gogo.findAll("div",{"class":"conts"})
-								
-			for i in posts:
-				title_old = i.find('span',{'class':'title'}).find_all(text = True)
-				title = title_old[0] + title_old[1]
-				#print(title)
-				url = i.find('a')["href"]
-				keys = ['TITLE','URL']
-				values = [title, url]
-				dt = dict(zip(keys, values))
-				list.append(dt)
-			
-			for ii in list:
-				title = ii['TITLE']
-				url_c = ii['URL']
-				if 'https' in url_c:
-					continue
-				else:
-					sec = 'https://www.ppomppu.co.kr' + ii['URL']
-				req = s.get(sec,headers=header)
-				html = req.text
-				gogo = bs(html, "html.parser")
-				memo_old = gogo.findAll("table",{"class":"pic_bg"})
-				memo_new = memo_old[2].findAll('b')
-				if len(memo_new) == 0:
-					memo_new = memo_old[2].findAll('p')
-				else:
-					pass
-				memo_list = []
-				for af in memo_new:
-					a = af.text
-					f = a.replace(u'\xa0',u'')
-					memo_list.append(f)
-				memo = ' '.join(memo_list).lstrip()
-				p = re.compile('(.*?)  ')
-				memo_last = p.findall(memo)
-				memos = '  '.join(memo_last).lstrip()
-				if len(memos) == 0:
-					memos = memo
-				else:
-					pass
-				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-				values = [title, memos, sec,'https://www.ppomppu.co.kr']
-				dt = dict(zip(keys, values))
-				last.append(dt)
+			memo_old = gogo.findAll("table",{"class":"pic_bg"})
+			memo_new = memo_old[2].findAll('b')
+			if len(memo_new) == 0:
+				memo_new = memo_old[2].findAll('p')
+			else:
+				pass
+			memo_list = []
+			for af in memo_new:
+				a = af.text
+				f = a.replace(u'\xa0',u'')
+				memo_list.append(f)
+			memo = ' '.join(memo_list).lstrip()
+			p = re.compile('(.*?)  ')
+			memo_last = p.findall(memo)
+			memos = '  '.join(memo_last).lstrip()
+			if len(memos) == 0:
+				memos = memo
+			else:
+				pass
+			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+			values = [title, memos, sec,'https://www.ppomppu.co.kr']
+			dt = dict(zip(keys, values))
+			last.append(dt)
 
-		for ii in last:
-			title = ii['TITLE']
-			memo_s = ii['MEMO']
-			URL = ii['URL']
-			SITE_NAME = ii['SITE_NAME']
-			quiz_add_go(title, memo_s, URL,SITE_NAME)
-			
-		#알려준다.
-		con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		sql = "select * from quiz where COMPLTE = ?"
-		cur.execute(sql, ('False',))
-		rows = cur.fetchall()
-		if len(rows) != 0:
-			for row in rows:
-				TITLE = row['TITLE']
-				MEMO = row['MEMO']
-				URL = row['URL']
-				SITE_NAME = row['SITE_NAME']
-				if '공유' in MEMO:
+	for ii in last:
+		title = ii['TITLE']
+		memo_s = ii['MEMO']
+		URL = ii['URL']
+		SITE_NAME = ii['SITE_NAME']
+		quiz_add_go(title, memo_s, URL,SITE_NAME)
+		
+	#알려준다.
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	sql = "select * from quiz where COMPLTE = ?"
+	cur.execute(sql, ('False',))
+	rows = cur.fetchall()
+	if len(rows) != 0:
+		for row in rows:
+			TITLE = row['TITLE']
+			MEMO = row['MEMO']
+			URL = row['URL']
+			SITE_NAME = row['SITE_NAME']
+			if '공유' in MEMO:
+				pass
+			else:	
+				if 'ppomppu' in SITE_NAME :
+					site = '뽐뿌'
+				elif 'gaecheon' in SITE_NAME :
+					site = '단델리온 더스트'
+				elif 'luckyquiz4' in SITE_NAME :
+					site = '토실행운퀴즈'
+				elif 'quizbang' in SITE_NAME :
+					site = '퀴즈방'
+				msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
+				check_len = myalim.split('|')
+				check_alim = len(check_len)
+				if check_alim == 0:
 					pass
-				else:	
-					if 'ppomppu' in SITE_NAME :
-						site = '뽐뿌'
-					elif 'gaecheon' in SITE_NAME :
-						site = '단델리온 더스트'
-					elif 'luckyquiz4' in SITE_NAME :
-						site = '토실행운퀴즈'
-					elif 'quizbang' in SITE_NAME :
-						site = '퀴즈방'
-					msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
-					check_len = myalim.split('|')
-					check_alim = len(check_len)
-					if check_alim == 0:
-						pass
-					elif check_alim > 0:
-						for i in check_len:
-							if i in msg:
-								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
-							quiz_add_go_d(MEMO, URL,SITE_NAME)
-						
-			logger.info('퀴즈정답 완료했습니다.')
-		else:
-			logger.info('퀴즈정답 신규내용이 없습니다.')
-			pass
-		con.close()
-	except:	
-		pass	
-	comp = '완료'
-	return comp		
+				elif check_alim > 0:
+					for i in check_len:
+						if i in msg:
+							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
+						quiz_add_go_d(MEMO, URL,SITE_NAME)
+					
+		logger.info('퀴즈정답 완료했습니다.')
+	else:
+		logger.info('퀴즈정답 신규내용이 없습니다.')
+		pass
+	con.close()
 	
 @bp2.route('quiz')
 def quiz():
