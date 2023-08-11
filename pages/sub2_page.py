@@ -1509,7 +1509,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	logger.info('퀴즈정답알림 시작')
 	#퀴즈정답 시작후 10초후 작동시작
 	time.sleep(10)
-		list = []
+	list = []
 	last = []
 	MAIN = ['https://quizbang.tistory.com' ]
 	url_count = 0
