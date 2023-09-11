@@ -416,6 +416,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"CWAY (Woori Express)":"kr.cway",
 			"대신택배":"kr.daesin",
 			"우체국 택배":"kr.epost",
+			"우체국택배":"kr.epost",
 			"한의사랑택배":"kr.hanips",
 			"한진택배":"kr.hanjin",
 			"합동택배":"kr.hdexp",
