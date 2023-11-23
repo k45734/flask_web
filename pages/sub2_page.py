@@ -440,7 +440,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"USPS":"us.usps"
 			}
 	carrier = code[f'{carrier_id}']
-	url_list = ["http://192.168.0.2:8085/graphql", "https://apis.tracker.delivery/graphql" ]
+	url_list = ["http://kdtc.iptime.org:8885/graphql", "https://apis.tracker.delivery/graphql" ]
 	for url2 in url_list:
 		result = track_url(url2)
 		if result == 9999:	
