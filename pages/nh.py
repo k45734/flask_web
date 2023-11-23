@@ -152,17 +152,14 @@ def addr(ein):
 		
 #택배조회 확인
 def checkURL(url2):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	try:
-		request = requests.get(url2,headers=header,timeout=3)
-		response = request.status_code
-	except:
-		print('%s 실패하였습니다.'% url2)
+	response = requests.get(url2)
+	check = response.status_code
+	if check != 500:
+		print('ok %s' % url2)
+		return 9999
 	else:
-		if response == 200:
-			print ("%s 성공하였습니다."% url2)
-			return True      
-		return False
+		print('no %s' % url2)
+		pass
 		
 #업무용 택배조회 알림
 def trdb(track_number,track_date,box_nun):
@@ -197,49 +194,72 @@ def flfl(json_string_m):
 	return test
 
 #저장된 정보를 출력하여 나열하여 메모리에 저장한뒤 출력한다.
-def ff(msg2, json_string,json_string2,json_string4,json_string5):
+def ff(msg2):
 	msg = []
 	for i in range(len(msg2)):
 		a = msg2[i]['시간']
-		b = msg2[i]['상품위치']
-		c = msg2[i]['현재상태']
-		d = msg2[i]['상품상태']
-		if '연락처' in d:
-			total = '{} {} {}'.format(a, c, d)
-		else:
-			total = '{} {} {}'.format(a, b, d)
+		b = msg2[i]['상태']
+		c = msg2[i]['상세내용']
+		total = '{} {} {}'.format(a,b,c)
 		msg.append(total)
-	#gogo = msg[-1]
 	return msg
 	
 #택배사에서 직접조회
-def tracking_ok(track_number):
+def tracking_ok(track_id):
+	url = []
 	with requests.Session() as s:
-		headers = {"Cache-Control": "no-cache",   "Pragma": "no-cache",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
-		url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+		headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36',
+						'Authorization': 'Bearer $YOUR_ACCESS_TOKEN',
+						'Content-Type': 'application/json'}
+		url_list = ["http://192.168.0.2:8085/graphql", "https://apis.tracker.delivery/graphql" ]
 		for url2 in url_list:
 			result = checkURL(url2)
-			if result == True:
-				main = url2 + '/kr.hanjin/tracks/' + track_number #기본 URL
+			if result == checkURL(url2):	
+				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
+				keys = ['url','carrier','track_id','carrier_id']
+				values = [url2,'kr.hanjin',track_id,'한진택배']
+				dt = dict(zip(keys, values))
+				url.append(dt)
 				break
-	
-		url = s.get(main, headers=headers)
-		resp = url.json()
-		check = resp.get('from', None)
-		if check == None:
-			msga = '송장번호가 없는거 같습니다.\n'
-		else:
-			json_string = check.get("name", None) #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("state").get("text") #배송현재상태
-			json_string4 = resp.get("carrier").get("name")
-			json_string_m = resp.get("progresses") #배송상황
-			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,json_string4,track_number)
-			#ms = '\n'.join(gg)
-			ms = gg[-1]
-			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,json_string4,track_number,ms)
-			
+		#print(url)		
+		for a in url:
+			main_url = a['url']
+			carrier = a['carrier']
+			track_id = a['track_id']
+			carrier_id = a['carrier_id']
+			LOGIN_INFO = {"query": "query Track($carrierId: ID!,$trackingNumber: String!) {track(carrierId: $carrierId,trackingNumber: $trackingNumber) {lastEvent {time status {code name} description}events(last: 10) {edges {node {time status {code name} description}}}}}",
+						"variables": {"carrierId": carrier,
+									"trackingNumber": track_id
+									},
+						}
+			data = json.dumps(LOGIN_INFO)
+			url_s = s.post(main_url, data=data,headers=headers, timeout=5)
+			resp = url_s.json()
+			try:
+				check = resp.get('data').get('track')
+			except:
+				check_list = resp.get('errors')
+				for ii in check_list:
+					check = ii.get('message')
+			if check == None or 'Invalid or expired token' in check:
+				msga = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
+			else:
+				in_data = resp.get('data').get('track').get('events').get('edges')
+				last_data = []
+				for ii in in_data:
+					json_string = ii.get('node').get('time') #시간
+					json_string2 = ii.get('node').get('status').get('name') #배송진행상태
+					json_string3 = ii.get('node').get('description') #상세배송진행상태
+					at = json_string[0:16]
+					new_s = at.replace('T',' ')
+					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
+					last_data.append(msg)
+				gg = ff(last_data)
+				ms = '\n'.join(gg)
+				#print(carrier_id,track_id)
+				msga = '================================\n택배사 : {} {}\n{}\n================================'.format(carrier_id,track_id,ms)
+				#print(msga)
+				
 	return msga	
 	
 def box_check(rsv_number):
@@ -339,6 +359,7 @@ def r_delivery(now,test,myday):
 						else:
 							pass
 						tr_all = tracking_ok(track_number)
+						print(tr_all)
 						tracking = '실시간 배송확인\n' + 'http://smile.hanjin.co.kr:9080/eksys/smartinfo/map_web.html?wbl=' + it['invNo']
 						all = '{}. {} {}\n{} 님 물품 {} 은 {} 되었습니다.\n배송원 {} 연락처 {}\n{}\n{}'.format(count, it['rsvDt'],it['invNo'],it['rcvNm'],box_nun,it['scanNm'],aai['empNm'],aai['empTel'],tr_all,tracking)
 						msg.append(all)

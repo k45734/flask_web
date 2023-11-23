@@ -372,35 +372,39 @@ def flfl(json_string_m):
 	return test
 	
 #저장된 정보를 출력하여 나열하여 메모리에 저장한뒤 출력한다.
-def ff(msg2, json_string,json_string2,json_string4,json_string5):
+def ff(msg2):
 	msg = []
 	for i in range(len(msg2)):
 		a = msg2[i]['시간']
-		b = msg2[i]['상품위치']
-		c = msg2[i]['현재상태']
-		d = msg2[i]['상품상태']
-		if '연락처' in d:
-			total = '{} {} {}'.format(a, c, d)
-		else:
-			total = '{} {} {}'.format(a, b, d)
+		b = msg2[i]['상태']
+		c = msg2[i]['상세내용']
+		total = '{} {} {}'.format(a,b,c)
 		msg.append(total)
 	return msg
 #택배조회 확인
 def track_url(url):
-	try:
-		request=urllib.request.Request(url,None) #The assembled request
-		response = urllib.request.urlopen(request,timeout=3)		
-	except:
-		print('The server couldn\'t fulfill the request. %s'% url)     
+	response = requests.get(url)
+	check = response.status_code
+	if check != 500:
+		print('ok %s' % url)
+		return 9999
 	else:
-		data = response.read()
-		data = data.decode()     
-		result = 0
-		result = data.find('id')
-		if result > 0:
-			print ("Website is working fine %s "% url)
-			return 9999
-		return response.status
+		print('no %s' % url)
+		pass
+	#try:
+	#	request=urllib.request.Request(url,None) #The assembled request
+	#	response = urllib.request.urlopen(request,timeout=3)		
+	#except:
+	#	print('The server couldn\'t fulfill the request. %s'% url)     
+	#else:
+	#	data = response.read()
+	#	data = data.decode()     
+	#	result = 0
+	#	result = data.find('id')
+	#	if result > 0:
+	#		print ("Website is working fine %s "% url)
+	#		return 9999
+	#	return response.status
 		
 #택배구동
 def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,start_time2,end_time,box):
@@ -436,7 +440,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"USPS":"us.usps"
 			}
 	carrier = code[f'{carrier_id}']
-	url_list = ["http://192.168.0.2:8085/carriers", "https://apis.tracker.delivery/carriers" ]
+	url_list = ["http://192.168.0.2:8085/graphql", "https://apis.tracker.delivery/graphql" ]
 	for url2 in url_list:
 		result = track_url(url2)
 		if result == 9999:	
@@ -447,44 +451,59 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			url.append(dt)
 			break
 	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
-	#with requests.Session() as s:
-	for a in url:
-		main_url = a['url']
-		carrier = a['carrier']
-		track_id = a['track_id']
-		carrier_id = a['carrier_id']
-		aa = main_url + '/' +  carrier + '/tracks/' + track_id
-		url = requests.get(aa, headers=h)
-		resp = url.json()
-		print(resp)
-		check = resp.get('from', None)
-		
-		if check == None:
-			msga = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
-			
-		else:
-			json_string = check.get("name", None) #누가 보냈냐			
-			json_string2 = resp.get("to").get("name") #누가 받냐
-			json_string3 = resp.get("state").get("text") #배송현재상태
-			#json_string4 = resp.get("carrier").get("name") #택배사이름
-			#json_string5 = resp.get("carrier").get("id") #택배사송장번호
-			json_string_m = resp.get("progresses") #배송상황
-			msg2 = flfl(json_string_m)
-			gg = ff(msg2,json_string,json_string2,carrier_id,track_id)
-			ms = '\n'.join(gg)
-			msga = '================================\n보내는 사람 : {}\n받는 사람 : {}\n물품명 : {}\n택배사 : {} {}\n{}\n================================'.format(json_string,json_string2,box,carrier_id,track_id,ms)
-			if '배송완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달 완료' in msga :
-				tracking_del_new(carrier_id,track_id)
-			elif '배달완료' in msga :
-				tracking_del_new(carrier_id,track_id)
+	with requests.Session() as s:
+		for a in url:
+			main_url = a['url']
+			carrier = a['carrier']
+			track_id = a['track_id']
+			carrier_id = a['carrier_id']
+			LOGIN_INFO = {"query": "query Track($carrierId: ID!,$trackingNumber: String!) {track(carrierId: $carrierId,trackingNumber: $trackingNumber) {lastEvent {time status {code name} description}events(last: 10) {edges {node {time status {code name} description}}}}}",
+						"variables": {"carrierId": carrier,
+									"trackingNumber": track_id
+									},
+						}
+			headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36',
+						'Authorization': 'Bearer $YOUR_ACCESS_TOKEN',
+						'Content-Type': 'application/json'}
+			data = json.dumps(LOGIN_INFO)
+			test = json.loads(data)
+			url_s = s.post(main_url, data=data,headers=headers, timeout=5)
+			resp = url_s.json()
+			#print(resp)
+			try:
+				check = resp.get('data').get('track')
+			except:
+				check_list = resp.get('errors')
+				for ii in check_list:
+					check = ii.get('message')
+			if check == None or 'Invalid or expired token' in check:
+				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 			else:
-				pass
-			print(msga)
-			tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
-	logger.info('택배 알림완료')
+				in_data = resp.get('data').get('track').get('events').get('edges')
+				last_data = []
+				for ii in in_data:
+					json_string = ii.get('node').get('time') #시간
+					json_string2 = ii.get('node').get('status').get('name') #배송진행상태
+					json_string3 = ii.get('node').get('description') #상세배송진행상태
+					at = json_string[0:16]
+					new_s = at.replace('T',' ')
+					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
+					last_data.append(msg)
+				gg = ff(last_data)
+				ms = '\n'.join(gg)
+				print(carrier_id,track_id)
+				msga = '================================\n택배사 : {} {}\n{}\n================================'.format(carrier_id,track_id,ms)
+				print(msga)
+				if '배송완료' in msga :
+					tracking_del_new(carrier_id,track_id)
+				elif '배달 완료' in msga :
+					tracking_del_new(carrier_id,track_id)
+				else:
+					pass
+				#print(msga)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
+		logger.info('택배 알림완료')
 	comp = '완료'
 	return msga
 	
