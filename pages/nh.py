@@ -211,17 +211,13 @@ def tracking_ok(track_id):
 		headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36',
 						'Authorization': 'Bearer $YOUR_ACCESS_TOKEN',
 						'Content-Type': 'application/json'}
-		url_list = ["http://0.0.0.0:4000/graphql", "https://apis.tracker.delivery/graphql" ]
-		for url2 in url_list:
-			result = checkURL(url2)
-			if result == checkURL(url2):	
-				#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-				keys = ['url','carrier','track_id','carrier_id']
-				values = [url2,'kr.hanjin',track_id,'한진택배']
-				dt = dict(zip(keys, values))
-				url.append(dt)
-				break
-		#print(url)		
+		url2 = "http://0.0.0.0:4000/graphql"
+		keys = ['url','carrier','track_id','carrier_id']
+		values = [url2,'kr.hanjin',track_id,'한진택배']
+		dt = dict(zip(keys, values))
+		url.append(dt)
+		
+		
 		for a in url:
 			main_url = a['url']
 			carrier = a['carrier']

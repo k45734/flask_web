@@ -440,17 +440,12 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"USPS":"us.usps"
 			}
 	carrier = code[f'{carrier_id}']
-	url_list = ["http://0.0.0.0:4000/graphql", "https://apis.tracker.delivery/graphql" ]
-	for url2 in url_list:
-		result = track_url(url2)
-		if result == 9999:	
-			#ttt = url2 + '/' +  carrier + '/tracks/' + track_id
-			keys = ['url','carrier','track_id','carrier_id']
-			values = [url2,carrier,track_id,carrier_id]
-			dt = dict(zip(keys, values))
-			url.append(dt)
-			break
-	h = {"Cache-Control": "no-cache",   "Pragma": "no-cache"}
+	url2 = "http://0.0.0.0:4000/graphql"
+	keys = ['url','carrier','track_id','carrier_id']
+	values = [url2,carrier,track_id,carrier_id]
+	dt = dict(zip(keys, values))
+	url.append(dt)
+	
 	with requests.Session() as s:
 		for a in url:
 			main_url = a['url']
