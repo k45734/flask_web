@@ -506,8 +506,6 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				#print(msga)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
 		logger.info('택배 알림완료')
-	#comp = '완료'
-	return msga
 	
 #택배조회 구동	
 def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid,start_time2,end_time):
