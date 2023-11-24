@@ -211,7 +211,7 @@ def tracking_ok(track_id):
 		headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36',
 						'Authorization': 'Bearer $YOUR_ACCESS_TOKEN',
 						'Content-Type': 'application/json'}
-		url_list = ["http://kdtc.iptime.org:8885/graphql", "https://apis.tracker.delivery/graphql" ]
+		url_list = ["http://192.168.0.2:8085/graphql", "https://apis.tracker.delivery/graphql" ]
 		for url2 in url_list:
 			result = checkURL(url2)
 			if result == checkURL(url2):	
