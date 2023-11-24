@@ -305,7 +305,11 @@ def tel_send_message(list):
 						complete2 = "True" #처음에 등록할때 이미지 확장자가 com 이면 무조건 True 로 등록한다.
 						check_img = re.compile(r"https:\/\/.*\/.*.com").search(webtoon_image)
 						if check_img == None:
-							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
+							
+							if 'loading.svg' in webtoon_image:
+								pass
+							else:
+								add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete,gbun)
 						else:
 							add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete2,gbun)
 						
@@ -379,10 +383,13 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 			for ii,iii in zip(image_url_last,image_number_last):
 				check_img = re.compile(r"https:\/\/.*\/.*.com").search(ii)
 				if check_img == None:
-					url_to_image(title, subtitle,ii,iii,gbun)
-					#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
-					time.sleep(3)
-					add_d(subtitle, title,ii,gbun)
+					if 'loading.svg' in ii:
+						pass
+					else:
+						url_to_image(title, subtitle,ii,iii,gbun)
+						#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+						time.sleep(3)
+						add_d(subtitle, title,ii,gbun)
 				else:
 					add_d(subtitle, title,ii,gbun)
 					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
