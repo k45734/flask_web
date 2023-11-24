@@ -506,7 +506,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				#print(msga)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msga,start_time2,end_time)
 		logger.info('택배 알림완료')
-	comp = '완료'
+	#comp = '완료'
 	return msga
 	
 #택배조회 구동	
@@ -794,7 +794,10 @@ def tracking_one(carrier_id,track_id,telgm,telgm_alim,telgm_token,telgm_botid):
 	else:
 		start_time2 = '23'
 		end_time = '6'
-		msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id, start_time2, end_time,box)
+		try:
+			msga = tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id, start_time2, end_time,box)
+		except:
+			pass
 
 	return redirect(url_for('sub2.tracking'))	
 	
