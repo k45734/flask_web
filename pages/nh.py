@@ -165,7 +165,7 @@ def checkURL(url2):
 def trdb(track_number,track_date,box_nun):
 	with requests.Session() as s:
 		headers = {"Cache-Control": "no-cache",   "Pragma": "no-cache",'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
-		main_url = 'http://kdtc.iptime.org:19998'
+		main_url = 'http://0.0.0.0:5000'
 		url = s.get(main_url, headers=headers)
 		check = url.status_code
 		if check == 200:
