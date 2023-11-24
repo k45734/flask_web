@@ -733,7 +733,10 @@ def tracking_add():
 		carrier_id = request.args.get('carrier_id')
 		track_id = request.args.get('track_id')
 		box_nun = request.args.get('box_nun')
-		match = re.compile(r"^[0-9]+$").search(track_id)
+		if carrier_id == 'EMS':
+			match = track_id
+		else:
+			match = re.compile(r"^[0-9]+$").search(track_id)
 		if match:
 			print(carrier_id, track_id, mytime)
 			con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
@@ -833,7 +836,10 @@ def tracking_del(carrier_id,track_id):
 
 @bp2.route("track_api/<carrier_id>/<track_id>/<box_nun>", methods=["GET"])
 def track_api(carrier_id, track_id, box_nun):
-	match = re.compile(r"^[0-9]+$").search(track_id)
+	if carrier_id == 'EMS':
+		match = track_id
+	else:
+		match = re.compile(r"^[0-9]+$").search(track_id)
 	if match:
 		print(carrier_id, track_id)
 		mytime = mydate()
