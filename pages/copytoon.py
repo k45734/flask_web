@@ -383,13 +383,14 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 			for ii,iii in zip(image_url_last,image_number_last):
 				check_img = re.compile(r"https:\/\/.*\/.*.com").search(ii)
 				if check_img == None:
-					url_to_image(title, subtitle,ii,iii,gbun)
-					#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
-					time.sleep(3)
-					add_d(subtitle, title,ii,gbun)
-				elif 'loading.svg' in ii:
-					add_d(subtitle, title,ii,gbun)
-					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+					if 'loading.svg' in ii:
+						add_d(subtitle, title,ii,gbun)
+						logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+					else:
+						url_to_image(title, subtitle,ii,iii,gbun)
+						#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
+						time.sleep(3)
+						add_d(subtitle, title,ii,gbun)
 				else:
 					add_d(subtitle, title,ii,gbun)
 					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
