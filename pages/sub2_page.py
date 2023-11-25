@@ -441,8 +441,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			}
 	carrier = code[f'{carrier_id}']
 	url2 = "http://0.0.0.0:4000/graphql"
-	keys = ['url','carrier','track_id','carrier_id']
-	values = [url2,carrier,track_id,carrier_id]
+	keys = ['url','carrier','track_id','carrier_id','box']
+	values = [url2,carrier,track_id,carrier_id,box]
 	dt = dict(zip(keys, values))
 	url.append(dt)
 	
@@ -452,6 +452,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			carrier = a['carrier']
 			track_id = a['track_id']
 			carrier_id = a['carrier_id']
+			box = a['box']
 			LOGIN_INFO = {"query": "query Track($carrierId: ID!,$trackingNumber: String!) {track(carrierId: $carrierId,trackingNumber: $trackingNumber) {lastEvent {time status {code name} description}events(last: 10) {edges {node {time status {code name} description}}}}}",
 						"variables": {"carrierId": carrier,
 									"trackingNumber": track_id
@@ -472,7 +473,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				for ii in check_list:
 					check = ii.get('message')
 			if check == None or 'Invalid or expired token' in check:
-				msg = '{} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id)
+				msg = '{} {} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id,box)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 			else:
 				in_data = resp.get('data').get('track').get('events').get('edges')
@@ -487,8 +488,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 					last_data.append(msg)
 				gg = ff(last_data)
 				ms = '\n'.join(gg)
-				print(carrier_id,track_id)
-				msga = '================================\n택배사 : {} {}\n{}\n================================'.format(carrier_id,track_id,ms)
+				print(carrier_id,track_id,box)
+				msga = '================================\n택배사 : {} {}\n물품명 : {}\n{}\n================================'.format(carrier_id,track_id,box,ms)
 				print(msga)
 				if '배송완료' in msga :
 					tracking_del_new(carrier_id,track_id)
