@@ -1655,7 +1655,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					site = '토실행운퀴즈'
 				elif 'quizbang' in SITE_NAME :
 					site = '퀴즈방'
-				msg = '|{}|{}\n정답 : {}'.format(site,TITLE,MEMO)
+				msg = '|{}|{}\n정답 : ▶ {}'.format(site,TITLE,MEMO)
 				check_len = myalim.split('|')
 				check_alim = len(check_len)
 				if check_alim == 0:
