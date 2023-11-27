@@ -1555,7 +1555,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					for i in list_r:
 						title_n = i['title']
 						all_text = i['summary']
-						p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
+						#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
+						p = re.compile('▶(.*?)\[')
 						memo = p.findall(all_text)
 						memo_check = ''.join(memo).lstrip()
 						url = i['path']
