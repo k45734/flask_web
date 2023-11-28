@@ -1557,6 +1557,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						all_text = i['summary']
 						#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
 						p = re.compile('▶(.*?)\[')
+						m = p.search(all_text)
+						if m:
+							memo = p.findall(all_text)
+						else:
+							memo = all_text 
 						memo = p.findall(all_text)
 						memo_check = ''.join(memo).lstrip()
 						url = i['path']
