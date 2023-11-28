@@ -1561,8 +1561,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						if m:
 							memo = p.findall(all_text)
 						else:
-							memo = all_text 
-						memo = p.findall(all_text)
+							memo = all_text
 						memo_check = ''.join(memo).lstrip()
 						url = i['path']
 						keys = ['SITE_NAME','TITLE','URL','MEMO']
