@@ -497,6 +497,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 					tracking_del_new(carrier_id,track_id)
 				elif '배달완료' in msga :
 					tracking_del_new(carrier_id,track_id)
+				elif 'Delivered'in msga :
+					tracking_del_new(carrier_id,track_id)
 				else:
 					pass
 				#print(msga)
