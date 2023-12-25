@@ -441,6 +441,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"Cainiao": "cn.cainiao.global"
 			}
 	carrier = code[f'{carrier_id}']
+	logger.info(carrier)
+	logger.info(carrier_id)
 	url2 = "http://0.0.0.0:4000/graphql"
 	keys = ['url','carrier','track_id','carrier_id','box']
 	values = [url2,carrier,track_id,carrier_id,box]
