@@ -438,7 +438,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"Fedex":"us.fedex",
 			"UPS":"us.ups",
 			"USPS":"us.usps",
-			"차이냐오": "cn.cainiao.global"
+			"Cainiao": "cn.cainiao.global"
 			}
 	carrier = code[f'{carrier_id}']
 	logger.info(carrier)
