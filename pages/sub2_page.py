@@ -437,7 +437,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"EMS":"un.upu.ems",
 			"Fedex":"us.fedex",
 			"UPS":"us.ups",
-			"USPS":"us.usps"
+			"USPS":"us.usps",
+			"Cainiao Global": "cn.cainiao.global"
 			}
 	carrier = code[f'{carrier_id}']
 	url2 = "http://0.0.0.0:4000/graphql"
