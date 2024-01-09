@@ -1632,7 +1632,39 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			values = [title, memos, sec,'https://www.ppomppu.co.kr']
 			dt = dict(zip(keys, values))
 			last.append(dt)
-
+	
+	#토실행운퀴즈
+	url = 'https://luckyquiz3.blogspot.com/feeds/posts/default?alt=rss'
+	parsed_data = get_data(url)
+	try:
+		news_name = parsed_data['feed']['title']
+	except:
+		pass
+	count = len(parsed_data['entries'])
+	for i in range(count):
+		article = parsed_data['entries'][i]
+		try:
+			title = article['title']
+		except:
+			continue
+		link = article['link']
+		memo_list = article['description']
+		#내용 파일로 저장한뒤 TEXT로 읽어옴
+		html_file = open('html_file.html', 'w', encoding="UTF-8")
+		html_file.write(memo_list)
+		html_file.close()
+		page = open('html_file.html', 'rt', encoding='utf-8').read()
+		soup = bs(page, 'html.parser')
+		all_text = soup.text
+		p = re.compile('정답은(.*?)\입니다.')
+		memo_re = p.findall(all_text)
+		memo = ''.join(memo_re).lstrip()
+		keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+		values = [title, memo, link, 'https://luckyquiz3.blogspot.com']
+		dt = dict(zip(keys, values))
+		last.append(dt)
+	
+	#마지막 DB 저장
 	for ii in last:
 		title = ii['TITLE']
 		memo_s = ii['MEMO']
