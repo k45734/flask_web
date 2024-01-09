@@ -1692,7 +1692,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					site = '뽐뿌'
 				elif 'gaecheon' in SITE_NAME :
 					site = '단델리온 더스트'
-				elif 'luckyquiz4' in SITE_NAME :
+				elif 'luckyquiz' in SITE_NAME :
 					site = '토실행운퀴즈'
 				elif 'quizbang' in SITE_NAME :
 					site = '퀴즈방'
