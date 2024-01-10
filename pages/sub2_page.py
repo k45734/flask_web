@@ -479,7 +479,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				check_list = resp.get('errors')
 				for ii in check_list:
 					check = ii.get('message')
-			if check == None or 'Invalid or expired token' in check:
+			if check == None or 'Invalid or expired token' in check or 'Internal error' in check:
 				msg = '{} {} {} 송장번호가 없는거 같습니다.\n'.format(carrier_id,track_id,box)
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 			else:
@@ -1606,6 +1606,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				continue
 			else:
 				sec = 'https://www.ppomppu.co.kr' + ii['URL']
+			logger.info(sec)
 			req = s.get(sec,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
