@@ -487,10 +487,14 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				last_data = []
 				for ii in in_data:
 					json_string = ii.get('node').get('time') #시간
+					if json_string == None:
+						at = json_string
+						new_s = at
+					else:
+						at = json_string[0:16]
+						new_s = at.replace('T',' ')
 					json_string2 = ii.get('node').get('status').get('name') #배송진행상태
 					json_string3 = ii.get('node').get('description') #상세배송진행상태
-					at = json_string[0:16]
-					new_s = at.replace('T',' ')
 					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
 					last_data.append(msg)
 				gg = ff(last_data)
