@@ -1639,6 +1639,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			last.append(dt)
 	
 	#토실행운퀴즈
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 	url = 'https://luckyquiz3.blogspot.com/feeds/posts/default?alt=rss'
 	parsed_data = get_data(url)
 	try:
@@ -1646,6 +1647,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	except:
 		pass
 	count = len(parsed_data['entries'])
+	answer = []
 	for i in range(count):
 		article = parsed_data['entries'][i]
 		try:
@@ -1663,7 +1665,23 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		all_text = soup.text
 		p = re.compile('정답은(.*?)\입니다.')
 		memo_re = p.findall(all_text)
-		memo = ''.join(memo_re).lstrip()
+		memo = ''.join(memo_re).lstrip().strip()
+		#정답 추가
+		answer.append(memo)
+		answer2_url = link
+		req = requests.get(answer2_url,headers=header)
+		html = req.text
+		gogo = bs(html, "html.parser")
+		posts = gogo.findAll("p",{"class":"comment-content"})
+		for i in posts:
+			answer2 = i.text.strip()
+			answer.append(answer2)
+		result = []
+		for value in answer:
+			if value not in result:
+				result.append(value)
+		memo = ' '.join(result).lstrip()
+		answer.clear()
 		keys = ['TITLE','MEMO', 'URL','SITE_NAME']
 		values = [title, memo, link, 'https://luckyquiz3.blogspot.com']
 		dt = dict(zip(keys, values))
