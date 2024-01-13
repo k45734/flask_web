@@ -52,7 +52,9 @@ if platform.system() == 'Windows':
 	sub2db = at[0] + '/data/db'
 else:
 	sub2db = '/data/db'
-	
+
+connect_timeout = 10
+read_timeout = 10
 bp2 = Blueprint('sub2', __name__, url_prefix='/sub2')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -470,7 +472,12 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 						'Content-Type': 'application/json'}
 			data = json.dumps(LOGIN_INFO)
 			test = json.loads(data)
-			url_s = s.post(main_url, data=data,headers=headers, timeout=5)
+			try:
+				url_s = s.post(main_url, data=data,headers=headers, timeout=(connect_timeout, read_timeout))
+			except:	
+				msg = '{} {} {} 택배 서버 접속 오류\n'.format(carrier_id,track_id,box)
+				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
+				continue
 			resp = url_s.json()
 			#print(resp)
 			try:
