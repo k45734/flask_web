@@ -1552,47 +1552,47 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	#time.sleep(10)
 	list = []
 	last = []
-	#퀴즈방이 종료가 된거 같아 주석처리
-	#MAIN = ['https://quizbang.tistory.com' ]
-	#url_count = 0
-	#for mi in MAIN:
-	#	MAINURL = mi + '/m/entries.json?page=0&size=30'
-	#	req = requests.get(MAINURL).json()
-	#	check = req['code']
-	#	if check == 200:
-	#		for p in range(0,1):
-	#			URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
-	#			print(URL)
-	#			req = requests.get(URL).json()
-	#			page = req['result']['nextPage']
-	#			list_r = req['result']['items']
-	#			if page == None:
-	#				break
-	#			else:
-	#				for i in list_r:
-	#					title_n = i['title']
-	#					all_text = i['summary']
-	#					#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-	#					p = re.compile('▶(.*?)\[')
-	#					m = p.search(all_text)
-	#					if m:
-	#						memo = p.findall(all_text)
-	#					else:
-	#						memo = all_text
-	#					memo_check = ''.join(memo).lstrip()
-	#					url = i['path']
-	#					keys = ['SITE_NAME','TITLE','URL','MEMO']
-	#					values = [mi,title_n, url,memo_check]
-	#					dt = dict(zip(keys, values))
-	#					#print(all_text)
-	#					last.append(dt)
-	#			url_count += 1
-	#	else:
-	#		print('종료')
-	#		pass
+	
+	MAIN = ['https://quizbang.tistory.com' ]
+	url_count = 0
+	for mi in MAIN:
+		MAINURL = mi + '/m/entries.json?page=0&size=30'
+		req = requests.get(MAINURL).json()
+		check = req['code']
+		if check == 200:
+			for p in range(0,1):
+				URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
+				print(URL)
+				req = requests.get(URL).json()
+				page = req['result']['nextPage']
+				list_r = req['result']['items']
+				if page == None:
+					break
+				else:
+					for i in list_r:
+						title_n = i['title']
+						all_text = i['summary']
+						#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
+						p = re.compile('▶(.*?)\[')
+						m = p.search(all_text)
+						if m:
+							memo = p.findall(all_text)
+						else:
+							memo = all_text
+						memo_check = ''.join(memo).lstrip()
+						url = i['path']
+						keys = ['SITE_NAME','TITLE','URL','MEMO']
+						values = [mi,title_n, url,memo_check]
+						dt = dict(zip(keys, values))
+						#print(all_text)
+						last.append(dt)
+				url_count += 1
+		else:
+			print('종료')
+			pass
 
 	#기존 리스트 목록 삭제
-	#list.clear()
+	list.clear()
 	with requests.Session() as s:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		URL = 'https://www.ppomppu.co.kr/search_bbs.php?bbs_cate=2&keyword=%BF%C0%C4%FB%C1%EE&search_type=sub_memo&order_typedate'
