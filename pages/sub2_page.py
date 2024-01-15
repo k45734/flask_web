@@ -1574,12 +1574,12 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						all_text = i['summary']
 						url = i['path']
 						#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-						p = re.compile('▶(.*?)\ [캐|O|포|한|신]')
+						p = re.compile('▶(.*?)\ [캐|O|포|한도 조회|신]')
 						m = p.search(all_text)
 						if m:
 							memo = p.findall(all_text)
 						else:
-							not_memo = '{} {}\n직접 확인바람'.format(title_n, url)
+							not_memo = '{}\n{}'.format(all_text, mi + url)
 							memo = not_memo
 						memo_check = ''.join(memo).lstrip()
 						keys = ['SITE_NAME','TITLE','URL','MEMO']
