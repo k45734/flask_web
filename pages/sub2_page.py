@@ -1573,7 +1573,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						title_n = i['title']
 						all_text = i['summary']
 						#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-						p = re.compile('▶(.*?)\[')
+						p = re.compile('▶(.*?)\ [캐|O|포]')
 						m = p.search(all_text)
 						if m:
 							memo = p.findall(all_text)
