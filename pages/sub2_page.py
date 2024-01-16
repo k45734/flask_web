@@ -1598,6 +1598,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						else:
 							not_memo = '{}\n{}'.format(all_text, mi + url)
 							memo = not_memo
+							logger.info(memo)
+							continue
 						memo_check = ''.join(memo).lstrip()
 						keys = ['SITE_NAME','TITLE','URL','MEMO']
 						values = [mi,title_n, url,memo_check]
