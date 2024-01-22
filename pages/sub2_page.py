@@ -461,7 +461,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 			"LTL":"kr.ltl",
 			"롯데국제택배":"kr.lotte.global",
 			"LX 판토스":"kr.epantos",
-			"오늘의픽업":"kr.todaypickup"
+			"오늘의픽업":"kr.todaypickup",
+			"우체국EMS":"kr.epost.ems"
 			}
 	carrier = code[f'{carrier_id}']
 	logger.info(carrier)
