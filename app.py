@@ -5,7 +5,51 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+
+import os
+
+try:
+	from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+except ImportError:
+	os.system('pip install flask')
+	import Flask, flash, redirect, render_template, request, session, abort, url_for
+
+try:
+	import psutil
+except ImportError:
+    os.system('pip install psutil')
+    import psutil
+
+try:
+	import requests
+except ImportError:
+	os.system('pip install requests')
+	import requests
+
+try:
+	from pytz import timezone
+except ImportError:
+	os.system('pip install pytz')
+	from pytz import timezone
+
+try:
+    from apscheduler.schedulers.background import BackgroundScheduler
+except ImportError:
+	os.system('pip install apscheduler')
+	from apscheduler.schedulers.background import BackgroundScheduler
+    
+try:
+    from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+except ImportError:
+    os.system('pip install sqlalchemy')
+    from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+
+try:
+    import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,urllib.request, asyncio
+except ImportError:
+    os.system('pip install telegram')
+    import os.path, json, os, re, time, logging, io, subprocess, platform, telegram, threading, sqlite3, random,urllib.request, asyncio
+    
 import platform,subprocess
 import os.path, os,shutil
 if platform.system() == 'Windows':

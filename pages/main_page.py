@@ -11,7 +11,7 @@ from flask import Flask, flash, redirect, render_template, request, session, abo
 from requests import get
 import requests
 import zipfile, shutil 
-from distutils.dir_util import copy_tree
+#from distutils.dir_util import copy_tree
 from logging.handlers import RotatingFileHandler
 from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler

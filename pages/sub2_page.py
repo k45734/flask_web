@@ -763,7 +763,7 @@ def tracking_add():
 	else:
 		#try:
 		carrier_id = request.args.get('carrier_id')
-		track_id = request.args.get('track_id')
+		track_id = request.args.get('track_id').strip()
 		box_nun = request.args.get('box_nun')
 		if len(track_id) == 0:
 			pass
@@ -890,7 +890,7 @@ def track_api(carrier_id, track_id, box_nun):
 		con.execute("PRAGMA synchronous=NORMAL")
 		cursor = con.cursor()
 		sql = "select * from tracking where PARCEL = ? and NUMBER = ?"
-		cursor.execute(sql, (carrier_id,track_id))
+		cursor.execute(sql, (carrier_id,track_id.strip()))
 		rows = cursor.fetchone()
 		if rows:
 			pass
