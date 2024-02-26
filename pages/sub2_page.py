@@ -1571,46 +1571,59 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	list = []
 	last = []
 	try:
-		MAIN = ['https://quizbang.tistory.com' ]
-		url_count = 0
-		for mi in MAIN:
-			MAINURL = mi + '/m/entries.json?page=0&size=30'
-			req = requests.get(MAINURL).json()
-			check = req['code']
-			if check == 200:
-				for p in range(0,1):
-					URL = mi + '/m/entries.json?page=' + str(p) + '&size=30'
-					print(URL)
-					req = requests.get(URL).json()
-					page = req['result']['nextPage']
-					list_r = req['result']['items']
-					if page == None:
-						break
-					else:
-						for i in list_r:
-							title_n = i['title']
-							all_text = i['summary']
-							url = i['path']
-							#p = re.compile('휴대폰 홈 화면에 \'퀴즈방\' 바로가기 만들기(.*?)\[')
-							p = re.compile('▶(.*?)\ [캐|O|포|한|신]')
-							m = p.search(all_text)
-							if m:
-								memo = p.findall(all_text)
-							else:
-								not_memo = '{}\n{}'.format(all_text, mi + url)
-								memo = not_memo
-								logger.info(memo)
-								continue
-							memo_check = ''.join(memo).lstrip()
-							keys = ['SITE_NAME','TITLE','URL','MEMO']
-							values = [mi,title_n, url,memo_check]
-							dt = dict(zip(keys, values))
-							#print(all_text)
-							last.append(dt)
-					url_count += 1
-			else:
-				print('종료')
-				pass
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		url = 'https://quizbang.tistory.com/rss'
+		parsed_data = get_data(url)
+
+		count = len(parsed_data['entries'])
+
+		answer = []
+		for i in range(count):
+			article = parsed_data['entries'][i]
+			try:
+				title = article['title']
+				if title == 'ㅡ':
+					print('내용없음')
+					continue
+			except:
+				continue
+			link = article['link']
+			memo_list = article['description']
+			#내용 파일로 저장한뒤 TEXT로 읽어옴
+			html_file = open('html_file.html', 'w', encoding="UTF-8")
+			html_file.write(memo_list)
+			html_file.close()
+			page = open('html_file.html', 'rt', encoding='utf-8').read()
+			soup = bs(page, 'html.parser')
+			all_text = soup.text
+			new_str = all_text.replace(u"\xa0", u" ")
+			p = re.compile('▶(.*?)\(퀴즈 방식이 변경되어')
+			memo_re = p.findall(new_str)
+			memo = ''.join(memo_re).lstrip().strip()
+			#정답 추가
+			answer.append(memo)
+			answer2_url = link
+			req = requests.get(answer2_url,headers=header)
+			html = req.text
+			gogo = bs(html, "html.parser")
+			try:
+				posts = gogo.findAll("p",{"class":"comment-content"})			
+				for i in posts:
+					answer2 = i.text.strip()
+					answer.append(answer2)
+				result = []
+				for value in answer:
+					if value not in result:
+						result.append(value)
+			except:
+				result = answer
+			#print(result)
+			answer = []
+			memo = ' '.join(result).lstrip()
+			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+			values = [title, memo, link, 'https://quizbang.tistory.com']
+			dt = dict(zip(keys, values))
+			last.append(dt)
 	except:
 		logger.info('퀴즈방 에러')
 		pass
