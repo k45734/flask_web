@@ -1612,6 +1612,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				print('종료')
 				pass
 	except:
+		logger.info('퀴즈방 에러')
 		pass
 
 	#기존 리스트 목록 삭제
@@ -1642,34 +1643,35 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					continue
 				else:
 					sec = 'https://www.ppomppu.co.kr' + ii['URL']
-				logger.info(sec)
-				req = s.get(sec,headers=header)
-				html = req.text
-				gogo = bs(html, "html.parser")
-				memo_old = gogo.findAll("table",{"class":"pic_bg"})
-				memo_new = memo_old[2].findAll('b')
-				if len(memo_new) == 0:
-					memo_new = memo_old[2].findAll('p')
-				else:
-					pass
-				memo_list = []
-				for af in memo_new:
-					a = af.text
-					f = a.replace(u'\xa0',u'')
-					memo_list.append(f)
-				memo = ' '.join(memo_list).lstrip()
-				p = re.compile('(.*?)  ')
-				memo_last = p.findall(memo)
-				memos = '  '.join(memo_last).lstrip()
-				if len(memos) == 0:
-					memos = memo
-				else:
-					pass
-				keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-				values = [title, memos, sec,'https://www.ppomppu.co.kr']
-				dt = dict(zip(keys, values))
-				last.append(dt)
+					logger.info(sec)
+					req = s.get(sec,headers=header)
+					html = req.text
+					gogo = bs(html, "html.parser")
+					memo_old = gogo.findAll("table",{"class":"pic_bg"})
+					memo_new = memo_old[2].findAll('b')
+					if len(memo_new) == 0:
+						memo_new = memo_old[2].findAll('p')
+					else:
+						pass
+					memo_list = []
+					for af in memo_new:
+						a = af.text
+						f = a.replace(u'\xa0',u'')
+						memo_list.append(f)
+					memo = ' '.join(memo_list).lstrip()
+					p = re.compile('(.*?)  ')
+					memo_last = p.findall(memo)
+					memos = '  '.join(memo_last).lstrip()
+					if len(memos) == 0:
+						memos = memo
+					else:
+						pass
+					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+					values = [title, memos, sec,'https://www.ppomppu.co.kr']
+					dt = dict(zip(keys, values))
+					last.append(dt)
 	except:
+		logger.info('뽐뿌퀴즈 에러')
 		pass
 	try:
 		#토실행운퀴즈
@@ -1721,6 +1723,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			dt = dict(zip(keys, values))
 			last.append(dt)
 	except:
+		logger.info('토실행운퀴즈 에러')
 		pass
 	#마지막 DB 저장
 	for ii in last:
