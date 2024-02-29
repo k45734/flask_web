@@ -387,10 +387,13 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 						add_d(subtitle, title,ii,gbun)
 						logger.info('%s %s %s %s', title, subtitle, ii,gbun)
 					else:
-						url_to_image(title, subtitle,ii,iii,gbun)
-						#logger.info('%s %s %s %s', title, subtitle, ii,gbun)
-						time.sleep(3)
-						add_d(subtitle, title,ii,gbun)
+						try:
+							url_to_image(title, subtitle,ii,iii,gbun)
+							time.sleep(3)
+							add_d(subtitle, title,ii,gbun)
+						except:
+							logger.info('%s %s %s %s 이미지주소깨짐', title, subtitle, ii,gbun)
+							pass
 				else:
 					add_d(subtitle, title,ii,gbun)
 					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
