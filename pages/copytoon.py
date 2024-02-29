@@ -397,7 +397,7 @@ def down(compress,cbz,alldown,title, subtitle,gbun):
 							add_d(subtitle, title,ii,gbun)
 						except:
 							logger.info('%s %s %s %s 이미지주소깨짐', title, subtitle, ii,gbun)
-							pass
+							continue
 				else:
 					add_d(subtitle, title,ii,gbun)
 					logger.info('%s %s %s %s', title, subtitle, ii,gbun)
