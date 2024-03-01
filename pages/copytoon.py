@@ -155,16 +155,22 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		con.close()
 		time.sleep(3) 
 		con = sqlite3.connect(webtoondb,timeout=60)
+		con.row_factory = sqlite3.Row
 		cur = con.cursor()
 		sql = 'select * from ' + DB_NAME + ' where WEBTOON_IMAGE = ? and TITLE = ? and SUBTITLE = ?'
 		cur.execute(sql, (webtoon_image,title, subtitle))
 		row = cur.fetchone()
 		if row != None:
-			cur.execute('update ' + DB_NAME + ' set TITLE = ?, SUBTITLE = ? , WEBTOON_IMAGE = ? where WEBTOON_SITE = ? AND WEBTOON_URL = ? AND WEBTOON_IMAGE = ? AND WEBTOON_IMAGE_NUMBER = ? AND COMPLETE = ?',(title, subtitle,webtoon_image,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
-			con.commit()
-			ttt = '{} : {} {} {} {} DB 업데이트했습니다.'.format(gbun, title, subtitle, webtoon_number, webtoon_image)
-			print(ttt)
-			logger.info(ttt)
+			old_image_url = row['WEBTOON_IMAGE']
+			if old_image_url == webtoon_image:
+				print('이미지 같아서 패스')
+				pass
+			else:
+				cur.execute('update ' + DB_NAME + ' set TITLE = ?, SUBTITLE = ? , WEBTOON_IMAGE = ? where WEBTOON_SITE = ? AND WEBTOON_URL = ? AND WEBTOON_IMAGE = ? AND WEBTOON_IMAGE_NUMBER = ? AND COMPLETE = ?',(title, subtitle,webtoon_image,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
+				con.commit()
+				ttt = '{} : {} {} {} {} DB 업데이트했습니다.'.format(gbun, title, subtitle, webtoon_number, webtoon_image)
+				print(ttt)
+				logger.info(ttt)
 		else:
 			cur.execute('INSERT OR REPLACE INTO ' + DB_NAME + ' (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE) VALUES (?, ?, ?, ?, ?, ?, ?)', (title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
 			con.commit()
