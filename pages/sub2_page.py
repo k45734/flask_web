@@ -1656,8 +1656,13 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					continue
 				else:
 					sec = 'https://www.ppomppu.co.kr' + ii['URL']
-					logger.info(sec)
-					req = s.get(sec,headers=header)
+					#logger.info(sec)
+					try:
+						req = s.get(sec,headers=header)
+						req.raise_for_status()
+					except requests.exceptions.RequestException as e:
+						logger.info(e)
+						continue
 					html = req.text
 					gogo = bs(html, "html.parser")
 					memo_old = gogo.findAll("table",{"class":"pic_bg"})

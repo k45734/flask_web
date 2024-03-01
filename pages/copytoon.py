@@ -80,7 +80,7 @@ def url_to_image(title, subtitle, webtoon_image, webtoon_number,gbun):
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36"}
 	try:
 		req = requests.get(webtoon_image,headers=header)
-		response.raise_for_status()
+		req.raise_for_status()
 	except requests.exceptions.RequestException as e:
 		logger.info('%s %s %s %s %s 다운에러',title, subtitle, webtoon_number, gbun, webtoon_image)
 	title2 = title.strip()
