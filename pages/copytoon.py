@@ -160,11 +160,18 @@ def add_c(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number
 		cur.execute(sql, (webtoon_image,title, subtitle))
 		row = cur.fetchone()
 		if row != None:
-			pass
+			cur.execute('update ' + DB_NAME + ' set TITLE = ?, SUBTITLE = ? where WEBTOON_SITE = ? AND WEBTOON_URL = ? AND WEBTOON_IMAGE = ? AND WEBTOON_IMAGE_NUMBER = ? AND COMPLETE = ?',(title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
+			con.commit()
+			ttt = '{} : {} {} {} {} DB 업데이트했습니다.'.format(gbun, title, subtitle, webtoon_number, webtoon_image)
+			print(ttt)
+			logger.info(ttt)
 		else:
 			cur.execute('INSERT OR REPLACE INTO ' + DB_NAME + ' (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE) VALUES (?, ?, ?, ?, ?, ?, ?)', (title, subtitle,webtoon_site, webtoon_url,webtoon_image,webtoon_number,complete))
 			con.commit()
-			#logger.info('%s %s %s %s',title, subtitle, webtoon_number, gbun)
+			ttt = '{} : {} {} {} {} DB 저장했습니다.'.format(gbun, title, subtitle, webtoon_number, webtoon_image)
+			print(ttt)
+			logger.info(ttt)
+			msg = True
 	except:
 		con.rollback()
 	finally:		
