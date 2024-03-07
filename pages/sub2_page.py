@@ -1998,37 +1998,33 @@ def funmom_start(startname):
 	con.close()
 	list = []
 	last = []	
-	URL = 'https://funmom.tistory.com/m/entries.json?page=0&size=30'
-	req = requests.get(URL).json()
-	check = req['code']
-	if check == 200:
-		for p in range(0,100000):
-			URL = 'https://funmom.tistory.com/m/entries.json?page=' + str(p) + '&size=30'
-			req = requests.get(URL).json()
-			page = req['result']['nextPage']
-			list_r = req['result']['items']
-			if page == None:
-				break
-			else:
-				for i in list_r:
-					title_n = i['title']
-					#all_text = i['summary']
-					url = i['path']
-					keys = ['TITLE','URL']
-					values = [title_n, url]
-					dt = dict(zip(keys, values))
-					list.append(dt)
-	else:
-		print('종료')
-		pass
+	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+	url = 'https://funmom.tistory.com/rss'
+	parsed_data = get_data(url)
+
+	count = len(parsed_data['entries'])
+	answer = []
+	for i in range(count):
+		article = parsed_data['entries'][i]
+		try:
+			title = article['title']
+			if title == 'ㅡ':
+				print('내용없음')
+				continue
+		except:
+			continue
+		link = article['link']
+		#print(title, link)
+		keys = ['TITLE','URL']
+		values = [title, link]
+		dt = dict(zip(keys, values))
+		list.append(dt)
 	for i in list:
 		list_url = i['URL']
 		title = i['TITLE']
-		URL = 'https://funmom.tistory.com' + list_url
-		#req = urllib.request.urlopen(URL).read()
-		req = requests.get(URL).text
+		req = requests.get(list_url).text
 		soup = bs(req, 'html.parser')
-		menu = soup.find(attrs={'class' :'inner_g'}).text #카테고리 이름 div class="list_tag"
+		menu = soup.find(attrs={'class' :'jb-category-name'}).text #카테고리 이름 div class="list_tag"
 		last_c = menu.split('/')
 		category = last_c[0]
 		category2 = last_c[1]
