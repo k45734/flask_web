@@ -1566,8 +1566,8 @@ def quiz_add_go_d(MEMO, URL,SITE_NAME):
 		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time):
 	logger.info('퀴즈정답알림 시작')
-	#퀴즈정답 시작후 10초후 작동시작
-	#time.sleep(10)
+	#퀴즈정답 시작후 30초후 작동시작
+	time.sleep(30)
 	list = []
 	last = []
 	try:
