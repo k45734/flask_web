@@ -1600,6 +1600,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			p = re.compile('▶(.*?)\(퀴즈 방식이 변경되어')
 			memo_re = p.findall(new_str)
 			memo = ''.join(memo_re).lstrip().strip()
+			#정답 없으면 패스
+			if memo == '':
+				continue
+			else:
+				print(memo)
 			#정답 추가
 			answer.append(memo)
 			answer2_url = link
