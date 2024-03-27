@@ -1685,6 +1685,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					p = re.compile('(.*?)  ')
 					memo_last = p.findall(memo)
 					memos = '  '.join(memo_last).lstrip()
+					if memos == '':
+						continue
+					else:
+						print(memos)
 					if len(memos) == 0:
 						memos = memo
 					else:
