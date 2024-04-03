@@ -457,7 +457,7 @@ def execelfile(numt):
 	return comp
 	
 #엑셀파일과 실제 예약을 하기 위한 작업입니다.
-def jsonfile(numt, a, r, u, v, w, boxType):
+def jsonfile(numt, a, r, u, v, w, g, boxType):
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
@@ -1156,7 +1156,7 @@ def nh_add():
 	r = texter[4]
 	u = texter[5]
 	numt = num
-	st_json = jsonfile(numt, a, r, u, v, w, h)
+	st_json = jsonfile(numt, a, r, u, v, w, g, h)
 	if st_json == None:
 		pass
 	else:
@@ -1226,8 +1226,8 @@ def nh_add_api(rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm,boxType):
 	r = texter[4]
 	u = texter[5]
 	numt = num
-	st_json = jsonfile(numt, a, r, u, v, w, h)
-	print('st_json',numt, a, r, u, v, w, h)
+	st_json = jsonfile(numt, a, r, u, v, w, g, h)
+	print('st_json',numt, a, r, u, v, w, g, h)
 	if st_json == None:
 		print('실패')
 		pass
