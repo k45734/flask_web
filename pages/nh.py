@@ -670,7 +670,7 @@ def adduse(context):
 	g = '일반식품'
 	h = '10'
 	#선불/착불
-	if len(context) != 7:
+	if len(context) != 8:
 		i = '선불'
 	else:
 		if '선불' in context[6]:
@@ -695,6 +695,7 @@ def adduse(context):
 	add(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x)
 	all = '{}\n{}\n{} {}\n{} {} {}'.format(a,b,e,f,r,u,x)
 	logger.info(all)
+	logger.info(len(context))
 	print(all)
 	return [v,w]
 
