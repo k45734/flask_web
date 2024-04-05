@@ -73,6 +73,10 @@ def mytime():
 	nowtime = time.localtime()
 	mytime = "%02d" % (nowtime.tm_hour)
 	return mytime	
+
+def remove_html(sentence) :
+	sentence = re.sub('(<([^>]+)>)', '', sentence)
+	return sentence
 	
 @bp2.route('/')
 @bp2.route('index')
@@ -1565,6 +1569,12 @@ def quiz_add_go_d(MEMO, URL,SITE_NAME):
 		con.close()
 		
 def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time):
+	if platform.system() == 'Windows':
+		at = os.path.splitdrive(os.getcwd())
+		root = at[0] + '/data'
+	else:
+		root = '/data'
+	dfolder = root + '/'
 	logger.info('퀴즈정답알림 시작')
 	#퀴즈정답 시작후 30초후 작동시작
 	time.sleep(30)
@@ -1590,20 +1600,21 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			link = article['link']
 			memo_list = article['description']
 			#내용 파일로 저장한뒤 TEXT로 읽어옴
-			html_file = open('html_file.html', 'w', encoding="UTF-8")
+			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
 			html_file.write(memo_list)
 			html_file.close()
-			page = open('html_file.html', 'rt', encoding='utf-8').read()
+			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
 			soup = bs(page, 'html.parser')
 			all_text = soup.text
 			new_str = all_text.replace(u"\xa0", u" ")
 			p = re.compile('▶(.*?)\(퀴즈 방식이 변경되어')
 			memo_re = p.findall(new_str)
-			memo = ''.join(memo_re).lstrip().strip()
+			memo_old_re = ''.join(memo_re).lstrip().strip()
 			#정답 없으면 패스
-			if memo == '':
+			if memo_old_re == '':
 				continue
 			else:
+				memo = remove_html(memo_old_re)
 				print(memo)
 			#정답 추가
 			answer.append(memo)
@@ -1721,10 +1732,10 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			link = article['link']
 			memo_list = article['description']
 			#내용 파일로 저장한뒤 TEXT로 읽어옴
-			html_file = open('html_file.html', 'w', encoding="UTF-8")
+			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
 			html_file.write(memo_list)
 			html_file.close()
-			page = open('html_file.html', 'rt', encoding='utf-8').read()
+			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
 			soup = bs(page, 'html.parser')
 			all_text = soup.text
 			p = re.compile('정답은(.*?)\입니다.')
