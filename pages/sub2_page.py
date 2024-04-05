@@ -1591,7 +1591,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		for i in range(count):
 			article = parsed_data['entries'][i]
 			try:
-				title = article['title']
+				old_title = article['title']
+				title = old_title.replace("&amp;quot;", '"')
 				if title == 'ㅡ':
 					print('내용없음')
 					continue
