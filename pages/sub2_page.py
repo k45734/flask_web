@@ -1610,6 +1610,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			new_str = all_text.replace(u"\xa0", u" ")
 			p = re.compile('▶(.*?)\(퀴즈 방식이 변경되어')
 			memo_re = p.findall(new_str)
+			if len(memo_re) == 0:
+				p = re.compile('▶(.*?)\n')
+				memo_re = p.findall(new_str)
+			else:
+				pass
 			memo_old_re = ''.join(memo_re).lstrip().strip()
 			#정답 없으면 패스
 			if memo_old_re == '':
