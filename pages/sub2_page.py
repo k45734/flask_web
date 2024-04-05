@@ -1620,7 +1620,9 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			if memo_old_re == '':
 				continue
 			else:
-				memo = remove_html(memo_old_re)
+				memo_re1 = memo_old_re.replace("<br>", ' ')
+				memo_re = memo_re1.replace("<br />", ' ')
+				memo = remove_html(memo_re)
 				print(memo)
 			#정답 추가
 			answer.append(memo)
