@@ -1628,8 +1628,13 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			else:
 				memo_re1 = memo_old_re.replace("<br>", ' ')
 				memo_re = memo_re1.replace("<br />", ' ')
-				memo = remove_html(memo_re)
-				print(memo)
+				html_memo = remove_html(memo_re)
+				p2 = re.compile('(.*?)\[')
+				html_memo_find = p2.findall(html_memo)
+				if len(html_memo_find) == 0:
+					memo = html_memo
+				else:
+					memo = ''.join(html_memo_find).lstrip().strip()
 			#정답 추가
 			answer.append(memo)
 			answer2_url = link
