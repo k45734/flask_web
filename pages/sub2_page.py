@@ -1634,7 +1634,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				if len(html_memo_find) == 0:
 					memo = html_memo
 				else:
-					memo = ''.join(html_memo_find).lstrip().strip()
+					#memo = ''.join(html_memo_find).lstrip().strip()
+					memo = html_memo_find[0]
 			#정답 추가
 			answer.append(memo)
 			answer2_url = link
