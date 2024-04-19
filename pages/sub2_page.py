@@ -77,6 +77,11 @@ def mytime():
 def remove_html(sentence) :
 	sentence = re.sub('(<([^>]+)>)', '', sentence)
 	return sentence
+
+def symbol_re(text):	
+	sy_re = text.replace("&amp;", ' &')
+	sy_re = text.replace("&quot;", ' "')
+	return sy_re
 	
 @bp2.route('/')
 @bp2.route('index')
@@ -1592,7 +1597,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			article = parsed_data['entries'][i]
 			try:
 				old_title = article['title']
-				title = old_title.replace("&amp;quot;", '"')
+				title = symbol_re(old_title)
 				if title == 'ㅡ':
 					print('내용없음')
 					continue
