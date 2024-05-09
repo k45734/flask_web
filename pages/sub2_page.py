@@ -1834,8 +1834,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 				elif check_alim > 0:
 					for i in check_len:
 						if i in msg:
-							tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
-						quiz_add_go_d(MEMO, URL,SITE_NAME)
+							if '잠시 후 공개' in msg:
+								pass
+							else:
+								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
+								quiz_add_go_d(MEMO, URL,SITE_NAME)
 					
 		logger.info('퀴즈정답 완료했습니다.')
 	else:
