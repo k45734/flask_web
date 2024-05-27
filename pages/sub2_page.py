@@ -1763,11 +1763,25 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
 			soup = bs(page, 'html.parser')
 			all_text = soup.text
+			#원코드
+			#p = re.compile('정답은(.*?)\입니다.')
+			#memo_re = p.findall(all_text)
+			#memo = ''.join(memo_re).lstrip().strip()
+			#수정코드
 			p = re.compile('정답은(.*?)\입니다.')
 			memo_re = p.findall(all_text)
 			memo = ''.join(memo_re).lstrip().strip()
+			memo_a = memo.split(' ')
+			p2 = re.compile('다른정답  (.*?)    ㅡ')
+			memo_re2 = p2.findall(all_text)
+			memo2 = ''.join(memo_re2).lstrip().strip()
+			memo2_a = memo2.split('   ')
+			memo3 = ' '.join(memo2_a).lstrip().strip()
+			memo3_a = memo3.split(' ')
+			lt_memo = memo_a + memo3_a
+			l_memo = ' '.join(lt_memo).lstrip().strip()
 			#정답 추가
-			answer.append(memo)
+			answer.append(l_memo)
 			answer2_url = link
 			print(answer2_url)
 			req = requests.get(answer2_url,headers=header)
