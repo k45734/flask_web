@@ -2066,46 +2066,40 @@ def funmom_start(startname):
 
 	count = len(parsed_data['entries'])
 	answer = []
+	last = []
+	urls = []
 	for i in range(count):
 		article = parsed_data['entries'][i]
 		try:
 			title = article['title']
-			if title == 'ㅡ':
-				print('내용없음')
-				continue
 		except:
 			continue
 		link = article['link']
-		#print(title, link)
-		keys = ['TITLE','URL']
-		values = [title, link]
-		dt = dict(zip(keys, values))
-		list.append(dt)
-	for i in list:
-		list_url = i['URL']
-		title = i['TITLE']
-		req = requests.get(list_url).text
-		soup = bs(req, 'html.parser')
-		menu = soup.find(attrs={'class' :'jb-category-name'}).text #카테고리 이름 div class="list_tag"
-		last_c = menu.split('/')
-		category = last_c[0]
-		category2 = last_c[1]
-		thisdata = cleanText(title)
-		ex_id_divs = soup.find_all(attrs={'class' : ["imageblock alignCenter","imageblock"]})
-		urls = []
-		for img in ex_id_divs:
-			img_url = img.find("img")
-			url1 = str(img_url["src"])
-			url2 = str(img_url["srcset"])
-			dt = [url1, url2]
-			urls.append(dt)
-		
-		jpeg_no = 00
-		for url in urls:
-			last_url = ' '.join(url)
-			filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
-			add_c(title, category, category2, list_url, last_url, filename)
-			jpeg_no += 1
+		if 'notice' in link:
+			pass
+		else:
+			memo_list = article['description']
+			menu = article['category']
+			last_c = menu.split('/')
+			category = last_c[0]
+			category2 = last_c[1]
+			#내용 파일로 저장한뒤 TEXT로 읽어옴
+			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
+			html_file.write(memo_list)
+			html_file.close()
+			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
+			soup = bs(page, 'html.parser')
+			#all_text = soup.text
+			ex_id_divs = soup.find_all("img")
+			for img in ex_id_divs:
+				urls.append(img)
+			thisdata = cleanText(title)
+			jpeg_no = 00
+			for url in urls:
+				last_url = ' '.join(url)
+				filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
+				add_c(title, category, category2, link, last_url, filename)
+				jpeg_no += 1
 			
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	con.row_factory = sqlite3.Row
