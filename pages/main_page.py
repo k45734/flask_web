@@ -333,7 +333,16 @@ def log():
 					tltl2.append(i)
 		tltl = tltl2[-20:]
 		return render_template('log.html', tltl=tltl)	
-	
+		
+@bp.route("xml")
+def xml():
+	filepath = root + '/rss.xml'
+	if not os.path.isfile(filepath):
+		return redirect(url_for('main.index'))
+	else:
+		f = open(filepath, 'r')
+		return "</br>".join(f.readlines())
+		
 @bp.route("restart")
 def restart():
 	if not session.get('logFlag'):
