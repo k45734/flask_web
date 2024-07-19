@@ -341,7 +341,7 @@ def xml():
 		return redirect(url_for('main.index'))
 	else:
 		f = open(filepath, 'r')
-		return f.readlines()
+		return f
 		
 @bp.route("restart")
 def restart():
