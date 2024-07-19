@@ -2096,7 +2096,7 @@ def funmom_start(startname):
 			thisdata = cleanText(title)
 			jpeg_no = 00
 			for url in urls:
-				last_url = ' '.join(url)
+				last_url = url
 				filename=thisdata + "-" + str(jpeg_no+1).zfill(3) + ".jpg"
 				add_c(title, category, category2, link, last_url, filename)
 				jpeg_no += 1
