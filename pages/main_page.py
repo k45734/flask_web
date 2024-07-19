@@ -333,7 +333,7 @@ def log():
 					tltl2.append(i)
 		tltl = tltl2[-20:]
 		return render_template('log.html', tltl=tltl)	
-		
+
 @bp.route("xml")
 def xml():
 	filepath = root + '/rss.xml'
