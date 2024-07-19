@@ -2029,6 +2029,12 @@ def add_c(title, category, category2, list_url, url, filename):
 	return comp
 	
 def funmom_start(startname):
+	if platform.system() == 'Windows':
+		at = os.path.splitdrive(os.getcwd())
+		root = at[0] + '/data'
+	else:
+		root = '/data'
+	dfolder = root + '/'
 	ccc = []
 	con = sqlite3.connect(sub2db + '/funmom.db',timeout=60)
 	con.row_factory = sqlite3.Row
@@ -2084,10 +2090,10 @@ def funmom_start(startname):
 			category = last_c[0]
 			category2 = last_c[1]
 			#내용 파일로 저장한뒤 TEXT로 읽어옴
-			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
+			html_file = open(dfolder + '/html_file_funmom.html', 'w', encoding="UTF-8")
 			html_file.write(memo_list)
 			html_file.close()
-			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
+			page = open(dfolder + '/html_file_funmom.html', 'rt', encoding='utf-8').read()
 			soup = bs(page, 'html.parser')
 			#all_text = soup.text
 			ex_id_divs = soup.find_all("img")
