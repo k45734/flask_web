@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+
+<center><h4>퀴즈정답 목록</p>
+<thead>
+<br>
+<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<thead>
+<tr>
+<th align="center" class="tg-baqh">제목</th>
+<th align="center" class="tg-baqh" colspan="2">정답</th>
+</tr>
+{% for row in view %} 
+<form method="GET">
+<input type='hidden' name='telgm_token' value="{{ telgm_token }}">
+<input type='hidden' name='telgm_botid' value="{{ telgm_botid }}">
+<input type='hidden' name='telgm' value="{{ telgm }}">
+<input type='hidden' name='telgm_alim' value="{{ telgm_alim }}">
+<tr>
+<th align="center" class="tg-0lax"><input type='text' name='TITLE' value="{{row['TITLE']}}" style="width:100%; border: 0;" readonly></th>
+<td align="center" class="tg-0lax" colspan="4"><input type='text' name='MEMO' value="{{row['MEMO']}}" style="width:100%; border: 0;" readonly></td>
+</td>
+</tr>
+</form>
+ {% endfor %}
+</tbody>
+</table>
+{{ pagination.links | safe }}
+{% endblock %}
