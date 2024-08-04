@@ -1808,6 +1808,44 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	except:	
 		logger.info('토실행운퀴즈 에러')
 		pass
+	try:
+		url = 'http://www.tipistip.com/bbs/rss.php?bo_table=quiz'
+		parsed_data = get_data(url)
+
+		count = len(parsed_data['entries'])
+		last = []
+		answer = []
+		for i in range(count):
+			article = parsed_data['entries'][i]
+			try:
+				old_title = article['title']
+				title = symbol_re(old_title)
+				#print(title)
+				if title == 'ㅡ':
+					print('내용없음')
+					continue
+			except:
+				continue
+			link = article['link']
+			memo_list = article['description']
+			title_old = re.compile('(.*?)문제는.*')
+			p = re.compile('정답 : (.*)')
+			title_new = title_old.findall(title)
+			#print(len(title_new))
+			if len(title_new) == 0:
+				title = title
+			else:
+				title = ''.join(title_new).lstrip().strip()
+			memo_re = p.findall(memo_list)
+			memo = ''.join(memo_re).lstrip().strip()
+			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+			values = [title, memo, link, 'http://www.tipistip.com/bbs/rss.php?bo_table=quiz']
+			dt = dict(zip(keys, values))
+			last.append(dt)
+	except:
+		logger.info('퀴즈정답알림 에러')
+		pass
+		
 	#마지막 DB 저장
 	for ii in last:
 		title = ii['TITLE']
