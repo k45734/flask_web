@@ -1522,7 +1522,7 @@ def quiz_list():
 	con.close()
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS tracking (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT, DATE TEXT)')
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = NORMAL")
 	con.execute("PRAGMA temp_store = MEMORY")
@@ -1551,14 +1551,14 @@ def quiz_list():
 		cur = con.cursor()
 		cur.execute("SELECT COUNT(*) FROM quiz;")
 		total = cur.fetchone()[0]
-		cur.execute('SELECT * FROM quiz ORDER BY COMPLTE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		cur.execute('SELECT * FROM quiz ORDER BY DATE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
 		view = cur.fetchall()
 		return render_template('quiz_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
 def quiz_add_go(title, memo_s, URL,SITE_NAME):
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT)')
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT, DATE TEXT)')
 	con.execute("PRAGMA cache_size = 10000")
 	con.execute("PRAGMA locking_mode = EXCLUSIVE")
 	con.execute("PRAGMA temp_store = MEMORY")
@@ -1574,6 +1574,17 @@ def quiz_add_go(title, memo_s, URL,SITE_NAME):
 	rows = cur.fetchall()
 	if len(rows) == 0:
 		sql = "alter table quiz add column SITE_NAME TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	#데이터베이스 컬럼 추가하기
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)	
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%DATE%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column DATE TEXT"
 		cur.execute(sql)
 	else:
 		pass
@@ -1894,12 +1905,14 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		pass
 		
 	#마지막 DB 저장
+	mytime = mydate()
 	for ii in last:
 		title = ii['TITLE']
 		memo_s = ii['MEMO']
 		URL = ii['URL']
 		SITE_NAME = ii['SITE_NAME']
-		quiz_add_go(title, memo_s, URL,SITE_NAME)
+		DATE = mytime
+		quiz_add_go(title, memo_s, URL,SITE_NAME, mytime)
 		
 	#알려준다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
@@ -1925,6 +1938,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					site = '토실행운퀴즈'
 				elif 'quizbang' in SITE_NAME :
 					site = '퀴즈방'
+				elif 'tipistip' in SITE_NAME :
+					site = '퀴즈정답알림'
 				msg = '|{}|{}\n정답 : ▶ {}'.format(site,TITLE,MEMO)
 				check_len = myalim.split('|')
 				check_alim = len(check_len)
