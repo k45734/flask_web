@@ -1984,6 +1984,18 @@ def quiz():
 	else:
 		pass
 	con.close()
+	#데이터베이스 컬럼 추가하기
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)	
+	cur = con.cursor()
+	sql = "SELECT sql FROM sqlite_master WHERE name='quiz' AND sql LIKE '%DATE%'"
+	cur.execute(sql)
+	rows = cur.fetchall()
+	if len(rows) == 0:
+		sql = "alter table quiz add column DATE TEXT"
+		cur.execute(sql)
+	else:
+		pass
+	con.close()
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
