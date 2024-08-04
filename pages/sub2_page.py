@@ -1555,7 +1555,7 @@ def quiz_list():
 		view = cur.fetchall()
 		return render_template('quiz_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
-def quiz_add_go(title, memo_s, URL,SITE_NAME):
+def quiz_add_go(title, memo_s, URL,SITE_NAME, DATE):
 	#SQLITE3 DB 없으면 만들다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT, DATE TEXT)')
@@ -1605,7 +1605,7 @@ def quiz_add_go(title, memo_s, URL,SITE_NAME):
 				con.commit()
 				#print("해당 내용은 DB에 있어서 {} {} -> {} {} 수정합니다.".format(old_title,MEMO, title,memo_s))
 		else:
-			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE, SITE_NAME) VALUES (?,?,?,?,?)", (title, URL, memo_s, 'False',SITE_NAME))
+			cur.execute("INSERT OR REPLACE INTO quiz (TITLE, URL, MEMO, COMPLTE, SITE_NAME, DATE) VALUES (?,?,?,?,?,?)", (title, URL, memo_s, 'False',SITE_NAME,DATE))
 			con.commit()
 	except:
 		con.rollback()	
@@ -1912,7 +1912,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		URL = ii['URL']
 		SITE_NAME = ii['SITE_NAME']
 		DATE = mytime
-		quiz_add_go(title, memo_s, URL,SITE_NAME, mytime)
+		quiz_add_go(title, memo_s, URL,SITE_NAME, DATE)
 		
 	#알려준다.
 	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
