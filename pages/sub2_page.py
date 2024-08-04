@@ -1551,7 +1551,7 @@ def quiz_list():
 		cur = con.cursor()
 		cur.execute("SELECT COUNT(*) FROM quiz;")
 		total = cur.fetchone()[0]
-		cur.execute('SELECT * FROM quiz ORDER BY DATE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
+		cur.execute('SELECT * FROM quiz ORDER BY COMPLTE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
 		view = cur.fetchall()
 		return render_template('quiz_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
 
