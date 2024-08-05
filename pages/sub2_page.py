@@ -1768,7 +1768,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					if memos == '':
 						continue
 					else:
-						print(memos)
+						#print(memos)
+						pass
 					if len(memos) == 0:
 						memos = memo
 					else:
@@ -1827,7 +1828,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			#정답 추가
 			answer.append(l_memo)
 			answer2_url = link
-			print(answer2_url)
+			#print(answer2_url)
 			req = requests.get(answer2_url,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
@@ -1842,7 +1843,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						result.append(value)
 			except:
 				result = answer
-			print(result)
+			#print(result)
 			answer = []
 			memo = ' '.join(result).lstrip()
 			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
@@ -1891,13 +1892,14 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		pass
 		
 	#마지막 DB 저장
-	mytime ='{} {}시'.format(mydate(), mytime())
+	#mytime ='{} {}시'.format(mydate(), mytime())
 	for ii in last:
 		title = ii['TITLE']
 		memo_s = ii['MEMO']
 		URL = ii['URL']
 		SITE_NAME = ii['SITE_NAME']
-		DATE = mytime
+		DATE = '{} {}시'.format(mydate(), mytime())
+		print(title, memo_s, URL,SITE_NAME, DATE)
 		quiz_add_go(title, memo_s, URL,SITE_NAME, DATE)
 		
 	#알려준다.
