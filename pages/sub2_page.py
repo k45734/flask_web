@@ -1960,6 +1960,16 @@ def quiz():
 	con.execute("PRAGMA journal_mode=WAL")
 	con.execute("PRAGMA synchronous=NORMAL")
 	con.close()
+	#SQLITE3 DB 없으면 만들다.
+	con = sqlite3.connect(sub2db + '/quiz.db',timeout=60)
+	con.execute('CREATE TABLE IF NOT EXISTS quiz (TITLE TEXT, URL TEXT, MEMO TEXT, COMPLTE TEXT,SITE_NAME TEXT, DATE TEXT)')
+	con.execute("PRAGMA cache_size = 10000")
+	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	con.execute("PRAGMA temp_store = MEMORY")
+	con.execute("PRAGMA auto_vacuum = 1")
+	con.execute("PRAGMA journal_mode=WAL")
+	con.execute("PRAGMA synchronous=NORMAL")
+	con.close()
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
