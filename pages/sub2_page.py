@@ -1891,7 +1891,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		pass
 		
 	#마지막 DB 저장
-	mytime = mydate()
+	mytime ='{} {}시'.format(mydate(), mytime())
 	for ii in last:
 		title = ii['TITLE']
 		memo_s = ii['MEMO']
