@@ -1343,27 +1343,17 @@ def unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2 ,end_time):
 	session = requests.Session()
 	header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"}
 
-	auth = 'https://www.unsin.co.kr/unse/free/todayline/form?linenum=9'
+	auth = 'https://www.unsin.co.kr/unse/free/todayline/result'
 	rs = requests.get(auth,headers=header)
 	bs0bj = bs(rs.content.decode('utf-8','replace'),'html.parser')
-	posts = bs0bj.findAll("div",{"class":"ani_result"})
-	dates = bs0bj.find('span',{'class':'cal'}).text
-	lastdate = " ".join(dates.split())
+	posts = bs0bj.findAll("div",{"id":"ani_result"})
+	lastdate = mydate()
 	for i in posts:
-		a = i.text
-		test = i.find('dd')
-		title = test.text
-		a2 = " ".join(title.split())
-		aaa = a2.split(maxsplit=1)
-		zodiac = aaa[0]
-		zodiac2 = aaa[1]
-		name = i.find('ul')
-		li = name.text
-		list = " ".join(li.split())
-		#a4 = a2 + '\n' + list
-		a4 = zodiac + '\n' + zodiac2 + '\n' + list
+		zodiac = i.find("div",{"class":"ani-tit"}).text.strip()
+		zodiac2 = i.find("div",{"class":"title-txt"}).text.strip()
+		zodiac3 = i.find("div",{"class":"result-txt"}).text.strip()
 		complte = 'False'
-		add_unse(lastdate, zodiac, zodiac2, list, complte)
+		add_unse(lastdate, zodiac, zodiac2, zodiac3, complte)
 		
 	#중복 알림 방지
 	con = sqlite3.connect(sub2db + '/unse.db',timeout=60)
