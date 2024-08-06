@@ -1776,11 +1776,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
 		url = 'https://luckyquiz3.blogspot.com/feeds/posts/default?alt=rss'
 		parsed_data = get_data(url)
-		#print(parsed_data)
-		#try:
-		#	news_name = parsed_data['feed']['title']
-		#except:
-		#	pass
 		count = len(parsed_data['entries'])
 		answer = []
 		for i in range(count):
@@ -1798,11 +1793,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
 			soup = bs(page, 'html.parser')
 			all_text = soup.text
-			#원코드
-			#p = re.compile('정답은(.*?)\입니다.')
-			#memo_re = p.findall(all_text)
-			#memo = ''.join(memo_re).lstrip().strip()
-			#수정코드
 			p = re.compile('정답은(.*?)\입니다.')
 			memo_re = p.findall(all_text)
 			memo = ''.join(memo_re).lstrip().strip()
@@ -1818,7 +1808,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			#정답 추가
 			answer.append(l_memo)
 			answer2_url = link
-			#print(answer2_url)
 			req = requests.get(answer2_url,headers=header)
 			html = req.text
 			gogo = bs(html, "html.parser")
@@ -1833,7 +1822,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 						result.append(value)
 			except:
 				result = answer
-			#print(result)
 			answer = []
 			memo = ' '.join(result).lstrip()
 			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
@@ -1848,14 +1836,11 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		parsed_data = get_data(url)
 
 		count = len(parsed_data['entries'])
-		last = []
-		answer = []
 		for i in range(count):
 			article = parsed_data['entries'][i]
 			try:
 				old_title = article['title']
 				title = symbol_re(old_title)
-				#print(title)
 				if title == 'ㅡ':
 					print('내용없음')
 					continue
@@ -1866,7 +1851,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			title_old = re.compile('(.*?)문제는.*')
 			p = re.compile('정답 : (.*)')
 			title_new = title_old.findall(title)
-			#print(len(title_new))
 			if len(title_new) == 0:
 				title = title
 			else:
@@ -1874,7 +1858,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			memo_re = p.findall(memo_list)
 			memo = ''.join(memo_re).lstrip().strip()
 			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-			values = [title, memo, link, 'http://www.tipistip.com/bbs/rss.php?bo_table=quiz']
+			values = [title, memo, link, 'http://www.tipistip.com']
 			dt = dict(zip(keys, values))
 			last.append(dt)
 	except:
@@ -1882,7 +1866,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		pass
 		
 	#마지막 DB 저장
-	#mytime ='{} {}시'.format(mydate(), mytime())
 	for ii in last:
 		title = ii['TITLE']
 		memo_s = ii['MEMO']
@@ -1927,6 +1910,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 					for i in check_len:
 						if i in msg:
 							if '잠시 후 공개' in msg:
+								pass
+							elif len(MEMO) == 0:
 								pass
 							else:
 								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
