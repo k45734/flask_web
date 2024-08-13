@@ -1913,6 +1913,8 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 								pass
 							elif len(MEMO) == 0:
 								pass
+							elif '종료' in TITLE:
+								pass
 							else:
 								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
 								quiz_add_go_d(MEMO, URL,SITE_NAME)
