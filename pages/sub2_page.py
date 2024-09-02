@@ -1618,7 +1618,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	logger.info('퀴즈정답알림 시작')
 	#퀴즈정답 시작후 30초후 작동시작
 	time.sleep(30)
-	list = []
 	last = []
 	try:
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
@@ -1704,74 +1703,6 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		logger.info('퀴즈방 에러')
 		pass
 
-	#기존 리스트 목록 삭제
-	list.clear()
-	try:
-		with requests.Session() as s:
-			header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-			URL = 'https://www.ppomppu.co.kr/search_bbs.php?bbs_cate=2&keyword=%BF%C0%C4%FB%C1%EE&search_type=sub_memo&order_typedate'
-			req = s.get(URL,headers=header)
-			html = req.text
-			gogo = bs(html, "html.parser")
-			posts = gogo.findAll("div",{"class":"conts"})
-                                
-			for i in posts:
-				title_old = i.find('span',{'class':'title'}).find_all(text = True)
-				title = title_old[0] + title_old[1]
-				#print(title)
-				url = i.find('a')["href"]
-				keys = ['TITLE','URL']
-				values = [title, url]
-				dt = dict(zip(keys, values))
-				list.append(dt)
-            
-			for ii in list:
-				title = ii['TITLE']
-				url_c = ii['URL']
-				if 'https' in url_c:
-					continue
-				else:
-					sec = 'https://www.ppomppu.co.kr' + ii['URL']
-					#logger.info(sec)
-					try:
-						req = s.get(sec,headers=header)
-						req.raise_for_status()
-					except requests.exceptions.RequestException as e:
-						logger.info(e)
-						continue
-					html = req.text
-					gogo = bs(html, "html.parser")
-					memo_old = gogo.findAll("table",{"class":"pic_bg"})
-					memo_new = memo_old[2].findAll('b')
-					if len(memo_new) == 0:
-						memo_new = memo_old[2].findAll('p')
-					else:
-						pass
-					memo_list = []
-					for af in memo_new:
-						a = af.text
-						f = a.replace(u'\xa0',u'')
-						memo_list.append(f)
-					memo = ' '.join(memo_list).lstrip()
-					p = re.compile('(.*?)  ')
-					memo_last = p.findall(memo)
-					memos = '  '.join(memo_last).lstrip()
-					if memos == '':
-						continue
-					else:
-						#print(memos)
-						pass
-					if len(memos) == 0:
-						memos = memo
-					else:
-						pass
-					keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-					values = [title, memos, sec,'https://www.ppomppu.co.kr']
-					dt = dict(zip(keys, values))
-					last.append(dt)
-	except:
-		logger.info('뽐뿌퀴즈 에러')
-		pass
 	try:
 		#토실행운퀴즈
 		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
@@ -1832,6 +1763,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	except:	
 		logger.info('토실행운퀴즈 에러')
 		pass
+
 	try:
 		url = 'http://www.tipistip.com/bbs/rss.php?bo_table=quiz'
 		parsed_data = get_data(url)
@@ -1865,6 +1797,41 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 	except:
 		logger.info('퀴즈정답알림 에러')
 		pass
+
+	try:
+		#뽐뿌 쿠폰게시판
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		url = 'https://www.ppomppu.co.kr/rss.php?id=coupon'
+		parsed_data = get_data(url)
+		count = len(parsed_data['entries'])
+		answer = []
+		for i in range(count):
+			article = parsed_data['entries'][i]
+			try:
+				title = article['title']
+			except:
+				continue
+			link = article['link']
+			memo_list = article['description']
+			#내용 파일로 저장한뒤 TEXT로 읽어옴
+			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
+			html_file.write(memo_list)
+			html_file.close()
+			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
+			soup = bs(page, 'html.parser')
+			all_text = soup.text.strip()
+			new_string = re.sub(r'\s+', '' , all_text)
+			print('{}\n{}'.format(title,new_string))
+			answer2_url = link
+			memo = new_string
+			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+			values = [title, memo, link, 'https://www.ppomppu.co.kr']
+			dt = dict(zip(keys, values))
+			last.append(dt)
+	except:	
+		logger.info('뽐뿌쿠폰 에러')
+		pass
+		
 		
 	#마지막 DB 저장
 	for ii in last:
