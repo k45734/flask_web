@@ -27,6 +27,15 @@ except ImportError:
 	os.system('pip install python-telegram-bot')
 	import telegram
 
+#구글 api번역
+try:
+	import googletrans
+except ImportError:
+	#os.system('pip install googletrans==4.0.0-rc1')
+	#os.system('pip install --upgrade httpx')
+	os.system('pip install googletrans-py')
+	import googletrans
+	
 from pages.main_page import scheduler
 from pages.main_page import logger
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -528,8 +537,14 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 					else:
 						at = json_string[0:16]
 						new_s = at.replace('T',' ')
-					json_string2 = ii.get('node').get('status').get('name') #배송진행상태
-					json_string3 = ii.get('node').get('description') #상세배송진행상태
+					json_string2_old = ii.get('node').get('status').get('name') #배송진행상태
+					json_string3_old = ii.get('node').get('description') #상세배송진행상태
+					#배송상태 번역
+					translator = googletrans.Translator()
+					result1 = translator.translate(json_string2_old, dest='ko')
+					json_string2 = result1.text
+					result2 = translator.translate(json_string3_old, dest='ko')
+					json_string3 = result2.text
 					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
 					last_data.append(msg)
 				gg = ff(last_data)
