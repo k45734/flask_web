@@ -1871,6 +1871,7 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 			MEMO = row['MEMO']
 			URL = row['URL']
 			SITE_NAME = row['SITE_NAME']
+			DATE = row['DATE']
 			if '공유' in MEMO:
 				pass
 			else:	
@@ -1899,8 +1900,12 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 							elif '종료' in TITLE:
 								pass
 							else:
-								tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
-								quiz_add_go_d(MEMO, URL,SITE_NAME)
+								NEW_DATE = '{}'.format(mydate())
+								if NEW_DATE in DATE: #현재 날짜만 알림 과거 날짜는 알림제외
+									tel(telgm,telgm_alim,telgm_token,telgm_botid,msg, start_time2, end_time)
+									quiz_add_go_d(MEMO, URL,SITE_NAME)
+								else:
+									pass
 					
 		logger.info('퀴즈정답 완료했습니다.')
 	else:
