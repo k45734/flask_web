@@ -162,30 +162,27 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	else:
 		for i in range(0 , int(time_end)+1):
 			a = str(i).zfill(2)
-			alim_start_end.append(a)
+			if a == time_end:
+				pass
+			else:
+				alim_start_end.append(a)
 			
 		for i in range(int(time_start) , 25):
 			a = str(i).zfill(2)
-			alim_start_end2.append(a)
+			if a == time_start or a == '24':
+				pass
+			else:
+				alim_start_end2.append(a)
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			if telgm_alim == 'True':
-				asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
-				logger.info('일반알림 무음')
-			else:
-				asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
-				logger.info('일반알림 시끄럽게')
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
+			logger.info('일반알림 무음')
 			
 		#미포함
 		else:
-			if telgm_alim == 'True':
-				asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
-				print('무음')
-				logger.info('일반알림 무음')
-			else:
-				asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
-				logger.info('일반알림 시끄럽게')
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
+			logger.info('일반알림 시끄럽게')
 
 #텔레그램 특정시간 조용하게
 def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
@@ -206,33 +203,29 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 	else:
 		for i in range(0 , int(time_end)+1):
 			a = str(i).zfill(2)
-			alim_start_end.append(a)
+			if a == time_end:
+				pass
+			else:
+				alim_start_end.append(a)
 			
 		for i in range(int(time_start) , 25):
 			a = str(i).zfill(2)
-			alim_start_end2.append(a)
+			if a == time_start or a == '24':
+				pass
+			else:
+				alim_start_end2.append(a)
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			if telgm_alim == 'True':
-				asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
-				print('무음')
-				logger.info('포토알림 무음')
-			else:
-				asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
-				print('시끄럽게')
-				logger.info('포토알림 시끄럽게')
-			
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
+			print('무음')
+			logger.info('포토알림 무음')			
 		#미포함
 		else:
-			if telgm_alim == 'True':
-				asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
-				print('무음')
-				logger.info('포토알림 무음')
-			else:
-				asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
-				print('시끄럽게')
-				logger.info('포토알림 시끄럽게')
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
+			print('시끄럽게')
+			logger.info('포토알림 시끄럽게')
+			
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
 	if len(text) <= 4096:
