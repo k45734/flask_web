@@ -176,13 +176,13 @@ def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
-			logger.info('일반알림 무음')
-			
-		#미포함
-		else:
 			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
 			logger.info('일반알림 시끄럽게')
+						
+		#미포함
+		else:
+			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
+			logger.info('일반알림 무음')
 
 #텔레그램 특정시간 조용하게
 def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
@@ -217,14 +217,14 @@ def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
 		
 		list = alim_start_end + alim_start_end2
 		if mynow not in list:
-			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
-			print('무음')
-			logger.info('포토알림 무음')			
-		#미포함
-		else:
 			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
 			print('시끄럽게')
-			logger.info('포토알림 시끄럽게')
+			logger.info('포토알림 시끄럽게')		
+		#미포함
+		else:
+			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
+			print('무음')
+			logger.info('포토알림 무음')	
 			
 #텔레그램 알림
 def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
