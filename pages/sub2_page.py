@@ -543,7 +543,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				gg = ff(last_data)
 				ms = '\n'.join(gg)
 				print(carrier_id,track_id,box)
-				msga = '================================\n택배사 : {} {}\n물품명 : {}\n{}\n================================'.format(carrier_id,track_id,box,ms)
+				msga = '===============================\n택배사 : {} {}\n물품명 : {}\n{}\n==============================='.format(carrier_id,track_id,box,ms)
 				print(msga)
 				if '배송완료' in msga :
 					tracking_del_new(carrier_id,track_id)
