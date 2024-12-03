@@ -480,6 +480,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 	logger.info(carrier)
 	logger.info(carrier_id)
 	url2 = "http://0.0.0.0:4000/graphql"
+	#url2 = "http://192.168.0.2:4000/graphql"
 	keys = ['url','carrier','track_id','carrier_id','box']
 	values = [url2,carrier,track_id,carrier_id,box]
 	dt = dict(zip(keys, values))
@@ -502,6 +503,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 						'Content-Type': 'application/json'}
 			data = json.dumps(LOGIN_INFO)
 			test = json.loads(data)
+			#print(test)
 			try:
 				url_s = s.post(main_url, data=data,headers=headers, timeout=(connect_timeout, read_timeout))
 			except:	
@@ -509,7 +511,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 				continue
 			resp = url_s.json()
-			#print(resp)
+			print(resp)
 			try:
 				check = resp.get('data').get('track')
 			except:
@@ -521,6 +523,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				tel(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time)
 			else:
 				in_data = resp.get('data').get('track').get('events').get('edges')
+				logger.info(in_data)
 				last_data = []
 				for ii in in_data:
 					json_string = ii.get('node').get('time') #시간
@@ -532,6 +535,7 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 						new_s = at.replace('T',' ')
 					json_string2_old = ii.get('node').get('status').get('name') #배송진행상태
 					json_string3_old = ii.get('node').get('description') #상세배송진행상태
+					#print(json_string)#, json_string2_old, json_string3_old)
 					#배송상태 번역
 					translator = googletrans.Translator()
 					result1 = translator.translate(json_string2_old, dest='ko')
