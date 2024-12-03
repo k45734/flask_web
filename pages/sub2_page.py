@@ -538,9 +538,15 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 					#print(json_string)#, json_string2_old, json_string3_old)
 					#배송상태 번역
 					translator = googletrans.Translator()
-					result1 = translator.translate(json_string2_old, dest='ko')
+					try:
+						result1 = translator.translate(json_string2_old, dest='ko')
+					except:
+						result1 = json_string2_old
 					json_string2 = result1.text
-					result2 = translator.translate(json_string3_old, dest='ko')
+					try:
+						result2 = translator.translate(json_string3_old, dest='ko')
+					except:
+						result2 = json_string3_old
 					json_string3 = result2.text
 					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
 					last_data.append(msg)
