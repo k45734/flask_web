@@ -540,14 +540,14 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 					translator = googletrans.Translator()
 					try:
 						result1 = translator.translate(json_string2_old, dest='ko')
+						json_string2 = result1.text
 					except:
-						result1 = json_string2_old
-					json_string2 = result1.text
+						json_string2 = json_string2_old
 					try:
 						result2 = translator.translate(json_string3_old, dest='ko')
+						json_string3 = result2.text
 					except:
-						result2 = json_string3_old
-					json_string3 = result2.text
+						json_string3 = json_string3_old
 					msg = {'시간':new_s, '상태':json_string2, '상세내용':json_string3}
 					last_data.append(msg)
 				gg = ff(last_data)
