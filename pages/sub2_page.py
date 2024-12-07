@@ -535,9 +535,9 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 						new_s = at.replace('T',' ')
 					json_string2_old = ii.get('node').get('status').get('name') #배송진행상태
 					json_string3_old = ii.get('node').get('description') #상세배송진행상태
-					#print(json_string)#, json_string2_old, json_string3_old)
+					print(json_string, json_string2_old, json_string3_old)
 					#배송상태 번역
-					translator = googletrans.Translator()
+					translator = googletrans.Translator(service_urls=['translate.google.com', 'translate.google.co.kr'])
 					try:
 						result1 = translator.translate(json_string2_old, dest='ko')
 						json_string2 = result1.text
@@ -562,6 +562,8 @@ def tracking_pro(telgm,telgm_alim,telgm_token,telgm_botid,carrier_id,track_id,st
 				elif '배달완료' in msga :
 					tracking_del_new(carrier_id,track_id)
 				elif 'Delivered'in msga :
+					tracking_del_new(carrier_id,track_id)
+				elif '패키지 배달'in msga :
 					tracking_del_new(carrier_id,track_id)
 				else:
 					pass
