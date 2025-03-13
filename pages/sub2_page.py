@@ -1818,39 +1818,39 @@ def quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end
 		logger.info('퀴즈정답알림 에러')
 		pass
 
-	try:
-		#뽐뿌 쿠폰게시판
-		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-		url = 'https://www.ppomppu.co.kr/rss.php?id=coupon'
-		parsed_data = get_data(url)
-		count = len(parsed_data['entries'])
-		answer = []
-		for i in range(count):
-			article = parsed_data['entries'][i]
-			try:
-				title = article['title']
-			except:
-				continue
-			link = article['link']
-			memo_list = article['description']
-			#내용 파일로 저장한뒤 TEXT로 읽어옴
-			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
-			html_file.write(memo_list)
-			html_file.close()
-			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
-			soup = bs(page, 'html.parser')
-			all_text = soup.text.strip()
-			new_string = re.sub(r'\s+', '' , all_text)
-			print('{}\n{}'.format(title,new_string))
-			answer2_url = link
-			memo = new_string
-			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
-			values = [title, memo, link, 'https://www.ppomppu.co.kr']
-			dt = dict(zip(keys, values))
-			last.append(dt)
-	except:	
-		logger.info('뽐뿌쿠폰 에러')
-		pass
+#	try:
+#		#뽐뿌 쿠폰게시판
+#		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+#		url = 'https://www.ppomppu.co.kr/rss.php?id=coupon'
+#		parsed_data = get_data(url)
+#		count = len(parsed_data['entries'])
+#		answer = []
+#		for i in range(count):
+#			article = parsed_data['entries'][i]
+#			try:
+#				title = article['title']
+#			except:
+#				continue
+#			link = article['link']
+#			memo_list = article['description']
+#			#내용 파일로 저장한뒤 TEXT로 읽어옴
+#			html_file = open(dfolder + '/html_file.html', 'w', encoding="UTF-8")
+#			html_file.write(memo_list)
+#			html_file.close()
+#			page = open(dfolder + '/html_file.html', 'rt', encoding='utf-8').read()
+#			soup = bs(page, 'html.parser')
+#			all_text = soup.text.strip()
+#			new_string = re.sub(r'\s+', '' , all_text)
+#			print('{}\n{}'.format(title,new_string))
+#			answer2_url = link
+#			memo = new_string
+#			keys = ['TITLE','MEMO', 'URL','SITE_NAME']
+#			values = [title, memo, link, 'https://www.ppomppu.co.kr']
+#			dt = dict(zip(keys, values))
+#			last.append(dt)
+#	except:	
+#		logger.info('뽐뿌쿠폰 에러')
+#		pass
 		
 		
 	#마지막 DB 저장
