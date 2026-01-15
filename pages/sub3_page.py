@@ -145,12 +145,12 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
-			subprocess.call(FLASKAPPS, shell=True)
+			subprocess.Popen(FLASKAPPS, shell=True)
 		else :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
-			subprocess.call(FLASKAPPS, shell=True)	
+			subprocess.Popen(FLASKAPPS, shell=True)	
 	else:
-		subprocess.call(FLASKAPPS, shell=True)
+		subprocess.Popen(FLASKAPPS, shell=True)
 	logger.info(msg_end)
 	#DB최적화
 	#db_optimization()
@@ -272,7 +272,7 @@ def ok(FLASKAPPSNAME):
 		FLASKBOTID = row['FLASKBOTID']
 		FLASKALIM = row['FLASKALIM']
 		try:
-			scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM] )
+			scheduler.add_job(exec_start, trigger=CronTrigger.from_crontab(FLASKTIME), id=FLASKAPPSNAME, args=[FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM],max_instances=10,replace_existing=True)
 			test2 = scheduler.get_job(FLASKAPPSNAME).id
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test2)
 		except ConflictingIdError:
