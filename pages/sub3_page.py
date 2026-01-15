@@ -66,77 +66,43 @@ def db_optimization():
 		con.close()
 	comp = '완료'
 	return comp
-#프로세스확인
+	
 def proc_test(name):
-	if platform.system() == 'Windows':
-		py = "python"
-		a2 = name.split()
-		if py in a2:
-			aa = a2[1]
-			try:
-				bb = a2[2]
-			except:
-				bb = None
-		else:
-			aa = a2[0]
-			try:
-				bb = a2[1]
-			except:
-				bb = None
-	else:
-		py = "python"
-		a2 = name.split()
-		if py in a2:
-			aa = a2[1]
-			try:
-				bb = a2[2]
-			except:
-				bb = None
-		else:
-			aa = a2[0]
-			try:
-				bb = a2[1]
-			except:
-				bb = None
-	logger.info('%s %s',aa, bb)
+	# name 예: "python /data/webtoon_server.py --gbun adult"
+	targets = name.split() 
+	logger.info('종료 시도 대상: %s', name)
+
 	for proc in psutil.process_iter():
-		# 프로세스 이름, PID값 가져오기
-		processName = proc.name()
-		processID = proc.pid
-		 #[:6] 
 		try:
-			commandLine = proc.cmdline()
-			for i in commandLine:
-				# 동일한 프로세스 확인. code 확인
-				if len(a2) >= 3:
-					if bb in i:	
-						logger.info(bb)
-						parent_pid = processID  #PID
-						parent = psutil.Process(parent_pid)  # PID 찾기
-						#print(parent)
-						for child in parent.children(recursive=True):  #자식-부모 종료
-							child.kill()
-						parent.kill()
-				else:
-					if aa in i:
-						logger.info(aa)
-						parent_pid = processID  #PID
-						parent = psutil.Process(parent_pid)  # PID 찾기
-						#print(parent)
-						for child in parent.children(recursive=True):  #자식-부모 종료
-							child.kill()
-						parent.kill()
-							
-				#else:
-				#	pass
-					#print(processName, ' ', commandLine, ' - ', processID)
-		except:
+			cmdline = proc.cmdline()
+			# 실행 명령어 리스트에 'adult' 혹은 'normal'이 정확히 포함된 프로세스만 골라냅니다.
+			if all(t in cmdline for t in targets):
+				pid = proc.pid
+				parent = psutil.Process(pid)
+				for child in parent.children(recursive=True):
+					child.kill()
+				parent.kill()
+				logger.info('PID %s 프로세스를 종료했습니다.', pid)
+		except (psutil.NoSuchProcess, psutil.AccessDenied):
 			pass
-		
-	msg = '{} {} 동일 프로세스 확인 완료....'.format(aa,bb)
-	return msg
+	return '종료 완료'
 	
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
+	targets = FLASKAPPS.split()
+	is_running = False
+	for proc in psutil.process_iter():
+		try:
+			cmdline = proc.cmdline()
+			# 실행하려는 명령어의 모든 단어가 현재 프로세스의 cmdline에 들어있는지 확인
+			if all(t in cmdline for t in targets):
+				is_running = True
+				break
+		except (psutil.NoSuchProcess, psutil.AccessDenied):
+			continue
+
+	if is_running:
+		logger.info(f"[{FLASKAPPSNAME}] 이미 동일한 프로세스가 실행 중이므로 스케줄 실행을 건너뜁니다.")
+		return '이미 실행 중'
 	msg = '{}을 시작합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	msg_end = '{}을 완료합니다. {}'.format(FLASKAPPSNAME, FLASKAPPS)
 	#ss = proc_test(FLASKAPPS)
@@ -145,12 +111,24 @@ def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLAS
 		bot = telegram.Bot(token = FLASKTOKEN)
 		if FLASKALIM == 'True' :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=True)
-			subprocess.Popen(FLASKAPPS, shell=True)
+			try:
+				subprocess.Popen(FLASKAPPS, shell=True)
+			except Exception as e:
+				logger.error(f"실행 오류: {e}")
+			return '완료'
 		else :
 			bot.sendMessage(chat_id = FLASKBOTID, text=msg, disable_notification=False)
-			subprocess.Popen(FLASKAPPS, shell=True)	
+			try:
+				subprocess.Popen(FLASKAPPS, shell=True)	
+			except Exception as e:
+				logger.error(f"실행 오류: {e}")
+			return '완료'	
 	else:
-		subprocess.Popen(FLASKAPPS, shell=True)
+		try:
+			subprocess.Popen(FLASKAPPS, shell=True)
+		except Exception as e:
+			logger.error(f"실행 오류: {e}")
+		return '완료'
 	logger.info(msg_end)
 	#DB최적화
 	#db_optimization()
