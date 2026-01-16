@@ -90,14 +90,14 @@ def proc_test(name):
 def exec_start(FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM):
 	
 	is_running = False
-	check_args = [t for t in FLASKAPPS.split() if '/' not in t and t != 'python']
+	current_command = FLASKAPPS.strip()
 	for proc in psutil.process_iter():
 		try:
-			full_cmd = " ".join(proc.cmdline())
+			full_cmd_line = " ".join(proc.cmdline())
 			#cmdline = proc.cmdline()
 			# 실행하려는 명령어의 모든 단어가 현재 프로세스의 cmdline에 들어있는지 확인
-			if all(arg in full_cmd for arg in check_args):
-				if proc.pid != os.getpid():
+			if current_command in full_cmd_line:
+				if proc.pid != os.getpid() and proc.pid != os.getppid():
 					is_running = True
 					break
 		except (psutil.NoSuchProcess, psutil.AccessDenied):
