@@ -4,9 +4,8 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from bs4 import BeautifulSoup as bs
 from datetime import datetime
 
-# 스케줄러 관련 라이브러리 (old 버전의 필수 기능)
+# 스케줄러 관련 필수 임포트
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.jobstores.base import ConflictingIdError
 
 # 프로젝트 로거 및 스케줄러 연결
 try:
@@ -17,7 +16,7 @@ except:
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 
-# --- [1. 경로 및 환경 설정] (copytoon.py 유지) ---
+# --- [1. 경로 및 설정 관리 (SQLite CONFIG 테이블 활용)] ---
 if platform.system() == 'Windows':
     at = os.path.splitdrive(os.getcwd())
     webtoondb = at[0] + '/data/db/webtoon_new.db'
@@ -26,87 +25,43 @@ else:
     webtoondb = '/data/db/webtoon_new.db'
     root = '/data'
 
-# --- [2. DB 및 유틸리티 함수] (copytoon.py 유지) ---
-def db_optimization():
+def get_config(key):
     try:
         con = sqlite3.connect(webtoondb, timeout=60)
-        con.execute('VACUUM')
-        con.commit()
-        logger.info('DB최적화를 진행하였습니다.')
-    except: con.rollback()
+        cur = con.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS CONFIG (KEY TEXT PRIMARY KEY, VALUE TEXT)")
+        cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
+        row = cur.fetchone()
+        return row[0] if row else "0"
+    except: return "0"
     finally: con.close()
-    return '완료'
 
+def set_config(key, value):
+    try:
+        con = sqlite3.connect(webtoondb, timeout=60)
+        con.execute("INSERT OR REPLACE INTO CONFIG VALUES (?, ?)", (key, value))
+        con.commit()
+    finally: con.close()
+
+# --- [2. DB 저장 및 유틸리티] ---
 def cleanText(readData):
     text = readData.replace('/', '')
     text = re.sub('[-\\/:*?\"<>|]', '', text).strip()
     return re.sub("\s{2,}", ' ', text)
 
-# --- [3. 이미지 다운로드 및 압축] (copytoon.py 유지) ---
-def url_to_image(title, subtitle, webtoon_image, webtoon_number, gbun):
-    header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-    try:
-        req = requests.get(webtoon_image, headers=header, timeout=30)
-        req.raise_for_status()
-        
-        parse = cleanText(title)
-        parse2 = cleanText(subtitle)
-        
-        dfolder = os.path.join(root, 'webtoon', gbun, parse, parse2)
-        os.makedirs(dfolder, exist_ok=True)
-            
-        filename = f"{webtoon_number}.jpg"
-        fifi = os.path.join(dfolder, filename)
-        
-        if not os.path.isfile(fifi):
-            with open(fifi, 'wb') as code:
-                code.write(req.content)
-        return '완료'
-    except Exception as e:
-        logger.error(f"다운로드 실패: {title} {subtitle} - {e}")
-        return '실패'
-
-def manazip(title, subtitle, cbz, gbun):
-    parse = cleanText(title)
-    parse2 = cleanText(subtitle)
-    dfolder = os.path.join(root, 'webtoon', gbun, parse)
-    target_dir = os.path.join(dfolder, parse2)
-    
-    if os.path.isdir(target_dir):
-        ext = '.cbz' if cbz == '0' else '.zip'
-        zip_path = os.path.join(dfolder, f"{parse2}{ext}")
-        with zipfile.ZipFile(zip_path, 'w') as f_zip:
-            for folder, subfolders, files in os.walk(target_dir):
-                for file in files:
-                    if file.endswith('.jpg'):
-                        f_zip.write(os.path.join(folder, file), file, compress_type=zipfile.ZIP_DEFLATED)
-        time.sleep(1)
-        shutil.rmtree(target_dir)
-    return '완료'
-
-# --- [4. DB 저장 로직] (copytoon.py의 효율적인 구조 유지) ---
 def add_c(title, subtitle, webtoon_site, webtoon_url, webtoon_image, webtoon_number, complete, gbun):
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
     try:
         con = sqlite3.connect(webtoondb, timeout=60)
-        # WAL 모드 적용으로 성능 향상
         con.execute(f"CREATE TABLE IF NOT EXISTS {db_table} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)")
         con.execute("PRAGMA journal_mode=WAL")
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        
         cur.execute(f'SELECT * FROM {db_table} WHERE WEBTOON_IMAGE = ? AND TITLE = ? AND SUBTITLE = ?', (webtoon_image, title, subtitle))
-        row = cur.fetchone()
-        
-        if row:
-            if row['COMPLETE'] == 'False':
-                cur.execute(f'UPDATE {db_table} SET WEBTOON_IMAGE_NUMBER = ?, COMPLETE = ? WHERE WEBTOON_IMAGE = ?', (webtoon_number, complete, webtoon_image))
-                con.commit()
-        else:
+        if not cur.fetchone():
             cur.execute(f'INSERT INTO {db_table} VALUES (?, ?, ?, ?, ?, ?, ?)', (title, subtitle, webtoon_site, webtoon_url, webtoon_image, webtoon_number, complete))
             con.commit()
     finally: con.close()
-    return '완료'
 
 def add_d(subtitle, title, webtoon_image, gbun):
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
@@ -115,152 +70,151 @@ def add_d(subtitle, title, webtoon_image, gbun):
         con.execute(f'UPDATE {db_table} SET COMPLETE = "True" WHERE SUBTITLE = ? AND TITLE = ? AND WEBTOON_IMAGE = ?', (subtitle, title, webtoon_image))
         con.commit()
     finally: con.close()
-    return '완료'
 
-# --- [5. 텔레그램 메시지 동기화] (Base64 예외처리 및 old 로직 복구) ---
+# --- [3. 텔레그램 리스트 동기화 (설정값 자동 기록)] ---
 def tel_send_message(dummy_list):
-    logger.info('웹툰 DB정보를 받아옵니다.')
-    file_path = os.path.join(root, 'last_num.json')
-    file_check = os.path.join(root, 'now_num.json')
-
-    if os.path.isfile(file_path):
-        with open(file_path, "r") as f: json_data = json.load(f)
-    else:
-        json_data = ["0"]
-
+    logger.info('웹툰 리스트 동기화를 시작합니다.')
+    last_saved_id = int(get_config('last_webtoon_id'))
+    url = 'https://t.me/s/webtoonalim'
     with requests.Session() as s:
-        url2 = 'https://t.me/s/webtoonalim'
-        req = s.get(url2)
-        soup = bs(req.text, "html.parser")
-        aa1 = soup.findAll("div", {"class":"tgme_widget_message"})
-        
-        if not aa1: return '메시지 없음'
-        
-        last_post = aa1[-1]['data-post']
-        real_now = int(last_post.split('/')[-1])
-        
-        if os.path.isfile(file_check):
-            with open(file_check, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                now_list, old_list, new_list = data[0]['NOW'], data[0]['OLD'], data[0]['NEW']
-        else:
-            now_list, old_list, new_list = real_now, int(json_data[0]), real_now
-
-        while True:
-            if new_list <= old_list:
-                wow = [{'NOW': real_now, 'OLD': now_list, 'NEW': real_now}]
-                with open(file_check, 'w') as outfile: json.dump(wow, outfile)
-                break
-            
-            PAGE_INFO = {'before': new_list}
-            req = s.post(url2, data=PAGE_INFO)
+        try:
+            req = s.get(url, timeout=15)
             soup = bs(req.text, "html.parser")
-            mm = soup.findAll("div", {"class":"tgme_widget_message_text"})
+            messages = soup.findAll("div", {"class": "tgme_widget_message"})
+            if not messages: return
             
-            for i in mm:
-                try:
-                    # Base64 디코딩 시도, 실패 시 평문 사용 (복구 포인트)
-                    raw_text = i.text
-                    try:
-                        decoded = base64.b64decode(raw_text).decode('utf-8')
-                    except:
-                        decoded = raw_text
-                        
-                    aac = decoded.split('\n\n')
-                    if len(aac) < 6: continue
-                    
-                    title, subtitle, site, url, img, num = aac[0], aac[1], aac[2], aac[3], aac[4], aac[5]
-                    gbun = aac[6] if len(aac) >= 7 else 'adult'
-                    
-                    # 완료 여부 판단 로직 보완
-                    complete = "True" if (".com" in img or "https" in img) else "False"
-                    
-                    if 'loading.svg' not in img:
-                        add_c(title, subtitle, site, url, img, num, complete, gbun)
-                except: continue
-            
-            new_list -= 20
-            time.sleep(1)
+            for msg in reversed(messages):
+                post_id = int(msg['data-post'].split('/')[-1])
+                if post_id <= last_saved_id: break
+                
+                text_div = msg.find("div", {"class": "tgme_widget_message_text"})
+                if not text_div: continue
+                
+                raw_text = text_div.text
+                try: decoded = base64.b64decode(raw_text).decode('utf-8')
+                except: decoded = raw_text
+                
+                aac = decoded.split('\n\n')
+                if len(aac) < 6: continue
+                
+                title, subtitle, site, u_addr, img, num = aac[0], aac[1], aac[2], aac[3], aac[4], aac[5]
+                gbun = aac[6] if len(aac) >= 7 else 'adult'
+                complete = "True" if (".com" in img or "https" in img) else "False"
+                
+                if 'loading.svg' not in img:
+                    add_c(title, subtitle, site, u_addr, img, num, complete, gbun)
+                    set_config('last_webtoon_id', str(post_id))
+        except Exception as e: logger.error(f"동기화 에러: {e}")
+    logger.info('웹툰 리스트 동기화 완료.')
 
-    with open(file_path, 'w') as outfile: json.dump([str(real_now)], outfile)
-    logger.info('웹툰 DB 동기화 종료.')
+# --- [4. 다운로드 및 압축 로직] ---
+def url_to_image(title, subtitle, webtoon_image, webtoon_number, gbun):
+    header = {"User-Agent":"Mozilla/5.0"}
+    try:
+        req = requests.get(webtoon_image, headers=header, timeout=30)
+        parse, parse2 = cleanText(title), cleanText(subtitle)
+        dfolder = os.path.join(root, 'webtoon', gbun, parse, parse2)
+        os.makedirs(dfolder, exist_ok=True)
+        fifi = os.path.join(dfolder, f"{webtoon_number}.jpg")
+        if not os.path.isfile(fifi):
+            with open(fifi, 'wb') as code: code.write(req.content)
+        return '완료'
+    except: return '실패'
+
+def manazip(title, subtitle, cbz, gbun):
+    parse, parse2 = cleanText(title), cleanText(subtitle)
+    dfolder = os.path.join(root, 'webtoon', gbun, parse)
+    target_dir = os.path.join(dfolder, parse2)
+    if os.path.isdir(target_dir):
+        ext = '.cbz' if cbz == '0' else '.zip'
+        zip_path = os.path.join(dfolder, f"{parse2}{ext}")
+        with zipfile.ZipFile(zip_path, 'w') as f_zip:
+            for folder, subs, files in os.walk(target_dir):
+                for file in files:
+                    if file.endswith('.jpg'):
+                        f_zip.write(os.path.join(folder, file), file, compress_type=zipfile.ZIP_DEFLATED)
+        shutil.rmtree(target_dir)
     return '완료'
 
-# --- [6. 다운로드 메인 함수] (copytoon.py 유지) ---
 def down(compress, cbz, alldown, title, subtitle, gbun):
+    logger.info(f'[{gbun}] 다운로드 작업을 시작합니다.')
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    con = sqlite3.connect(webtoondb, timeout=60)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
-    
-    if alldown == 'True':
-        sql = f'SELECT TITLE, SUBTITLE, group_concat(WEBTOON_IMAGE,"|"), group_concat(WEBTOON_IMAGE_NUMBER), group_concat(COMPLETE) FROM {db_table} GROUP BY TITLE, SUBTITLE'
-        cur.execute(sql)
-    else:
-        sql = f'SELECT TITLE, SUBTITLE, group_concat(WEBTOON_IMAGE,"|"), group_concat(WEBTOON_IMAGE_NUMBER), group_concat(COMPLETE) FROM {db_table} WHERE TITLE=? AND SUBTITLE=? GROUP BY SUBTITLE'
-        cur.execute(sql, (title, subtitle))
-    
-    rows = cur.fetchall()
-    for row in rows:
-        img_urls = row[2].split('|')
-        img_nums = row[3].split(',')
-        comp_status = row[4].split(',')
+    try:
+        con = sqlite3.connect(webtoondb)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
         
-        if 'False' in comp_status:
-            for u, n in zip(img_urls, img_nums):
-                if ".com" not in u and 'loading.svg' not in u:
-                    if url_to_image(row['TITLE'], row['SUBTITLE'], u, n, gbun) == '완료':
-                        add_d(row['SUBTITLE'], row['TITLE'], u, gbun)
-            
-            if compress == '0':
-                manazip(row['TITLE'], row['SUBTITLE'], cbz, gbun)
-    con.close()
-    return '완료'
+        if alldown == 'True':
+            cur.execute(f'SELECT TITLE, SUBTITLE, group_concat(WEBTOON_IMAGE,"|"), group_concat(WEBTOON_IMAGE_NUMBER), group_concat(COMPLETE) FROM {db_table} GROUP BY TITLE, SUBTITLE')
+        else:
+            cur.execute(f'SELECT TITLE, SUBTITLE, group_concat(WEBTOON_IMAGE,"|"), group_concat(WEBTOON_IMAGE_NUMBER), group_concat(COMPLETE) FROM {db_table} WHERE TITLE=? AND SUBTITLE=? GROUP BY SUBTITLE', (title, subtitle))
+        
+        rows = cur.fetchall()
+        for row in rows:
+            img_urls, img_nums, comp_status = row[2].split('|'), row[3].split(','), row[4].split(',')
+            if 'False' in comp_status:
+                for u, n in zip(img_urls, img_nums):
+                    if ".com" not in u and 'loading.svg' not in u:
+                        if url_to_image(row['TITLE'], row['SUBTITLE'], u, n, gbun) == '완료':
+                            add_d(row['SUBTITLE'], row['TITLE'], u, gbun)
+                if compress == '0':
+                    manazip(row['TITLE'], row['SUBTITLE'], cbz, gbun)
+    except Exception as e: logger.error(f"다운로드 중 오류: {e}")
+    finally: con.close()
+    logger.info(f'[{gbun}] 다운로드 작업 완료.')
 
-# --- [7. Flask Routes] (스케줄러 등록 로직 복구) ---
+# --- [5. Flask Routes (스케줄러 2종)] ---
+
 @webtoon.route('/')
 def index():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
     return render_template('webtoon.html')
 
+# (1) 리스트 동기화 예약
 @webtoon.route('webtoon_list', methods=['GET'])
-def start_sync():
+def start_sync_route():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    
     start_time = request.args.get('start_time')
-    job_id = 'webtoon_db_sync'
+    job_id = 'webtoon_list_sync'
+    try:
+        scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id=job_id, args=[None], replace_existing=True)
+        logger.info(f"리스트 동기화 스케줄 등록: {start_time}")
+    except Exception as e: logger.error(f"리스트 예약 에러: {e}")
+    return redirect(url_for('webtoon.index'))
+
+# (2) 자동 다운로드 예약 (성인/일반 구분)
+@webtoon.route('webtoon_down', methods=['GET'])
+def start_down_route():
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    start_time = request.args.get('start_time')
+    gbun = request.args.get('gbun', 'adult')
+    compress = request.args.get('compress', '1')
+    cbz = request.args.get('cbz', '1')
+    
+    # 구분별로 별도 스케줄 ID 부여 (중복 방지)
+    job_id = f'webtoon_auto_down_{gbun}'
     
     try:
-        # APScheduler 등록 로직 (old 버전 방식 복구)
         scheduler.add_job(
-            tel_send_message, 
+            down, 
             trigger=CronTrigger.from_crontab(start_time), 
             id=job_id, 
-            args=[None], 
+            args=[compress, cbz, 'True', None, None, gbun],
             replace_existing=True
         )
-        logger.info(f'{job_id} 스케줄러가 {start_time} 주기로 등록되었습니다.')
-    except Exception as e:
-        logger.error(f'스케줄러 등록 실패: {e}')
-        
+        logger.info(f"자동 다운로드 스케줄 등록 ({gbun}): {start_time}")
+    except Exception as e: logger.error(f"다운로드 예약 에러: {e}")
     return redirect(url_for('webtoon.index'))
 
 @webtoon.route("now", methods=["GET"])
 def now_down():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    gbun = request.args.get('gbun')
-    down(request.args.get('compress'), request.args.get('cbz'), 'True', None, None, gbun)
+    down(request.args.get('compress'), request.args.get('cbz'), 'True', None, None, request.args.get('gbun'))
     return redirect(url_for('webtoon.index'))
 
 @webtoon.route('db_list_reset', methods=['GET'])
 def db_list_reset():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    # 리스트 초기화 기능 (old 버전 복구)
-    file_path = os.path.join(root, 'last_num.json')
-    file_path2 = os.path.join(root, 'now_num.json')
-    try:
-        if os.path.exists(file_path): os.remove(file_path)
-        if os.path.exists(file_path2): os.remove(file_path2)
-        logger.info('웹툰 리스트 정보를 초기화했습니다.')
-    except: pass
+    set_config('last_webtoon_id', '0')
+    logger.info("리스트 동기화 위치가 초기화되었습니다.")
     return redirect(url_for('webtoon.index'))
