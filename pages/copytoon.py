@@ -178,7 +178,12 @@ def manazip(title, subtitle, cbz, gbun):
     return '완료'
 
 # --- [3. Flask Routes: 목록 및 통계] ---
-
+@webtoon.route('/')
+def index():
+    """BuildError 해결을 위한 메인 라우트"""
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    return render_template('webtoon.html')
+	
 @webtoon.route('index_list', methods=["GET"])
 def index_list():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
