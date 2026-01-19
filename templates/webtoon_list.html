@@ -1,38 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
+<div class="container mt-4">
+    <center>
+        <h4 class="mb-4">웹툰 리스트 목록 ({{ '성인' if gbun == 'adult' else '일반' }})</h4>
+    </center>
 
-<center><h4>웹툰 리스트 목록</p>
-<thead>
-<tr>
-<th align="center" class="tg-baqh">제목</th>
-<th align="center" class="tg-baqh" colspan="2">회차</th>
-</tr>
-{% for i in wow %}
-<form method="GET">
-<input type='hidden' name='gbun' value="{{ gbun }}">
-<tr>
-<th align="center" class="tg-0lax"><input type="text" name="title" value="{{ i['TITLE'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax" colspan="2"><input type="text" name="subtitle" value="{{i['SUBTITLE']}}" style="width:100%; border: 0;" readonly></th>
-<td align="center" class="tg-0lax" colspan="3">
-<select name="compress" readonly>
-<option value="0">압축사용</option>
-<option value="1">압축안함</option></td>
-<td align="center" class="tg-0lax" colspan="4">
-<select name="cbz" readonly>
-<option value="0">CBZ사용</option>
-<option value="1">ZIP사용</option></td>
-<td align="center" class="tg-0lax" colspan="5">
-<input type="submit" value="개별다운" onclick="javascript: form.action='index_list/{{ gbun }}/one_now';">
-</tr>
-</form>
-{% endfor %}
-</center>
-</tr>
-</tbody>
-</table>
-{{ pagination.links | safe }}
+    <div class="row mb-3 justify-content-center">
+        <div class="col-md-8">
+            <form action="{{ url_for('webtoon.index_list') }}" method="get">
+                <input type="hidden" name="gbun" value="{{ gbun }}">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="웹툰 제목 검색..." value="{{ search or '' }}">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                    {% if search %}
+                    <a href="{{ url_for('webtoon.index_list', gbun=gbun) }}" class="btn btn-outline-secondary">초기화</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered shadow-sm" style="border-collapse:collapse; text-align: center;">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 35%;">제목</th>
+                <th style="width: 25%;">회차</th>
+                <th style="width: 15%;">압축 설정</th>
+                <th style="width: 15%;">포맷</th>
+                <th style="width: 10%;">작업</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in wow %}
+            <tr>
+                <form action="{{ url_for('webtoon.now_down') }}" method="GET">
+                    <input type='hidden' name='gbun' value="{{ gbun }}">
+                    <input type="hidden" name="title" value="{{ i['TITLE'] }}">
+                    <input type="hidden" name="subtitle" value="{{ i['SUBTITLE'] }}">
+                    
+                    <td class="align-middle text-start px-3">{{ i['TITLE'] }}</td>
+                    <td class="align-middle text-start px-3">{{ i['SUBTITLE'] }}</td>
+                    <td class="align-middle">
+                        <select name="compress" class="form-select form-select-sm">
+                            <option value="0">압축사용</option>
+                            <option value="1" selected>안함</option>
+                        </select>
+                    </td>
+                    <td class="align-middle">
+                        <select name="cbz" class="form-select form-select-sm">
+                            <option value="0">CBZ</option>
+                            <option value="1" selected>ZIP</option>
+                        </select>
+                    </td>
+                    <td class="align-middle">
+                        <input type="submit" class="btn btn-success btn-sm w-100" value="다운">
+                    </td>
+                </form>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="py-4 text-muted">검색 결과가 없거나 데이터가 존재하지 않습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center mt-3">
+        {{ pagination.links | safe }}
+    </div>
+</div>
+
+<style>
+    /* 테이블 가독성을 위한 스타일 */
+    .table th { font-weight: 600; background-color: #f8f9fa; }
+    .table td { vertical-align: middle; }
+    .form-select-sm { font-size: 0.85rem; }
+</style>
+
 {% endblock %}

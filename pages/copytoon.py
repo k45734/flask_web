@@ -187,21 +187,64 @@ def index():
 @webtoon.route('index_list', methods=["GET"])
 def index_list():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
+    
     gbun = request.args.get('gbun', 'adult')
+    search_keyword = request.args.get('search', '').strip()
     db_name = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+    
     per_page = 10
     page, _, offset = get_page_args(per_page=per_page)
     
     con = get_db_con()
     cur = con.cursor()
-    cur.execute(f'SELECT count(*) FROM (SELECT TITLE FROM {db_name} GROUP BY TITLE, SUBTITLE)')
-    total = cur.fetchone()[0]
-    cur.execute(f'SELECT TITLE, SUBTITLE FROM {db_name} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC, SUBTITLE DESC LIMIT ? OFFSET ?', (per_page, offset))
-    wow = cur.fetchall()
-    con.close()
     
-    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4)
-    return render_template('webtoon_list.html', gbun=gbun, wow=wow, pagination=pagination)
+    try:
+        # [수정 포인트] 테이블이 없으면 에러가 나므로, 먼저 테이블을 생성해줍니다.
+        cur.execute(f"""
+            CREATE TABLE IF NOT EXISTS {db_name} (
+                TITLE TEXT, 
+                SUBTITLE TEXT, 
+                WEBTOON_SITE TEXT, 
+                WEBTOON_URL TEXT, 
+                WEBTOON_IMAGE TEXT, 
+                WEBTOON_IMAGE_NUMBER TEXT, 
+                COMPLETE TEXT
+            )
+        """)
+        con.commit()
+
+        # 검색 조건 설정
+        where_clause = ""
+        params = []
+        if search_keyword:
+            where_clause = "WHERE TITLE LIKE ?"
+            params.append(f"%{search_keyword}%")
+
+        # 개수 조회
+        count_sql = f"SELECT COUNT(*) FROM (SELECT DISTINCT TITLE, SUBTITLE FROM {db_name} {where_clause})"
+        cur.execute(count_sql, params)
+        total = cur.fetchone()[0]
+
+        # 데이터 조회
+        data_sql = f"""
+            SELECT TITLE, SUBTITLE FROM {db_name} 
+            {where_clause}
+            GROUP BY TITLE, SUBTITLE 
+            ORDER BY TITLE ASC, SUBTITLE DESC 
+            LIMIT ? OFFSET ?
+        """
+        cur.execute(data_sql, params + [per_page, offset])
+        wow = cur.fetchall()
+        
+    except Exception as e:
+        logger.error(f"DB 조회 중 오류 발생: {e}")
+        wow = []
+        total = 0
+    finally:
+        con.close()
+    
+    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4, search=bool(search_keyword))
+    return render_template('webtoon_list.html', gbun=gbun, wow=wow, pagination=pagination, search=search_keyword)
 
 @webtoon.route('alim_list', methods=["GET"])
 def alim_list():
