@@ -66,10 +66,12 @@
         </tbody>
     </table>
 
-    <div class="d-flex justify-content-center mt-4 mb-5">
-        {% if pagination %}
-            {{ pagination.links | safe }}
-        {% endif %}
+    <div class="d-flex justify-content-center mt-4 mb-5" style="display: flex !important; justify-content: center;">
+    {% if pagination %}
+        {{ pagination.links | safe }}
+    {% else %}
+        <p style="color:red;">페이징 데이터가 전달되지 않았습니다.</p>
+    {% endif %}
     </div>
 </div>
 {% endblock %}
