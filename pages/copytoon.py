@@ -196,36 +196,32 @@ def index_list():
     page, _, offset = get_page_args(per_page=per_page)
     
     con = get_db_con()
+    # 결과를 딕셔너리 형태로 받도록 설정 (HTML에서 i['TITLE'] 형태 사용 가능)
+    con.row_factory = sqlite3.Row 
     cur = con.cursor()
     
     try:
-        # [수정 포인트] 테이블이 없으면 에러가 나므로, 먼저 테이블을 생성해줍니다.
-        cur.execute(f"""
-            CREATE TABLE IF NOT EXISTS {db_name} (
-                TITLE TEXT, 
-                SUBTITLE TEXT, 
-                WEBTOON_SITE TEXT, 
-                WEBTOON_URL TEXT, 
-                WEBTOON_IMAGE TEXT, 
-                WEBTOON_IMAGE_NUMBER TEXT, 
-                COMPLETE TEXT
-            )
-        """)
+        # 테이블 생성 로직
+        cur.execute(f"CREATE TABLE IF NOT EXISTS {db_name} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER TEXT, COMPLETE TEXT)")
         con.commit()
 
         # 검색 조건 설정
         where_clause = ""
         params = []
         if search_keyword:
+            # 검색어 앞뒤 공백 제거 및 부분 일치 검색
             where_clause = "WHERE TITLE LIKE ?"
             params.append(f"%{search_keyword}%")
 
-        # 개수 조회
-        count_sql = f"SELECT COUNT(*) FROM (SELECT DISTINCT TITLE, SUBTITLE FROM {db_name} {where_clause})"
+        # [수정] 개수 조회 쿼리 단순화 및 정확도 향상
+        # 실제 보여지는 데이터와 동일한 그룹화 조건으로 개수를 셉니다.
+        count_sql = f"SELECT COUNT(*) FROM (SELECT 1 FROM {db_name} {where_clause} GROUP BY TITLE, SUBTITLE)"
         cur.execute(count_sql, params)
-        total = cur.fetchone()[0]
-        print(f"검색된 총 개수: {total}") # 디버깅용 로그
-        logger.info(f"검색된 총 개수: {total}")
+        count_res = cur.fetchone()
+        total = count_res[0] if count_res else 0
+        
+        logger.info(f"--- 검색어: [{search_keyword}] / 검색된 총 개수: {total} ---")
+
         # 데이터 조회
         data_sql = f"""
             SELECT TITLE, SUBTITLE FROM {db_name} 
@@ -239,14 +235,29 @@ def index_list():
         
     except Exception as e:
         logger.error(f"DB 조회 중 오류 발생: {e}")
-        wow = []
-        total = 0
+        wow, total = [], 0
     finally:
         con.close()
-    is_search = True if search_keyword else False
-    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4, search=is_search,show_single_page=True,add_args={'gbun': gbun, 'search': search_keyword})
-    return render_template('webtoon_list.html', gbun=gbun, wow=wow, pagination=pagination, search=search_keyword)
-
+    
+    # Pagination 설정
+    # bs_version=4가 적용되지 않는 환경일 수 있으므로 관련 설정 확인
+    pagination = Pagination(
+        page=page, 
+        total=total, 
+        per_page=per_page, 
+        bs_version=4, 
+        search=True if search_keyword else False,
+        show_single_page=True,
+        record_name='wow',
+        add_args={'gbun': gbun, 'search': search_keyword}
+    )
+    
+    return render_template('webtoon_list.html', 
+                           gbun=gbun, 
+                           wow=wow, 
+                           pagination=pagination, 
+                           search=search_keyword)
+						   
 @webtoon.route('alim_list', methods=["GET"])
 def alim_list():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
