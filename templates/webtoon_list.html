@@ -21,14 +21,14 @@
         </div>
     </div>
 
-    <table class="table table-bordered shadow-sm" style="border-collapse:collapse; text-align: center;">
+    <table class="table table-bordered shadow-sm" style="text-align: center;">
         <thead class="table-light">
             <tr>
-                <th style="width: 35%;">제목</th>
-                <th style="width: 25%;">회차</th>
-                <th style="width: 15%;">압축 설정</th>
-                <th style="width: 15%;">포맷</th>
-                <th style="width: 10%;">작업</th>
+                <th>제목</th>
+                <th>회차</th>
+                <th>압축 설정</th>
+                <th>포맷</th>
+                <th>작업</th>
             </tr>
         </thead>
         <tbody>
@@ -60,7 +60,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="py-4 text-muted">검색 결과가 없거나 데이터가 존재하지 않습니다.</td>
+                <td colspan="5" class="py-4 text-muted">데이터가 존재하지 않습니다.</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -70,12 +70,4 @@
         {{ pagination.links | safe }}
     </div>
 </div>
-
-<style>
-    /* 테이블 가독성을 위한 스타일 */
-    .table th { font-weight: 600; background-color: #f8f9fa; }
-    .table td { vertical-align: middle; }
-    .form-select-sm { font-size: 0.85rem; }
-</style>
-
 {% endblock %}
