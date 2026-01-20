@@ -244,7 +244,7 @@ def index_list():
     finally:
         con.close()
     
-    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4, search=bool(search_keyword),add_args={'gbun': gbun, 'search': search_keyword})
+    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4, search=True,record_name='webtoons',add_args={'gbun': gbun, 'search': search_keyword}, 'compress': request.args.get('compress', '1'), 'cbz': request.args.get('cbz', '1'))
     return render_template('webtoon_list.html', gbun=gbun, wow=wow, pagination=pagination, search=search_keyword)
 
 @webtoon.route('alim_list', methods=["GET"])
