@@ -224,7 +224,8 @@ def index_list():
         count_sql = f"SELECT COUNT(*) FROM (SELECT DISTINCT TITLE, SUBTITLE FROM {db_name} {where_clause})"
         cur.execute(count_sql, params)
         total = cur.fetchone()[0]
-
+        print(f"검색된 총 개수: {total}") # 디버깅용 로그
+        logger.info(f"검색된 총 개수: {total}")
         # 데이터 조회
         data_sql = f"""
             SELECT TITLE, SUBTITLE FROM {db_name} 
