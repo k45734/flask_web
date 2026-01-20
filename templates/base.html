@@ -1,10 +1,36 @@
+
 <html>
   <head><link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 		<title>원격 알리미 서비스 관리</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
+/* 2. 기존 CSS 수정: .container가 300px로 고정되어 리스트가 안 보일 수 있습니다 */
+.container.main-content { 
+    width: 100% !important; 
+    max-width: 1200px !important; 
+    margin: auto;
+}
+
+/* 3. 페이징 디자인 보정 */
+.pagination { 
+    display: flex !important; 
+    list-style: none; 
+    border-radius: 0.375rem;
+    padding: 0;
+    justify-content: center;
+    width: 100% !important; /* 350px 고정 해제 */
+}
+.page-item { margin: 0 2px; }
+.page-link { 
+    padding: 0.5rem 0.75rem; 
+    border: 1px solid #dee2e6; 
+    color: #2ba0db; 
+    background-color: #fff;
+}
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,700,500);
 
 /* main Styles */
