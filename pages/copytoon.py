@@ -60,28 +60,84 @@ def add_c(title, subtitle, site, url, img, num, complete, gbun, total_count):
         print(msg); logger.info(msg)
     con.close()
 
-def tel_send_message(raw_base64_text):
-    """서버에서 보낸 base64 메시지를 수신하여 파싱 (NoneType 에러 방지 포함)"""
-    # [수정] 인자가 None이거나 비어있는 경우 즉시 리턴하여 에러 방지
-    if raw_base64_text is None or not raw_base64_text:
-        return
-
+def tel_send_message(dummy_list):
+    msg = '[동기화] 텔레그램 채널에서 최신 리스트 확인 중...'
+    print(msg); logger.info(msg)
+    
     try:
-        # 인자가 bytes가 아니면 인코딩 시도
-        if isinstance(raw_base64_text, str):
-            raw_base64_text = raw_base64_text.encode('ascii')
-            
-        decoded = base64.b64decode(raw_base64_text).decode('utf-8')
-        aac = decoded.split('\n\n')
+        last_saved_id = int(get_config('last_webtoon_id'))
+    except:
+        last_saved_id = 0
         
-        # 순서: 0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:NUM, 6:COMPLETE, 7:TOTAL_COUNT, 8:GBUN
-        if len(aac) >= 9:
-            add_c(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7])
-            print(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7]); logger.error(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7])
-    except Exception as e:
-        # 에러 발생 시 로그에 상세 출력
-        err_msg = f"!!! [파싱오류 상세]: {e} (입력값: {raw_base64_text})"
-        print(err_msg); logger.error(err_msg)
+    url = 'https://t.me/s/webtoonalim'
+    with requests.Session() as s:
+        try:
+            req = s.get(url, timeout=15)
+            soup = bs(req.text, "html.parser")
+            messages = soup.findAll("div", {"class": "tgme_widget_message"})
+            
+            if not messages: 
+                msg = "[동기화] 새로운 메시지가 없습니다."
+                print(msg); logger.info(msg)
+                return
+            
+            new_count = 0
+            # 최신 메시지부터 역순으로 검사
+            for msg_div in reversed(messages):
+                try:
+                    post_id = int(msg_div['data-post'].split('/')[-1])
+                except: continue
+                
+                if post_id <= last_saved_id: break
+                
+                text_div = msg_div.find("div", {"class": "tgme_widget_message_text"})
+                if not text_div: continue
+                
+                # [수정] NoneType 방어: text_div가 있어도 내부 텍스트가 없는 경우 대비
+                raw_text = text_div.get_text(strip=True)
+                if not raw_text: continue
+                
+                try:
+                    # [수정] base64 디코딩 예외 처리 강화
+                    try: 
+                        # 공백 제거 후 바이트 변환하여 디코딩
+                        decoded = base64.b64decode(raw_text.encode('ascii')).decode('utf-8')
+                    except: 
+                        decoded = raw_text
+                    
+                    # 데이터 분할 (서버에서 보낸 TOTAL_COUNT 포함 8~9개 항목 대응)
+                    aac = decoded.split('\n\n')
+                    
+                    # 최소 8개 항목 필요 (TITLE, SUBTITLE, SITE, URL, IMAGE, NUM, COMPLETE, TOTAL_COUNT)
+                    if len(aac) < 8: continue
+                    
+                    # 0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:NUM, 6:COMPLETE, 7:TOTAL_COUNT, 8:GBUN
+                    title, subtitle, site, u_addr, img, num, complete, total_count = aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[7]
+                    gbun = aac[8] if len(aac) >= 9 else 'adult'
+                    
+                    if 'loading.svg' not in img:
+                        # [핵심] add_c 함수에 total_count 인자를 포함하여 호출
+                        add_c(title, subtitle, site, u_addr, img, num, complete, gbun, total_count)
+                        
+                        set_config('last_webtoon_id', str(post_id))
+                        new_count += 1
+                        
+                        # 진행 상황 실시간 출력
+                        status = f">>> [동기화 성공] {title} - {subtitle} ({num}/{total_count})"
+                        print(status); logger.info(status)
+                        
+                except Exception as e:
+                    # 개별 메시지 처리 중 오류가 나도 중단되지 않고 다음 메시지로 진행
+                    err_msg = f"!!! [개별메시지 파싱오류] ID {post_id}: {e}"
+                    print(err_msg); logger.error(err_msg)
+                    continue
+                    
+            final_msg = f'[동기화] 작업 완료. {new_count}개의 데이터가 추가되었습니다.'
+            print(final_msg); logger.info(final_msg)
+            
+        except Exception as e: 
+            err_msg = f"[동기화 전체오류] {e}"
+            print(err_msg); logger.error(err_msg)
 
 # --- [3. 다운로드 로직 (대기 기능)] ---
 def down(compress, cbz, alldown, title, subtitle, gbun):
