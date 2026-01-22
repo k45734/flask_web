@@ -77,6 +77,7 @@ def tel_send_message(raw_base64_text):
         # 순서: 0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:NUM, 6:COMPLETE, 7:TOTAL_COUNT, 8:GBUN
         if len(aac) >= 9:
             add_c(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7])
+            print(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7]); logger.error(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7])
     except Exception as e:
         # 에러 발생 시 로그에 상세 출력
         err_msg = f"!!! [파싱오류 상세]: {e} (입력값: {raw_base64_text})"
