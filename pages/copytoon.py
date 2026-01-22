@@ -12,6 +12,7 @@ except ImportError:
     os.system('pip install flask_paginate')
     from flask_paginate import Pagination, get_page_args
 
+# 프로젝트 로거 및 스케줄러 연결
 try:
     from pages.main_page import scheduler, logger
 except:
@@ -36,7 +37,6 @@ def get_db_con():
 
 # --- [2. 데이터 수신 및 DB 저장] ---
 def add_c(title, subtitle, site, url, img, num, complete, gbun, total_count):
-    print(title, subtitle, site, url, img, num, complete, gbun, total_count)
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
     con = get_db_con()
     
@@ -56,22 +56,33 @@ def add_c(title, subtitle, site, url, img, num, complete, gbun, total_count):
         cur.execute(f'INSERT INTO {db_table} (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE, TOTAL_COUNT) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
                     (title, subtitle, site, url, img, num, complete, total_count))
         con.commit()
-        msg = f">>> [데이터수신] {title} - {subtitle} ({num}/{total_count})"
+        msg = f">>> [DB저장] {title} - {subtitle} ({num}/{total_count})"
         print(msg); logger.info(msg)
     con.close()
 
 def tel_send_message(raw_base64_text):
-    """서버에서 보낸 base64 메시지를 수신하여 파싱하는 함수"""
+    """서버에서 보낸 base64 메시지를 수신하여 파싱 (NoneType 에러 방지 포함)"""
+    # [수정] 인자가 None이거나 비어있는 경우 즉시 리턴하여 에러 방지
+    if raw_base64_text is None or not raw_base64_text:
+        return
+
     try:
+        # 인자가 bytes가 아니면 인코딩 시도
+        if isinstance(raw_base64_text, str):
+            raw_base64_text = raw_base64_text.encode('ascii')
+            
         decoded = base64.b64decode(raw_base64_text).decode('utf-8')
         aac = decoded.split('\n\n')
-        # 규격: 0:제목, 1:소제목, 2:사이트, 3:URL, 4:이미지, 5:번호, 6:False, 7:총개수, 8:구분
+        
+        # 순서: 0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:NUM, 6:COMPLETE, 7:TOTAL_COUNT, 8:GBUN
         if len(aac) >= 9:
             add_c(aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[8], aac[7])
     except Exception as e:
-        print(f"!!! [파싱오류] {e}"); logger.error(f"파싱오류: {e}")
+        # 에러 발생 시 로그에 상세 출력
+        err_msg = f"!!! [파싱오류 상세]: {e} (입력값: {raw_base64_text})"
+        print(err_msg); logger.error(err_msg)
 
-# --- [3. 다운로드 로직 (대기 기능 및 로그 강화)] ---
+# --- [3. 다운로드 로직 (대기 기능)] ---
 def down(compress, cbz, alldown, title, subtitle, gbun):
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
     con = get_db_con()
@@ -80,27 +91,26 @@ def down(compress, cbz, alldown, title, subtitle, gbun):
     msg = f"=== [{gbun.upper()}] 다운로드 프로세스 가동 ==="
     print(msg); logger.info(msg)
     
-    # 완료되지 않은(False) 회차 목록 추출
+    # 수집 완료되지 않은 회차 목록 추출
     sql = f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {db_table} WHERE COMPLETE = 'False' GROUP BY TITLE, SUBTITLE"
     cur.execute(sql)
     targets = cur.fetchall()
     
     if not targets:
-        print("    > 현재 처리할 대기 목록이 없습니다."); con.close(); return
+        print("    > 대기 목록이 없습니다."); con.close(); return
 
     for t_title, t_sub, t_total in targets:
-        # 현재 DB에 쌓인 이미지 개수 확인
         cur.execute(f"SELECT COUNT(*) FROM {db_table} WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
         current_cnt = cur.fetchone()[0]
         
         status_msg = f"  - [{t_title}] {t_sub}: 현황({current_cnt}) / 목표({t_total})"
         print(status_msg); logger.info(status_msg)
         
-        # [핵심] 개수가 다 안 찼으면 다운로드 건너뜀
+        # 서버에서 알려준 개수와 내 DB 장수가 다르면 대기
         if current_cnt < int(t_total):
-            print(f"    ! [대기] 이미지가 부족하여 수집을 더 기다립니다."); continue
+            print(f"    ! [대기] {t_total - current_cnt}장이 더 필요합니다."); continue
 
-        print(f"    √ [진행] 모든 파일(100%) 확인 완료. 이미지 저장을 시작합니다.")
+        print(f"    √ [진행] {t_total}장 전량 확인 완료. 파일 저장 시작.")
         
         folder_path = os.path.join(root, "download", t_title, t_sub)
         os.makedirs(folder_path, exist_ok=True)
@@ -108,7 +118,6 @@ def down(compress, cbz, alldown, title, subtitle, gbun):
         cur.execute(f'SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC', (t_title, t_sub))
         img_list = cur.fetchall()
         
-        success_flag = True
         for img_url, img_num in img_list:
             try:
                 file_path = os.path.join(folder_path, f"{img_num}.jpg")
@@ -119,29 +128,24 @@ def down(compress, cbz, alldown, title, subtitle, gbun):
                             f.write(res.content)
             except Exception as e:
                 print(f"    ! [다운로드 실패] {img_num}.jpg : {e}")
-                success_flag = False
 
-        if success_flag:
-            # 개별 이미지 저장이 완료되면 DB 상태 변경
-            cur.execute(f"UPDATE {db_table} SET COMPLETE = 'True' WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
-            con.commit()
-            print(f"    √ [완료] {t_title} {t_sub} 다운로드 완료")
-            
-            # 압축 설정 시 압축 진행
-            if compress == '1':
-                make_zip(folder_path, cbz)
+        # 처리 완료 기록
+        cur.execute(f"UPDATE {db_table} SET COMPLETE = 'True' WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
+        con.commit()
+        print(f"    √ [완료] {t_title} {t_sub} 처리 성공")
+        
+        if compress == '1':
+            make_zip(folder_path, cbz)
 
     con.close()
 
 def make_zip(folder_path, is_cbz):
     ext = ".cbz" if is_cbz == '1' else ".zip"
     zip_name = folder_path + ext
-    print(f"    > [압축] {zip_name} 생성 중...")
     with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as z:
         for file in os.listdir(folder_path):
             z.write(os.path.join(folder_path, file), file)
     shutil.rmtree(folder_path)
-    print(f"    > [압축완료] 원본 폴더 삭제됨")
 	
 # --- [3. Flask Routes: 목록 및 통계] ---
 @webtoon.route('/')
