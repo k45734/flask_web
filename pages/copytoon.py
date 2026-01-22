@@ -29,7 +29,15 @@ if platform.system() == 'Windows':
 else:
     webtoondb = '/data/db/webtoon_new.db'
     root = '/data'
-
+	
+def set_config(key, value):
+    """DB에 설정값을 저장합니다."""
+    con = get_db_con()
+    con.execute("CREATE TABLE IF NOT EXISTS CONFIG (KEY TEXT PRIMARY KEY, VALUE TEXT)")
+    con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, value))
+    con.commit()
+    con.close()
+	
 def get_db_con():
     con = sqlite3.connect(webtoondb, timeout=60)
     con.execute("PRAGMA journal_mode=WAL")
@@ -313,7 +321,7 @@ def now_down():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
     logger.info("[수동실행] 사용자가 즉시 다운로드를 요청했습니다.")
     down(request.args.get('compress'), request.args.get('cbz'), 'True', None, None, request.args.get('gbun'))
-    return redirect(url_for('webtoon.index'))
+    return "<script>alert('즉시 실행되었습니다.'); history.back();</script>"
 
 @webtoon.route('db_list_reset')
 def db_list_reset():
