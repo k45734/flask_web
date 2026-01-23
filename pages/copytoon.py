@@ -347,6 +347,21 @@ def now_down():
 
 @webtoon.route('db_list_reset')
 def db_list_reset():
-    set_config('last_webtoon_id', '0')
-    logger.info("[리셋] 동기화 추적 ID를 0으로 초기화했습니다.")
-    return redirect(url_for('webtoon.index'))
+    con = get_db_con()
+    cur = con.cursor()
+    try:
+        # 1. 모든 웹툰의 완료 상태를 False로 (재다운로드 대상 지정)
+        cur.execute("UPDATE TOON SET COMPLETE = 'False'")
+        cur.execute("UPDATE TOON_NORMAL SET COMPLETE = 'False'")
+        
+        # 2. 텔레그램 수집 지점 초기화 (과거 메시지 재수집)
+        set_config('last_webtoon_id', '0')
+        
+        con.commit()
+        logger.info("[리셋] 데이터 상태 및 수집 ID 초기화 완료")
+    except Exception as e:
+        logger.error(f"[리셋 실패] {e}")
+    finally:
+        con.close()
+    
+    return "<script>alert('상태값과 수집 ID가 모두 초기화되었습니다.'); location.href='/webtoon';</script>"
