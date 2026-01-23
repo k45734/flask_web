@@ -59,12 +59,48 @@ def set_config(key, value):
 # --- [2. 핵심 엔진: 고속 다운로드 루프] ---
 
 def db_optimize():
-    print("== [최적화] DB 진공 청소 시작 =="); logger.info("DB Vacuum Start")
+    logger.info("========================================")
+    logger.info("[최적화] 구형 데이터 보정 및 DB 진공 청소 시작")
+    logger.info("========================================")
+    
     try:
+        # 1. 과거에 0으로 저장된 데이터들 전수 조사 및 보정
+        with get_list_db() as con:
+            for table in ['TOON', 'TOON_NORMAL']:
+                # 테이블 존재 여부 확인
+                cur = con.cursor()
+                cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+                if not cur.fetchone(): continue
+
+                # TOTAL_COUNT가 0이거나 NULL인 대상 추출
+                zero_targets = con.execute(f"SELECT TITLE, SUBTITLE FROM {table} WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL GROUP BY TITLE, SUBTITLE").fetchall()
+                
+                if zero_targets:
+                    logger.info(f" -> [{table}] 보정이 필요한 구형 데이터 {len(zero_targets)}건 발견")
+                    for row in zero_targets:
+                        t_title, t_sub = row['TITLE'], row['SUBTITLE']
+                        con.execute(f"""
+                            UPDATE {table} 
+                            SET TOTAL_COUNT = (SELECT COUNT(*) FROM {table} WHERE TITLE=? AND SUBTITLE=?)
+                            WHERE TITLE=? AND SUBTITLE=?
+                        """, (t_title, t_sub, t_title, t_sub))
+                    con.commit()
+                    logger.info(f" -> [{table}] 구형 데이터 보정 완료")
+                else:
+                    logger.info(f" -> [{table}] 보정할 구형 데이터가 없습니다.")
+
+        # 2. DB 용량 최적화 (VACUUM)
         for db_path in [LIST_DB, STATUS_DB]:
-            with sqlite3.connect(db_path) as con: con.execute("VACUUM")
-        print("== [완료] DB 최적화 종료 ==")
-    except Exception as e: logger.error(f"Optimize Error: {e}")
+            with sqlite3.connect(db_path) as con: 
+                con.execute("VACUUM")
+                logger.info(f" -> [VACUUM] {os.path.basename(db_path)} 최적화 완료")
+        
+        logger.info("========================================")
+        logger.info("[완료] 모든 DB 최적화 및 보정 작업 종료")
+        logger.info("========================================")
+
+    except Exception as e: 
+        logger.error(f"!!! [에러] 최적화 중 오류 발생: {e}")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     msg = f"== [{gbun}] 다운로드 엔진 가동 =="
@@ -130,7 +166,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 
 # --- [3. 수집 및 라우트: 보정 로직 통합] ---
 def tel_send_message(dummy=None):
-    print("[수집] 대용량 동기화 엔진 가동"); logger.info("Bulk Sync Start")
+    logger.info("========================================")
+    logger.info("[수집] 대용량 동기화 및 보정 엔진 가동")
+    logger.info("========================================")
+    
     last_id = int(get_config('last_webtoon_id') or 0)
     
     try:
@@ -138,9 +177,10 @@ def tel_send_message(dummy=None):
         soup = bs(req.text, "html.parser")
         messages = soup.findAll("div", {"class": "tgme_widget_message"})
         
-        new_data = {'TOON': [], 'TOON_NORMAL': []} # 데이터를 담을 바구니
+        new_data = {'TOON': [], 'TOON_NORMAL': []}
         update_targets = set()
         max_id = last_id
+        parsed_count = 0
 
         for m in reversed(messages):
             try:
@@ -157,35 +197,54 @@ def tel_send_message(dummy=None):
                 gbun = aac[8] if len(aac) >= 9 else 'adult'
                 db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
                 
-                # 데이터를 튜플 형태로 리스트에 저장
+                # 데이터 준비
                 new_data[db_t].append((aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7])))
                 update_targets.add((db_t, aac[0], aac[1]))
                 max_id = max(max_id, pid)
-            except: continue
+                parsed_count += 1
+                
+                # [상세 로그] 어떤 데이터를 바구니에 담았는지 기록
+                logger.info(f" -> [분석성공] ID:{pid} | {aac[0]} - {aac[1]} ({gbun})")
+                
+            except Exception as e:
+                logger.error(f" -> [분석실패] 메시지 파싱 에러: {e}")
+                continue
 
         # --- [Bulk Insert 실행] ---
+        total_saved = 0
         for db_t in ['TOON', 'TOON_NORMAL']:
             if new_data[db_t]:
                 with get_list_db() as con:
-                    # 테이블 없으면 생성
                     con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-                    # executemany로 한 번에 밀어넣기
-                    con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
+                    # 2. 인덱스 생성 (여기에 넣으세요!)
+                    con.execute(f"CREATE INDEX IF NOT EXISTS idx_{db_t}_total_count ON {db_t} (TOTAL_COUNT)")
+                    cur = con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
                     con.commit()
-                print(f" -> [{db_t}] {len(new_data[db_t])}건 일괄 저장 완료")
+                    count = len(new_data[db_t])
+                    total_saved += count
+                    logger.info(f" -> [DB저장] {db_t} 테이블에 {count}건 일괄 저장 완료")
 
         # --- [보정 작업] ---
         if update_targets:
+            logger.info(f" -> [보정시작] 총 {len(update_targets)}개 회차 수치 최적화 (Total Count 동기화)")
             with get_list_db() as con:
                 for db_t, title, subtitle in update_targets:
-                    con.execute(f"UPDATE {db_t} SET TOTAL_COUNT = (SELECT COUNT(*) FROM {db_t} WHERE TITLE=? AND SUBTITLE=?) WHERE TITLE=? AND SUBTITLE=?", (title, subtitle, title, subtitle))
+                    con.execute(f"""
+                        UPDATE {db_t} 
+                        SET TOTAL_COUNT = (SELECT COUNT(*) FROM {db_t} WHERE TITLE=? AND SUBTITLE=?) 
+                        WHERE TITLE=? AND SUBTITLE=?
+                    """, (title, subtitle, title, subtitle))
                 con.commit()
+            logger.info(" -> [보정완료] 모든 회차의 이미지 개수 동기화 성공")
 
         set_config('last_webtoon_id', max_id)
-        print(f"[완료] 총 {len(update_targets)}개 회차 수집 및 보정 완료"); logger.info("Bulk Sync Done")
         
+        logger.info("========================================")
+        logger.info(f"[수집종료] 새 ID: {max_id} | 분석: {parsed_count}건 | 저장: {total_saved}건")
+        logger.info("========================================")
+        db_optimize()
     except Exception as e: 
-        logger.error(f"Sync Error: {e}")
+        logger.error(f"!!! [비상] 수집 엔진 치명적 에러: {e}")
 
 @webtoon.route('/')
 def index():
