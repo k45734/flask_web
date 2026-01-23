@@ -60,11 +60,10 @@ def set_config(key, value):
 
 def db_optimize():
     logger.info("========================================")
-    logger.info("[최적화] 구형 데이터 보정 및 DB 진공 청소 시작")
+    logger.info("[최적화] 초고속 보정 및 DB 진공 청소 시작")
     logger.info("========================================")
     
     try:
-        # 1. 과거에 0으로 저장된 데이터들 전수 조사 및 보정
         with get_list_db() as con:
             for table in ['TOON', 'TOON_NORMAL']:
                 # 테이블 존재 여부 확인
@@ -72,22 +71,31 @@ def db_optimize():
                 cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
                 if not cur.fetchone(): continue
 
-                # TOTAL_COUNT가 0이거나 NULL인 대상 추출
-                zero_targets = con.execute(f"SELECT TITLE, SUBTITLE FROM {table} WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL GROUP BY TITLE, SUBTITLE").fetchall()
+                logger.info(f" -> [{table}] 대량 보정 분석 중...")
+
+                # 1. 임시 테이블 생성: 전체 카운트를 미리 딱 한 번만 계산 (속도의 핵심)
+                con.execute("DROP TABLE IF EXISTS temp_counts")
+                con.execute(f"""
+                    CREATE TEMPORARY TABLE temp_counts AS 
+                    SELECT TITLE, SUBTITLE, COUNT(*) as cnt 
+                    FROM {table} 
+                    GROUP BY TITLE, SUBTITLE
+                """)
                 
-                if zero_targets:
-                    logger.info(f" -> [{table}] 보정이 필요한 구형 데이터 {len(zero_targets)}건 발견")
-                    for row in zero_targets:
-                        t_title, t_sub = row['TITLE'], row['SUBTITLE']
-                        con.execute(f"""
-                            UPDATE {table} 
-                            SET TOTAL_COUNT = (SELECT COUNT(*) FROM {table} WHERE TITLE=? AND SUBTITLE=?)
-                            WHERE TITLE=? AND SUBTITLE=?
-                        """, (t_title, t_sub, t_title, t_sub))
-                    con.commit()
-                    logger.info(f" -> [{table}] 구형 데이터 보정 완료")
-                else:
-                    logger.info(f" -> [{table}] 보정할 구형 데이터가 없습니다.")
+                # 2. 한 방에 업데이트: 서브쿼리 없이 임시 테이블과 대조하여 업데이트
+                # TOTAL_COUNT가 0이거나 NULL인 녀석들만 골라서 채워넣음
+                cur = con.execute(f"""
+                    UPDATE {table} 
+                    SET TOTAL_COUNT = (
+                        SELECT cnt FROM temp_counts 
+                        WHERE temp_counts.TITLE = {table}.TITLE 
+                        AND temp_counts.SUBTITLE = {table}.SUBTITLE
+                    ) 
+                    WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL
+                """)
+                
+                con.commit()
+                logger.info(f" -> [{table}] {cur.rowcount}건 보정 완료")
 
         # 2. DB 용량 최적화 (VACUUM)
         for db_path in [LIST_DB, STATUS_DB]:
