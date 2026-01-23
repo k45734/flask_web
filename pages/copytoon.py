@@ -5,14 +5,12 @@ from bs4 import BeautifulSoup as bs
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
 
-# 페이징 및 스케줄러 라이브러리 예외 처리
 try:
     from flask_paginate import Pagination, get_page_args
 except ImportError:
     os.system('pip install flask_paginate')
     from flask_paginate import Pagination, get_page_args
 
-# 프로젝트 로거 및 스케줄러 연결
 try:
     from pages.main_page import scheduler, logger
 except:
@@ -21,391 +19,258 @@ except:
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 
-# --- [1. 경로 및 DB 설정] ---
-if platform.system() == 'Windows':
-    at = os.path.splitdrive(os.getcwd())
-    webtoondb = at[0] + '/data/db/webtoon_new.db'
-    root = at[0] + '/data'
-else:
-    webtoondb = '/data/db/webtoon_new.db'
-    root = '/data'
-	
-def set_config(key, value):
-    """DB에 설정값을 저장합니다."""
-    con = get_db_con()
-    con.execute("CREATE TABLE IF NOT EXISTS CONFIG (KEY TEXT PRIMARY KEY, VALUE TEXT)")
-    con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, value))
-    con.commit()
-    con.close()
+# --- [1. 멀티 DB 설정] ---
+at = os.path.splitdrive(os.getcwd()) if platform.system() == 'Windows' else ('', '/data')
+LIST_DB = at[0] + '/data/db/webtoon_list.db'     
+STATUS_DB = at[0] + '/data/db/webtoon_status.db' 
+ROOT_PATH = at[0] + '/data'
 
-def get_config(key):
-    con = get_db_con()
-    cur = con.cursor()
-    cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
-    row = cur.fetchone()
-    con.close()
-    return row[0] if row else None
-	
-def reset_db_task():
-    """실제 무거운 DB 작업을 수행하는 별도의 함수"""
-    with get_db_con() as con:
-        try:
-            cur = con.cursor()
-            cur.execute("UPDATE TOON SET COMPLETE = 'False'")
-            cur.execute("UPDATE TOON_NORMAL SET COMPLETE = 'False'")
-            cur.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES ('last_webtoon_id', '0')")
-            con.commit()
-            logger.info("[백그라운드] 리셋 작업이 완료되었습니다.")
-        except Exception as e:
-            logger.error(f"[백그라운드] 리셋 중 오류: {e}")	
-			
-def get_db_con():
-    con = sqlite3.connect(webtoondb, timeout=60)
-    con.execute("PRAGMA journal_mode=WAL")
-    # 아래 설정을 추가하면 쓰기 작업 시 다른 작업이 끼어드는 것을 더 강하게 막아줍니다.
-    con.isolation_level = 'IMMEDIATE' 
+os.makedirs(os.path.dirname(LIST_DB), exist_ok=True)
+
+def get_list_db():
+    con = sqlite3.connect(LIST_DB, timeout=60)
     con.row_factory = sqlite3.Row
+    con.execute("PRAGMA journal_mode=WAL")
     return con
 
-# --- [2. 데이터 수신 및 DB 저장] ---
+def get_status_db():
+    con = sqlite3.connect(STATUS_DB, timeout=60)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("CREATE TABLE IF NOT EXISTS STATUS (TITLE TEXT, SUBTITLE TEXT, COMPLETE TEXT, PRIMARY KEY(TITLE, SUBTITLE))")
+    con.execute("CREATE TABLE IF NOT EXISTS CONFIG (KEY TEXT PRIMARY KEY, VALUE TEXT)")
+    return con
+
+def get_config(key):
+    try:
+        with get_status_db() as con:
+            cur = con.cursor()
+            cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
+            row = cur.fetchone()
+            return row['VALUE'] if row else None
+    except: return None
+
+def set_config(key, value):
+    with get_status_db() as con:
+        con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, str(value)))
+        con.commit()
+
+# --- [2. 수집 및 저장 로직] ---
 def add_c(title, subtitle, site, url, img, num, complete, gbun, total_count):
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    con = get_db_con()
-    cur = con.cursor()
-    
-    # 0으로 들어온 데이터를 보정하는 신의 한 수
-    if str(total_count) == "0":
-        # 현재 내 DB에 이 회차의 이미지가 몇 개 있는지 확인
-        cur.execute(f"SELECT COUNT(*) FROM {db_table} WHERE TITLE=? AND SUBTITLE=?", (title, subtitle))
-        row_cnt = cur.fetchone()[0]
-        # 이미지가 하나라도 있다면 그 개수를 total_count로 사용 (없으면 일단 0 유지)
-        if row_cnt > 0:
-            total_count = row_cnt
-
-    # 중복 확인 및 저장
-    cur.execute(f'SELECT 1 FROM {db_table} WHERE WEBTOON_IMAGE = ? AND TITLE = ?', (img, title))
-    if not cur.fetchone():
-        cur.execute(f'INSERT INTO {db_table} (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, COMPLETE, TOTAL_COUNT) VALUES (?,?,?,?,?,?,?,?)', 
-                    (title, subtitle, site, url, img, num, complete, total_count))
-        
-        # [추가] 기존에 0으로 저장되어 있던 같은 회차 데이터들도 한꺼번에 진짜 숫자로 업데이트
-        if int(total_count) > 0:
-            cur.execute(f"UPDATE {db_table} SET TOTAL_COUNT = ? WHERE TITLE = ? AND SUBTITLE = ? AND TOTAL_COUNT = 0", 
-                        (total_count, title, subtitle))
-            
+    with get_list_db() as con:
+        cur = con.cursor()
+        cur.execute(f'''CREATE TABLE IF NOT EXISTS {db_table} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)''')
+        cur.execute(f"INSERT OR IGNORE INTO {db_table} VALUES (?,?,?,?,?,?,?)", (title, subtitle, site, url, img, int(num), int(total_count)))
         con.commit()
-    con.close()
 
 def tel_send_message(dummy_list):
-    msg = '[동기화] 텔레그램 채널에서 최신 리스트 확인 중...'
-    print(msg); logger.info(msg)
-    
-    try:
-        last_saved_id = int(get_config('last_webtoon_id'))
-    except:
-        last_saved_id = 0
-        
+    logger.info("[동기화] 텔레그램 채널 수집 시작...")
+    last_saved_id = int(get_config('last_webtoon_id') or 0)
     url = 'https://t.me/s/webtoonalim'
     with requests.Session() as s:
         try:
             req = s.get(url, timeout=15)
             soup = bs(req.text, "html.parser")
             messages = soup.findAll("div", {"class": "tgme_widget_message"})
-            
-            if not messages: 
-                msg = "[동기화] 새로운 메시지가 없습니다."
-                print(msg); logger.info(msg)
-                return
-            
-            new_count = 0
-            # 최신 메시지부터 역순으로 검사
+            new_count, current_max_id = 0, last_saved_id
             for msg_div in reversed(messages):
                 try:
                     post_id = int(msg_div['data-post'].split('/')[-1])
-                except: continue
-                
-                if post_id <= last_saved_id: break
-                
-                text_div = msg_div.find("div", {"class": "tgme_widget_message_text"})
-                if not text_div: continue
-                
-                # [수정] NoneType 방어: text_div가 있어도 내부 텍스트가 없는 경우 대비
-                raw_text = text_div.get_text(strip=True)
-                if not raw_text: continue
-                
-                try:
-                    # [수정] base64 디코딩 예외 처리 강화
-                    try: 
-                        # 공백 제거 후 바이트 변환하여 디코딩
-                        decoded = base64.b64decode(raw_text.encode('ascii')).decode('utf-8')
-                    except: 
-                        decoded = raw_text
-                    
-                    # 데이터 분할 (서버에서 보낸 TOTAL_COUNT 포함 8~9개 항목 대응)
+                    if post_id <= last_saved_id: break
+                    text_div = msg_div.find("div", {"class": "tgme_widget_message_text"})
+                    if not text_div: continue
+                    raw_text = text_div.get_text(strip=True)
+                    decoded = base64.b64decode(raw_text.encode('ascii')).decode('utf-8')
                     aac = decoded.split('\n\n')
-                    
-                    # 최소 8개 항목 필요 (TITLE, SUBTITLE, SITE, URL, IMAGE, NUM, COMPLETE, TOTAL_COUNT)
-                    if len(aac) < 8: continue
-                    
-                    # 0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:NUM, 6:COMPLETE, 7:TOTAL_COUNT, 8:GBUN
-                    title, subtitle, site, u_addr, img, num, complete, total_count = aac[0], aac[1], aac[2], aac[3], aac[4], aac[5], aac[6], aac[7]
-                    gbun = aac[8] if len(aac) >= 9 else 'adult'
-                    
-                    if 'loading.svg' not in img:
-                        # [핵심] add_c 함수에 total_count 인자를 포함하여 호출
-                        add_c(title, subtitle, site, u_addr, img, num, complete, gbun, total_count)
-                        
-                        set_config('last_webtoon_id', str(post_id))
-                        new_count += 1
-                        
-                        # 진행 상황 실시간 출력
-                        status = f">>> [동기화 성공] {title} - {subtitle} ({num}/{total_count})"
-                        print(status); logger.info(status)
-                        
-                except Exception as e:
-                    # 개별 메시지 처리 중 오류가 나도 중단되지 않고 다음 메시지로 진행
-                    err_msg = f"!!! [개별메시지 파싱오류] ID {post_id}: {e}"
-                    print(err_msg); logger.error(err_msg)
-                    continue
-                    
-            final_msg = f'[동기화] 작업 완료. {new_count}개의 데이터가 추가되었습니다.'
-            print(final_msg); logger.info(final_msg)
-            
-        except Exception as e: 
-            err_msg = f"[동기화 전체오류] {e}"
-            print(err_msg); logger.error(err_msg)
+                    if len(aac) >= 8:
+                        title, subtitle, site, u_addr, img, num, complete, total_count = aac[:8]
+                        gbun = aac[8] if len(aac) >= 9 else 'adult'
+                        if 'loading.svg' not in img:
+                            add_c(title, subtitle, site, u_addr, img, num, complete, gbun, total_count)
+                            new_count += 1
+                            current_max_id = max(current_max_id, post_id)
+                except: continue
+            set_config('last_webtoon_id', current_max_id)
+            logger.info(f"[동기화 완료] {new_count}개 추가됨.")
+        except Exception as e: logger.error(f"수집 오류: {e}")
 
-# --- [3. 다운로드 로직 (대기 기능)] ---
-def down(compress, cbz, alldown, title, subtitle, gbun):
-    db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    con = get_db_con()
-    cur = con.cursor()
-    
-    msg = f"=== [{gbun.upper()}] 다운로드 프로세스 가동 (자동 DB 보정 포함) ==="
-    print(msg); logger.info(msg)
-
-    # --- [신의 한 수: 자동 DB 보정 로직] ---
-    # TOTAL_COUNT가 0인 데이터들을 찾아 실제 행 개수로 업데이트합니다.
-    try:
-        cur.execute(f"SELECT TITLE, SUBTITLE FROM {db_table} WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL GROUP BY TITLE, SUBTITLE")
-        zero_targets = cur.fetchall()
-        if zero_targets:
-            print(f"    [보정] {len(zero_targets)}개의 회차에서 0개 데이터를 발견하여 보정을 시작합니다.")
-            for z_title, z_sub in zero_targets:
-                cur.execute(f"SELECT COUNT(*) FROM {db_table} WHERE TITLE = ? AND SUBTITLE = ?", (z_title, z_sub))
-                real_cnt = cur.fetchone()[0]
-                if real_cnt > 0:
-                    cur.execute(f"UPDATE {db_table} SET TOTAL_COUNT = ? WHERE TITLE = ? AND SUBTITLE = ?", (real_cnt, z_title, z_sub))
-            con.commit()
-            print("    [보정] DB 보정 작업이 완료되었습니다.")
-    except Exception as e:
-        print(f"    ! [보정실패] {e}")
-    # ---------------------------------------
-
-    # 이제 보정된 데이터를 바탕으로 다운로드 목록 추출
-    sql = f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {db_table} WHERE COMPLETE = 'False' GROUP BY TITLE, SUBTITLE"
-    cur.execute(sql)
-    targets = cur.fetchall()
-    
-    if not targets:
-        print("    > 대기 목록이 없습니다."); con.close(); return
-
-    for t_title, t_sub, t_total in targets:
-        cur.execute(f"SELECT COUNT(*) FROM {db_table} WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
-        current_cnt = cur.fetchone()[0]
-        
-        # 보정 로직 덕분에 t_total은 이제 0이 아닐 것입니다.
-        status_msg = f"  - [{t_title}] {t_sub}: 현황({current_cnt}) / 목표({t_total})"
-        print(status_msg); logger.info(status_msg)
-        
-        if current_cnt < int(t_total):
-            print(f"    ! [대기] {int(t_total) - current_cnt}장이 더 필요합니다."); continue
-
-        print(f"    √ [진행] {t_total}장 전량 확인 완료. 파일 저장 시작.")
-        
-        folder_path = os.path.join(root, "download", t_title, t_sub)
-        os.makedirs(folder_path, exist_ok=True)
-        
-        cur.execute(f'SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC', (t_title, t_sub))
-        img_list = cur.fetchall()
-        
-        for img_url, img_num in img_list:
-            try:
-                file_path = os.path.join(folder_path, f"{img_num}.jpg")
-                if not os.path.exists(file_path):
-                    res = requests.get(img_url, timeout=20)
-                    if res.status_code == 200:
-                        with open(file_path, 'wb') as f:
-                            f.write(res.content)
-            except Exception as e:
-                print(f"    ! [다운로드 실패] {img_num}.jpg : {e}")
-
-        # 처리 완료 기록
-        cur.execute(f"UPDATE {db_table} SET COMPLETE = 'True' WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
-        con.commit()
-        print(f"    √ [완료] {t_title} {t_sub} 처리 성공")
-        
-        if compress == '1':
-            make_zip(folder_path, cbz)
-
-    con.close()
-
+# --- [3. 다운로드 및 압축 로직] ---
 def make_zip(folder_path, is_cbz):
-    ext = ".cbz" if is_cbz == '1' else ".zip"
+    ext = ".cbz" if str(is_cbz) == '1' else ".zip"
     zip_name = folder_path + ext
     with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as z:
         for file in os.listdir(folder_path):
             z.write(os.path.join(folder_path, file), file)
     shutil.rmtree(folder_path)
+
+def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
+    db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+    with get_list_db() as con_l:
+        cur_l = con_l.cursor()
+        cur_l.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{db_table}'")
+        if not cur_l.fetchone(): return
+        cur_l.execute(f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {db_table} GROUP BY TITLE, SUBTITLE")
+        targets = cur_l.fetchall()
+
+    for t_title, t_sub, t_total in targets:
+        if title_filter and t_title != title_filter: continue
+        if sub_filter and t_sub != sub_filter: continue
+        with get_status_db() as con_s:
+            cur_s = con_s.cursor()
+            cur_s.execute("SELECT COMPLETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
+            if (res := cur_s.fetchone()) and res['COMPLETE'] == 'True': continue
+
+        with get_list_db() as con_l:
+            cur_l = con_l.cursor()
+            cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
+            img_list = cur_l.fetchall()
+
+        if len(img_list) >= int(t_total or 0) and int(t_total or 0) > 0:
+            folder_path = os.path.join(ROOT_PATH, "download", t_title, t_sub)
+            os.makedirs(folder_path, exist_ok=True)
+            success_count = 0
+            for img_url, img_num in img_list:
+                file_path = os.path.join(folder_path, f"{img_num:03d}.jpg")
+                if not os.path.exists(file_path):
+                    try:
+                        res = requests.get(img_url, timeout=20)
+                        if res.status_code == 200:
+                            with open(file_path, 'wb') as f: f.write(res.content)
+                            success_count += 1
+                    except: continue
+            if success_count > 0:
+                if str(compress) == '1': make_zip(folder_path, cbz)
+                with get_status_db() as con_s:
+                    con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
+                    con_s.commit()
+
+def migrate_old_db():
+    old_db_path = at[0] + '/data/db/webtoon_new.db' # 기존 DB 경로
+    
+    if not os.path.exists(old_db_path):
+        logger.error(f"기존 DB 파일이 없습니다: {old_db_path}")
+        return
+
+    logger.info("== [데이터 이관 시작] 기존 데이터를 멀티 DB로 분산 이동합니다. ==")
+    
+    # 1. 기존 DB 연결
+    old_con = sqlite3.connect(old_db_path)
+    old_con.row_factory = sqlite3.Row
+    old_cur = old_con.cursor()
+
+    # 2. 목록 DB(List DB)로 웹툰 정보 복사 (TOON, TOON_NORMAL 테이블)
+    with get_list_db() as list_con:
+        for table in ['TOON', 'TOON_NORMAL']:
+            # 테이블 존재 여부 확인
+            old_cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+            if old_cur.fetchone():
+                logger.info(f"[{table}] 테이블 데이터 복사 중...")
+                rows = old_cur.execute(f"SELECT * FROM {table}").fetchall()
+                
+                # 새 DB에 테이블 생성 및 데이터 삽입
+                list_con.execute(f"CREATE TABLE IF NOT EXISTS {table} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+                for row in rows:
+                    list_con.execute(f"INSERT OR IGNORE INTO {table} VALUES (?,?,?,?,?,?,?)", 
+                                     (row['TITLE'], row['SUBTITLE'], row['WEBTOON_SITE'], row['WEBTOON_URL'], row['WEBTOON_IMAGE'], row['WEBTOON_IMAGE_NUMBER'], row['TOTAL_COUNT']))
+        list_con.commit()
+
+    # 3. 상태 DB(Status DB)로 완료 기록 및 설정값 복사
+    with get_status_db() as status_con:
+        # COMPLETE 여부 이관 (기존 DB의 TOON에서 COMPLETE='True'인 조합만 추출)
+        logger.info("[STATUS] 완료 상태 정보 이관 중...")
+        for table in ['TOON', 'TOON_NORMAL']:
+            old_cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+            if old_cur.fetchone():
+                # COMPLETE 컬럼이 있는 경우만 추출 (기존 설계에 따라)
+                completed_rows = old_cur.execute(f"SELECT DISTINCT TITLE, SUBTITLE FROM {table} WHERE COMPLETE='True'").fetchall()
+                for row in completed_rows:
+                    status_con.execute("INSERT OR IGNORE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (row['TITLE'], row['SUBTITLE'], 'True'))
+        
+        # CONFIG 정보 (last_webtoon_id 등) 이관
+        old_cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='CONFIG'")
+        if old_cur.fetchone():
+            configs = old_cur.execute("SELECT * FROM CONFIG").fetchall()
+            for cfg in configs:
+                status_con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?,?)", (cfg['KEY'], cfg['VALUE']))
+        
+        status_con.commit()
+
+    old_con.close()
+    logger.info("== [이관 완료] 모든 데이터가 webtoon_list.db와 webtoon_status.db로 성공적으로 이동되었습니다. ==")
+    # logger.info("안전을 위해 webtoon_new.db 파일은 직접 삭제하시거나 백업 폴더로 옮겨주세요.")
+
+# --- 라우트로 만들어 실행하기 ---
+@webtoon.route('db_migrate')
+def run_migration():
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    threading.Thread(target=migrate_old_db).start()
+    return "<script>alert('데이터 이관이 백그라운드에서 시작되었습니다. 로그를 확인하세요.'); history.back();</script>"
 	
-# --- [3. Flask Routes: 목록 및 통계] ---
+# --- [4. Flask 라우트 (누락 기능 포함)] ---
 @webtoon.route('/')
 def index():
-    """BuildError 해결을 위한 메인 라우트"""
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    return render_template('webtoon.html')
-	
-@webtoon.route('index_list', methods=["GET"])
-def index_list():
-    if not session.get('logFlag'): return redirect(url_for('main.index'))
-    
-    gbun = request.args.get('gbun', 'adult')
-    search_keyword = request.args.get('search', '').strip()
-    db_name = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    
-    # [수정] 페이지 번호를 명시적으로 가져옵니다.
-    per_page = 10
-    page = request.args.get('page', type=int, default=1) # 이 부분이 핵심입니다.
-    offset = (page - 1) * per_page
-    
-    con = get_db_con()
-    cur = con.cursor()
-    
-    try:
-        # 검색 조건 설정
-        where_clause = ""
-        params = []
-        if search_keyword:
-            where_clause = "WHERE TITLE LIKE ?"
-            params.append(f"%{search_keyword}%")
+    return render_template('webtoon.html', gbun='adult')
 
-        # 개수 조회 (이전과 동일)
-        count_sql = f"SELECT COUNT(*) FROM (SELECT 1 FROM {db_name} {where_clause} GROUP BY TITLE, SUBTITLE)"
-        cur.execute(count_sql, params)
-        total = cur.fetchone()[0]
-        logger.info(f"--- 검색어: [{search_keyword}] / 검색된 총 개수: {total} ---")
-
-        # 데이터 조회 (이전과 동일)
-        data_sql = f"SELECT TITLE, SUBTITLE FROM {db_name} {where_clause} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC, SUBTITLE DESC LIMIT ? OFFSET ?"
-        cur.execute(data_sql, params + [per_page, offset])
-        wow = cur.fetchall()
-        
-    except Exception as e:
-        logger.error(f"DB 오류: {e}")
-        wow, total = [], 0
-    finally:
-        con.close()
-
-    # [수정] Pagination 객체 생성 시 bs_version을 4로 유지하고 인자를 명확히 전달
-    pagination = Pagination(
-        page=page, 
-        total=total, 
-        per_page=per_page, 
-        bs_version=4, # 4로 설정되어 있는지 확인
-        search=True if search_keyword else False,
-        record_name='wow',
-        add_args={
-            'gbun': gbun, 
-            'search': search_keyword
-        }
-    )
-    
-    return render_template('webtoon_list.html', gbun=gbun, wow=wow, pagination=pagination, search=search_keyword)
-	
-@webtoon.route('alim_list', methods=["GET"])
-def alim_list():
-    if not session.get('logFlag'): return redirect(url_for('main.index'))
-    def stats(table):
-        con = get_db_con()
-        cur = con.cursor()
-        cur.execute(f'SELECT count(*) FROM (SELECT TITLE FROM {table} GROUP BY TITLE)')
-        t_cnt = cur.fetchone()[0]
-        cur.execute(f'SELECT count(*) FROM {table} WHERE COMPLETE = "False"')
-        f_cnt = cur.fetchone()[0]
-        cur.execute(f'SELECT count(*) FROM {table} WHERE COMPLETE = "True"')
-        tr_cnt = cur.fetchone()[0]
-        con.close()
-        return {'TOTAL': t_cnt, 'False': f_cnt, 'True': tr_cnt}
-    return render_template('webtoon_alim_list.html', rows=[stats('TOON')], rows2=[stats('TOON_NORMAL')])
-
-# --- [4. Flask Routes: 스케줄러 (로그 강화)] ---
-
-@webtoon.route('webtoon_list', methods=['GET'])
-def start_sync_route():
-    if not session.get('logFlag'): return redirect(url_for('main.index'))
-    start_time = request.args.get('start_time')
-    try:
-        scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(start_time), id='webtoon_list_sync', args=[None], replace_existing=True)
-        logger.info(f"[스케줄러] 리스트 동기화가 {start_time} 주기로 예약되었습니다.")
-    except Exception as e: logger.error(f"[스케줄러] 동기화 예약 실패: {e}")
-    return redirect(url_for('webtoon.index'))
-	
-@webtoon.route("now_sync", methods=["GET"])
-def now_sync():
-    if not session.get('logFlag'): return redirect(url_for('main.index'))
-    
-    # 즉시 수집을 백그라운드에서 실행
-    import threading
-    thread = threading.Thread(target=tel_send_message, args=[None])
-    thread.start()
-    
-    return "<script>alert('즉시 목록 수집을 시작했습니다.'); history.back();</script>"
-@webtoon.route('webtoon_down', methods=['GET'])
-def start_down_route():
-    if not session.get('logFlag'): return redirect(url_for('main.index'))
-    start_time = request.args.get('start_time')
-    gbun = request.args.get('gbun', 'adult')
-    try:
-        scheduler.add_job(down, trigger=CronTrigger.from_crontab(start_time), id=f'webtoon_auto_down_{gbun}', 
-                          args=[request.args.get('compress','1'), request.args.get('cbz','1'), 'True', None, None, gbun], replace_existing=True)
-        logger.info(f"[스케줄러] {gbun} 자동 다운로드가 {start_time} 주기로 예약되었습니다.")
-    except Exception as e: logger.error(f"[스케줄러] 다운로드 예약 실패: {e}")
-    return redirect(url_for('webtoon.index'))
+@webtoon.route('db_list_reset')
+def db_list_reset():
+    def reset_task():
+        with get_status_db() as con:
+            con.execute("DELETE FROM STATUS")
+            con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES ('last_webtoon_id', '0')")
+            con.commit()
+    threading.Thread(target=reset_task).start()
+    return "<script>alert('상태 및 ID가 초기화되었습니다.'); history.back();</script>"
 
 @webtoon.route("now", methods=["GET"])
 def now_down():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    
-    # 1. 폼에서 넘어온 설정값들 읽기
-    compress = request.args.get('compress', '1')
-    cbz = request.args.get('cbz', '1')
-    gbun = request.args.get('gbun', 'adult')
-    
-    logger.info(f"[수동실행] 사용자가 백그라운드 다운로드를 요청했습니다. (구분: {gbun})")
+    threading.Thread(target=down, args=(request.args.get('compress','1'), request.args.get('cbz','1'), 'True', request.args.get('title'), request.args.get('subtitle'), request.args.get('gbun','adult'))).start()
+    return "<script>alert('다운로드를 시작했습니다.'); history.back();</script>"
 
-    # 2. 실제 다운로드 함수(down)를 별도의 스레드에서 실행 (비동기)
-    # thread를 사용하면 서버는 즉시 응답을 돌려줄 수 있습니다.
-    thread = threading.Thread(
-        target=down, 
-        args=(compress, cbz, 'True', None, None, gbun)
-    )
-    thread.setDaemon(True) # 메인 프로세스 종료 시 함께 종료되도록 설정
-    thread.start()
-    
-    # 3. 사용자에게는 즉시 피드백 제공
-    return "<script>alert('다운로드가 백그라운드에서 시작되었습니다. [로그] 또는 [카운팅보기]에서 확인하세요.'); history.back();</script>"
-	
-@webtoon.route('db_list_reset')
-def db_list_reset():
+# [누락기능] 개별 재다운로드 - 상태 DB에서 해당 항목만 삭제 후 다시 다운로드
+@webtoon.route('db_redown', methods=["GET"])
+def db_redown():
+    title, subtitle, gbun = request.args.get('title'), request.args.get('subtitle'), request.args.get('gbun', 'adult')
+    with get_status_db() as con:
+        con.execute("DELETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (title, subtitle))
+        con.commit()
+    threading.Thread(target=down, args=('1', '1', 'True', title, subtitle, gbun)).start()
+    return "<script>alert('재다운로드를 시작합니다.'); history.back();</script>"
+
+@webtoon.route("now_sync", methods=["GET"])
+def now_sync():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
+    threading.Thread(target=tel_send_message, args=[None]).start()
+    return "<script>alert('즉시 수집을 시작했습니다.'); history.back();</script>"
 
-    # 스케줄러에 즉시 실행(run_now) 되도록 작업을 추가
-    # 별도의 ID를 부여해 겹치지 않게 합니다.
-    scheduler.add_job(
-        func=reset_db_task, # 위에 만든 함수 혹은 내부 로직
-        trigger='date', 
-        run_date=datetime.now(), 
-        id='manual_reset_job'
-    )
+# [누락기능] 스케줄러 등록 라우트들
+@webtoon.route('webtoon_list_sync', methods=['GET'])
+def start_sync_route():
+    scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(request.args.get('start_time')), id='webtoon_list_sync', args=[None], replace_existing=True)
+    return redirect(url_for('webtoon.index'))
 
-    return "<script>alert('백그라운드에서 리셋 중입니다.'); history.back();</script>"
+@webtoon.route('webtoon_down_start', methods=['GET'])
+def start_down_route():
+    gbun = request.args.get('gbun')
+    scheduler.add_job(down, trigger=CronTrigger.from_crontab(request.args.get('start_time')), id=f"auto_down_{gbun}", args=[request.args.get('compress','1'), request.args.get('cbz','1'), 'True', None, None, gbun], replace_existing=True)
+    return redirect(url_for('webtoon.index'))
+
+@webtoon.route('index_list')
+def index_list():
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    gbun, search, page = request.args.get('gbun', 'adult'), request.args.get('search', '').strip(), request.args.get('page', type=int, default=1)
+    per_page = 15
+    with get_list_db() as con:
+        cur = con.cursor()
+        table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+        cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+        if not cur.fetchone(): return render_template('webtoon_list.html', wow=[], pagination=None, gbun=gbun)
+        where, param = ("WHERE TITLE LIKE ?", [f"%{search}%"]) if search else ("", [])
+        cur.execute(f"SELECT TITLE, SUBTITLE FROM {table} {where} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC LIMIT ? OFFSET ?", param + [per_page, (page-1)*per_page])
+        wow = cur.fetchall()
+        cur.execute(f"SELECT COUNT(*) FROM (SELECT 1 FROM {table} {where} GROUP BY TITLE, SUBTITLE)", param)
+        total = cur.fetchone()[0]
+    pagination = Pagination(page=page, total=total, per_page=per_page, bs_version=4, add_args={'gbun': gbun, 'search': search})
+    return render_template('webtoon_list.html', wow=wow, pagination=pagination, gbun=gbun, search=search)
