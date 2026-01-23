@@ -346,6 +346,26 @@ def xml():
 	else:
 		f = open(filepath, 'r')
 		return f
+
+@bp.route('get_raw_logs')
+def get_raw_logs():
+    # [보정] 절대 경로와 OS별 경로 차이를 고려하여 설정
+    if platform.system() == 'Windows':
+        log_path = os.getcwd() + '/data/log/flask.log'
+    else:
+        log_path = '/data/log/flask.log'
+        
+    try:
+        # [핵심] deque를 사용하면 파일 전체를 메모리에 올리지 않고 마지막 줄만 "번개"처럼 읽습니다.
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as f:
+                # 마지막 100줄만 추출
+                last_lines = collections.deque(f, maxlen=100)
+                return "".join(last_lines)
+        else:
+            return "로그 파일이 아직 생성되지 않았습니다."
+    except Exception as e:
+        return f"로그 파일을 읽는 중 오류 발생: {str(e)}"
 		
 @bp.route("restart")
 def restart():

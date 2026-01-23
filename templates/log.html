@@ -7,31 +7,18 @@
             <div class="card shadow-lg border-0 bg-dark text-white">
                 <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-dark py-2">
                     <h5 class="mb-0 text-info fw-bold" style="font-size: 1.1rem;">
-                        <i class="bi bi-terminal-fill me-2"></i>시스템 실시간 로그
+                        <i class="bi bi-terminal-fill me-2"></i>시스템 실시간 로그 <small class="text-muted" id="status-text">(연결 중...)</small>
                     </h5>
                     <div>
-                        <span class="badge bg-danger pulse-red me-2">LIVE</span>
-                        <button class="btn btn-sm btn-outline-light" onclick="location.reload()">
-                            <i class="bi bi-arrow-clockwise"></i> 새로고침
+                        <span class="badge bg-danger pulse-red me-2" id="live-badge">LIVE</span>
+                        <button class="btn btn-sm btn-outline-light" onclick="toggleAutoScroll()" id="scroll-btn">
+                            <i class="bi bi-lock-fill"></i> 자동 스크롤 ON
                         </button>
                     </div>
                 </div>
                 
                 <div class="card-body p-0">
-                    <div id="log-container" class="log-viewer">
-                        {% for ml in tltl %}
-                            {# [보정] 내용이 있는 줄만 렌더링하여 빈 공간 방지 #}
-                            {% if ml.strip() %}
-                            <div class="log-line">
-                                <span class="log-content">{{ ml.strip() }}</span>
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                
-                <div class="card-footer bg-dark border-secondary p-1 px-3">
-                    <small class="text-muted" style="font-size: 0.75rem;">Path: /data/log/flask.log</small>
+                    <div id="log-container" class="log-viewer"></div>
                 </div>
             </div>
         </div>
@@ -40,50 +27,74 @@
 
 <style>
     .log-viewer {
-        background-color: #000000;
+        background-color: #000;
         color: #e0e0e0;
-        font-family: 'Consolas', 'Monaco', monospace;
+        font-family: 'Consolas', monospace;
         padding: 15px;
-        height: 700px;
+        height: 750px; /* 높이 고정 */
         overflow-y: auto;
-        font-size: 0.9rem;
-        line-height: 1.4; /* 가독성을 위해 살짝 조절 */
+        font-size: 0.85rem;
     }
-
     .log-line {
         border-bottom: 1px solid #1a1a1a;
-        padding: 4px 0;
-        /* [핵심 수정] pre-wrap 대신 normal을 사용하면 연속된 공백이 하나로 합쳐집니다 */
-        white-space: normal; 
+        padding: 2px 0;
+        white-space: pre-wrap; /* tail 처럼 줄바꿈 유지 */
         word-break: break-all;
-        display: block;
     }
-
-    .log-content {
-        display: block;
-        width: 100%;
-        text-align: left; /* 왼쪽 정렬 강제 */
-    }
-    
-    /* [추가] Flask 배너 메시지(Running on...)를 위한 별도 강조 스타일 */
-    .log-banner {
-        color: #fcc419; /* 노란색 */
-        background: rgba(252, 196, 25, 0.1);
-        padding: 2px 5px;
-        border-radius: 4px;
-    }
+    /* 중요 키워드 강조 */
+    .log-info { color: #51cf66; }
+    .log-error { color: #ff6b6b; font-weight: bold; }
+    .log-warn { color: #fcc419; }
 </style>
 
 <script>
-    document.querySelectorAll('.log-content').forEach(function(el) {
-        const text = el.textContent;
-        // ... (기존 에러/정보 강조 로직 생략) ...
-        
-        // [추가] Running on 메시지가 포함된 줄은 별도 스타일 적용
-        if (text.includes('Running on')) {
-            el.classList.add('log-banner');
+    let autoScroll = true;
+    let lastLogContent = "";
+
+    function toggleAutoScroll() {
+        autoScroll = !autoScroll;
+        const btn = document.getElementById('scroll-btn');
+        btn.innerHTML = autoScroll ? '<i class="bi bi-lock-fill"></i> 자동 스크롤 ON' : '<i class="bi bi-unlock"></i> 자동 스크롤 OFF';
+        btn.className = autoScroll ? 'btn btn-sm btn-outline-light' : 'btn btn-sm btn-secondary';
+    }
+
+    async function fetchLogs() {
+        try {
+            // 서버에서 로그의 마지막 100줄 정도만 가져오는 API 엔드포인트가 있다고 가정
+            // (만약 없다면 현재 route에서 반환하는 데이터를 활용해야 함)
+            const response = await fetch('/webtoon/get_raw_logs'); 
+            const data = await response.text();
+            
+            if (data !== lastLogContent) {
+                const container = document.getElementById('log-container');
+                container.innerHTML = formatLogs(data);
+                lastLogContent = data;
+                
+                if (autoScroll) {
+                    container.scrollTop = container.scrollHeight;
+                }
+                document.getElementById('status-text').innerText = "(업데이트 완료: " + new Date().toLocaleTimeString() + ")";
+            }
+        } catch (e) {
+            document.getElementById('status-text').innerText = "(연결 오류)";
         }
-    });
+    }
+
+    function formatLogs(text) {
+        return text.split('\n').map(line => {
+            if (!line.trim()) return '';
+            let className = '';
+            if (line.includes('ERROR')) className = 'log-error';
+            else if (line.includes('INFO')) className = 'log-info';
+            else if (line.includes('WARNING')) className = 'log-warn';
+            
+            return `<div class="log-line ${className}">${line}</div>`;
+        }).join('');
+    }
+
+    // 2초마다 새로운 로그 호출
+    setInterval(fetchLogs, 2000);
+    fetchLogs(); // 초기 실행
 </script>
 
 {% endblock %}
