@@ -1,54 +1,64 @@
 {% extends "base.html" %}
 {% block content %}
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>웹툰 다운로더</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
 <center>
-<form method="get|post">
+    <h4 style="margin-top:20px;">웹툰 자동화 시스템 (God Mode)</h4>
+    <form method="get">
+        <table border="1" style="border-collapse:collapse; border:1px solid #ddd; width:400px; text-align:center;">
+            <tr style="height:40px;">
+                <th bgcolor="#f2f2f2">압축 사용</th>
+                <td>
+                    <select name="compress" style="width:90%;">
+                        <option value="1">사용함</option>
+                        <option value="0">안함</option>
+                    </select>
+                </td>
+            </tr>
+            <tr style="height:40px;">
+                <th bgcolor="#f2f2f2">CBZ 변환</th>
+                <td>
+                    <select name="cbz" style="width:90%;">
+                        <option value="1">사용함</option>
+                        <option value="0">안함</option>
+                    </select>
+                </td>
+            </tr>
+            <tr style="height:40px;">
+                <th bgcolor="#f2f2f2">웹툰 종류</th>
+                <td>
+                    <select name="gbun" style="width:90%;">
+                        <option value="adult">성인웹툰</option>
+                        <option value="normal">일반웹툰</option>
+                    </select>
+                </td>
+            </tr>
+            <tr style="height:40px;">
+                <th bgcolor="#f2f2f2">스케줄 주기</th>
+                <td><input type="text" name="start_time" value="*/5 * * * *" style="width:90%; border:0; text-align:center;"></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding:15px;">
+                    <p style="color:gray; font-size:12px;">※ 모든 작업은 백그라운드에서 실행됩니다.</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <input type="submit" value="수집 스케줄 시작" onclick="this.form.action='webtoon_list';">
+                        <input type="submit" value="다운 스케줄 시작" onclick="this.form.action='webtoon_down';">
+                        <input type="submit" value="즉시 다운로드(1회)" onclick="this.form.action='now';">
+                        <input type="submit" value="전체 초기화(리셋)" onclick="return confirmReset(this.form);" style="color:red;">
+                        <input type="submit" value="웹툰 목록 관리" onclick="this.form.action='index_list';">
+                        <input type="submit" value="수집 현황 보기" onclick="this.form.action='alim_list';">
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+</center>
 
-<thead>
-<tr>
-<th align="center" class="tg-baqh">압축여부</td>
-<td align="center" class="tg-baqh" colspan="2">
-
-<select name="compress">
-<option value="0">사용</option>
-<option value="1">안함</option></td></tr>
-<tr>
-<th align="center" class="tg-baqh">CBZ사용압축여부</td>
-<td align="center" class="tg-baqh" colspan="2">
-
-<select name="cbz">
-<option value="0">사용</option>
-<option value="1">안함</option></td></tr>
-<tr>
-<th align="center" class="tg-baqh">웹툰선택</td>
-<td align="center" class="tg-baqh" colspan="2">
-
-<select name="gbun">
-<option value="adult">성인웹툰</option>
-<option value="normal">일반웹툰</option></td></tr>
-<tr>
-<th align="center" class="tg-baqh">스케줄이름</td>
-<td align="center" class="tg-0lax"><input type="text" name="startname" value="webtoon" style="width:100%; border: 0;" ></td>
-</tr>
-<tr>
-<th align="center" class="tg-baqh">실행주기</td>
-<td align="center" class="tg-0lax"><input type="text" name="start_time" value="*/5 * * * *" style="width:100%; border: 0;" ></td>
-</tr>
-<tbody>
-<tr>
-<th align="center" colspan="8"><p align="center">스케줄이름은 동시사용이 않됩니다.</p>
-<input type="submit" value="목록갱신시작" onclick="javascript: form.action='webtoon_list';">
-<input type="submit" value="다운로드시작"  onclick="javascript: form.action='webtoon_down';">
-<input type="submit" value="재다운로드" onclick="javascript: form.action='db_redown';">
-<input type="submit" value="1회 다운로드시작" onclick="javascript: form.action='now';">
-<input type="submit" value="목록갱신처음부터시작" onclick="javascript: form.action='db_list_reset';">
-<input type="submit" value="웹툰목록관리" onclick="javascript: form.action='index_list';">
-<input type="submit" value="카운팅보기" onClick="javascript: form.action='alim_list';">
-</th>
-<br>
-</thead>
+<script>
+function confirmReset(form) {
+    if (confirm("DB의 모든 완료 상태를 False로 바꾸고 처음부터 다시 수집할까요?")) {
+        form.action = 'db_list_reset';
+        return true;
+    }
+    return false;
+}
+</script>
 {% endblock %}

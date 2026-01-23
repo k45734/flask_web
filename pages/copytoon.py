@@ -37,6 +37,14 @@ def set_config(key, value):
     con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, value))
     con.commit()
     con.close()
+
+def get_config(key):
+    con = get_db_con()
+    cur = con.cursor()
+    cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
+    row = cur.fetchone()
+    con.close()
+    return row[0] if row else None
 	
 def reset_db_task():
     """실제 무거운 DB 작업을 수행하는 별도의 함수"""
@@ -338,7 +346,17 @@ def start_sync_route():
         logger.info(f"[스케줄러] 리스트 동기화가 {start_time} 주기로 예약되었습니다.")
     except Exception as e: logger.error(f"[스케줄러] 동기화 예약 실패: {e}")
     return redirect(url_for('webtoon.index'))
-
+	
+@webtoon.route("now_sync", methods=["GET"])
+def now_sync():
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    
+    # 즉시 수집을 백그라운드에서 실행
+    import threading
+    thread = threading.Thread(target=tel_send_message, args=[None])
+    thread.start()
+    
+    return "<script>alert('즉시 목록 수집을 시작했습니다.'); history.back();</script>"
 @webtoon.route('webtoon_down', methods=['GET'])
 def start_down_route():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
@@ -354,10 +372,26 @@ def start_down_route():
 @webtoon.route("now", methods=["GET"])
 def now_down():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    logger.info("[수동실행] 사용자가 즉시 다운로드를 요청했습니다.")
-    down(request.args.get('compress'), request.args.get('cbz'), 'True', None, None, request.args.get('gbun'))
-    return "<script>alert('즉시 실행되었습니다.'); history.back();</script>"
+    
+    # 1. 폼에서 넘어온 설정값들 읽기
+    compress = request.args.get('compress', '1')
+    cbz = request.args.get('cbz', '1')
+    gbun = request.args.get('gbun', 'adult')
+    
+    logger.info(f"[수동실행] 사용자가 백그라운드 다운로드를 요청했습니다. (구분: {gbun})")
 
+    # 2. 실제 다운로드 함수(down)를 별도의 스레드에서 실행 (비동기)
+    # thread를 사용하면 서버는 즉시 응답을 돌려줄 수 있습니다.
+    thread = threading.Thread(
+        target=down, 
+        args=(compress, cbz, 'True', None, None, gbun)
+    )
+    thread.setDaemon(True) # 메인 프로세스 종료 시 함께 종료되도록 설정
+    thread.start()
+    
+    # 3. 사용자에게는 즉시 피드백 제공
+    return "<script>alert('다운로드가 백그라운드에서 시작되었습니다. [로그] 또는 [카운팅보기]에서 확인하세요.'); history.back();</script>"
+	
 @webtoon.route('db_list_reset')
 def db_list_reset():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
