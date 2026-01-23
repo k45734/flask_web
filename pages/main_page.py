@@ -315,25 +315,29 @@ def vnstat_tr():
 	
 @bp.route("log")
 def log():
-	createFolder(logdata)
-	filepath = logdata + '/flask.log'
-	if not os.path.isfile(filepath):
-		f = open(filepath,'a', encoding='utf-8')
-	if not session.get('logFlag'):
-		return render_template('login.html')
-	else:
-		filepath = logdata + '/flask.log'
-		tltl2 = []
-		with open(filepath, 'rt', encoding='utf-8') as fp:
-			lines = fp.readlines()
-			for i in lines:
-				if '/log' in i:
-					pass
-				else:
-					tltl2.append(i)
-		tltl = tltl2[-20:]
-		return render_template('log.html', tltl=tltl)	
+    createFolder(logdata)
+    filepath = logdata + '/flask.log'
+    if not os.path.isfile(filepath):
+        f = open(filepath, 'a', encoding='utf-8')
+        f.close() # 파일 생성 후 닫기
 
+    if not session.get('logFlag'):
+        return render_template('login.html')
+    else:
+        tltl2 = []
+        with open(filepath, 'rt', encoding='utf-8') as fp:
+            lines = fp.readlines()
+            for i in lines:
+                clean_line = i.strip() # [보정] 앞뒤 공백/줄바꿈 제거
+                # [보정] /log 접속 기록 제외 및 빈 줄 제외
+                if clean_line and '/log' not in clean_line:
+                    tltl2.append(clean_line)
+        
+        # 최신 로그 30줄 정도로 넉넉히 전달
+        tltl = tltl2[-30:]
+        logger.info(f"로그 뷰어 호출: {len(tltl)}줄 출력") # [logger 적용]
+        return render_template('log.html', tltl=tltl)
+		
 @bp.route("xml")
 def xml():
 	filepath = root + '/rss.xml'
