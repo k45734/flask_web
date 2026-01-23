@@ -205,7 +205,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                 log_start = f"    [다운로드 시작] {t_title} ({len(img_list)}장)"
                 print(log_start); logger.info(log_start)
                 
-                folder_path = os.path.join(ROOT_PATH, "download", t_title, t_sub)
+                folder_path = os.path.join(ROOT_PATH, "webtoon", t_title, t_sub)
                 os.makedirs(folder_path, exist_ok=True)
                 
                 sc = 0 # 성공 카운트
