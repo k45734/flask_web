@@ -57,10 +57,9 @@ def set_config(key, value):
         con.commit()
 
 # --- [2. 핵심 엔진: 고속 다운로드 루프] ---
-
 def db_optimize():
     logger.info("========================================")
-    logger.info("[최적화] 초고속 보정 및 DB 진공 청소 시작")
+    logger.info("[최적화] 초고속 임시 테이블 보정 엔진 가동")
     logger.info("========================================")
     
     try:
@@ -71,9 +70,9 @@ def db_optimize():
                 cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
                 if not cur.fetchone(): continue
 
-                logger.info(f" -> [{table}] 대량 보정 분석 중...")
+                logger.info(f" -> [{table}] 대량 보정 분석 및 최적화 중...")
 
-                # 1. 임시 테이블 생성: 전체 카운트를 미리 딱 한 번만 계산 (속도의 핵심)
+                # [필살기 1] 임시 테이블에 현재 모든 회차의 카운트를 미리 계산해서 담기
                 con.execute("DROP TABLE IF EXISTS temp_counts")
                 con.execute(f"""
                     CREATE TEMPORARY TABLE temp_counts AS 
@@ -82,8 +81,8 @@ def db_optimize():
                     GROUP BY TITLE, SUBTITLE
                 """)
                 
-                # 2. 한 방에 업데이트: 서브쿼리 없이 임시 테이블과 대조하여 업데이트
-                # TOTAL_COUNT가 0이거나 NULL인 녀석들만 골라서 채워넣음
+                # [필살기 2] 임시 테이블과 대조하여 한 번의 쿼리로 업데이트
+                # (기존의 for 루프 5만 번 도는 작업을 이 쿼리 한 줄이 대체합니다)
                 cur = con.execute(f"""
                     UPDATE {table} 
                     SET TOTAL_COUNT = (
@@ -95,7 +94,7 @@ def db_optimize():
                 """)
                 
                 con.commit()
-                logger.info(f" -> [{table}] {cur.rowcount}건 보정 완료")
+                logger.info(f" -> [{table}] {cur.rowcount}건 보정 완료!")
 
         # 2. DB 용량 최적화 (VACUUM)
         for db_path in [LIST_DB, STATUS_DB]:
@@ -104,11 +103,11 @@ def db_optimize():
                 logger.info(f" -> [VACUUM] {os.path.basename(db_path)} 최적화 완료")
         
         logger.info("========================================")
-        logger.info("[완료] 모든 DB 최적화 및 보정 작업 종료")
+        logger.info("[완료] 모든 최적화 작업이 순식간에 끝났습니다.")
         logger.info("========================================")
 
     except Exception as e: 
-        logger.error(f"!!! [에러] 최적화 중 오류 발생: {e}")
+        logger.error(f"!!! [에러] 초고속 최적화 중 오류 발생: {e}")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     msg = f"== [{gbun}] 다운로드 엔진 가동 =="
