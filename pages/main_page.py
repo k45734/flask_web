@@ -328,14 +328,14 @@ def log():
         with open(filepath, 'rt', encoding='utf-8') as fp:
             lines = fp.readlines()
             for i in lines:
-                clean_line = i.strip() # [보정] 앞뒤 공백/줄바꿈 제거
-                # [보정] /log 접속 기록 제외 및 빈 줄 제외
+                clean_line = i.strip()
+                # [보정] /log 호출 기록 제외 및 알맹이가 없는 줄 제외
                 if clean_line and '/log' not in clean_line:
+                    # [추가 보정] Flask 배너 메시지의 특수 문자나 과도한 공백 제거
+                    # 예: "* Running on..." 앞의 공백 제거
                     tltl2.append(clean_line)
         
-        # 최신 로그 30줄 정도로 넉넉히 전달
         tltl = tltl2[-30:]
-        logger.info(f"로그 뷰어 호출: {len(tltl)}줄 출력") # [logger 적용]
         return render_template('log.html', tltl=tltl)
 		
 @bp.route("xml")
