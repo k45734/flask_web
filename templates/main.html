@@ -1,60 +1,132 @@
 {% extends "base.html" %}
 {% block content %}
 
-<html>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 bg-light">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 text-primary"><i class="bi bi-cpu-fill"></i> 시스템 마스터 제어판</h4>
+                    <span class="badge bg-secondary">현재 시간: {{test}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <head>
-      
-    </head>
-    <body>	
-	<center><h4>현재 시스템 사양</p>
-	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-	<tr>
-<td align="center">버젼</td>
-<td align="center"> 현재 {{lines}} 최신 {{version}}  <button type='button' onclick="location.href='/restart'">업데이트</button></td>
-</tr>	
-<tr>
-<td align="center">현재시간</td>
-<td align="center"> {{test}}</td>
-</tr>	
-<tr>
-<td align="center"> 운영체제</td>
-<td align="center"> {{oos}}</td>
-</tr>
-<tr>
-<td align="center"> 프로세서</td>
-<td align="center"> {{oocpu}}</td>
-</tr>
-<tr>
-<td align="center"> 메모리</td>
-<td align="center"> {{mem_percent}}</td>
-</tr>
-<tr>
-<td align="center"> 디스크</td>
-<td align="center"> {{disk_percent}}</td>
-</tr>
-{% for row in data %} 
-<tr>
-<td align="center"> 트래픽사용량</td>
-<td align="center">{{row['DATE']}}<br>{{row['DOWNLOAD']}}<br> {{row['UPLOAD']}}</td>
-</tr>
- {% endfor %} 
-</table><br>
-<center><h4>현재 스케줄러에 있는 목록보기</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<thead>
-{% for row in sch_save %} 
-<tr>
-<th align="center" class="tg-0lax">{{row['NAME']}}</th>
-<th align="center" class="tg-0lax" colspan="2">{{row['TIME']}}</th>
-<td align="center" class="tg-0lax" colspan="3"><input type="button" value="스케줄러 취소" onclick="location.href='cancle/{{ row['NAME'] }}'">
-</td>
-</tr>
- {% endfor %}
-    </body>
-</html>
+    <div class="row">
+        # --- [1. 시스템 사양 카드] ---
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white font-weight-bold">
+                    <strong><i class="bi bi-info-circle"></i> 시스템 사양 및 버전</strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light w-25">버전 정보</th>
+                                <td>
+                                    현재: <code>{{lines}}</code> / 최신: <span class="text-success fw-bold">{{version}}</span>
+                                    {% if lines != version %}
+                                    <button type='button' class="btn btn-sm btn-danger ms-2 shadow-sm" onclick="if(confirm('전체 시스템을 업데이트하고 재시작하시겠습니까?')) location.href='/update_server'">
+                                        <i class="bi bi-cloud-arrow-down-fill"></i> 즉시 업데이트
+                                    </button>
+                                    {% else %}
+                                    <span class="badge bg-success ms-2">최신상태</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr><th class="bg-light">운영체제</th><td>{{oos}}</td></tr>
+                            <tr><th class="bg-light">프로세서</th><td>{{oocpu}}</td></tr>
+                            <tr><th class="bg-light">메모리</th><td>{{mem_percent}}</td></tr>
+                            <tr><th class="bg-light">디스크</th><td>{{disk_percent}}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        # --- [2. 트래픽 상황 카드] ---
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100 border-start border-info" style="border-width: 4px !important;">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-graph-up-arrow"></i> 네트워크 트래픽 (vnstat)</strong>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center text-center">
+                    {% if data %}
+                        {% for row in data %} 
+                        <div>
+                            <h6 class="text-muted">마지막 업데이트: {{row['DATE']}}</h6>
+                            <div class="row mt-3">
+                                <div class="col-6 border-end">
+                                    <div class="text-primary small">DOWNLOAD</div>
+                                    <div class="h5 fw-bold">{{row['DOWNLOAD']}}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-danger small">UPLOAD</div>
+                                    <div class="h5 fw-bold">{{row['UPLOAD']}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">트래픽 데이터를 불러올 수 없습니다.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    # --- [3. 스케줄러 목록 카드] ---
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <strong><i class="bi bi-calendar-check"></i> 실행 중인 스케줄러 목록</strong>
+                    <span class="badge bg-primary">{{ sch_save|length }}개 작동 중</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0 text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>작업 명칭</th>
+                                    <th>다음 실행 예정 시간</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in sch_save %} 
+                                <tr>
+                                    <td class="fw-bold">{{row['NAME']}}</td>
+                                    <td><span class="text-info">{{row['TIME']}}</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="if(confirm('정말 삭제하시겠습니까?')) location.href='cancle/{{ row['NAME'] }}'">
+                                            <i class="bi bi-trash"></i> 스케줄 취소
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-muted py-4">활성화된 스케줄이 없습니다.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 신의 취향을 반영한 미세한 디자인 조정 */
+    .card { border-radius: 12px; overflow: hidden; }
+    .table th { font-size: 0.9rem; vertical-align: middle; }
+    .table td { vertical-align: middle; }
+    .btn { border-radius: 8px; transition: all 0.2s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+</style>
 
 {% endblock %}

@@ -345,11 +345,62 @@ def xml():
 		
 @bp.route("restart")
 def restart():
-	if not session.get('logFlag'):
-		return render_template('login.html')
-	else:
-		if platform.system() == 'Windows':
-			os.system("flask run --reload")
-		else:
-			os.system("kill -9 `ps -ef|grep supervisord|awk '{print $1}'`")
-		return redirect(url_for('main.index'))
+    if not session.get('logFlag'):
+        return redirect(url_for('main.index'))
+    
+    print("== [시스템] 엔진 재시작 프로세스 가동 ==")
+    # 현재 실행 중인 파이썬 경로와 인자값을 그대로 다시 실행합니다.
+    os.execv(sys.executable, ['python'] + sys.argv)
+
+@bp.route("update_server")
+def update_server():
+    if not session.get('logFlag'):
+        return redirect(url_for('main.index'))
+    
+    # 1. GitHub API 주소 (저장소의 콘텐츠 목록을 가져옵니다)
+    # k45734/flask_web 저장소의 root(/) 폴더 기준
+    api_url = "https://api.github.com/repos/k45734/flask_web/contents?ref=main"
+    raw_base_url = "https://raw.githubusercontent.com/k45734/flask_web/main/"
+    
+    print("== [업데이트] 전체 폴더 동기화 시작 ==")
+    logger.info("Full Folder Sync Started")
+    
+    try:
+        # 2. 파일 목록 요청
+        response = requests.get(api_url, timeout=15)
+        if response.status_code != 200:
+            return f"<script>alert('GitHub API 연결 실패: {response.status_code}'); history.back();</script>"
+        
+        file_list = response.json()
+        success_files = []
+
+        for item in file_list:
+            # 폴더('dir')가 아닌 파일('file')만 처리
+            if item['type'] == 'file':
+                file_name = item['name']
+                
+                # 업데이트에서 제외할 파일이 있다면 필터링 (예: DB파일 등)
+                if file_name.endswith('.db') or file_name.endswith('.sqlite'):
+                    continue
+                
+                # 3. 각 파일의 Raw 데이터 다운로드
+                download_url = raw_base_url + file_name
+                file_res = requests.get(download_url, timeout=15)
+                
+                if file_res.status_code == 200:
+                    with open(file_name, 'w', encoding='utf-8') as f:
+                        f.write(file_res.text)
+                    success_files.append(file_name)
+                    print(f" -> [동기화] {file_name} 완료")
+
+        if success_files:
+            print(f"== [성공] 총 {len(success_files)}개 파일 최신화 완료. 엔진 재시작! ==")
+            # 4. 즉시 재시작
+            time.sleep(1)
+            os.execv(sys.executable, ['python'] + sys.argv)
+        else:
+            return "<script>alert('업데이트할 새 파일을 찾지 못했습니다.'); history.back();</script>"
+
+    except Exception as e:
+        logger.error(f"Full Update Error: {e}")
+        return f"<script>alert('오류 발생: {e}'); history.back();</script>"

@@ -1,24 +1,113 @@
 {% extends "base.html" %}
 {% block content %}
-<html>
 
-<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <META HTTP-EQUIV="refresh" CONTENT="60">
-    <head>
-      
-    </head>
-    <body>
-        <center>
-		<br>
-   <p><textarea cols="100" rows="50">
-   {%for ml in tltl %}
-   {{ ml }}
-   {% endfor %}
-   </textarea></p><br>
-		
-{{testDataHtml}}</center>
-    </body>
-</html>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 bg-dark text-white">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-dark py-3">
+                    <h5 class="mb-0 text-info fw-bold">
+                        <i class="bi bi-terminal-fill me-2"></i>시스템 실시간 로그 (최근 20줄)
+                    </h5>
+                    <div>
+                        <span class="badge bg-danger pulse-red me-2">LIVE</span>
+                        <small class="text-muted">60초마다 자동 갱신 중</small>
+                        <button class="btn btn-sm btn-outline-light ms-3" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> 새로고침
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div id="log-container" class="log-viewer">
+                        {% for ml in tltl %}
+                        <div class="log-line">
+                            <span class="log-content">{{ ml }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-dark border-secondary text-end">
+                    <small class="text-muted">파일 경로: /data/log/flask.log</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 터미널 뷰어 스타일 */
+    .log-viewer {
+        background-color: #1a1a1a;
+        color: #dcdcdc;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        padding: 20px;
+        height: 600px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .log-line {
+        border-bottom: 1px solid #2d2d2d;
+        padding: 4px 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    /* 로그 레벨별 색상 강조 (자동 필터링 효과) */
+    .log-content:contains("ERROR"), .log-line:has(span:contains("ERROR")) {
+        color: #ff6b6b !important; /* 에러는 빨간색 */
+        font-weight: bold;
+    }
+    
+    .log-content:contains("INFO") {
+        color: #4dabf7; /* 정보는 하늘색 */
+    }
+
+    .log-content:contains("[수집]"), .log-content:contains("[보정]") {
+        color: #51cf66; /* 주요 작업은 초록색 */
+    }
+
+    /* 실시간 애니메이션 */
+    .pulse-red {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+
+    /* 스크롤바 커스텀 */
+    .log-viewer::-webkit-scrollbar { width: 8px; }
+    .log-viewer::-webkit-scrollbar-track { background: #1a1a1a; }
+    .log-viewer::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    .log-viewer::-webkit-scrollbar-thumb:hover { background: #555; }
+</style>
+
+<script>
+    // 페이지 로드 시 가장 최근 로그(맨 아래)로 자동 스크롤
+    window.onload = function() {
+        var container = document.getElementById("log-container");
+        container.scrollTop = container.scrollHeight;
+    };
+
+    // 텍스트 강조 처리를 위한 간단한 스크립트 (CSS :contains 미지원 대비)
+    document.querySelectorAll('.log-content').forEach(function(el) {
+        if (el.textContent.includes('ERROR') || el.textContent.includes('치명적')) {
+            el.parentElement.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+            el.style.color = '#ff6b6b';
+        } else if (el.textContent.includes('INFO')) {
+            el.style.color = '#4dabf7';
+        } else if (el.textContent.includes('SUCCESS') || el.textContent.includes('완료')) {
+            el.style.color = '#51cf66';
+        }
+    });
+</script>
 
 {% endblock %}
