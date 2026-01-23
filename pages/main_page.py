@@ -330,7 +330,7 @@ def log():
             for i in lines:
                 clean_line = i.strip()
                 # [보정] /log 호출 기록 제외 및 알맹이가 없는 줄 제외
-                if clean_line and '/log' not in clean_line:
+                if clean_line and '/log' not in clean_line and '/get_raw_logs' not in clean_line:
                     # [추가 보정] Flask 배너 메시지의 특수 문자나 과도한 공백 제거
                     # 예: "* Running on..." 앞의 공백 제거
                     tltl2.append(clean_line)
