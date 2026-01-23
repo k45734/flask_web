@@ -62,7 +62,7 @@
         try {
             // 서버에서 로그의 마지막 100줄 정도만 가져오는 API 엔드포인트가 있다고 가정
             // (만약 없다면 현재 route에서 반환하는 데이터를 활용해야 함)
-            const response = await fetch('/webtoon/get_raw_logs'); 
+            const response = await fetch('/get_raw_logs'); 
             const data = await response.text();
             
             if (data !== lastLogContent) {
