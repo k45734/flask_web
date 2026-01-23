@@ -61,8 +61,10 @@ def reset_db_task():
 			
 def get_db_con():
     con = sqlite3.connect(webtoondb, timeout=60)
-    con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
+    # 아래 설정을 추가하면 쓰기 작업 시 다른 작업이 끼어드는 것을 더 강하게 막아줍니다.
+    con.isolation_level = 'IMMEDIATE' 
+    con.row_factory = sqlite3.Row
     return con
 
 # --- [2. 데이터 수신 및 DB 저장] ---
