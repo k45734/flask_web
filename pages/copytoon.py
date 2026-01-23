@@ -20,7 +20,7 @@ except:
 
 webtoon = Blueprint('webtoon', __name__, url_prefix='/webtoon')
 
-# --- [1. 경로 및 DB 설정: Timeout 강화] ---
+# --- [1. 경로 및 DB 설정] ---
 at = os.path.splitdrive(os.getcwd()) if platform.system() == 'Windows' else ('', '/data')
 LIST_DB = at[0] + '/data/db/webtoon_list.db'     
 STATUS_DB = at[0] + '/data/db/webtoon_status.db' 
@@ -30,7 +30,6 @@ os.makedirs(WEBTOON_PATH, exist_ok=True)
 os.makedirs(os.path.dirname(LIST_DB), exist_ok=True)
 
 def get_list_db():
-    # Timeout 300초 유지 + WAL 모드 최적화
     con = sqlite3.connect(LIST_DB, timeout=300)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
@@ -57,7 +56,7 @@ def set_config(key, value):
         con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, str(value)))
         con.commit()
 
-# --- [2. 핵심 엔진: 임시 테이블 보정 및 고속 다운로드] ---
+# --- [2. 핵심 엔진: 고속 다운로드 루프] ---
 
 def db_optimize():
     print("== [최적화] DB 진공 청소 시작 =="); logger.info("DB Vacuum Start")
@@ -68,30 +67,16 @@ def db_optimize():
     except Exception as e: logger.error(f"Optimize Error: {e}")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    msg = f"== [{gbun}] 엔진 가동 (Lock-Free 보정 모드) =="
+    msg = f"== [{gbun}] 다운로드 엔진 가동 =="
     print(msg); logger.info(msg)
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
     
     try:
-        # [STEP 1] 임시 테이블을 이용한 고속 보정 (Locked 방지 핵심)
-        with get_list_db() as con_p:
-            print(" -> [보정] 임시 인덱스 생성 및 계산 중..."); logger.info("Fixing counts...")
-            # 1. 메모리에 현재 카운트를 미리 계산
-            con_p.execute(f"CREATE TEMPORARY TABLE temp_counts AS SELECT TITLE, SUBTITLE, COUNT(*) as cnt FROM {db_table} WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL GROUP BY TITLE, SUBTITLE")
-            # 2. 본 테이블에 한 번에 업데이트 (이 쿼리는 매우 빠릅니다)
-            cur_p = con_p.execute(f"""
-                UPDATE {db_table} SET TOTAL_COUNT = (
-                    SELECT cnt FROM temp_counts WHERE temp_counts.TITLE = {db_table}.TITLE AND temp_counts.SUBTITLE = {db_table}.SUBTITLE
-                ) WHERE EXISTS (SELECT 1 FROM temp_counts WHERE temp_counts.TITLE = {db_table}.TITLE AND temp_counts.SUBTITLE = {db_table}.SUBTITLE)
-            """)
-            con_p.commit()
-            if cur_p.rowcount > 0:
-                print(f" -> [보정 완료] {cur_p.rowcount}건 동기화 성공"); logger.info(f"Fixed {cur_p.rowcount} entries")
-
-        # [STEP 2] 미완료 대상 추출 (JOIN 최적화)
+        # [STEP 1] 미완료 대상 추출 (수집 단계에서 보정이 완료되었으므로 바로 JOIN)
         with get_list_db() as con_l:
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
-            query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True')"
+            # TOTAL_COUNT가 0보다 큰 것(정상 수집된 것) 중 미완료 건 추출
+            query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
             if title_filter: query += f" AND a.TITLE = '{title_filter}'"
             query += " GROUP BY a.TITLE, a.SUBTITLE"
             targets = con_l.execute(query).fetchall()
@@ -99,7 +84,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 
         print(f" -> [검사] 미완료 {len(targets)}건 발견"); logger.info(f"Targets: {len(targets)}")
 
-        # [STEP 3] 다운로드 루프
+        # [STEP 2] 다운로드 루프
         for t_title, t_sub, t_total in targets:
             with get_list_db() as con_l:
                 cur_l = con_l.cursor()
@@ -107,10 +92,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                 img_list = cur_l.fetchall()
             
             cur_c, tar_c = len(img_list), int(t_total or 0)
-            print(f" -> [체크] {t_title} - {t_sub} ({cur_c}/{tar_c})"); logger.info(f"Check: {t_title} ({cur_c}/{tar_c})")
             
+            # 수집된 이미지 개수가 목표치에 도달했는지 확인
             if cur_c > 0 and cur_c >= tar_c:
-                print(f"    [실행] {t_title} 다운로드 시작"); logger.info(f"Down Start: {t_title}")
+                print(f"    [실행] {t_title} - {t_sub} 다운로드 시작"); logger.info(f"Down Start: {t_title}")
                 f_path = os.path.join(WEBTOON_PATH, t_title, t_sub)
                 os.makedirs(f_path, exist_ok=True)
                 
@@ -125,6 +110,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 sc += 1
                         except: continue
                 
+                # 파일 생성 확인 후 후속 처리
                 if sc > 0 or os.path.exists(f_path):
                     if str(compress) == '1':
                         ext = ".cbz" if str(cbz) == '1' else ".zip"
@@ -142,36 +128,64 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
         print(f"== [{gbun}] 엔진 작업 종료 =="); logger.info(f"Engine Finish: {gbun}")
     except Exception as e: logger.error(f"Critical Engine Error: {e}")
 
-# --- [3. 수집 및 라우트] ---
-
+# --- [3. 수집 및 라우트: 보정 로직 통합] ---
 def tel_send_message(dummy=None):
-    print("[수집] 데이터 동기화 개시"); logger.info("Sync Start")
+    print("[수집] 대용량 동기화 엔진 가동"); logger.info("Bulk Sync Start")
     last_id = int(get_config('last_webtoon_id') or 0)
+    
     try:
         req = requests.get('https://t.me/s/webtoonalim', timeout=15)
         soup = bs(req.text, "html.parser")
         messages = soup.findAll("div", {"class": "tgme_widget_message"})
-        new_c, max_id = 0, last_id
+        
+        new_data = {'TOON': [], 'TOON_NORMAL': []} # 데이터를 담을 바구니
+        update_targets = set()
+        max_id = last_id
+
         for m in reversed(messages):
-            pid = int(m['data-post'].split('/')[-1])
-            if pid <= last_id: break
-            txt = m.find("div", {"class": "tgme_widget_message_text"})
-            if not txt: continue
             try:
+                pid = int(m['data-post'].split('/')[-1])
+                if pid <= last_id: break
+                
+                txt = m.find("div", {"class": "tgme_widget_message_text"})
+                if not txt: continue
+                
                 dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
                 aac = dec.split('\n\n')
-                if len(aac) >= 8:
-                    gbun = aac[8] if len(aac)>=9 else 'adult'
-                    db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-                    with get_list_db() as con:
-                        con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-                        con.execute(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7])))
-                    new_c += 1; max_id = max(max_id, pid)
-                    print(f" -> [수집] {aac[0]} 추가")
+                if len(aac) < 8: continue
+
+                gbun = aac[8] if len(aac) >= 9 else 'adult'
+                db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+                
+                # 데이터를 튜플 형태로 리스트에 저장
+                new_data[db_t].append((aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7])))
+                update_targets.add((db_t, aac[0], aac[1]))
+                max_id = max(max_id, pid)
             except: continue
+
+        # --- [Bulk Insert 실행] ---
+        for db_t in ['TOON', 'TOON_NORMAL']:
+            if new_data[db_t]:
+                with get_list_db() as con:
+                    # 테이블 없으면 생성
+                    con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+                    # executemany로 한 번에 밀어넣기
+                    con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
+                    con.commit()
+                print(f" -> [{db_t}] {len(new_data[db_t])}건 일괄 저장 완료")
+
+        # --- [보정 작업] ---
+        if update_targets:
+            with get_list_db() as con:
+                for db_t, title, subtitle in update_targets:
+                    con.execute(f"UPDATE {db_t} SET TOTAL_COUNT = (SELECT COUNT(*) FROM {db_t} WHERE TITLE=? AND SUBTITLE=?) WHERE TITLE=? AND SUBTITLE=?", (title, subtitle, title, subtitle))
+                con.commit()
+
         set_config('last_webtoon_id', max_id)
-        print(f"[완료] {new_c}건 수집 (ID: {max_id})"); logger.info(f"Sync Done: {new_c}")
-    except Exception as e: logger.error(f"Sync Error: {e}")
+        print(f"[완료] 총 {len(update_targets)}개 회차 수집 및 보정 완료"); logger.info("Bulk Sync Done")
+        
+    except Exception as e: 
+        logger.error(f"Sync Error: {e}")
 
 @webtoon.route('/')
 def index():
