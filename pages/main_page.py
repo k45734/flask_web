@@ -361,48 +361,55 @@ def update_server():
     if not session.get('logFlag'):
         return redirect(url_for('main.index'))
     
-    api_url = "https://api.github.com/repos/k45734/flask_web/contents?ref=main"
+    # [보정] recursive=1 파라미터를 추가하여 모든 하위 폴더 구조를 한 번에 가져옵니다.
+    api_url = "https://api.github.com/repos/k45734/flask_web/git/trees/main?recursive=1"
     raw_base_url = "https://raw.githubusercontent.com/k45734/flask_web/main/"
     
-    logger.info("== [업데이트] 전체 폴더 동기화 시작 ==")
+    logger.info("== [업데이트] 전수 조사 및 전체 동기화 시작 ==")
     
     try:
         response = requests.get(api_url, timeout=15)
         if response.status_code != 200:
             logger.error(f"GitHub API 연결 실패: {response.status_code}")
-            return f"<script>alert('GitHub API 연결 실패: {response.status_code}'); history.back();</script>"
+            return f"<script>alert('GitHub API 연결 실패'); history.back();</script>"
         
-        file_list = response.json()
-        success_files = []
+        tree_list = response.json().get('tree', [])
+        success_count = 0
 
-        for item in file_list:
-            if item['type'] == 'file':
-                file_name = item['name']
-                if file_name.endswith('.db') or file_name.endswith('.sqlite'):
+        for item in tree_list:
+            # 파일(blob) 타입만 처리하며, DB 파일은 제외합니다.
+            if item['type'] == 'blob':
+                file_path = item['path']
+                
+                if file_path.endswith(('.db', '.sqlite', '.log')):
                     continue
                 
-                download_url = raw_base_url + file_name
+                # [핵심] 하위 폴더가 있다면 자동으로 생성합니다.
+                dir_name = os.path.dirname(file_path)
+                if dir_name:
+                    os.makedirs(dir_name, exist_ok=True)
+                
+                download_url = raw_base_url + file_path
                 file_res = requests.get(download_url, timeout=15)
                 
                 if file_res.status_code == 200:
-                    # 안정적인 파일 쓰기 보정
-                    save_path = os.path.join(os.getcwd(), file_name)
-                    with open(save_path, 'w', encoding='utf-8') as f:
-                        f.write(file_res.text)
+                    save_full_path = os.path.join(os.getcwd(), file_path)
+                    with open(save_full_path, 'wb') as f: # 바이너리 모드로 저장하여 인코딩 깨짐 방지
+                        f.write(file_res.content)
                         f.flush()
                         os.fsync(f.fileno())
                     
-                    success_files.append(file_name)
-                    # [수정] 동기화 로그 기록
-                    logger.info(f" -> [동기화 완료] {file_name}")
+                    success_count += 1
+                    logger.info(f" -> [업데이트 완료] {file_path}")
 
-        if success_files:
-            logger.info(f"== [성공] 총 {len(success_files)}개 파일 최신화 완료. 엔진 재시작! ==")
+        if success_count > 0:
+            logger.info(f"== [성공] 총 {success_count}개 파일 전체 최신화 완료. 엔진 재시작! ==")
             time.sleep(2)
+            # 시스템 재시작
             os.execv(sys.executable, [sys.executable] + sys.argv)
         else:
             return "<script>alert('업데이트할 새 파일을 찾지 못했습니다.'); history.back();</script>"
 
     except Exception as e:
-        logger.error(f"Full Update Error: {e}")
+        logger.error(f"Full Recursive Update Error: {e}")
         return f"<script>alert('오류 발생: {e}'); history.back();</script>"
