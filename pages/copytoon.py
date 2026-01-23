@@ -61,6 +61,7 @@ def reset_db_task():
 			
 def get_db_con():
     con = sqlite3.connect(webtoondb, timeout=60)
+    con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
     return con
 
