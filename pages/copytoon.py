@@ -158,99 +158,100 @@ def migrate_old_db():
         print(f"[이관 오류] {e}"); logger.error(f"Migration Error: {e}")
 
 # --- [3. 다운로드 및 파일 처리] ---
-
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    msg = f"== [{gbun}] 자동 다운로드 스케줄 가동 =="
+    msg = f"== [{gbun}] 자동 다운로드 프로세스 가동 =="
     print(msg); logger.info(msg)
     
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
     
-    try:
+    with get_list_db() as con_l:
+        cur_l = con_l.cursor()
+        cur_l.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{db_table}'")
+        if not cur_l.fetchone():
+            err = f"[{db_table}] 테이블이 존재하지 않아 중단합니다."
+            print(err); logger.warning(err)
+            return
+            
+        cur_l.execute(f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {db_table} GROUP BY TITLE, SUBTITLE")
+        targets = cur_l.fetchall()
+
+    logger.info(f"DB 검색 완료: 총 {len(targets)}개의 에피소드 대조 시작")
+
+    for t_title, t_sub, t_total in targets:
+        if title_filter and t_title != title_filter: continue
+        if sub_filter and t_sub != sub_filter: continue
+        
+        # 1. 완료 여부 확인
+        with get_status_db() as con_s:
+            cur_s = con_s.cursor()
+            cur_s.execute("SELECT COMPLETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
+            res = cur_s.fetchone()
+            if res and res['COMPLETE'] == 'True':
+                continue
+
+        # 2. 이미지 주소 수집 현황 파악
         with get_list_db() as con_l:
             cur_l = con_l.cursor()
-            cur_l.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{db_table}'")
-            if not cur_l.fetchone():
-                err_msg = f"[{db_table}] 테이블이 존재하지 않아 중단합니다."
-                print(err_msg); logger.warning(err_msg)
-                return
+            cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
+            img_list = cur_l.fetchall()
+
+        current_count = len(img_list)
+        target_count = int(t_total or 0)
+
+        # [실시간 로그] 수집 현황 출력
+        check_msg = f" -> [검사] {t_title} - {t_sub} : 수집({current_count}/{target_count})"
+        print(check_msg); logger.info(check_msg)
+
+        # 3. 목표치 달성 시 다운로드 시작
+        if current_count >= target_count and target_count > 0:
+            start_msg = f"    [실행] 목표 달성! 다운로드를 시작합니다. ({target_count}장)"
+            print(start_msg); logger.info(start_msg)
             
-            cur_l.execute(f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {db_table} GROUP BY TITLE, SUBTITLE")
-            targets = cur_l.fetchall()
-
-        logger.info(f"검사 대상 웹툰: 총 {len(targets)}개의 에피소드 확인 중...")
-
-        for t_title, t_sub, t_total in targets:
-            # 필터링 로직
-            if title_filter and t_title != title_filter: continue
-            if sub_filter and t_sub != sub_filter: continue
+            # 경로 설정: /data/webtoon/제목/소제목
+            folder_path = os.path.join(ROOT_PATH, "webtoon", t_title, t_sub)
+            os.makedirs(folder_path, exist_ok=True)
             
-            # 완료 여부 체크 (Status DB)
-            with get_status_db() as con_s:
-                cur_s = con_s.cursor()
-                cur_s.execute("SELECT COMPLETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (t_title, t_sub))
-                res = cur_s.fetchone()
-                if res and res['COMPLETE'] == 'True':
-                    continue # 이미 완료된 것은 건너뜀
+            sc = 0 # 성공 카운트
+            for img_url, img_num in img_list:
+                f_path = os.path.join(folder_path, f"{img_num:03d}.jpg")
+                if not os.path.exists(f_path):
+                    try:
+                        r = requests.get(img_url, timeout=20)
+                        if r.status_code == 200:
+                            with open(f_path, 'wb') as f: f.write(r.content)
+                            sc += 1
+                    except Exception as e:
+                        logger.error(f"      └ 이미지 다운로드 실패 ({img_num}번): {e}")
+                        continue
 
-            print(f" -> [체크] {t_title} - {t_sub}")
-            
-            # 이미지 리스트 불러오기
-            with get_list_db() as con_l:
-                cur_l = con_l.cursor()
-                cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
-                img_list = cur_l.fetchall()
-
-            # 수집된 이미지 수가 전체 장수(TOTAL_COUNT)와 일치하거나 더 많을 때만 다운로드 시작
-            if len(img_list) >= int(t_total or 0) and int(t_total or 0) > 0:
-                log_start = f"    [다운로드 시작] {t_title} ({len(img_list)}장)"
-                print(log_start); logger.info(log_start)
-                
-                folder_path = os.path.join(ROOT_PATH, "webtoon", t_title, t_sub)
-                os.makedirs(folder_path, exist_ok=True)
-                
-                sc = 0 # 성공 카운트
-                for img_url, img_num in img_list:
-                    f_path = os.path.join(folder_path, f"{img_num:03d}.jpg")
-                    if not os.path.exists(f_path):
-                        try:
-                            r = requests.get(img_url, timeout=20)
-                            if r.status_code == 200:
-                                with open(f_path, 'wb') as f: f.write(r.content)
-                                sc += 1
-                        except Exception as e:
-                            logger.error(f"      └ 이미지 다운로드 실패 ({img_num}): {e}")
-                            continue
-
-                if sc > 0:
-                    # 압축 처리 로직
-                    if str(compress) == '1':
-                        ext = ".cbz" if str(cbz) == '1' else ".zip"
-                        z_name = folder_path + ext
-                        print(f"    [압축] {z_name} 생성 중...")
-                        try:
-                            with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
-                                for file in os.listdir(folder_path):
-                                    z.write(os.path.join(folder_path, file), file)
-                            shutil.rmtree(folder_path) # 압축 후 원본 폴더 삭제
-                            logger.info(f"    [압축완료] {z_name}")
-                        except Exception as e:
-                            logger.error(f"    [압축실패] {t_title}: {e}")
-
-                    # 상태 기록 (가장 중요)
-                    with get_status_db() as con_s:
-                        con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
-                        con_s.commit()
+            # 4. 후처리 (압축 및 DB 기록)
+            if sc > 0:
+                if str(compress) == '1':
+                    ext = ".cbz" if str(cbz) == '1' else ".zip"
+                    z_name = folder_path + ext
+                    zip_msg = f"    [압축] 파일 생성 중: {z_name}"
+                    print(zip_msg); logger.info(zip_msg)
                     
-                    final_msg = f"    [완료] {t_title} - {t_sub} (새로 받은 이미지: {sc}장)"
-                    print(final_msg); logger.info(final_msg)
-            else:
-                # 데이터가 덜 모였을 때 로그 (선택 사항)
-                if int(t_total or 0) > 0:
-                    logger.debug(f"    [대기] {t_title} 데이터 부족 ({len(img_list)}/{t_total})")
+                    try:
+                        with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                            for file in os.listdir(folder_path):
+                                z.write(os.path.join(folder_path, file), file)
+                        shutil.rmtree(folder_path) # 임시 폴더 삭제
+                    except Exception as e:
+                        logger.error(f"    [압축오류] {t_title}: {e}")
 
-    except Exception as e:
-        err_final = f"[{gbun}] 다운로드 루프 중 치명적 오류: {e}"
-        print(err_final); logger.error(err_final)
+                # 상태 저장
+                with get_status_db() as con_s:
+                    con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
+                    con_s.commit()
+                
+                done_msg = f"    [완료] {t_title} - {t_sub} 처리 성공 (신규: {sc}장)"
+                print(done_msg); logger.info(done_msg)
+        else:
+            # 수집 미달 시 로그
+            if target_count > 0:
+                wait_msg = f"    [대기] 아직 주소가 더 모여야 합니다. ({current_count}/{target_count})"
+                print(wait_msg); logger.debug(wait_msg)
 
 # --- [4. Flask 라우트] ---
 
