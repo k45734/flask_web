@@ -1,5 +1,5 @@
 ﻿#-*- coding: utf-8 -*-
-import os, sys, sqlite3, logging, asyncio, base64, requests, json, time, re, zipfile, shutil, platform
+import os, sys, sqlite3, logging, asyncio, base64, requests, json, time, re, zipfile, shutil, platform, threading
 from flask import Blueprint, render_template, request, session, redirect, url_for
 from bs4 import BeautifulSoup as bs
 from datetime import datetime
@@ -38,6 +38,19 @@ def set_config(key, value):
     con.commit()
     con.close()
 	
+def reset_db_task():
+    """실제 무거운 DB 작업을 수행하는 별도의 함수"""
+    with get_db_con() as con:
+        try:
+            cur = con.cursor()
+            cur.execute("UPDATE TOON SET COMPLETE = 'False'")
+            cur.execute("UPDATE TOON_NORMAL SET COMPLETE = 'False'")
+            cur.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES ('last_webtoon_id', '0')")
+            con.commit()
+            logger.info("[백그라운드] 리셋 작업이 완료되었습니다.")
+        except Exception as e:
+            logger.error(f"[백그라운드] 리셋 중 오류: {e}")	
+			
 def get_db_con():
     con = sqlite3.connect(webtoondb, timeout=60)
     con.execute("PRAGMA journal_mode=WAL")
@@ -347,21 +360,15 @@ def now_down():
 
 @webtoon.route('db_list_reset')
 def db_list_reset():
-    con = get_db_con()
-    cur = con.cursor()
-    try:
-        # 1. 모든 웹툰의 완료 상태를 False로 (재다운로드 대상 지정)
-        cur.execute("UPDATE TOON SET COMPLETE = 'False'")
-        cur.execute("UPDATE TOON_NORMAL SET COMPLETE = 'False'")
-        
-        # 2. 텔레그램 수집 지점 초기화 (과거 메시지 재수집)
-        set_config('last_webtoon_id', '0')
-        
-        con.commit()
-        logger.info("[리셋] 데이터 상태 및 수집 ID 초기화 완료")
-    except Exception as e:
-        logger.error(f"[리셋 실패] {e}")
-    finally:
-        con.close()
-    
-    return "<script>alert('상태값과 수집 ID가 모두 초기화되었습니다.'); location.href='/webtoon';</script>"
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+
+    # 스케줄러에 즉시 실행(run_now) 되도록 작업을 추가
+    # 별도의 ID를 부여해 겹치지 않게 합니다.
+    scheduler.add_job(
+        func=reset_db_task, # 위에 만든 함수 혹은 내부 로직
+        trigger='date', 
+        run_date=datetime.now(), 
+        id='manual_reset_job'
+    )
+
+    return "<script>alert('백그라운드에서 리셋 중입니다.'); history.back();</script>"
