@@ -2,94 +2,76 @@
 {% block content %}
 
 <div class="container mt-4">
-    <center>
-        <h4 class="mb-4">웹툰 리스트 목록 ({{ '성인' if gbun == 'adult' else '일반' }})</h4>
-    </center>
+    <center>
+        <h4 class="mb-4">웹툰 리스트 목록 ({{ '성인' if gbun == 'adult' else '일반' }})</h4>
+    </center>
 
-    <div class="row mb-3 justify-content-center">
-        <div class="col-md-10">
-            <div class="d-flex gap-2 mb-3 justify-content-center">
-                <a href="{{ url_for('webtoon.run_migration') }}" 
-                   class="btn btn-dark shadow-sm" 
-                   onclick="return confirm('기존 webtoon_new.db의 데이터를 새 멀티 DB로 복사하시겠습니까? (최초 1회 권장)')">
-                    📦 기존 DB 데이터 이관
-                </a>
-                
-                <a href="{{ url_for('webtoon.db_list_reset') }}" 
-                   class="btn btn-outline-danger shadow-sm" 
-                   onclick="return confirm('수집 지점(ID)과 다운로드 상태를 초기화할까요? 목록은 유지됩니다.')">
-                    🔄 수집/상태 초기화
-                </a>
-            </div>
+    <div class="row mb-3 justify-content-center">
+        <div class="col-md-8">
+            <form action="{{ url_for('webtoon.index_list') }}" method="get">
+                <input type="hidden" name="gbun" value="{{ gbun }}">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="웹툰 제목 검색..." value="{{ search or '' }}">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                    {% if search %}
+                    <a href="{{ url_for('webtoon.index_list', gbun=gbun) }}" class="btn btn-outline-secondary">초기화</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <form action="{{ url_for('webtoon.index_list') }}" method="get">
-                <input type="hidden" name="gbun" value="{{ gbun }}">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="웹툰 제목 검색..." value="{{ search or '' }}">
-                    <button class="btn btn-primary" type="submit">검색</button>
-                    {% if search %}
-                    <a href="{{ url_for('webtoon.index_list', gbun=gbun) }}" class="btn btn-outline-secondary">초기화</a>
-                    {% endif %}
-                </div>
-            </form>
-        </div>
-    </div>
+    <table class="table table-bordered shadow-sm" style="text-align: center;">
+        <thead class="table-light">
+            <tr>
+                <th>제목</th>
+                <th>회차</th>
+                <th>압축 설정</th>
+                <th>포맷</th>
+                <th>작업</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in wow %}
+            <tr>
+                <form action="{{ url_for('webtoon.now_down') }}" method="GET">
+                    <input type='hidden' name='gbun' value="{{ gbun }}">
+                    <input type="hidden" name="title" value="{{ i['TITLE'] }}">
+                    <input type="hidden" name="subtitle" value="{{ i['SUBTITLE'] }}">
+                    
+                    <td class="align-middle text-start px-3">{{ i['TITLE'] }}</td>
+                    <td class="align-middle text-start px-3">{{ i['SUBTITLE'] }}</td>
+                    <td class="align-middle">
+                        <select name="compress" class="form-select form-select-sm">
+                            <option value="0">압축사용</option>
+                            <option value="1" selected>안함</option>
+                        </select>
+                    </td>
+                    <td class="align-middle">
+                        <select name="cbz" class="form-select form-select-sm">
+                            <option value="0">CBZ</option>
+                            <option value="1" selected>ZIP</option>
+                        </select>
+                    </td>
+                    <td class="align-middle">
+                        <input type="submit" class="btn btn-success btn-sm w-100" value="다운">
+                    </td>
+                </form>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="py-4 text-muted">데이터가 존재하지 않습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <table class="table table-bordered shadow-sm" style="text-align: center;">
-        <thead class="table-light">
-            <tr>
-                <th>제목</th>
-                <th>회차</th>
-                <th>압축 설정</th>
-                <th>포맷</th>
-                <th>작업</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in wow %}
-            <tr>
-                <form action="{{ url_for('webtoon.now_down') }}" method="GET">
-                    <input type='hidden' name='gbun' value="{{ gbun }}">
-                    <input type="hidden" name="title" value="{{ i['TITLE'] }}">
-                    <input type="hidden" name="subtitle" value="{{ i['SUBTITLE'] }}">
-                    
-                    <td class="align-middle text-start px-3">{{ i['TITLE'] }}</td>
-                    <td class="align-middle text-start px-3">{{ i['SUBTITLE'] }}</td>
-                    <td class="align-middle">
-                        <select name="compress" class="form-select form-select-sm">
-                            <option value="0">압축사용</option>
-                            <option value="1" selected>안함</option>
-                        </select>
-                    </td>
-                    <td class="align-middle">
-                        <select name="cbz" class="form-select form-select-sm">
-                            <option value="0">CBZ</option>
-                            <option value="1" selected>ZIP</option>
-                        </select>
-                    </td>
-                    <td class="align-middle">
-                        <div class="d-flex gap-1">
-                            <input type="submit" class="btn btn-success btn-sm w-100" value="다운">
-                            <a href="{{ url_for('webtoon.db_redown', title=i['TITLE'], subtitle=i['SUBTITLE'], gbun=gbun) }}" 
-                               class="btn btn-outline-warning btn-sm">🔄</a>
-                        </div>
-                    </td>
-                </form>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="py-4 text-muted">데이터가 존재하지 않습니다.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <div class="d-flex justify-content-center mt-4 mb-5" style="display: flex !important; justify-content: center;">
-    {% if pagination %}
-        {{ pagination.links | safe }}
-    {% else %}
-        <p style="color:red;">페이징 데이터가 전달되지 않았습니다.</p>
-    {% endif %}
-    </div>
+    <div class="d-flex justify-content-center mt-4 mb-5" style="display: flex !important; justify-content: center;">
+    {% if pagination %}
+        {{ pagination.links | safe }}
+    {% else %}
+        <p style="color:red;">페이징 데이터가 전달되지 않았습니다.</p>
+    {% endif %}
+    </div>
 </div>
 {% endblock %}
