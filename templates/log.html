@@ -10,7 +10,7 @@
                         <i class="bi bi-terminal-fill me-2"></i>시스템 실시간 로그 <small class="text-muted" id="status-text">(연결 중...)</small>
                     </h5>
                     <div>
-                        <span class="badge bg-danger pulse-red me-2" id="live-badge">LIVE</span>
+                        <span class="badge bg-danger pulse-red me-2">LIVE</span>
                         <button class="btn btn-sm btn-outline-light" onclick="toggleAutoScroll()" id="scroll-btn">
                             <i class="bi bi-lock-fill"></i> 자동 스크롤 ON
                         </button>
@@ -29,19 +29,19 @@
     .log-viewer {
         background-color: #000;
         color: #e0e0e0;
-        font-family: 'Consolas', monospace;
+        font-family: 'Consolas', 'Monaco', monospace;
         padding: 15px;
-        height: 750px; /* 높이 고정 */
+        height: 700px;
         overflow-y: auto;
         font-size: 0.85rem;
+        line-height: 1.5;
     }
     .log-line {
         border-bottom: 1px solid #1a1a1a;
-        padding: 2px 0;
-        white-space: pre-wrap; /* tail 처럼 줄바꿈 유지 */
+        padding: 4px 0;
+        white-space: pre-wrap;
         word-break: break-all;
     }
-    /* 중요 키워드 강조 */
     .log-info { color: #51cf66; }
     .log-error { color: #ff6b6b; font-weight: bold; }
     .log-warn { color: #fcc419; }
@@ -60,8 +60,7 @@
 
     async function fetchLogs() {
         try {
-            // 서버에서 로그의 마지막 100줄 정도만 가져오는 API 엔드포인트가 있다고 가정
-            // (만약 없다면 현재 route에서 반환하는 데이터를 활용해야 함)
+            // main_page.py의 bp.route 경로인 /get_raw_logs 호출
             const response = await fetch('/get_raw_logs'); 
             const data = await response.text();
             
@@ -73,7 +72,7 @@
                 if (autoScroll) {
                     container.scrollTop = container.scrollHeight;
                 }
-                document.getElementById('status-text').innerText = "(업데이트 완료: " + new Date().toLocaleTimeString() + ")";
+                document.getElementById('status-text').innerText = "(업데이트: " + new Date().toLocaleTimeString() + ")";
             }
         } catch (e) {
             document.getElementById('status-text').innerText = "(연결 오류)";
@@ -81,20 +80,26 @@
     }
 
     function formatLogs(text) {
-        return text.split('\n').map(line => {
-            if (!line.trim()) return '';
+        return text.split('\n').reverse().map(line => { // 최신 로그를 위해 뒤집어서 처리 가능 (취향껏)
+            const cleanLine = line.trim();
+            if (!cleanLine) return '';
+
+            // [신의 필터] 접속 기록 로그는 화면에서 완전히 제외합니다.
+            if (cleanLine.includes('/get_raw_logs') || cleanLine.includes('/log')) {
+                return ''; 
+            }
+
             let className = '';
-            if (line.includes('ERROR')) className = 'log-error';
-            else if (line.includes('INFO')) className = 'log-info';
-            else if (line.includes('WARNING')) className = 'log-warn';
+            if (cleanLine.includes('ERROR')) className = 'log-error';
+            else if (cleanLine.includes('INFO')) className = 'log-info';
+            else if (cleanLine.includes('WARNING')) className = 'log-warn';
             
-            return `<div class="log-line ${className}">${line}</div>`;
-        }).join('');
+            return `<div class="log-line ${className}">${cleanLine}</div>`;
+        }).reverse().join(''); // 다시 원상복구하여 출력
     }
 
-    // 2초마다 새로운 로그 호출
     setInterval(fetchLogs, 2000);
-    fetchLogs(); // 초기 실행
+    fetchLogs();
 </script>
 
 {% endblock %}
