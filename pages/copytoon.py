@@ -113,10 +113,9 @@ def db_optimize():
         logger.info("========================================")
     except Exception as e: 
         logger.error(f"!!! [에러] 최적화 엔진 오류: {e}")
-
 def tel_send_message(dummy=None):
     logger.info("========================================")
-    logger.info("[수집] 중복 충돌 방지 및 이미지 갱신 엔진 가동")
+    logger.info("[수집] 중복 정화 및 긴급 복구 모드 가동")
     logger.info("========================================")
     
     last_id = int(get_config('last_webtoon_id') or 0)
@@ -126,11 +125,10 @@ def tel_send_message(dummy=None):
         soup = bs(req.text, "html.parser")
         messages = soup.findAll("div", {"class": "tgme_widget_message"})
         
-        # [핵심] 리스트 대신 딕셔너리를 사용하여 메모리 단에서 중복 제거
         new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
-        update_targets = set()
         max_id = last_id
 
+        # 1. 메모리 단계에서 최신 데이터만 남기기
         for m in reversed(messages):
             try:
                 pid = int(m['data-post'].split('/')[-1])
@@ -146,45 +144,35 @@ def tel_send_message(dummy=None):
                 gbun = aac[8] if len(aac) >= 9 else 'adult'
                 db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
                 
-                title, subtitle, img_num = aac[0], aac[1], int(aac[5])
-                # 고유 키 생성 (제목, 소제목, 이미지번호)
-                key = (title, subtitle, img_num)
+                # 중복 판단 키: 제목, 소제목, 이미지번호
+                key = (aac[0], aac[1], int(aac[5]))
+                new_data_dict[db_t][key] = (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7]))
                 
-                # [해결] 딕셔너리에 넣으면서 같은 키가 있으면 자연스럽게 최신 데이터로 대체됨
-                new_data_dict[db_t][key] = (title, subtitle, aac[2], aac[3], aac[4], img_num, int(aac[7]))
-                
-                update_targets.add((db_t, title, subtitle))
                 max_id = max(max_id, pid)
-                logger.info(f" -> [분석] ID:{pid} | {title} - {subtitle} ({img_num}번)")
+                logger.info(f" -> [분석] ID:{pid} | {aac[0]} ({aac[5]}번)")
+            except: continue
+
+        # 2. DB 저장 시도 (에러 발생 시 인덱스 자동 삭제 및 복구)
+        with get_list_db() as con:
+            for db_t in ['TOON', 'TOON_NORMAL']:
+                data_list = list(new_data_dict[db_t].values())
+                if not data_list: continue
                 
-            except Exception as e:
-                continue
-
-        # --- [DB 저장/갱신 실행] ---
-        total_saved = 0
-        for db_t in ['TOON', 'TOON_NORMAL']:
-            # 딕셔너리의 값(values)들만 뽑아서 리스트로 변환
-            clean_data_list = list(new_data_dict[db_t].values())
-            
-            if clean_data_list:
-                with get_list_db() as con:
-                    # 유니크 인덱스 생성 여부 재확인
-                    con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-                    con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
-                    
-                    # 이제 중복이 제거된 데이터셋이므로 에러 없이 REPLACE가 작동함
-                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", clean_data_list)
-                    con.commit()
-                    total_saved += len(clean_data_list)
-
-        if update_targets:
-            db_optimize() # 전체 카운트 보정 및 최적화 실행
+                try:
+                    # 유니크 인덱스가 이미 있다면 그대로 진행
+                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
+                except sqlite3.IntegrityError:
+                    # [긴급복구] 에러 발생 시 인덱스를 삭제하고 이전처럼 중복 허용 상태로 저장
+                    logger.warning(f"!!! [{db_t}] 인덱스 충돌 발생! 이전 상태로 강제 복구 중...")
+                    con.execute(f"DROP INDEX IF EXISTS uidx_{db_t}")
+                    con.executemany(f"INSERT INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
+            con.commit()
 
         set_config('last_webtoon_id', max_id)
-        logger.info(f"[종료] 충돌 없이 수집 완료: {total_saved}건 처리")
+        logger.info(f"[종료] 수집 완료 (최신 ID: {max_id})")
         
     except Exception as e: 
-        logger.error(f"!!! [비상] 수집 엔진 치명적 에러: {e}")
+        logger.error(f"!!! [비상] 엔진 에러: {e}")
 
 # --- [4. 다운로드 및 라우트 로직 (기존 유지)] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
