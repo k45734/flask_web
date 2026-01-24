@@ -56,23 +56,33 @@ def set_config(key, value):
         con.execute("INSERT OR REPLACE INTO CONFIG (KEY, VALUE) VALUES (?, ?)", (key, str(value)))
         con.commit()
 
-# --- [2. 핵심 엔진: 고속 다운로드 루프] ---
+# --- [2. 핵심 엔진: DB 최적화 및 보정] ---
 def db_optimize():
     logger.info("========================================")
-    logger.info("[최적화] 초고속 임시 테이블 보정 엔진 가동")
+    logger.info("[최적화] 초고속 임시 테이블 보정 및 인덱스 정비 가동")
     logger.info("========================================")
     
     try:
         with get_list_db() as con:
             for table in ['TOON', 'TOON_NORMAL']:
-                # 테이블 존재 여부 확인
                 cur = con.cursor()
                 cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
                 if not cur.fetchone(): continue
 
-                logger.info(f" -> [{table}] 대량 보정 분석 및 최적화 중...")
+                # [추가] 중복 데이터 1차 청소 (인덱스 생성 전 필수 작업)
+                logger.info(f" -> [{table}] 기존 중복 데이터 청소 중...")
+                con.execute(f"""
+                    DELETE FROM {table} 
+                    WHERE rowid NOT IN (
+                        SELECT MIN(rowid) FROM {table} 
+                        GROUP BY TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER
+                    )
+                """)
 
-                # [필살기 1] 임시 테이블에 현재 모든 회차의 카운트를 미리 계산해서 담기
+                # [추가] 고유 인덱스 설정 (앞으로의 중복 원천 차단)
+                con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{table} ON {table} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
+                
+                logger.info(f" -> [{table}] 대량 보정 분석 및 최적화 중...")
                 con.execute("DROP TABLE IF EXISTS temp_counts")
                 con.execute(f"""
                     CREATE TEMPORARY TABLE temp_counts AS 
@@ -81,8 +91,6 @@ def db_optimize():
                     GROUP BY TITLE, SUBTITLE
                 """)
                 
-                # [필살기 2] 임시 테이블과 대조하여 한 번의 쿼리로 업데이트
-                # (기존의 for 루프 5만 번 도는 작업을 이 쿼리 한 줄이 대체합니다)
                 cur = con.execute(f"""
                     UPDATE {table} 
                     SET TOTAL_COUNT = (
@@ -92,89 +100,24 @@ def db_optimize():
                     ) 
                     WHERE TOTAL_COUNT = 0 OR TOTAL_COUNT IS NULL
                 """)
-                
                 con.commit()
-                logger.info(f" -> [{table}] {cur.rowcount}건 보정 완료!")
+                logger.info(f" -> [{table}] {cur.rowcount}건 보정 및 인덱스 정비 완료!")
 
-        # 2. DB 용량 최적화 (VACUUM)
         for db_path in [LIST_DB, STATUS_DB]:
             with sqlite3.connect(db_path) as con: 
                 con.execute("VACUUM")
                 logger.info(f" -> [VACUUM] {os.path.basename(db_path)} 최적화 완료")
         
         logger.info("========================================")
-        logger.info("[완료] 모든 최적화 작업이 순식간에 끝났습니다.")
+        logger.info("[완료] 모든 최적화 작업이 끝났습니다.")
         logger.info("========================================")
-
     except Exception as e: 
-        logger.error(f"!!! [에러] 초고속 최적화 중 오류 발생: {e}")
+        logger.error(f"!!! [에러] 최적화 엔진 오류: {e}")
 
-def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    msg = f"== [{gbun}] 다운로드 엔진 가동 =="
-    print(msg); logger.info(msg)
-    db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    
-    try:
-        # [STEP 1] 미완료 대상 추출 (수집 단계에서 보정이 완료되었으므로 바로 JOIN)
-        with get_list_db() as con_l:
-            con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
-            # TOTAL_COUNT가 0보다 큰 것(정상 수집된 것) 중 미완료 건 추출
-            query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
-            if title_filter: query += f" AND a.TITLE = '{title_filter}'"
-            query += " GROUP BY a.TITLE, a.SUBTITLE"
-            targets = con_l.execute(query).fetchall()
-            con_l.execute("DETACH DATABASE s_db")
-
-        print(f" -> [검사] 미완료 {len(targets)}건 발견"); logger.info(f"Targets: {len(targets)}")
-
-        # [STEP 2] 다운로드 루프
-        for t_title, t_sub, t_total in targets:
-            with get_list_db() as con_l:
-                cur_l = con_l.cursor()
-                cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
-                img_list = cur_l.fetchall()
-            
-            cur_c, tar_c = len(img_list), int(t_total or 0)
-            
-            # 수집된 이미지 개수가 목표치에 도달했는지 확인
-            if cur_c > 0 and cur_c >= tar_c:
-                print(f"    [실행] {t_title} - {t_sub} 다운로드 시작"); logger.info(f"Down Start: {t_title}")
-                f_path = os.path.join(WEBTOON_PATH, t_title, t_sub)
-                os.makedirs(f_path, exist_ok=True)
-                
-                sc = 0
-                for img_url, img_num in img_list:
-                    img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
-                    if not os.path.exists(img_file):
-                        try:
-                            r = requests.get(img_url, timeout=20)
-                            if r.status_code == 200:
-                                with open(img_file, 'wb') as f: f.write(r.content)
-                                sc += 1
-                        except: continue
-                
-                # 파일 생성 확인 후 후속 처리
-                if sc > 0 or os.path.exists(f_path):
-                    if str(compress) == '1':
-                        ext = ".cbz" if str(cbz) == '1' else ".zip"
-                        z_name = f_path + ext
-                        print(f"    [압축] 생성: {z_name}")
-                        with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
-                            for file in os.listdir(f_path): z.write(os.path.join(f_path, file), file)
-                        shutil.rmtree(f_path)
-                    
-                    with get_status_db() as con_s:
-                        con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
-                        con_s.commit()
-                    print(f"    [완료] {t_title} - {t_sub} 처리 성공")
-        
-        print(f"== [{gbun}] 엔진 작업 종료 =="); logger.info(f"Engine Finish: {gbun}")
-    except Exception as e: logger.error(f"Critical Engine Error: {e}")
-
-# --- [3. 수집 및 라우트: 보정 로직 통합] ---
+# --- [3. 수집 엔진: 이미지 갱신 로직 포함] ---
 def tel_send_message(dummy=None):
     logger.info("========================================")
-    logger.info("[수집] 대용량 동기화 및 보정 엔진 가동")
+    logger.info("[수집] 대용량 동기화 및 이미지 갱신 엔진 가동")
     logger.info("========================================")
     
     last_id = int(get_config('last_webtoon_id') or 0)
@@ -204,54 +147,91 @@ def tel_send_message(dummy=None):
                 gbun = aac[8] if len(aac) >= 9 else 'adult'
                 db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
                 
-                # 데이터 준비
+                # 데이터 매핑: (제목, 소제목, 사이트, URL, 이미지주소, 번호, 전체카운트)
                 new_data[db_t].append((aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7])))
                 update_targets.add((db_t, aac[0], aac[1]))
                 max_id = max(max_id, pid)
                 parsed_count += 1
                 
-                # [상세 로그] 어떤 데이터를 바구니에 담았는지 기록
-                logger.info(f" -> [분석성공] ID:{pid} | {aac[0]} - {aac[1]} ({gbun})")
+                logger.info(f" -> [분석] ID:{pid} | {aac[0]} - {aac[1]}")
                 
             except Exception as e:
-                logger.error(f" -> [분석실패] 메시지 파싱 에러: {e}")
+                logger.error(f" -> [실패] 파싱 에러: {e}")
                 continue
 
-        # --- [Bulk Insert 실행] ---
+        # --- [DB 저장/갱신 루프] ---
         total_saved = 0
         for db_t in ['TOON', 'TOON_NORMAL']:
             if new_data[db_t]:
                 with get_list_db() as con:
+                    # [핵심] 테이블 보장 및 유니크 인덱스 강제 적용
                     con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-                    # 2. 인덱스 생성 (여기에 넣으세요!)
+                    con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
                     con.execute(f"CREATE INDEX IF NOT EXISTS idx_{db_t}_total_count ON {db_t} (TOTAL_COUNT)")
-                    cur = con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
+                    
+                    # [핵심] INSERT OR REPLACE: 이미지 주소(WEBTOON_IMAGE)가 다르면 덮어씀
+                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
                     con.commit()
-                    count = len(new_data[db_t])
-                    total_saved += count
-                    logger.info(f" -> [DB저장] {db_t} 테이블에 {count}건 일괄 저장 완료")
+                    total_saved += len(new_data[db_t])
 
-        # --- [보정 작업] ---
         if update_targets:
-            logger.info(f" -> [보정시작] 총 {len(update_targets)}개 회차 수치 최적화 (Total Count 동기화)")
-            with get_list_db() as con:
-                for db_t, title, subtitle in update_targets:
-                    con.execute(f"""
-                        UPDATE {db_t} 
-                        SET TOTAL_COUNT = (SELECT COUNT(*) FROM {db_t} WHERE TITLE=? AND SUBTITLE=?) 
-                        WHERE TITLE=? AND SUBTITLE=?
-                    """, (title, subtitle, title, subtitle))
-                con.commit()
-            logger.info(" -> [보정완료] 모든 회차의 이미지 개수 동기화 성공")
+            db_optimize() # 즉시 보정 및 카운트 동기화 실행
 
         set_config('last_webtoon_id', max_id)
-        
-        logger.info("========================================")
-        logger.info(f"[수집종료] 새 ID: {max_id} | 분석: {parsed_count}건 | 저장: {total_saved}건")
-        logger.info("========================================")
-        db_optimize()
+        logger.info(f"[종료] 처리완료: {total_saved}건 | 최신ID: {max_id}")
     except Exception as e: 
         logger.error(f"!!! [비상] 수집 엔진 치명적 에러: {e}")
+
+# --- [4. 다운로드 및 라우트 로직 (기존 유지)] ---
+def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
+    msg = f"== [{gbun}] 다운로드 엔진 가동 =="
+    logger.info(msg)
+    db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+    
+    try:
+        with get_list_db() as con_l:
+            con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
+            query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
+            if title_filter: query += f" AND a.TITLE = '{title_filter}'"
+            query += " GROUP BY a.TITLE, a.SUBTITLE"
+            targets = con_l.execute(query).fetchall()
+            con_l.execute("DETACH DATABASE s_db")
+
+        for t_title, t_sub, t_total in targets:
+            with get_list_db() as con_l:
+                cur_l = con_l.cursor()
+                cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
+                img_list = cur_l.fetchall()
+            
+            cur_c, tar_c = len(img_list), int(t_total or 0)
+            if cur_c > 0 and cur_c >= tar_c:
+                f_path = os.path.join(WEBTOON_PATH, t_title, t_sub)
+                os.makedirs(f_path, exist_ok=True)
+                
+                sc = 0
+                for img_url, img_num in img_list:
+                    img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
+                    if not os.path.exists(img_file):
+                        try:
+                            r = requests.get(img_url, timeout=20)
+                            if r.status_code == 200:
+                                with open(img_file, 'wb') as f: f.write(r.content)
+                                sc += 1
+                        except: continue
+                
+                if sc > 0 or os.path.exists(f_path):
+                    if str(compress) == '1':
+                        ext = ".cbz" if str(cbz) == '1' else ".zip"
+                        z_name = f_path + ext
+                        with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                            for file in os.listdir(f_path): z.write(os.path.join(f_path, file), file)
+                        shutil.rmtree(f_path)
+                    
+                    with get_status_db() as con_s:
+                        con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
+                        con_s.commit()
+        logger.info(f"== [{gbun}] 다운로드 엔진 종료 ==")
+    except Exception as e: logger.error(f"Down Error: {e}")
 
 @webtoon.route('/')
 def index():
@@ -267,7 +247,7 @@ def index_list():
         cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
         if not cur.fetchone(): return render_template('webtoon_list.html', wow=[], pagination=None, gbun=gbun)
         where, param = ("WHERE TITLE LIKE ?", [f"%{search}%"]) if search else ("", [])
-        cur.execute(f"SELECT TITLE, SUBTITLE FROM {table} {where} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC LIMIT 15 OFFSET {(page-1)*15}", param)
+        cur.execute(f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {table} {where} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC LIMIT 15 OFFSET {(page-1)*15}", param)
         wow = cur.fetchall()
         cur.execute(f"SELECT COUNT(*) FROM (SELECT 1 FROM {table} {where} GROUP BY TITLE, SUBTITLE)", param)
         total = cur.fetchone()[0]
