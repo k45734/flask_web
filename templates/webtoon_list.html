@@ -1,77 +1,74 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container mt-4">
-    <center>
-        <h4 class="mb-4">웹툰 리스트 목록 ({{ '성인' if gbun == 'adult' else '일반' }})</h4>
-    </center>
+<div class="container mt-3"> <div class="text-center mb-2"> <h4 class="fw-bold">웹툰 리스트 목록 ({{ '성인' if gbun == 'adult' else '일반' }})</h4>
+    </div>
 
-    <div class="row mb-3 justify-content-center">
-        <div class="col-md-8">
-            <form action="{{ url_for('webtoon.index_list') }}" method="get">
-                <input type="hidden" name="gbun" value="{{ gbun }}">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="웹툰 제목 검색..." value="{{ search or '' }}">
-                    <button class="btn btn-primary" type="submit">검색</button>
-                    {% if search %}
-                    <a href="{{ url_for('webtoon.index_list', gbun=gbun) }}" class="btn btn-outline-secondary">초기화</a>
-                    {% endif %}
-                </div>
-            </form>
-        </div>
-    </div>
+    <div class="row mb-2 justify-content-center"> 
+        <div class="col-md-8">
+            <form action="{{ url_for('webtoon.index_list') }}" method="get">
+                <input type="hidden" name="gbun" value="{{ gbun }}">
+                <div class="input-group input-group-sm"> <input type="text" name="search" class="form-control" placeholder="웹툰 제목 검색..." value="{{ search or '' }}">
+                    <button class="btn btn-primary" type="submit">검색</button>
+                    {% if search %}
+                    <a href="{{ url_for('webtoon.index_list', gbun=gbun) }}" class="btn btn-outline-secondary">초기화</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <table class="table table-bordered shadow-sm" style="text-align: center;">
-        <thead class="table-light">
-            <tr>
-                <th>제목</th>
-                <th>회차</th>
-                <th>압축 설정</th>
-                <th>포맷</th>
-                <th>작업</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for i in wow %}
-            <tr>
-                <form action="{{ url_for('webtoon.now_down') }}" method="GET">
-                    <input type='hidden' name='gbun' value="{{ gbun }}">
-                    <input type="hidden" name="title" value="{{ i['TITLE'] }}">
-                    <input type="hidden" name="subtitle" value="{{ i['SUBTITLE'] }}">
-                    
-                    <td class="align-middle text-start px-3">{{ i['TITLE'] }}</td>
-                    <td class="align-middle text-start px-3">{{ i['SUBTITLE'] }}</td>
-                    <td class="align-middle">
-                        <select name="compress" class="form-select form-select-sm">
-                            <option value="0">압축사용</option>
-                            <option value="1" selected>안함</option>
-                        </select>
-                    </td>
-                    <td class="align-middle">
-                        <select name="cbz" class="form-select form-select-sm">
-                            <option value="0">CBZ</option>
-                            <option value="1" selected>ZIP</option>
-                        </select>
-                    </td>
-                    <td class="align-middle">
-                        <input type="submit" class="btn btn-success btn-sm w-100" value="다운">
-                    </td>
-                </form>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="py-4 text-muted">데이터가 존재하지 않습니다.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive"> <table class="table table-sm table-bordered shadow-sm" style="text-align: center;"> <thead class="table-light">
+                <tr>
+                    <th style="width: 40%;">제목</th>
+                    <th style="width: 20%;">회차</th>
+                    <th>압축 설정</th>
+                    <th>포맷</th>
+                    <th>작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in wow %}
+                <tr>
+                    <form action="{{ url_for('webtoon.now_down') }}" method="GET">
+                        <input type='hidden' name='gbun' value="{{ gbun }}">
+                        <input type="hidden" name="title" value="{{ i['TITLE'] }}">
+                        <input type="hidden" name="subtitle" value="{{ i['SUBTITLE'] }}">
+                        
+                        <td class="align-middle text-start px-3 text-truncate" style="max-width: 200px;">{{ i['TITLE'] }}</td>
+                        <td class="align-middle text-start px-3">{{ i['SUBTITLE'] }}</td>
+                        <td class="align-middle">
+                            <select name="compress" class="form-select form-select-sm">
+                                <option value="0">압축사용</option>
+                                <option value="1" selected>안함</option>
+                            </select>
+                        </td>
+                        <td class="align-middle">
+                            <select name="cbz" class="form-select form-select-sm">
+                                <option value="0">CBZ</option>
+                                <option value="1" selected>ZIP</option>
+                            </select>
+                        </td>
+                        <td class="align-middle">
+                            <input type="submit" class="btn btn-success btn-sm w-100" value="다운">
+                        </td>
+                    </form>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="py-4 text-muted">데이터가 존재하지 않습니다.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-    <div class="d-flex justify-content-center mt-4 mb-5" style="display: flex !important; justify-content: center;">
-    {% if pagination %}
-        {{ pagination.links | safe }}
-    {% else %}
-        <p style="color:red;">페이징 데이터가 전달되지 않았습니다.</p>
-    {% endif %}
-    </div>
+    <div class="d-flex justify-content-center mt-3 mb-5">
+        {% if pagination %}
+            {{ pagination.links | safe }}
+        {% else %}
+            <p style="color:red;">페이징 데이터가 전달되지 않았습니다.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
