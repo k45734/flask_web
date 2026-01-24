@@ -305,9 +305,9 @@ def alim_list():
             # 일단 샘플로 rows와 동일하게 조회하거나, 비워둘 수 있습니다.
             rows2 = rows 
 
-        return render_template('alim_list.html', rows=rows, rows2=rows2)
+        return render_template('webtoon_alim_list.html', rows=rows, rows2=rows2)
         
     except Exception as e:
         logger.error(f"Alim List Error: {e}")
         # 에러 발생 시 빈 값이라도 넘겨서 템플릿 에러 방지
-        return render_template('alim_list.html', rows=[], rows2=[])
+        return render_template('webtoon_alim_list.html', rows=[], rows2=[])
