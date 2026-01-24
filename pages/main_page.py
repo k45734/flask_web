@@ -142,8 +142,8 @@ def index():
 	tmp2 = psutil.disk_usage(root)
 	oos = platform.platform()
 	oocpu = platform.machine()
-	mem_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%)' % (sizeof_fmt(tmp[0], suffix='B'), sizeof_fmt(tmp[3], suffix='B'), sizeof_fmt(tmp[1], suffix='B'), tmp[2])
-	disk_percent = u'전체 : %s   사용량 : %s   남은량 : %s  (%s%%) - 드라이브 (%s)' % (sizeof_fmt(tmp2[0], suffix='B'), sizeof_fmt(tmp2[1], suffix='B'), sizeof_fmt(tmp2[2], suffix='B'), tmp2[3], root)
+	memory_percent = f"{psutil.virtual_memory().percent}%"
+	disk_percent = f"{psutil.disk_usage('/').percent}%"
 	sch_save = []
 	sch_list = scheduler.get_jobs()
 	for i in sch_list:

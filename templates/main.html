@@ -20,113 +20,84 @@
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <strong class="text-secondary"><i class="bi bi-info-circle me-2"></i>시스템 정보</strong>
                     <button type="button" class="btn btn-xs btn-danger shadow-sm" onclick="if(confirm('GitHub에서 최신 소스를 가져와 재시작하시겠습니까?')) location.href='/update_server'">
-                        <i class="bi bi-cloud-arrow-down-fill"></i> 업데이트 실행
+                        <i class="bi bi-cloud-arrow-down-fill"></i> 업데이트
                     </button>
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-sm mb-0 v-middle">
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
                         <tbody>
-                            <tr class="border-light">
-                                <td class="ps-3 py-2 text-muted small">현재 버전</td>
-                                <td class="pe-3 py-2 text-end">
-                                    <span class="badge bg-primary">v{{lines}}</span>
+                            <tr>
+                                <td class="ps-0 py-2 text-muted small">운영체제</td>
+                                <td class="pe-0 py-2 text-end small fw-bold">{{os_version}}</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-0 py-2 text-muted small">메모리 사용량</td>
+                                <td class="pe-0 py-2">
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <div class="progress me-2" style="width: 80px; height: 8px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ memory_percent }}"></div>
+                                        </div>
+                                        <span class="small fw-bold text-info">{{ memory_percent }}</span>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="ps-3 py-2 text-muted small">최신 버전</td>
-                                <td class="pe-3 py-2 text-end">
-                                    <span class="text-success fw-bold">{{version}}</span>
+                                <td class="ps-0 py-2 text-muted small">디스크 사용량</td>
+                                <td class="pe-0 py-2">
+                                    <div class="d-flex align-items-center justify-content-end">
+                                        <div class="progress me-2" style="width: 80px; height: 8px;">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ disk_percent }}"></div>
+                                        </div>
+                                        <span class="small fw-bold text-warning">{{ disk_percent }}</span>
+                                    </div>
                                 </td>
                             </tr>
-                            <tr><td class="ps-3 py-2 text-muted small">운영체제</td><td class="pe-3 py-2 text-end small">{{oos}}</td></tr>
-                            <tr><td class="ps-3 py-2 text-muted small">메모리</td><td class="pe-3 py-2 text-end small fw-bold">{{mem_percent.split(' ')[-1]}}</td></tr>
-                            <tr><td class="ps-3 py-2 text-muted small">디스크</td><td class="pe-3 py-2 text-end small fw-bold">{{disk_percent.split(' ')[-2]}}</td></tr>
+                            <tr>
+                                <td class="ps-0 py-2 text-muted small">로컬 IP</td>
+                                <td class="pe-0 py-2 text-end small fw-bold text-primary">{{ip_address}}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-md-6 col-lg-4 mb-2">
-            <div class="card shadow-sm border-0 h-100 bg-primary text-white overflow-hidden">
-                <div class="card-header bg-transparent border-0 py-3">
-                    <strong><i class="bi bi-graph-up-arrow me-2"></i>네트워크 트래픽</strong>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center pt-0">
-                    {% if data %}
-                        {% for row in data %} 
-                        <div class="w-100 px-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="small opacity-75">Download</span>
-                                <span class="fw-bold">{{row['DOWNLOAD']}}</span>
-                            </div>
-                            <div class="progress mb-3" style="height: 6px; background: rgba(255,255,255,0.2);">
-                                <div class="progress-bar bg-white" style="width: 70%"></div>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="small opacity-75">Upload</span>
-                                <span class="fw-bold">{{row['UPLOAD']}}</span>
-                            </div>
-                            <div class="progress" style="height: 6px; background: rgba(255,255,255,0.2);">
-                                <div class="progress-bar bg-info" style="width: 40%"></div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <div class="card-footer bg-transparent border-0 text-center pb-3">
-                    <small class="opacity-75">날짜: {{data[0]['DATE'] if data else 'N/A'}}</small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4 mb-2">
-            <div class="card shadow-sm border-0 h-100 bg-dark text-white">
-                <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-bottom border-secondary">
-                    <strong><i class="bi bi-calendar-check me-2"></i>스케줄 요약</strong>
-                    <span class="badge bg-info text-dark fw-bold">{{ sch_save|length }}</span>
-                </div>
-                <div class="card-body py-2">
-                    {% for row in sch_save[:4] %}
-                    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-secondary pb-1">
-                        <span class="small text-truncate" style="max-width: 150px;">{{row['NAME']}}</span>
-                        <span class="badge bg-secondary" style="font-size: 0.6rem;">대기중</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
+        <div class="col-12 col-lg-8 mb-2">
+            <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white py-3">
-                    <strong><i class="bi bi-list-task me-2"></i>스케줄러 매니저</strong>
+                    <strong class="text-secondary"><i class="bi bi-calendar-check me-2"></i>활성화된 스케줄</strong>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 text-center align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="py-3">작업 명칭</th>
-                                <th class="py-3">차기 실행 예정</th>
-                                <th class="py-3">관리</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in sch_save %} 
-                            <tr>
-                                <td class="fw-bold text-primary">{{row['NAME']}}</td>
-                                <td><code class="text-secondary">{{row['TIME']}}</code></td>
-                                <td>
-                                    <button class="btn btn-light btn-sm border text-danger" onclick="if(confirm('이 스케줄을 중단하시겠습니까?')) location.href='cancle/{{ row['NAME'] }}'">
-                                        <i class="bi bi-x-circle"></i> 취소
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4 py-3 border-0">작업 명칭</th>
+                                    <th class="py-3 border-0">차기 실행 예정</th>
+                                    <th class="text-center py-3 border-0">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if sch_save %}
+                                    {% for row in sch_save %} 
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-dark">{{row['NAME']}}</td>
+                                        <td><span class="badge bg-light text-secondary border fw-normal">{{row['TIME']}}</span></td>
+                                        <td class="text-center">
+                                            <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="if(confirm('이 스케줄을 중단하시겠습니까?')) location.href='cancle/{{ row['NAME'] }}'">
+                                                <i class="bi bi-stop-fill"></i> 중단
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5 text-muted small">현재 실행 중인 스케줄이 없습니다.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,10 +105,11 @@
 </div>
 
 <style>
-    @media (min-width: 1400px) { .container-xl { max-width: 1200px; } }
-    .card { border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); }
-    .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px; }
-    .progress { border-radius: 10px; }
+    body { background-color: #f8f9fa; }
+    .card { border-radius: 12px; }
+    .progress { background-color: #e9ecef; }
+    .btn-xs { padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: 6px; }
+    .table > :not(caption) > * > * { border-bottom-width: 1px; border-color: #f1f1f1; }
 </style>
 
 {% endblock %}
