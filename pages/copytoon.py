@@ -212,11 +212,22 @@ def tel_send_message(dummy=None):
     print(f"최종적으로 {current_search_id}번까지 훑었습니다.")
     print("="*50 + "\n")
 
-# --- [4. 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
+    logger.info(f"==================================================")
+    logger.info(f"== [{gbun}] 다운로드 엔진 가동 (경로 분리 모드) ==")
+    logger.info(f"==================================================")
+    print(f"\n[다운로드] {gbun} 구역 작업 시작...")
+
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+    
     try:
+        # 1. gbun 기반 최상위 경로 생성 및 확인
+        target_gbun_path = os.path.join(WEBTOON_PATH, gbun)
+        if not os.path.exists(target_gbun_path):
+            os.makedirs(target_gbun_path, exist_ok=True)
+            print(f">> [폴더생성] 새로운 구분 폴더를 만들었습니다: {target_gbun_path}")
+
+        # 2. 다운로드 대상 쿼리 (STATUS_DB와 결합)
         with get_list_db() as con_l:
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
             query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
@@ -225,43 +236,76 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             targets = con_l.execute(query).fetchall()
             con_l.execute("DETACH DATABASE s_db")
 
+        print(f">> 분석 결과: 총 {len(targets)}개의 에피소드가 대기 중입니다.")
+
         for t_title, t_sub, t_total in targets:
+            # 3. 이미지 리스트 확보
             with get_list_db() as con_l:
                 cur_l = con_l.cursor()
                 cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
                 img_list = cur_l.fetchall()
             
             cur_c, tar_c = len(img_list), int(t_total or 0)
-            # [수정] 다운로드 시작 로그 강화 (현재수/총수)
-            logger.info(f" -> [다운로드 시작] {t_title} - {t_sub} ({cur_c}/{tar_c}장)")
+            
+            # 진행 상황 판단 로그
+            status_msg = f" -> [{t_title}] {t_sub} ({cur_c}/{tar_c}장)"
+            logger.info(status_msg)
+            print(status_msg, end=" ", flush=True)
 
+            # 4. 수집 완료 여부 검사 (cur_c >= tar_c)
             if cur_c > 0 and cur_c >= tar_c:
-                f_path = os.path.join(WEBTOON_PATH, t_title, t_sub)
+                print(" -> [조건충족! 다운로드 개시]")
+                
+                # 최종 저장 경로 설정 (WEBTOON_PATH/gbun/제목/부제목)
+                f_path = os.path.join(target_gbun_path, t_title, t_sub)
                 os.makedirs(f_path, exist_ok=True)
-                sc = 0
+                
+                sc = 0 # 성공 카운트
                 for img_url, img_num in img_list:
                     img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
+                    
                     if not os.path.exists(img_file):
                         try:
                             r = requests.get(img_url, timeout=20)
                             if r.status_code == 200:
                                 with open(img_file, 'wb') as f: f.write(r.content)
                                 sc += 1
-                        except: continue
+                        except Exception as e:
+                            logger.error(f"   ! 이미지 다운로드 실패 (번호:{img_num}): {e}")
+                            continue
                 
+                # 5. 후처리 (압축 및 완료 기록)
                 if sc > 0 or os.path.exists(f_path):
                     if str(compress) == '1':
                         ext = ".cbz" if str(cbz) == '1' else ".zip"
                         z_name = f_path + ext
+                        print(f"    └ [압축] {os.path.basename(z_name)} 생성 중...", end="")
+                        
                         with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
-                            for file in os.listdir(f_path): z.write(os.path.join(f_path, file), file)
-                        shutil.rmtree(f_path)
+                            for file in os.listdir(f_path): 
+                                z.write(os.path.join(f_path, file), file)
+                        
+                        shutil.rmtree(f_path) # 원본 폴더 삭제
+                        print(" 완료!")
                     
+                    # 상태 DB 업데이트
                     with get_status_db() as con_s:
                         con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
                         con_s.commit()
+                    logger.info(f"    └ [성공] {t_title} - {t_sub} 완료 처리됨")
+            else:
+                # 조건 미달 시 이유 출력
+                shortage = tar_c - cur_c
+                print(f" -> [대기] {shortage}장 부족함 (수집 대기 중)")
+
+        print(f"\n[알림] {gbun} 구역 작업이 완료되었습니다.")
+        logger.info(f"==================================================")
         logger.info(f"== [{gbun}] 다운로드 엔진 종료 ==")
-    except Exception as e: logger.error(f"Down Error: {e}")
+        logger.info(f"==================================================")
+
+    except Exception as e: 
+        logger.error(f"!!! Down Error: {e}")
+        print(f"!!! 다운로드 중 치명적 오류 발생: {e}")
 
 # --- [5. 웹 라우트] ---
 @webtoon.route('/')
