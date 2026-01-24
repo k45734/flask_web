@@ -283,10 +283,31 @@ def start_down_route():
 
 @webtoon.route('/alim_list')
 def alim_list():
-    gbun = request.args.get('gbun', 'adult')
-    # 알림(수집 현황) 데이터를 가져오는 로직 (예시: STATUS 테이블이나 로그 테이블 조회)
-    # 여기서는 단순히 페이지를 렌더링하거나, 기존에 쓰시던 DB 조회 로직을 넣으시면 됩니다.
-    
-    # 만약 특별한 로직이 아직 없다면, 일단 리스트 페이지로 리다이렉트하거나
-    # 빈 페이지라도 띄워야 404가 안 납니다.
-    return render_template('alim_list.html', gbun=gbun)
+    try:
+        with get_status_db() as con_s:
+            con_s.row_factory = sqlite3.Row  # 컬럼명으로 접근 가능하게 설정
+            
+            # 1. 성인 웹툰(adult) 통계 조회
+            # STATUS 테이블에 별도의 구분값이 없다면 TITLE로 JOIN하거나, 
+            # 만약 구분값이 없다면 전체 현황을 rows에 넣으셔도 됩니다.
+            # 아래는 일반적인 집계 쿼리 예시입니다.
+            
+            # 성인 웹툰용 (DB 구조에 따라 수정이 필요할 수 있습니다)
+            rows = con_s.execute("""
+                SELECT 
+                    SUM(CASE WHEN COMPLETE = 'False' THEN 1 ELSE 0 END) as 'False',
+                    SUM(CASE WHEN COMPLETE = 'True' THEN 1 ELSE 0 END) as 'True',
+                    COUNT(*) as TOTAL 
+                FROM STATUS
+            """).fetchall() # 실제 운영 환경에 맞춰 테이블이나 조건을 분리하세요.
+
+            # 2. 일반 웹툰용 (만약 별도의 테이블이나 구분이 있다면 사용)
+            # 일단 샘플로 rows와 동일하게 조회하거나, 비워둘 수 있습니다.
+            rows2 = rows 
+
+        return render_template('alim_list.html', rows=rows, rows2=rows2)
+        
+    except Exception as e:
+        logger.error(f"Alim List Error: {e}")
+        # 에러 발생 시 빈 값이라도 넘겨서 템플릿 에러 방지
+        return render_template('alim_list.html', rows=[], rows2=[])
