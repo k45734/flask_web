@@ -1,92 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 750px;">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-cloud-sun me-2"></i> 날씨 정보 알림 서비스</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-primary">알림 받을 지역</label>
+                        <input type="text" class="form-control form-control-lg border-primary" name="location" value="{{location}}" placeholder="예: 서울, 부산, 대전">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">실행 주기</label>
+                        <input type="text" class="form-control form-control-lg" name="start_time" value="{{ start_time }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">텔레그램 토큰</label>
+                        <input type="text" class="form-control" name="telgm_token" value="{{ telgm_token }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">텔레그램 아이디</label>
+                        <input type="text" class="form-control" name="telgm_botid" value="{{ telgm_botid }}">
+                    </div>
 
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>날씨알림서비스</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="POST">
-
-<thead>
-  <tr>
-    <th class="tg-baqh" colspan="2">날씨알림서비스</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-baqh">텔레그램알림</td>
-    <td class="tg-0lax"><select name="telgm">
-	<option value="{{ telgm }}">{{ telgm }}</option>
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램무음</td>
-    <td class="tg-0lax"><select name="telgm_alim">
-	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
-    <option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램토큰</td>
-    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램아이디</td>
-    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="weather" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">지역</td>
-    <td class="tg-0lax"><input type="text" name="location" value="{{location}}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">알림시작시간</td>
-    <td class="tg-0lax"><input type="text" name="start_time2" value="{{start_time2}}" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림종료시간</td>
-    <td class="tg-0lax"><input type="text" name="end_time" value="{{end_time}}" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='weather_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-</th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">알림 시작 시간</label>
+                        <input type="text" class="form-control" name="start" value="{{ start }}" placeholder="08:00">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">알림 종료 시간</label>
+                        <input type="text" class="form-control" name="end" value="{{ end }}" placeholder="22:00">
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow">날씨 알림 서버 등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,16 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-
-<html>
-
-<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <head>
-      
-    </head>
-    <body> <br><br>{% for i in msg %}
-       <center>{{i}}<br>{% endfor %}<br><br><a href="javascript:window.history.back();">뒤로가기</a></center>
-    </body>
-</html>
-
+<div class="container mt-5 pt-5 text-center">
+    <div class="card border-0 shadow mx-auto" style="max-width: 500px; border-radius: 20px;">
+        <div class="card-body p-5">
+            <div class="mb-4">
+                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="fw-bold mb-4">알림</h3>
+            <div class="p-3 bg-light rounded mb-4">
+                {% for i in msg %}
+                <p class="mb-1 fw-bold text-dark">{{ i }}</p>
+                {% endfor %}
+            </div>
+            <a href="javascript:window.history.back();" class="btn btn-primary btn-lg w-100 rounded-pill shadow">
+                <i class="fas fa-arrow-left me-2"></i>이전 화면으로
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}

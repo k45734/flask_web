@@ -1,66 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 700px; border-radius: 20px;">
+        <div class="card-header bg-gradient text-white text-center py-4" style="background: #6610f2;">
+            <h4 class="mb-0"><i class="fas fa-paint-brush me-2"></i> 아이들 색칠공부 다운로더</h4>
+        </div>
+        <div class="card-body p-4 p-md-5">
+            <form method="POST">
+                <div class="mb-4">
+                    <label class="form-label fw-bold"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
+                    <input type="text" class="form-control form-control-lg border-2" name="start_time" value="{{ start_time }}" placeholder="*/1 * * * *">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold"><i class="fas fa-tag me-1"></i> 스케줄 이름</label>
+                    <input type="text" class="form-control bg-light border-0" name="startname" value="funmom" readonly>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold"><i class="fas fa-play-circle me-1"></i> 실행 모드 선택</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="now" id="mode1" value="True" checked>
+                            <label class="btn btn-outline-primary w-100 py-3 fw-bold" for="mode1">📅 예약 실행</label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="now" id="mode2" value="False">
+                            <label class="btn btn-outline-danger w-100 py-3 fw-bold" for="mode2">🚀 즉시 실행</label>
+                        </div>
+                    </div>
+                </div>
 
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>아이들색칠공부다운로더</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="POST">
-
-<thead>
-  <tr>
-    <th class="tg-baqh" colspan="2">아이들색칠공부다운로더</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}"  style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="funmom" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-
-<tr>
-
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='funmom_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-</th>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<thead>
-<tr>
-<th align="center" class="tg-0lax">다운실패</th>
-<th align="center" class="tg-0lax">다운완료</th>
-</tr>
-<tr>
-<td align="center" class="tg-0lax">{{ rows[0] }}</td>
-<td align="center" class="tg-0lax">{{ rows[1] }}</td>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-lg text-white shadow" style="background: #6610f2; border-radius: 12px;">
+                        설정 저장 및 시작하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

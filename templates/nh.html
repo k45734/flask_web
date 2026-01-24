@@ -1,94 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>농협택배 예약및 조회</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<form method="get|post">
-<thead>
-{% if session.get('logFlag') %}
-  <tr>
-    <th align="center" class="tg-baqh">농협택배 아이디</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ nh_id }}' name="nh_id" style="width:100%; border: 0;" ></td>
-  </tr>
-
-  <tr>
-    <th align="center" class="tg-baqh">농협택배 비밀번호</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="password" value='{{ nh_pwd }}' name="nh_pwd" style="width:100%; border: 0;" ></td>
-  </tr>
-
-  <tr>
-    <th align="center" class="tg-baqh">보내는사람</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndNm }}' name="sndNm" style="width:100%; border: 0;" ></td>
-  </tr>
-
-<tr>
-    <th align="center" class="tg-baqh">보내는사람 휴대폰번호</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndHpno }}' name="sndHpno" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-    <th align="center" class="tg-baqh">보내는사람 주소</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndAddr }}' name="sndAddr" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">보내는사람 상세주소</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value='{{ sndAddrDtl }}' name="sndAddrDtl" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr><td align="center" class="tg-baqh" colspan="2"><br></td></tr>
-
- {% endif %} 
-  <tr>
-    <th align="center" class="tg-baqh">받는사람</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvNm" style="width:100%; border: 0;" ></td>
-  </tr>
-
-<tr>
-    <th align="center" class="tg-baqh">받는사람 휴대폰번호</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvHpno" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-    <th align="center" class="tg-baqh">받는사람 주소</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvAddr" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">받는사람 상세주소</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="rcvAddrDtl" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">물품명</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="prodNm" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-    <th align="center">택배요금</th>
-    <td class="tg-baqh"><select name="priceTypeNm">
-	<option value="선불">선불(미리계산)</option>
-    <option value="착불">착불</option>
-    </td>
-</tr>
-<tr>
-    <th align="center">박스무게</th>
-    <td class="tg-baqh"><select name="boxType">
-	<option value="01">5KG 이하</option>
-    <option value="02">5KG 이상</option>
-    </td>
-</tr>
-<tr>
-<td align="center" class="tg-baqh" colspan="2">
-<input type="submit" value="택배예약(퀵)" onclick="javascript: form.action='nh_add';">
-{% if session.get('logFlag') %}
-<input type="button" value="택배예약보기" onclick="location.href='index_list'">
-<input type="submit" value="기본정보입력" onclick="javascript: form.action='nh_login';">
-{% endif %}
-</td>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
-</thead>
-</center>
-
+<div class="container mt-5">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>농협택배 예약 및 조회</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="row g-3">
+                    {% if session.get('logFlag') %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">농협택배 아이디</label>
+                        <input type="text" class="form-control" value="{{ nh_id }}" name="nh_id">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">비밀번호</label>
+                        <input type="password" class="form-control" value="{{ nh_pwd }}" name="nh_pwd">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">보내는 사람</label>
+                        <input type="text" class="form-control" value="{{ sndNm }}" name="sndNm">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">받는사람 성함</label>
+                        <input type="text" class="form-control" name="rcvNm" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">연락처</label>
+                        <input type="text" class="form-control" name="rcvHpno" placeholder="010-0000-0000">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold">받는사람 주소</label>
+                        <input type="text" class="form-control mb-2" name="rcvAddr" placeholder="기본주소">
+                        <input type="text" class="form-control" name="rcvAddrDtl" placeholder="상세주소">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">물품명</label>
+                        <input type="text" class="form-control" name="prodNm">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">택배요금</label>
+                        <select class="form-select" name="priceTypeNm">
+                            <option value="선불">선불</option>
+                            <option value="착불">착불</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">박스무게</label>
+                        <select class="form-select" name="boxType">
+                            <option value="2">5kg이하</option>
+                            <option value="3">10kg이하</option>
+                            <option value="4">20kg이하</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">예약하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

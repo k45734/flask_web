@@ -1,64 +1,61 @@
 {% extends "base.html" %}
 {% block content %}
-<html>
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-tools me-2"></i>프로그램 상세 설정 수정</h4>
+        </div>
+        <div class="card-body p-4 text-start">
+            <form action="/sub3/edit_result/{{ FLASKAPPSNAME }}" method="POST">
+                <h5 class="border-bottom pb-2 mb-3 text-primary">기본 설정</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">프로그램명</label>
+                        <input type="text" class="form-control bg-light" name="FLASKAPPSNAME" value="{{ FLASKAPPSNAME }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">실행 명령</label>
+                        <input type="text" class="form-control border-primary" name="FLASKAPPS" value="{{ FLASKAPPS }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">시간 (CRON)</label>
+                        <input type="text" class="form-control border-primary" name="FLASKTIME" value="{{ FLASKTIME }}">
+                    </div>
+                </div>
 
-<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <head>
-      
-    </head>
-    <body>
-<!-- edit.html -->
-<div class="col-4 d-flex justify-content-center">
-<br><center><h4>프로그램 수정</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<form action="/sub3/edit_result/{{ FLASKAPPSNAME }}" method="POST">
-<center>
-<tr>
-<th align="center">프로그램명</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKAPPSNAME" value="{{ FLASKAPPSNAME }}" readonly></td>
-</tr>
-<tr>
-<th align="center">실행</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKAPPS" value="{{ FLASKAPPS }}"></td>
-</tr>
-<tr>
-<th align="center">시간(CRON)</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
-</tr>
-<tr>
-<th colspan="4">텔레그램</th>
-</tr>
-<tr>
-<th align="center">알림</th>
-<th align="center">아이디</th>
-<th align="center">토큰</th>
-<th align="center">사용</th>
-</tr>
-<tr>
-<td align="center"><select name="FLASKALIM">
-    <option value="{{ FLASKALIM }}">{{ FLASKALIM }}</option>
-    <option value="False">무음</option>
-    <option value="True">소리</option>
-</select></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKBOTID" value="{{ FLASKBOTID }}"></td>
-<td align="center"><input type="text" style="width:100%; border: 0;" name="FLASKTOKEN" value="{{ FLASKTOKEN }}"></td>
-
-<td align="center"><select name="FLASKTELGM">
-    <option value="{{ FLASKTELGM }}">{{ FLASKTELGM }}</option>
-    <option value="True">사용</option>
-    <option value="False">안함</option>
-</select></td>
-</tr>
-<tr>
-<td align="center" colspan="8"><input type="submit" value="수정"><input type="button" value="취소" onclick="history.back(-1);">
-</tr>
-</table>
-</center>
+                <h5 class="border-bottom pb-2 mb-3 text-info">텔레그램 알림 설정</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">알림 모드</label>
+                        <select class="form-select" name="FLASKALIM">
+                            <option value="{{ FLASKALIM }}">{{ '소리알림' if FLASKALIM == 'True' else '무음' }} (현재)</option>
+                            <option value="False">무음</option>
+                            <option value="True">소리알림</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">아이디</label>
+                        <input type="text" class="form-control" name="FLASKBOTID" value="{{ FLASKBOTID }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">토큰</label>
+                        <input type="text" class="form-control" name="FLASKTOKEN" value="{{ FLASKTOKEN }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">사용 여부</label>
+                        <select class="form-select" name="FLASKTELGM">
+                            <option value="{{ FLASKTELGM }}">{{ FLASKTELGM }}</option>
+                            <option value="True">사용</option>
+                            <option value="False">미사용</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">수정 내용 저장</button>
+                    <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-lg px-5">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-</form>
-</body>
-</html>
 {% endblock %}
-
-{# <input type="text" style="width:100%; border: 0;" name="FLASKALIM" value="{{FLASKALIM}}"/></td> #}

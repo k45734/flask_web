@@ -1,89 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>RCLONE</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<form action="start" method="POST">
-<thead>
-  <tr>
-    <th align="center" class="tg-baqh">RCLONE 설정파일</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_CONFIG" placeholder="RCLONE_CONFIG" style="width:100%; border: 0;" ></td>
-  </tr>
-<tbody>
-  <tr>
-    <th align="center">COPY or MOVE</th>
-    <td class="tg-baqh"><select name="RCLONE_C_M">
-	<option value="copy">COPY</option>
-    <option value="move">MOVE</option>
-    </td>
-</tr>
-  <tr>
-    <th align="center">폴더없으면생성</th>
-    <td class="tg-baqh"><select name="CREATE_F">
-	<option value="True">네</option>
-    <option value="False">아니요</option>
-	
-    </td>
-</tr>
-  <tr>
-    <th align="center">작업후폴더삭제</th>
-    <td class="tg-baqh"><select name="DELETE_F">
-	<option value="True">네</option>
-    <option value="False">아니요</option>
-    </td>
-</tr>
-<tr>
-    <th align="center" class="tg-baqh">RCLONE_INCLUDE</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_include" placeholder="RCLONE_include" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-<th align="center">RCLONE_ETC</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="ETC" value="{{ ETC }}"></td>
-</tr>
-<tr>
-    <th align="center" class="tg-baqh">RCLONE_UPLOAD</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value="128K" name="RCLONE_UPLOAD" placeholder="RCLONE_UPLOAD" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">설정이름</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONENAME" placeholder="RCLONENAME" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">로컬드라이브</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_LOCAL" placeholder="RCLONE_LOCAL" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-    <th align="center" class="tg-baqh">원격드라이브</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RCLONE_REMOTE" placeholder="RCLONE_REMOTE" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">시간(CRON)</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value="*/1 * * * *" name="FLASKTIME" placeholder="FLASKTIME" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-<th align="center" colspan="8" ><input type="submit" value="추가"></th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
-	<center><h4>목록보기</p>
-	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-		<thead>
-		{% for row in rows %}
-  <tr>
-    <th align="center" class="tg-0lax">프로그램명</th>
-    <td align="center" class="tg-0lax" colspan="2">{{ row["RCLONENAME"] }}</td>
-    <td align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok/{{ row["RCLONENAME"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["RCLONENAME"] }}'"><input type="button" value="수정" onClick="location.href='edit/{{ row["RCLONENAME"] }}'"><input type="button" value="바로실행" onClick="location.href='now/{{ row["RCLONENAME"] }}'"></th>
-  </tr>
-</thead>
-		
-		{% endfor %}
- 
-</center>
-
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white text-center"><h4>☁️ RCLONE 클라우드 설정</h4></div>
+        <div class="card-body bg-light">
+            <form action="start" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">프로그램명</label>
+                        <input type="text" class="form-control" name="RCLONENAME" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">작업 유형</label>
+                        <select class="form-select" name="RCLONE_C_M">
+                            <option value="copy">복사 (Copy)</option>
+                            <option value="move">이동 (Move)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">실행 주기(Cron)</label>
+                        <input type="text" class="form-control" name="FLASKTIME" value="*/1 * * * *">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">로컬 경로</label>
+                        <input type="text" class="form-control" name="RCLONE_LOCAL" placeholder="/data/local/...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">원격 경로</label>
+                        <input type="text" class="form-control" name="RCLONE_REMOTE" placeholder="drive:remote/...">
+                    </div>
+                </div>
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-dark px-5">새 작업 등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

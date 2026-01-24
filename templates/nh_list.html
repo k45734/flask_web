@@ -1,52 +1,54 @@
 {% extends "base.html" %}
 {% block content %}
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-
-<center><h4>리스트 목록</p>
-<thead>
-<tr>
-<th align="center" class="tg-baqh">이름</th>
-<th align="center" class="tg-baqh">연락처</th>
-{% if session.get('logFlag') %}
-<th align="center" class="tg-baqh">주소</th>
-<th align="center" class="tg-baqh">상세주소</th>
-{% endif %}
-<th align="center" class="tg-baqh">선불/후불</th>
-<th align="center" class="tg-baqh" >예약번호</th>
-<th align="center" class="tg-baqh">예약날짜</th>
-<th align="center" class="tg-baqh">예약수정</th>
-<th align="center" class="tg-baqh">예약취소</th>
-</tr>
-{% for i in wow %}
-<tr>
-{% if session.get('logFlag') %}
-<th align="center" class="tg-0lax"><input type="text" name="rcvNm" value="{{ i['rcvNm'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="text" name="rcvHpno" value="{{ i['rcvHpno'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="text" name="rcvAddr" value="{{ i['rcvAddr'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="text" name="rcvAddrDtl" value="{{ i['rcvAddrDtl'] }}" style="width:100%; border: 0;" readonly></th>
-{% else %}
-<th align="center" class="tg-0lax"><input type="text" name="rcvNm" value="{{ i['rcvNm'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="password" name="rcvHpno" value="{{ i['rcvHpno'] }}" style="width:100%; border: 0;" readonly></th>
-{% endif %}
-
-<th align="center" class="tg-0lax"><input type="text" name="priceTypeNm" value="{{ i['priceTypeNm'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="text" name="rsvNo" value="{{ i['rsvNo'] }}" style="width:100%; border: 0;" readonly></th>
-<th align="center" class="tg-0lax"><input type="text" name="date" value="{{ i['date'] }}" style="width:100%; border: 0;" readonly></th>
-{% if session.get('logFlag') %}
-<th align="center" class="tg-0lax"><input type="button" value="예약수정" onclick="location.href='{{i['rsvNo']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['priceTypeNm']}}/nh_edit'"></th>
-<th align="center" class="tg-0lax"><input type="button" value="예약취소" onclick="location.href='{{i['rsvNo']}}/{{i['rcvNm']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['prodNm']}}/{{i['priceTypeNm']}}/{{i['date']}}/nh_del'"></th>
-{% else %}
-<th align="center" class="tg-0lax">예약수정</th>
-<th align="center" class="tg-0lax">예약취소</th>
-{% endif %}
-</tr>
-{% endfor %}
-</center>
-</tr>
-</tbody>
-</table>
-{{ pagination.links | safe }}
+<div class="container-fluid mt-4 px-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0"><i class="fas fa-list-ul me-2"></i>택배 리스트 목록</h4>
+            <span class="badge bg-primary">Total: {{ wow|length }}</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>이름</th>
+                            <th>연락처</th>
+                            {% if session.get('logFlag') %}
+                            <th>주소</th>
+                            {% endif %}
+                            <th>요금</th>
+                            <th>예약번호</th>
+                            <th>날짜</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in wow %}
+                        <tr>
+                            <td class="fw-bold">{{ i['rcvNm'] }}</td>
+                            <td>{{ i['rcvHpno'] }}</td>
+                            {% if session.get('logFlag') %}
+                            <td class="text-start small">{{ i['rcvAddr'] }} {{ i['rcvAddrDtl'] }}</td>
+                            {% endif %}
+                            <td>
+                                <span class="badge {{ 'bg-success' if i['priceTypeNm'] == '선불' else 'bg-warning text-dark' }}">
+                                    {{ i['priceTypeNm'] }}
+                                </span>
+                            </td>
+                            <td><code class="text-primary">{{ i['rsvNo'] }}</code></td>
+                            <td class="small text-muted">{{ i['date'] }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{i['rsvNo']}}/{{i['rcvHpno']}}/{{i['rcvAddr']}}/{{i['rcvAddrDtl']}}/{{i['priceTypeNm']}}/nh_edit" class="btn btn-outline-secondary">수정</a>
+                                    <a href="{{i['rsvNo']}}/nh_del" class="btn btn-outline-danger" onclick="return confirm('취소하시겠습니까?')">취소</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

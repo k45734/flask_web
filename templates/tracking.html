@@ -1,139 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>택배알림서비스</p>
-
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="get|post">
-
-<thead>
-  <tr>
-    <th class="tg-baqh" colspan="2">택배알림서비스</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-baqh">텔레그램알림</td>
-    <td class="tg-0lax"><select name="telgm">
-	<option value="{{ telgm }}">{{ telgm }}</option>
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램무음</td>
-    <td class="tg-0lax"><select name="telgm_alim">
-	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
-    <option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-    <td class="tg-baqh">텔레그램토큰</td>
-    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램아이디</td>
-    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="track" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림시작시간</td>
-    <td class="tg-0lax"><input type="text" name="start_time2" value="{{start_time2}}" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림종료시간</td>
-    <td class="tg-0lax"><input type="text" name="end_time" value="{{end_time}}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">택배사</td>
-    <td class="tg-0lax"><select name="carrier_id">
-    <option value="DHL">DHL</option>
-<option value="Sagawa">Sagawa</option>
-<option value="Kuroneko Yamato">Kuroneko Yamato</option>
-<option value="Japan Post">Japan Post</option>
-<option value="천일택배">천일택배</option>
-<option value="CJ대한통운">CJ대한통운</option>
-<option value="CU 편의점택배">CU 편의점택배</option>
-<option value="GS Postbox 택배">GS Postbox 택배</option>
-<option value="CWAY (Woori Express)">CWAY (Woori Express)</option>
-<option value="대신택배">대신택배</option>
-<option value="우체국 택배">우체국 택배</option>
-<option value="한의사랑택배">한의사랑택배</option>
-<option value="한진택배">한진택배</option>
-<option value="합동택배">합동택배</option>
-<option value="홈픽">홈픽</option>
-<option value="한서호남택배">한서호남택배</option>
-<option value="일양로지스">일양로지스</option>
-<option value="경동택배">경동택배</option>
-<option value="건영택배">건영택배</option>
-<option value="로젠택배">로젠택배</option>
-<option value="롯데택배">롯데택배</option>
-<option value="SLX">SLX</option>
-<option value="성원글로벌카고">성원글로벌카고</option>
-<option value="TNT">TNT</option>
-<option value="EMS">EMS</option>
-<option value="Fedex">Fedex</option>
-<option value="UPS">UPS</option>
-<option value="USPS">USPS</option>
-<option value="Cainiao">Cainiao</option>
-<option value="LTL">LTL</option>
-<option value="롯데국제택배">롯데국제택배</option>
-<option value="LX 판토스">LX 판토스</option>
-<option value="오늘의픽업">오늘의픽업</option>
-<option value="우체국EMS">우체국EMS</option>
-<option value="쿠팡">쿠팡</option>
-	</td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">송장번호</td>
-    <td class="tg-0lax"><input type="text" name="track_id" placeholder="송장번호" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">물품명</td>
-    <td class="tg-0lax"><input type="text" name="box_nun" placeholder="물품명" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='tracking/tracking_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-<input type="submit" value="추가" onclick="javascript: form.action='tracking/tracking_add';">
-<input type="submit" value="목록보기" onclick="javascript: form.action='tracking_list';">
-
-</th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table>
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 700px;">
+        <div class="card-header bg-info text-white text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-search-location me-2"></i>택배 알림 서비스 등록</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">택배사 선택</label>
+                    <select class="form-select border-info" name="parcel">
+                        <option value="CJ대한통운">CJ대한통운</option>
+                        <option value="우체국택배">우체국택배</option>
+                        <option value="한진택배">한진택배</option>
+                        <option value="롯데택배">롯데택배</option>
+                        <option value="로젠택배">로젠택배</option>
+                        <option value="CU 편의점택배">CU 편의점택배</option>
+                        <option value="GS25 편의점택배">GS25 편의점택배</option>
+                        <option value="경동택배">경동택배</option>
+                        <hr>
+                        <option value="EMS">EMS / 우체국EMS</option>
+                        <option value="Fedex">Fedex</option>
+                        <option value="UPS">UPS</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">송장번호</label>
+                    <input type="text" class="form-control border-info" name="track_id" placeholder="숫자만 입력하세요" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">물품 별칭</label>
+                    <input type="text" class="form-control border-info" name="box_name" placeholder="예: 아이폰 15, 영양제 등">
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-info text-white btn-lg fw-bold">추적 시작하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

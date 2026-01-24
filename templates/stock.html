@@ -1,75 +1,68 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-5 border-0">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">➕ 신규 재고 등록</h5>
+        </div>
+        <div class="card-body">
+            <form action="start" method="POST" class="row g-3">
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="MY_DATE" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="PRODUCT_NAME" placeholder="상품명" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control text-primary" name="RECEIVING" placeholder="입고량">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" class="form-control text-danger" name="SHIPPING" placeholder="출고량">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">추가</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>재고관리추가</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<form action="start" method="POST">
-
-<thead>
-  <tr>
-    <th align="center" class="tg-baqh">날짜</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="date" name="MY_DATE" placeholder="날짜" style="width:100%; border: 0;" ></td>
-  </tr>
-<tbody>
-  <tr>
-    <th align="center" class="tg-baqh">상품명</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="PRODUCT_NAME" placeholder="상품명" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">입고</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="RECEIVING" placeholder="입고" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">출고</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="SHIPPING" placeholder="출고" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">합계</th>
-    <td align="center" class="tg-baqh"><input type="text" name="TOTAL" placeholder="자동입력" style="width:100%; border: 0;" readonly ></td>
-  </tr>
-<tr>
-<th align="center" colspan="8"><input type="submit" value="추가"></th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
-	<center><h4>재고현황</p>
-	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-		<thead>		
-  <tr>
-	<th align="center" class="tg-0lax">번호</th>
-    <th align="center" class="tg-0lax">날짜</th>
-    <th align="center" class="tg-0lax">상품명</th>
-    <th align="center" class="tg-0lax">입고</th>
-    <th align="center" class="tg-0lax">출고</th>
-    <th align="center" class="tg-0lax">합계</th>
-	<th align="center" class="tg-0lax">동작</th>
-  </tr>
-  {% for row in rows %}
-	<tr>
-	<td align="center" class="tg-0lax">{{ row["idx"] }}</td>
-	<td align="center" class="tg-0lax">{{ row["MY_DATE"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["PRODUCT_NAME"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["RECEIVING"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["SHIPPING"] }}</td>
-    <td align="center" class="tg-0lax">{{ row["TOTAL"] }}</td>
-	<td align="center"><input type="button" value="수정" onClick="location.href='edit?idx={{ row["idx"] }}&MY_DATE={{ row["MY_DATE"] }}&PRODUCT_NAME={{ row["PRODUCT_NAME"] }}&SHIPPING={{ row["SHIPPING"] }}&RECEIVING={{ row["RECEIVING"] }}&TOTAL={{ row["TOTAL"] }}'">
-	<input type="button" value="삭제" onClick="location.href='databasedel/{{ row["idx"] }}'"></td>
-  </tr>
-</thead>
-		
-		{% endfor %}
-
-</center>
-</table>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<thead>	
-<tr>
-<th align="center" class="tg-0lax"><input type="button" value="백업만들기" onClick="location.href='csv_import'">
-<input type="button" value="백업다운로드" onClick="location.href='csv_download'"></th>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom py-3">
+            <h4 class="mb-0 text-dark fw-bold">📊 재고 현황 마스터</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle text-center mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>번호</th>
+                        <th>날짜</th>
+                        <th>상품명</th>
+                        <th class="text-primary">입고</th>
+                        <th class="text-danger">출고</th>
+                        <th class="fw-bold">현재고</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row["idx"] }}</td>
+                        <td class="small">{{ row["MY_DATE"] }}</td>
+                        <td class="fw-bold">{{ row["PRODUCT_NAME"] }}</td>
+                        <td class="text-primary">+{{ row["RECEIVING"] }}</td>
+                        <td class="text-danger">-{{ row["SHIPPING"] }}</td>
+                        <td class="bg-light fw-bold">{{ row["TOTAL"] }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="edit?idx={{ row['idx'] }}&MY_DATE={{ row['MY_DATE'] }}&PRODUCT_NAME={{ row['PRODUCT_NAME'] }}&SHIPPING={{ row['SHIPPING'] }}&RECEIVING={{ row['RECEIVING'] }}&TOTAL={{ row['TOTAL'] }}" class="btn btn-outline-dark">수정</a>
+                                <a href="del?idx={{ row['idx'] }}" class="btn btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

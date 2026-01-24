@@ -1,71 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-primary text-white"><h5>🚀 프로그램 추가</h5></div>
+        <div class="card-body">
+            <form action="start" method="POST" class="row g-2">
+                <div class="col-md-3"><input type="text" class="form-control" name="FLASKAPPSNAME" placeholder="프로그램명"></div>
+                <div class="col-md-3"><input type="text" class="form-control" name="FLASKAPPS" placeholder="실행 경로/명령"></div>
+                <div class="col-md-2"><input type="text" class="form-control text-center" value="*/1 * * * *" name="FLASKTIME"></div>
+                <div class="col-md-2">
+                    <select class="form-select" name="FLASKALIM">
+                        <option value="True">무음</option>
+                        <option value="False">소리알림</option>
+                    </select>
+                </div>
+                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">추가</button></div>
+            </form>
+        </div>
+    </div>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>프로그램 추가</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center>
-<form action="start" method="POST">
-<thead>
-  <tr>
-    <th align="center" class="tg-baqh">프로그램명</td>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPSNAME" placeholder="FLASKAPPSNAME" style="width:100%; border: 0;" ></td>
-  </tr>
-<tbody>
-  <tr>
-    <th align="center" class="tg-baqh">실행</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" name="FLASKAPPS" placeholder="FLASKAPPS" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">시간(CRON)</th>
-    <td align="center" class="tg-baqh" colspan="2"><input type="text" value="*/1 * * * *" name="FLASKTIME" placeholder="FLASKTIME" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh" rowspan="4">텔레그램</th>
-    <th align="center" class="tg-baqh">사용</th>
-    <td align="center" class="tg-baqh"><select name="FLASKTELGM">
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    
-</select></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">토큰</th>
-    <td align="center" class="tg-baqh"><input type="text" name="FLASKTOKEN" placeholder="FLASKTOKEN" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">아이디</th>
-    <td align="center" class="tg-baqh"><input type="text" name="FLASKBOTID" placeholder="FLASKBOTID" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <th align="center" class="tg-baqh">알림</th>
-    <td align="center" class="tg-baqh"><select name="FLASKALIM">
-    <option value="True">무음</option>
-    <option value="False">소리</option>
-</select></td>
-  </tr>
-<tr>
-<th align="center" colspan="8" ><input type="submit" value="추가"></th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
-	<center><h4>목록보기</p>
-	<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-		<thead>
-		{% for row in rows %}
-  <tr>
-    <th align="center" class="tg-0lax">프로그램명</th>
-    <td align="center" class="tg-0lax" colspan="2">{{ row["FLASKAPPSNAME"] }}</td>
-    <td align="center" class="tg-0lax" colspan="3"><input type="button" value="실행" onClick="location.href='ok/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="삭제" onClick="location.href='databasedel/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="수정" onClick="location.href='edit/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="바로실행" onClick="location.href='now/{{ row["FLASKAPPSNAME"] }}'"><input type="button" value="프로세스종료" onClick="location.href='kill/{{ row["FLASKAPPSNAME"] }}'"></th>
-  </tr>
-</thead>
-		
-		{% endfor %}
- 
-</center>
-
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for row in rows %}
+        <div class="col">
+            <div class="card h-100 border-start border-4 border-primary shadow-sm">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title fw-bold mb-1">{{ row["FLASKAPPSNAME"] }}</h5>
+                        <p class="text-muted small mb-0">{{ row["FLASKTIME"] }}</p>
+                    </div>
+                    <div class="btn-group">
+                        <a href="ok/{{ row['FLASKAPPSNAME'] }}" class="btn btn-success btn-sm">실행</a>
+                        <a href="no/{{ row['FLASKAPPSNAME'] }}" class="btn btn-danger btn-sm">중지</a>
+                        <a href="del/{{ row['FLASKAPPSNAME'] }}" class="btn btn-light btn-sm">삭제</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

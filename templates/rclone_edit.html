@@ -1,81 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
-<html>
+<div class="container mt-5">
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white text-center py-3">
+            <h4 class="mb-0"><i class="fas fa-sync-alt me-2"></i> RCLONE 작업 수정</h4>
+        </div>
+        <div class="card-body p-4">
+            <form action="/rclone/edit_result/{{ RCLONENAME }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">프로그램명 (중복불가)</label>
+                        <input type="text" class="form-control bg-light font-monospace" name="RCLONENAME" value="{{ RCLONENAME }}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">작업 유형</label>
+                        <select class="form-select border-primary" name="RCLONE_C_M">
+                            <option value="{{ RCLONE_C_M }}">{{ RCLONE_C_M }} (현재)</option>
+                            <option value="copy">COPY</option>
+                            <option value="move">MOVE</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">폴더 자동생성</label>
+                        <select class="form-select" name="CREATE_F">
+                            <option value="{{ CREATE_F }}">{{ '네' if CREATE_F == 'True' else '아니요' }}</option>
+                            <option value="True">네</option>
+                            <option value="False">아니요</option>
+                        </select>
+                    </div>
 
-<meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <head>
-      
-    </head>
-    <body>
-<!-- edit.html -->
-<div class="col-4 d-flex justify-content-center">
-<br><center><h4>프로그램 수정</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<form action="/rclone/edit_result/{{ RCLONENAME }}" method="POST">
-<center>
-<tr>
-<th align="center">프로그램명</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONENAME" value="{{ RCLONENAME }}" readonly></td>
-</tr>
-  <tr>
-    <th align="center">COPY or MOVE</th>
-    <td class="tg-baqh"><select name="RCLONE_C_M">
-	<option value="{{ RCLONE_C_M }}">{{ RCLONE_C_M }}</option>
-	<option value="copy">COPY</option>
-    <option value="move">MOVE</option>
-    </td>
-</tr>
-  <tr>
-    <th align="center">폴더없으면생성</th>
-    <td class="tg-baqh"><select name="CREATE_F">
-	<option value="{{ CREATE_F }}">{{ CREATE_F }}</option>
-	<option value="True">네</option>
-    <option value="False">아니요</option>
-	
-    </td>
-</tr>
-  <tr>
-    <th align="center">작업후폴더삭제</th>
-    <td class="tg-baqh"><select name="DELETE_F">
-	<option value="{{ DELETE_F }}">{{ DELETE_F }}</option>
-	<option value="True">네</option>
-    <option value="False">아니요</option>
-    </td>
-</tr>
-<tr>
-<th align="center">RCLONE_INCLUDE</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_include" value="{{ RCLONE_include }}"></td>
-</tr>
-<tr>
-<th align="center">RCLONE_ETC</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="ETC" value="{{ ETC }}"></td>
-</tr>
-<tr>
-<th align="center" class="tg-baqh">RCLONE_UPLOAD</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_UPLOAD" value="{{ RCLONE_UPLOAD }}" ></td>
-</tr>
-<tr>
-<th align="center">설정파일</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_CONFIG" value="{{ RCLONE_CONFIG }}"></td>
-<tr>
-<th align="center">로컬경로</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_LOCAL" value="{{ RCLONE_LOCAL }}"></td>
-<tr>
-<th align="center">원격경로</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="RCLONE_REMOTE" value="{{ RCLONE_REMOTE }}"></td>
-</tr>
-<tr>
-<th align="center">시간(CRON)</th>
-<td align="center" colspan="8"><input type="text" style="width:100%; border: 0;" name="FLASKTIME" value="{{ FLASKTIME }}"/></td>
-</tr>
-<tr>
-<td align="center" colspan="8"><input type="submit" value="수정"><input type="button" value="취소" onclick="history.back(-1);">
-</tr>
-</table>
-</center>
+                    <div class="col-12 mt-4">
+                        <h6 class="text-muted border-bottom pb-2">경로 설정</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary">로컬(Source) 경로</label>
+                        <input type="text" class="form-control border-primary" name="RCLONE_LOCAL" value="{{ RCLONE_LOCAL }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success">원격(Target) 경로</label>
+                        <input type="text" class="form-control border-success" name="RCLONE_REMOTE" value="{{ RCLONE_REMOTE }}">
+                    </div>
+
+                    <div class="col-md-12 mt-4">
+                        <h6 class="text-muted border-bottom pb-2">고급 옵션</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">RCLONE_INCLUDE (필터)</label>
+                        <input type="text" class="form-control" name="RCLONE_include" value="{{ RCLONE_include }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">RCLONE_ETC (추가옵션)</label>
+                        <input type="text" class="form-control" name="ETC" value="{{ ETC }}">
+                    </div>
+                </div>
+
+                <div class="text-center mt-5 d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">수정 완료</button>
+                    <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-lg">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-</form>
-</body>
-</html>
 {% endblock %}
