@@ -1,66 +1,109 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-header bg-primary text-white text-center py-3">
-            <h4 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>농협택배 예약 및 조회</h4>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 900px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header py-4 text-center text-white" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+            <h3 class="fw-bold mb-1"><i class="bi bi-truck me-2"></i> 농협택배 예약 및 조회</h3>
+            <p class="mb-0 opacity-75 small fw-bold">빠르고 정확한 농협택배 서비스를 이용해 보세요</p>
         </div>
-        <div class="card-body p-4">
+
+        <div class="card-body p-4 p-md-5 bg-white">
             <form method="POST">
-                <div class="row g-3">
-                    {% if session.get('logFlag') %}
+                
+                {% if session.get('logFlag') %}
+                <div class="card border-0 bg-light rounded-4 p-4 mb-4 border-start border-4 border-success shadow-sm">
+                    <h5 class="fw-bold mb-4 text-success"><i class="bi bi-person-up me-2"></i>보내는 사람 (기본 정보)</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">농협택배 ID</label>
+                            <input type="text" name="nh_id" class="form-control border-0 shadow-sm" value="{{ nh_id }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">비밀번호</label>
+                            <input type="password" name="nh_pwd" class="form-control border-0 shadow-sm" value="{{ nh_pwd }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">이름</label>
+                            <input type="text" name="sndNm" class="form-control border-0 shadow-sm" value="{{ sndNm }}">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-muted">휴대폰 번호</label>
+                            <input type="text" name="sndHpno" class="form-control border-0 shadow-sm" value="{{ sndHpno }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">주소</label>
+                            <input type="text" name="sndAddr" class="form-control border-0 shadow-sm mb-2" value="{{ sndAddr }}">
+                            <input type="text" name="sndAddrDtl" class="form-control border-0 shadow-sm" value="{{ sndAddrDtl }}" placeholder="상세주소">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card border-0 bg-white border rounded-4 p-4 mb-5 shadow-sm">
+                    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-person-down me-2"></i>받는 사람 정보</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">이름</label>
+                            <input type="text" name="rcvNm" class="form-control border-2" placeholder="성함" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold text-muted">휴대폰 번호</label>
+                            <input type="text" name="rcvHpno" class="form-control border-2" placeholder="010-0000-0000" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">주소</label>
+                            <input type="text" name="rcvAddr" class="form-control border-2 mb-2" placeholder="기본 주소 입력" required>
+                            <input type="text" name="rcvAddrDtl" class="form-control border-2" placeholder="상세 주소(동, 호수 등)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-5">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">농협택배 아이디</label>
-                        <input type="text" class="form-control" value="{{ nh_id }}" name="nh_id">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">비밀번호</label>
-                        <input type="password" class="form-control" value="{{ nh_pwd }}" name="nh_pwd">
-                    </div>
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">보내는 사람</label>
-                        <input type="text" class="form-control" value="{{ sndNm }}" name="sndNm">
-                    </div>
-                    {% endif %}
-                    
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">받는사람 성함</label>
-                        <input type="text" class="form-control" name="rcvNm" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">연락처</label>
-                        <input type="text" class="form-control" name="rcvHpno" placeholder="010-0000-0000">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold">받는사람 주소</label>
-                        <input type="text" class="form-control mb-2" name="rcvAddr" placeholder="기본주소">
-                        <input type="text" class="form-control" name="rcvAddrDtl" placeholder="상세주소">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">물품명</label>
-                        <input type="text" class="form-control" name="prodNm">
+                        <label class="form-label fw-bold text-secondary"><i class="bi bi-box me-1"></i> 물품명</label>
+                        <input type="text" name="prodNm" class="form-control border-2 shadow-sm" placeholder="내용물 기입">
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">택배요금</label>
-                        <select class="form-select" name="priceTypeNm">
-                            <option value="선불">선불</option>
+                        <label class="form-label fw-bold text-secondary"><i class="bi bi-credit-card me-1"></i> 택배요금</label>
+                        <select name="priceTypeNm" class="form-select border-2 shadow-sm">
+                            <option value="선불">선불 (미리계산)</option>
                             <option value="착불">착불</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label fw-bold">박스무게</label>
-                        <select class="form-select" name="boxType">
-                            <option value="2">5kg이하</option>
-                            <option value="3">10kg이하</option>
-                            <option value="4">20kg이하</option>
+                        <label class="form-label fw-bold text-secondary"><i class="bi bi-scales me-1"></i> 박스무게</label>
+                        <select name="boxType" class="form-select border-2 shadow-sm">
+                            <option value="01">5KG 이하</option>
+                            <option value="02">5KG 이상</option>
                         </select>
                     </div>
                 </div>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">예약하기</button>
+
+                <div class="d-flex flex-wrap gap-2 justify-content-center border-top pt-4">
+                    {% if session.get('logFlag') %}
+                    <button type="button" class="btn btn-outline-success px-4 py-3 fw-bold rounded-pill" onclick="location.href='index_list'">
+                        <i class="bi bi-journal-text me-1"></i> 예약내역 확인
+                    </button>
+                    <button type="submit" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-pill" onclick="javascript: form.action='nh_login';">
+                        기본정보 업데이트
+                    </button>
+                    {% endif %}
+                    <button type="submit" class="btn btn-success px-5 py-3 fw-bold rounded-pill shadow-lg" style="min-width: 200px;" onclick="javascript: form.action='nh_add';">
+                        택배 예약하기 <i class="bi bi-check-circle-fill ms-1"></i>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    body { background-color: #f4f7f6; font-family: 'Pretendard', sans-serif; }
+    .form-control:focus, .form-select:focus { border-color: #28a745; box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15); }
+    .card { transition: transform 0.2s ease; }
+    .btn { transition: all 0.3s ease; }
+    .btn:hover { transform: translateY(-2px); }
+</style>
+
 {% endblock %}
