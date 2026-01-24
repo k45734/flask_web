@@ -82,49 +82,125 @@ def db_optimize():
         logger.info("[완료] 모든 최적화 작업 종료")
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
-# --- [3. 수집 엔진] ---
 def tel_send_message(dummy=None):
-    logger.info("========================================")
-    logger.info("[수집] 텔레그램 데이터 분석 및 정화 가동")
-    logger.info("========================================")
+    logger.info("==================================================")
+    logger.info("== [시스템] 전수 조사 및 규격 검증 엔진 가동 ==")
+    logger.info("==================================================")
+    print("\n[알림] 텔레그램 수집 프로세스가 시작되었습니다.")
+    
+    # 1. 시작점 확인
     last_id = int(get_config('last_webtoon_id') or 0)
-    try:
-        req = requests.get('https://t.me/s/webtoonalim', timeout=15)
-        soup = bs(req.text, "html.parser")
-        messages = soup.findAll("div", {"class": "tgme_widget_message"})
-        new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
-        max_id = last_id
+    logger.info(f"[설정] 현재 DB 저장된 마지막 ID: {last_id}")
+    print(f">> 현재 기준점(last_id): {last_id} 번부터 추적 시작")
+    
+    is_continue = True
+    total_new_count = 0
+    page_count = 0
 
-        for m in reversed(messages):
-            try:
-                pid = int(m['data-post'].split('/')[-1])
-                if pid <= last_id: break
-                txt = m.find("div", {"class": "tgme_widget_message_text"})
-                if not txt: continue
-                dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
-                aac = dec.split('\n\n')
-                if len(aac) < 8: continue
+    while is_continue:
+        page_count += 1
+        # 현재 지점보다 조금 앞선 지점(25개)을 요청하여 유연하게 수집
+        target_id = last_id + 25 
+        url = f'https://t.me/s/webtoonalim?before={target_id}'
+        
+        logger.info(f"[진행] {page_count}페이지 분석 중... (Target ID: {target_id})")
+        print(f"\n--- {page_count}번 페이지 호출 ({url}) ---")
+        
+        try:
+            req = requests.get(url, timeout=15)
+            soup = bs(req.text, "html.parser")
+            messages = soup.findAll("div", {"class": "tgme_widget_message"})
+            
+            if not messages:
+                logger.warning("[중단] 페이지 내 메시지가 없습니다. 루프를 종료합니다.")
+                print("!! 메시지를 찾을 수 없어 수집을 종료합니다.")
+                break
 
-                gbun = aac[8] if len(aac) >= 9 else 'adult'
-                db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-                key = (aac[0], aac[1], int(aac[5]))
-                new_data_dict[db_t][key] = (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7]))
-                max_id = max(max_id, pid)
-                # [수정] 수집 로그 강화
-                logger.info(f" -> [분석] ID:{pid} | {aac[0]} ({aac[5]}/{aac[7]}장)")
-            except: continue
+            new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
+            processed_ids = []
+            
+            for m in messages:
+                try:
+                    pid = int(m['data-post'].split('/')[-1])
+                    
+                    # 이미 수집된 ID는 가볍게 print만 찍고 pass
+                    if pid <= last_id:
+                        print(f"[-] ID:{pid} (이미 수집됨)")
+                        continue
+                    
+                    processed_ids.append(pid)
+                    txt = m.find("div", {"class": "tgme_widget_message_text"})
+                    
+                    if not txt:
+                        print(f"[!] ID:{pid} (본문 텍스트 없음 - 건너뜀)")
+                        continue
+                    
+                    # 데이터 해독 시작
+                    dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
+                    aac = dec.split('\n\n')
 
-        with get_list_db() as con:
-            for db_t in ['TOON', 'TOON_NORMAL']:
-                data_list = list(new_data_dict[db_t].values())
-                if not data_list: continue
-                con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-                con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
-                con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
-            con.commit()
-        set_config('last_webtoon_id', max_id)
-        logger.info(f"[종료] 수집 완료 (최신 ID: {max_id})")
-    except Exception as e: logger.error(f"!!! 수집 에러: {e}")
+                    # [핵심] 규격 검사 로직 + 로그
+                    if len(aac) < 8:
+                        logger.warning(f"[구버전] ID:{pid} | 데이터 조각 부족 (len:{len(aac)})")
+                        print(f"[종료] ID:{pid} 번에서 구형 데이터 포맷을 발견했습니다.")
+                        is_continue = False
+                        break
+                    
+                    if not aac[7].strip().isdigit():
+                        logger.warning(f"[구버전] ID:{pid} | aac[7]이 숫자가 아님 ('{aac[7]}')")
+                        print(f"[종료] ID:{pid} 번은 유효한 최신 규격이 아닙니다. (총 장수 정보 없음)")
+                        is_continue = False
+                        break
+
+                    # 규격 통과 시 데이터 분류
+                    gbun = aac[8] if len(aac) >= 9 else 'adult'
+                    db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+                    key = (aac[0], aac[1], int(aac[5]))
+                    
+                    # 실제 데이터 저장 준비
+                    new_data_dict[db_t][key] = (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7]))
+                    
+                    msg = f" -> [수집성공] ID:{pid} | {aac[0]} | {aac[5]}/{aac[7]}장"
+                    logger.info(msg)
+                    print(msg)
+                    
+                except Exception as ex:
+                    print(f"[에러] 개별 메시지(ID:{pid}) 분석 중 예외 발생: {ex}")
+                    continue
+
+            # 페이지 단위 DB 저장 로그
+            with get_list_db() as con:
+                added_this_page = 0
+                for db_t in ['TOON', 'TOON_NORMAL']:
+                    data_list = list(new_data_dict[db_t].values())
+                    if not data_list: continue
+                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
+                    added_this_page += len(data_list)
+                con.commit()
+                if added_this_page > 0:
+                    logger.info(f"[DB] {added_this_page}개 데이터 저장 완료")
+                    print(f"== DB에 {added_this_page}개의 새로운 에피소드를 기록했습니다. ==")
+
+            # 다음 루프를 위한 ID 업데이트
+            if processed_ids:
+                last_id = max(processed_ids)
+                set_config('last_webtoon_id', last_id)
+                total_new_count += len(processed_ids)
+                print(f">> 현재까지 누적 수집 ID: {last_id} (진행 중...)")
+                time.sleep(0.5) # 서버 부하 방지용 짧은 휴식
+            else:
+                print(">> 더 이상 처리할 새로운 ID가 없습니다.")
+                is_continue = False
+                
+        except Exception as e:
+            logger.error(f"!!! 수집 메인 루프 치명적 에러: {e}")
+            print(f"!!! 시스템 오류 발생으로 수집 중단: {e}")
+            break
+
+    print("\n" + "="*50)
+    logger.info(f"== [수집종료] 총 {total_new_count}개 메시지 검사 완료 (최종 ID: {last_id}) ==")
+    print(f"[완료] 전수 조사가 종료되었습니다. 총 {total_new_count}개를 훑었습니다.")
+    print("="*50 + "\n")
 
 # --- [4. 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
