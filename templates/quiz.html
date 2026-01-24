@@ -1,62 +1,108 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow border-0 mx-auto" style="max-width: 800px; border-radius: 20px;">
-        <div class="card-header bg-warning text-dark text-center py-4" style="border-radius: 20px 20px 0 0;">
-            <h4 class="mb-0 fw-bold"><i class="fas fa-lightbulb me-2"></i> 퀴즈 정답 알림 설정</h4>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 800px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header py-4 text-center text-dark" style="background: linear-gradient(135deg, #ffca28 0%, #ffb300 100%);">
+            <h3 class="fw-bold mb-1"><i class="bi bi-lightbulb-fill me-2"></i> 퀴즈 정답 알림 서비스</h3>
+            <p class="mb-0 opacity-75 small fw-bold">키워드 기반 실시간 퀴즈 정답 알림 설정</p>
         </div>
 
-        <div class="card-body p-4 p-md-5">
+        <div class="card-body p-4 p-md-5 bg-white">
             <form method="POST">
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-danger"><i class="fas fa-search me-1"></i> 알림 키워드 (필터)</label>
-                    <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="myalim" value="{{myalim}}" placeholder="예) 11번가|옥션">
-                    <div class="form-text mt-2">알림을 받고 싶은 키워드를 <code>|</code> 기호로 구분하여 입력하세요.</div>
+                <div class="mb-5">
+                    <label class="form-label fw-bold text-danger">
+                        <i class="bi bi-search me-1"></i> 알림 키워드 입력 (필터)
+                    </label>
+                    <div class="p-3 bg-danger-subtle rounded-3 mb-2 small text-danger border border-danger-subtle">
+                        <i class="bi bi-info-circle-fill me-1"></i> <b>예시:</b> 오퀴즈|캐시워크|캐시닥|타임스프레드|신한|우리|KB Pay|홈플
+                    </div>
+                    <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="myalim" value="{{ myalim }}" placeholder="키워드를 | 기호로 구분하여 입력하세요">
                 </div>
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
-                        <input type="text" class="form-control shadow-sm" name="start_time" value="{{ start_time }}">
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-secondary small"><i class="bi bi-play-circle me-1"></i> 실행 모드</label>
+                        <select class="form-select border-2 shadow-sm" name="now">
+                            <option value="True" {% if now == 'True' %}selected{% endif %}>📅 예약 실행</option>
+                            <option value="False" {% if now == 'False' %}selected{% endif %}>🚀 바로 실행</option>
+                        </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold"><i class="fas fa-tag me-1"></i> 스케줄 이름</label>
-                        <input type="text" class="form-control bg-light" name="startname" value="quiz" readonly>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-secondary small"><i class="bi bi-clock me-1"></i> 실행 주기(Cron)</label>
+                        <input type="text" class="form-control border-2 shadow-sm" name="start_time" value="{{ start_time }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-secondary small"><i class="bi bi-tag me-1"></i> 스케줄 이름</label>
+                        <input type="text" class="form-control bg-light border-2 shadow-sm" name="startname" value="quiz" readonly>
                     </div>
                 </div>
 
-                <div class="bg-light p-4 rounded-4 mb-4 border">
-                    <h6 class="fw-bold mb-3"><i class="fab fa-telegram me-1 text-primary"></i> 텔레그램 알림 정보</h6>
+                <div class="card border-0 bg-light rounded-4 p-4 mb-5">
+                    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-telegram me-2"></i> 텔레그램 전송 옵션</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">알림 여부</label>
+                            <select class="form-select border-0 shadow-sm" name="telgm">
+                                <option value="True" {% if telgm == 'True' %}selected{% endif %}>사용함</option>
+                                <option value="False" {% if telgm == 'False' %}selected{% endif %}>사용 안 함</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">무음 모드</label>
+                            <select class="form-select border-0 shadow-sm" name="telgm_alim">
+                                <option value="True" {% if telgm_alim == 'True' %}selected{% endif %}>무음 전송</option>
+                                <option value="False" {% if telgm_alim == 'False' %}selected{% endif %}>소리 포함</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small">봇 토큰</label>
-                            <input type="text" class="form-control" name="telgm_token" value="{{ telgm_token }}">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">봇 토큰 (Bot Token)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_token" value="{{ telgm_token }}">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small">봇 아이디</label>
-                            <input type="text" class="form-control" name="telgm_botid" value="{{ telgm_botid }}">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">채팅 아이디 (Chat ID)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_botid" value="{{ telgm_botid }}">
                         </div>
                     </div>
                 </div>
 
-                <div class="row g-3 text-center mb-5">
+                <div class="row g-3 text-center align-items-end mb-5">
                     <div class="col-6">
-                        <label class="form-label small fw-bold">알림 시작 시간</label>
-                        <input type="text" class="form-control text-center" name="start_time2" value="{{start_time2}}" placeholder="08:00">
+                        <label class="form-label small fw-bold text-muted">알림 허용 시작</label>
+                        <input type="text" class="form-control border-0 border-bottom rounded-0 bg-transparent text-center fs-5" name="start_time2" value="{{ start_time2 }}" placeholder="08:00">
                     </div>
                     <div class="col-6">
-                        <label class="form-label small fw-bold">알림 종료 시간</label>
-                        <input type="text" class="form-control text-center" name="end_time" value="{{end_time}}" placeholder="23:00">
+                        <label class="form-label small fw-bold text-muted">알림 허용 종료</label>
+                        <input type="text" class="form-control border-0 border-bottom rounded-0 bg-transparent text-center fs-5" name="end_time" value="{{ end_time }}" placeholder="23:00">
                     </div>
                 </div>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 shadow-sm" style="border-radius: 12px;">
-                        퀴즈 알림 서비스 활성화
-                    </button>
+                <div class="row g-2">
+                    <div class="col-md-4 order-2 order-md-1">
+                        <button type="button" class="btn btn-outline-secondary w-100 py-3 fw-bold rounded-pill" onclick="location.href='quiz_list';">
+                            <i class="bi bi-list-ul me-1"></i> 목록보기
+                        </button>
+                    </div>
+                    <div class="col-md-8 order-1 order-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-danger flex-grow-1 py-3 fw-bold rounded-pill shadow" onclick="javascript: form.action='sch_del';">
+                            취소/삭제
+                        </button>
+                        <button type="submit" class="btn btn-warning flex-grow-1 py-3 fw-bold rounded-pill shadow text-dark" onclick="javascript: form.action='quiz_ok';">
+                            설정 저장 및 실행 <i class="bi bi-check-circle-fill ms-1"></i>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    body { background-color: #f0f2f5; font-family: 'Pretendard', sans-serif; }
+    .form-control:focus, .form-select:focus { border-color: #ffca28; box-shadow: 0 0 0 0.25rem rgba(255, 202, 40, 0.25); }
+    .btn-warning:hover { background-color: #ffb300; border-color: #ffb300; }
+</style>
+
 {% endblock %}

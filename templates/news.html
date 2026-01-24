@@ -1,53 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <div class="card shadow border-0 mx-auto" style="max-width: 800px; border-radius: 15px;">
-        <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 15px 15px 0 0;">
-            <h4 class="mb-0"><i class="fas fa-newspaper me-2"></i> 실시간 뉴스 알림 설정</h4>
-            <small class="opacity-75">중요한 소식을 텔레그램으로 즉시 받아보세요</small>
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 750px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header py-4 text-center text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+            <h3 class="mb-1"><i class="fas fa-newspaper me-2"></i> 뉴스 알림 설정</h3>
+            <p class="mb-0 opacity-75 small">실시간 주요 뉴스를 텔레그램으로 받아보세요</p>
         </div>
 
-        <div class="card-body p-4 p-md-5">
+        <div class="card-body p-4 p-md-5 bg-white">
             <form method="POST">
-                <div class="row g-3 mb-4">
+                <div class="row g-4 mb-5">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-primary"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
-                        <input type="text" class="form-control form-control-lg border-2" name="start_time" value="{{ start_time }}" placeholder="예: */30 * * * *">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="fas fa-history me-1"></i> 실행 주기 (Cron)
+                        </label>
+                        <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="start_time" value="{{ start_time }}" placeholder="예: 0 9 * * *">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-primary"><i class="fas fa-play-circle me-1"></i> 실행 모드</label>
-                        <select class="form-select form-select-lg border-2" name="now">
-                            <option value="True" {% if now == 'True' %}selected{% endif %}>📅 예약 실행 (Schedule)</option>
-                            <option value="False" {% if now == 'False' %}selected{% endif %}>🚀 즉시 실행 (Now)</option>
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="fas fa-toggle-on me-1"></i> 즉시 실행 여부
+                        </label>
+                        <select class="form-select form-select-lg border-2 shadow-sm" name="now">
+                            <option value="True" {% if now == 'True' %}selected{% endif %}>📅 예약 모드 (Schedule)</option>
+                            <option value="False" {% if now == 'False' %}selected{% endif %}>🚀 즉시 실행 (Run Now)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="p-3 bg-light rounded-3 mb-4 border">
-                    <h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">
-                        <i class="fab fa-telegram me-1 text-info"></i> 텔레그램 알림 정보
-                    </h6>
+                <div class="card border-0 bg-light rounded-4 p-4 mb-5">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i class="fab fa-telegram me-2"></i> 텔레그램 전송 설정
+                    </h5>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">봇 토큰 (Bot Token)</label>
-                            <input type="text" class="form-control bg-white" name="telgm_token" value="{{ telgm_token }}">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">봇 토큰 (Bot Token)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_token" value="{{ telgm_token }}">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">사용자 아이디 (Chat ID)</label>
-                            <input type="text" class="form-control bg-white" name="telgm_botid" value="{{ telgm_botid }}">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">사용자 아이디 (Chat ID)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_botid" value="{{ telgm_botid }}">
                         </div>
                     </div>
                 </div>
 
-                <div class="row g-3 mb-4">
+                <div class="row g-3 text-center align-items-end mb-5">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small">알림 시작 시간</label>
-                        <input type="text" class="form-control text-center shadow-sm" name="start" value="{{ start }}" placeholder="08:00">
+                        <label class="form-label small fw-bold text-muted">알림 시작 시간</label>
+                        <input type="text" class="form-control border-bottom border-0 rounded-0 bg-transparent text-center" name="start" value="{{ start }}" placeholder="07:00">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small">알림 종료 시간</label>
-                        <input type="text" class="form-control text-center shadow-sm" name="end" value="{{ end }}" placeholder="23:00">
+                        <label class="form-label small fw-bold text-muted">알림 종료 시간</label>
+                        <input type="text" class="form-control border-bottom border-0 rounded-0 bg-transparent text-center" name="end" value="{{ end }}" placeholder="23:00">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold small text-muted">스케줄 이름</label>
-                        <input type="text" class="form-control bg-light border-0 text-center" name="startname" value="news" readonly>
+                        <label class="form-label small fw-bold text-muted">스케줄 이름</label>
+                        <input type="text" class="form-control bg-light border-0 text-center fw-bold" name="startname" value="news" readonly>
+                    </div>
+                </div>
+
+                <div class="text-center mt-2">
+                    <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow" style="border-radius: 50px; min-width: 250px;">
+                        뉴스 알림 서비스 활성화 <i class="fas fa-check-circle ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
