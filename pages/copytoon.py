@@ -159,12 +159,19 @@ def tel_send_message(dummy=None):
                 if not data_list: continue
                 
                 try:
-                    # 유니크 인덱스가 이미 있다면 그대로 진행
+                    # 유니크 인덱스 생성 시도
+                    con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+                    con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
+                    
+                    # 데이터 저장 시도
                     con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
                 except sqlite3.IntegrityError:
-                    # [긴급복구] 에러 발생 시 인덱스를 삭제하고 이전처럼 중복 허용 상태로 저장
-                    logger.warning(f"!!! [{db_t}] 인덱스 충돌 발생! 이전 상태로 강제 복구 중...")
-                    con.execute(f"DROP INDEX IF EXISTS uidx_{db_t}")
+                    # [최후의 수단] 에러 시 해당 테이블을 밀어버리고 새로 받기
+                    logger.warning(f"!!! [{db_t}] 데이터 꼬임 발견. 테이블 초기화 후 재구축합니다.")
+                    con.execute(f"DROP TABLE IF EXISTS {db_t}")
+                    # 다시 생성 후 저장
+                    con.execute(f"CREATE TABLE {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+                    con.execute(f"CREATE UNIQUE INDEX uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
                     con.executemany(f"INSERT INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
             con.commit()
 
