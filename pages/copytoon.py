@@ -114,7 +114,6 @@ def db_optimize():
     except Exception as e: 
         logger.error(f"!!! [에러] 최적화 엔진 오류: {e}")
 
-# --- [3. 수집 엔진: 이미지 갱신 로직 포함] ---
 def tel_send_message(dummy=None):
     logger.info("========================================")
     logger.info("[수집] 대용량 동기화 및 이미지 갱신 엔진 가동")
@@ -127,10 +126,10 @@ def tel_send_message(dummy=None):
         soup = bs(req.text, "html.parser")
         messages = soup.findAll("div", {"class": "tgme_widget_message"})
         
-        new_data = {'TOON': [], 'TOON_NORMAL': []}
+        # 중복 제거를 위해 딕셔너리 사용 (Key: 제목+소제목+번호)
+        new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
         update_targets = set()
         max_id = last_id
-        parsed_count = 0
 
         for m in reversed(messages):
             try:
@@ -147,35 +146,34 @@ def tel_send_message(dummy=None):
                 gbun = aac[8] if len(aac) >= 9 else 'adult'
                 db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
                 
-                # 데이터 매핑: (제목, 소제목, 사이트, URL, 이미지주소, 번호, 전체카운트)
-                new_data[db_t].append((aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7])))
-                update_targets.add((db_t, aac[0], aac[1]))
-                max_id = max(max_id, pid)
-                parsed_count += 1
+                title, subtitle, img_num = aac[0], aac[1], int(aac[5])
+                # [핵심] 같은 패키지 내 중복 데이터가 있다면 덮어쓰기 하여 유니크 에러 방지
+                key = (title, subtitle, img_num)
+                new_data_dict[db_t][key] = (title, subtitle, aac[2], aac[3], aac[4], img_num, int(aac[7]))
                 
-                logger.info(f" -> [분석] ID:{pid} | {aac[0]} - {aac[1]}")
+                update_targets.add((db_t, title, subtitle))
+                max_id = max(max_id, pid)
                 
             except Exception as e:
-                logger.error(f" -> [실패] 파싱 에러: {e}")
                 continue
 
         # --- [DB 저장/갱신 루프] ---
         total_saved = 0
         for db_t in ['TOON', 'TOON_NORMAL']:
-            if new_data[db_t]:
+            data_list = list(new_data_dict[db_t].values())
+            if data_list:
                 with get_list_db() as con:
-                    # [핵심] 테이블 보장 및 유니크 인덱스 강제 적용
+                    # 유니크 인덱스 다시 한 번 확인
                     con.execute(f"CREATE TABLE IF NOT EXISTS {db_t} (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
                     con.execute(f"CREATE UNIQUE INDEX IF NOT EXISTS uidx_{db_t} ON {db_t} (TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER)")
-                    con.execute(f"CREATE INDEX IF NOT EXISTS idx_{db_t}_total_count ON {db_t} (TOTAL_COUNT)")
                     
-                    # [핵심] INSERT OR REPLACE: 이미지 주소(WEBTOON_IMAGE)가 다르면 덮어씀
-                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", new_data[db_t])
+                    # REPLACE 구문으로 안전하게 저장
+                    con.executemany(f"INSERT OR REPLACE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
                     con.commit()
-                    total_saved += len(new_data[db_t])
+                    total_saved += len(data_list)
 
         if update_targets:
-            db_optimize() # 즉시 보정 및 카운트 동기화 실행
+            db_optimize() 
 
         set_config('last_webtoon_id', max_id)
         logger.info(f"[종료] 처리완료: {total_saved}건 | 최신ID: {max_id}")
