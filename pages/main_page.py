@@ -91,10 +91,18 @@ except:
 	pass
 if not os.path.isfile(filepath):
 	f = open(filepath,'a', encoding='utf-8')
+class NoRawLogFilter(logging.Filter):
+    def filter(self, record):
+        msg = record.getMessage()
+        # /get_raw_logs 및 /log 호출 로그는 기록하지 않음
+        exclude_list = ['/get_raw_logs', '/log']
+        return not any(path in msg for path in exclude_list)
+		
 fileMaxByte = 1024*500
 rfh = logging.handlers.RotatingFileHandler(filename=filepath, mode='a', maxBytes=fileMaxByte, backupCount=5, encoding='utf-8', delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(asctime)s %(filename)s:%(lineno)d %(levelname)s] - %(message)s",datefmt='%Y-%m-%d %H:%M:%S',handlers=[rfh])
 logger = logging.getLogger()
+logging.getLogger('werkzeug').addFilter(NoRawLogFilter())
 logging.getLogger('apscheduler.executors.default').setLevel(logging.WARNING)
 jobstores = {
 	'default': SQLAlchemyJobStore(url='sqlite:////data/db/jobs.sqlite', tablename='main')
