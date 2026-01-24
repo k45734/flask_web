@@ -281,7 +281,7 @@ def start_down_route():
     scheduler.add_job(down, trigger=CronTrigger.from_crontab(t_str), id=f"auto_down_{gbun}", args=[request.args.get('compress','1'), request.args.get('cbz','1'), 'True', None, None, gbun], replace_existing=True, max_instances=3)
     return redirect(url_for('webtoon.index'))
 
-@bp.route('/alim_list')
+@webtoon.route('/alim_list')
 def alim_list():
     gbun = request.args.get('gbun', 'adult')
     # 알림(수집 현황) 데이터를 가져오는 로직 (예시: STATUS 테이블이나 로그 테이블 조회)
