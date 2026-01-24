@@ -1,35 +1,78 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold" style="color: #2c3e50;">📊 웹툰 서버 다운로드 현황</h2>
+        <p class="text-muted">시스템의 실시간 완료/실패 상태를 요약합니다.</p>
+    </div>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>웹툰서버관리</p>
-<table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center><h4>성인웹툰다운 완료/실패</p>
-<thead>
-<tr>
-<th align="center" class="tg-0lax">다운실패</th>
-<th align="center" class="tg-0lax">다운완료</th>
-<th align="center" class="tg-0lax">총갯수</th>
-</tr>
-<tr>
-{% for row in rows %}
-<td align="center" class="tg-0lax">{{ row['False'] }}</td>
-<td align="center" class="tg-0lax">{{ row['True'] }}</td>
-<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
-{% endfor %}
-<table border=1 width="auto" align="center" style="border-collapse:collapse; border:1px gray solid;">
-<center><h4>일반웹툰다운 완료/실패</p>
-<thead>
-<tr>
-<th align="center" class="tg-0lax">다운실패</th>
-<th align="center" class="tg-0lax">다운완료</th>
-<th align="center" class="tg-0lax">총갯수</th>
-</tr>
-<tr>
-{% for row in rows2 %}
-<td align="center" class="tg-0lax">{{ row['False'] }}</td>
-<td align="center" class="tg-0lax">{{ row['True'] }}</td>
-<td align="center" class="tg-0lax">{{ row['TOTAL'] }}</td>
-{% endfor %}
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white text-center py-3">
+                    <h5 class="mb-0">🔞 성인 웹툰 현황</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3">다운실패</th>
+                                <th class="py-3 text-primary">다운완료</th>
+                                <th class="py-3 fw-bold">총 갯수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows %}
+                            <tr>
+                                <td class="py-4 text-danger font-monospace">{{ row['False'] }}</td>
+                                <td class="py-4 text-primary font-monospace">{{ row['True'] }}</td>
+                                <td class="py-4 fw-bold font-monospace">{{ row['TOTAL'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h5 class="mb-0">😊 일반 웹툰 현황</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3">다운실패</th>
+                                <th class="py-3 text-primary">다운완료</th>
+                                <th class="py-3 fw-bold">총 갯수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in rows2 %}
+                            <tr>
+                                <td class="py-4 text-danger font-monospace">{{ row['False'] }}</td>
+                                <td class="py-4 text-primary font-monospace">{{ row['True'] }}</td>
+                                <td class="py-4 fw-bold font-monospace">{{ row['TOTAL'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-5">
+        <a href="{{ url_for('webtoon.main') }}" class="btn btn-outline-secondary px-4">메인으로 돌아가기</a>
+    </div>
+</div>
+
+<style>
+    .card { border-radius: 15px; overflow: hidden; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-5px); }
+    .table th { font-size: 0.9rem; letter-spacing: -0.5px; }
+    .font-monospace { font-size: 1.2rem; font-weight: 600; }
+</style>
 {% endblock %}

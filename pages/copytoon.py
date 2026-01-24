@@ -280,3 +280,13 @@ def start_down_route():
     t_str, gbun = request.args.get('start_time'), request.args.get('gbun')
     scheduler.add_job(down, trigger=CronTrigger.from_crontab(t_str), id=f"auto_down_{gbun}", args=[request.args.get('compress','1'), request.args.get('cbz','1'), 'True', None, None, gbun], replace_existing=True, max_instances=3)
     return redirect(url_for('webtoon.index'))
+
+@bp.route('/alim_list')
+def alim_list():
+    gbun = request.args.get('gbun', 'adult')
+    # 알림(수집 현황) 데이터를 가져오는 로직 (예시: STATUS 테이블이나 로그 테이블 조회)
+    # 여기서는 단순히 페이지를 렌더링하거나, 기존에 쓰시던 DB 조회 로직을 넣으시면 됩니다.
+    
+    # 만약 특별한 로직이 아직 없다면, 일단 리스트 페이지로 리다이렉트하거나
+    # 빈 페이지라도 띄워야 404가 안 납니다.
+    return render_template('alim_list.html', gbun=gbun)
