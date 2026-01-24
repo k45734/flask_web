@@ -1,88 +1,73 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 750px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header py-4 text-center text-white" style="background: linear-gradient(135deg, #6610f2 0%, #6f42c1 100%);">
+            <h3 class="mb-1"><i class="fas fa-magic me-2"></i> 오늘의 운세 알림</h3>
+            <p class="mb-0 opacity-75 small">매일 아침, 당신의 하루를 점쳐보세요</p>
+        </div>
 
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>운세알림서비스</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="POST">
+        <div class="card-body p-4 p-md-5 bg-white">
+            <form method="POST">
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="fas fa-history me-1"></i> 실행 주기 (Cron)
+                        </label>
+                        <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="start_time" value="{{ start_time }}" placeholder="예: 0 8 * * *">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-secondary">
+                            <i class="fas fa-toggle-on me-1"></i> 즉시 실행 여부
+                        </label>
+                        <select class="form-select form-select-lg border-2 shadow-sm" name="now">
+                            <option value="True" {% if now == 'True' %}selected{% endif %}>📅 예약 모드 (Schedule)</option>
+                            <option value="False" {% if now == 'False' %}selected{% endif %}>🚀 즉시 실행 (Run Now)</option>
+                        </select>
+                    </div>
+                </div>
 
-<thead>
-  <tr>
-    <th class="tg-baqh" colspan="2">운세알림서비스</th>
-  </tr>
-</thead>
-<tbody>
-   <tr>
-    <td class="tg-baqh">텔레그램알림</td>
-    <td class="tg-0lax"><select name="telgm">
-	<option value="{{ telgm }}">{{ telgm }}</option>
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램무음</td>
-    <td class="tg-0lax"><select name="telgm_alim">
-	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
-    <option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램토큰</td>
-    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램아이디</td>
-    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="unse" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">알림시작시간</td>
-    <td class="tg-0lax"><input type="text" name="start_time2" value="{{start_time2}}" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림종료시간</td>
-    <td class="tg-0lax"><input type="text" name="end_time" value="{{end_time}}" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
+                <div class="card border-0 bg-light rounded-4 p-4 mb-5">
+                    <h5 class="fw-bold mb-3" style="color: #6f42c1;">
+                        <i class="fab fa-telegram me-2"></i>텔레그램 알림 전송처
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small text-muted">봇 토큰 (Bot Token)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_token" value="{{ telgm_token }}" placeholder="Token을 입력하세요">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small text-muted">사용자 아이디 (Chat ID)</label>
+                            <input type="text" class="form-control border-0 shadow-sm" name="telgm_botid" value="{{ telgm_botid }}" placeholder="ID를 입력하세요">
+                        </div>
+                    </div>
+                </div>
 
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='unse_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-</th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
+                <div class="row g-3 text-center align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">알림 시작 시간</label>
+                        <input type="text" class="form-control border-bottom border-0 rounded-0 bg-transparent text-center" name="start" value="{{ start }}" placeholder="07:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">알림 종료 시간</label>
+                        <input type="text" class="form-control border-bottom border-0 rounded-0 bg-transparent text-center" name="end" value="{{ end }}" placeholder="23:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">스케줄 이름</label>
+                        <input type="text" class="form-control bg-light border-0 text-center fw-bold" name="startname" value="unse" readonly>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-lg px-5 py-3 text-white fw-bold shadow" style="background: #6f42c1; border-radius: 50px; min-width: 250px;">
+                        운세 서비스 활성화 <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                    <div class="mt-3 text-muted small">
+                        <i class="fas fa-info-circle me-1"></i> 설정된 시간에 텔레그램으로 운세가 발송됩니다.
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,92 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 800px; border-radius: 15px;">
+        <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 15px 15px 0 0;">
+            <h4 class="mb-0"><i class="fas fa-newspaper me-2"></i> 실시간 뉴스 알림 설정</h4>
+            <small class="opacity-75">중요한 소식을 텔레그램으로 즉시 받아보세요</small>
+        </div>
 
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>뉴스알림서비스</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="POST">
+        <div class="card-body p-4 p-md-5">
+            <form method="POST">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
+                        <input type="text" class="form-control form-control-lg border-2" name="start_time" value="{{ start_time }}" placeholder="예: */30 * * * *">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-primary"><i class="fas fa-play-circle me-1"></i> 실행 모드</label>
+                        <select class="form-select form-select-lg border-2" name="now">
+                            <option value="True" {% if now == 'True' %}selected{% endif %}>📅 예약 실행 (Schedule)</option>
+                            <option value="False" {% if now == 'False' %}selected{% endif %}>🚀 즉시 실행 (Now)</option>
+                        </select>
+                    </div>
+                </div>
 
-<thead>
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <h6 class="fw-bold mb-3 text-secondary border-bottom pb-2">
+                        <i class="fab fa-telegram me-1 text-info"></i> 텔레그램 알림 정보
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">봇 토큰 (Bot Token)</label>
+                            <input type="text" class="form-control bg-white" name="telgm_token" value="{{ telgm_token }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">사용자 아이디 (Chat ID)</label>
+                            <input type="text" class="form-control bg-white" name="telgm_botid" value="{{ telgm_botid }}">
+                        </div>
+                    </div>
+                </div>
 
-  <tr>
-    <th class="tg-baqh" colspan="2">뉴스알림서비스</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-baqh">텔레그램알림</td>
-    <td class="tg-0lax"><select name="telgm">
-	<option value="{{ telgm }}">{{ telgm }}</option>
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램무음</td>
-    <td class="tg-0lax"><select name="telgm_alim">
-	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
-    <option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-  
-  
-  <tr>
-    <td class="tg-baqh">텔레그램토큰</td>
-    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램아이디</td>
-    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="news" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">알림시작시간</td>
-    <td class="tg-0lax"><input type="text" name="start_time2" value="{{start_time2}}" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림종료시간</td>
-    <td class="tg-0lax"><input type="text" name="end_time" value="{{end_time}}" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
-
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='news_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-</th>
-</thead>
-
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
-{% endblock %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">알림 시작 시간</label>
+                        <input type="text" class="form-control text-center shadow-sm" name="start" value="{{ start }}" placeholder="08:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">알림 종료 시간</label>
+                        <input type="text" class="form-control text-center shadow-sm" name="end" value="{{ end }}" placeholder="23:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">스케줄 이름</label>
+                        <input type="text" class="form-control bg-light border-0 text-center" name="startname" value="news" readonly>

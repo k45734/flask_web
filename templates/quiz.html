@@ -1,95 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 mx-auto" style="max-width: 800px; border-radius: 20px;">
+        <div class="card-header bg-warning text-dark text-center py-4" style="border-radius: 20px 20px 0 0;">
+            <h4 class="mb-0 fw-bold"><i class="fas fa-lightbulb me-2"></i> 퀴즈 정답 알림 설정</h4>
+        </div>
 
-<meta charset="utf-8">
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<center><h4>퀴즈정답알림서비스</p>
-<table class="tg" width="auto" border=1 align="center" style="border-collapse:collapse; border:1px gray solid;">
-<colgroup>
-<col style="width: 109px">
-<col style="width: 491px">
-</colgroup>
-<center>
-<form method="POST">
+        <div class="card-body p-4 p-md-5">
+            <form method="POST">
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-danger"><i class="fas fa-search me-1"></i> 알림 키워드 (필터)</label>
+                    <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="myalim" value="{{myalim}}" placeholder="예) 11번가|옥션">
+                    <div class="form-text mt-2">알림을 받고 싶은 키워드를 <code>|</code> 기호로 구분하여 입력하세요.</div>
+                </div>
 
-<thead>
-  <tr>
-    <th class="tg-baqh" colspan="2">퀴즈정답알림서비스</th>
-  </tr>
-</thead>
-<tbody>
-   <tr>
-    <td class="tg-baqh">텔레그램알림</td>
-    <td class="tg-0lax"><select name="telgm">
-	<option value="{{ telgm }}">{{ telgm }}</option>
-	<option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램무음</td>
-    <td class="tg-0lax"><select name="telgm_alim">
-	<option value="{{ telgm_alim }}">{{ telgm_alim }}</option>
-    <option value="False">안함</option>
-    <option value="True">사용</option>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">예약및바로실행</td>
-    <td class="tg-0lax"><select name="now">
-	<option value="True">예약</option>
-    <option value="False">바로실행</option>
-    </td>
-  </tr>
-  <tr>
-	<td class="tg-baqh">퀴즈정답알림입력</td>
-	<td class="tg-0lax"><font color="red">예)오퀴즈|캐시워크|캐시닥|타임스프레드|지니어트|신한|우리|KB Pay|홈플</font><br><br>
-	<input type="text" name="myalim" value="{{myalim}}" style="width:100%; border: 0;" ></td>
-    </td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램토큰</td>
-    <td class="tg-0lax"><input type="text" name="telgm_token" value="{{ telgm_token }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">텔레그램아이디</td>
-    <td class="tg-0lax"><input type="text" name="telgm_botid" value="{{ telgm_botid }}" style="width:100%; border: 0;" ></td>
-  </tr>
-  <tr>
-    <td class="tg-baqh">실행주기</td>
-    <td class="tg-0lax"><input type="text" name="start_time" value="{{ start_time }}" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">스케줄이름</td>
-    <td class="tg-0lax"><input type="text" name="startname" value="quiz" style="width:100%; border: 0;" ></td>
-  </tr>
- <tr>
-    <td class="tg-baqh">알림시작시간</td>
-    <td class="tg-0lax"><input type="text" name="start_time2" value="{{start_time2}}" style="width:100%; border: 0;" ></td>
-  </tr>
-   <tr>
-    <td class="tg-baqh">알림종료시간</td>
-    <td class="tg-0lax"><input type="text" name="end_time" value="{{end_time}}" style="width:100%; border: 0;" ></td>
-  </tr>
-<tr>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
+                        <input type="text" class="form-control shadow-sm" name="start_time" value="{{ start_time }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-tag me-1"></i> 스케줄 이름</label>
+                        <input type="text" class="form-control bg-light" name="startname" value="quiz" readonly>
+                    </div>
+                </div>
 
-<th align="center" colspan="8"><input type="submit" value="실행" onclick="javascript: form.action='quiz_ok';">
-<input type="submit" value="취소" onclick="javascript: form.action='sch_del';">
-<input type="button" value="목록보기" onclick="location.href='quiz_list';">
-</th>
-</thead>
-</center>
-</tr>
-</form>
-</tbody>
-</table> 
+                <div class="bg-light p-4 rounded-4 mb-4 border">
+                    <h6 class="fw-bold mb-3"><i class="fab fa-telegram me-1 text-primary"></i> 텔레그램 알림 정보</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small">봇 토큰</label>
+                            <input type="text" class="form-control" name="telgm_token" value="{{ telgm_token }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">봇 아이디</label>
+                            <input type="text" class="form-control" name="telgm_botid" value="{{ telgm_botid }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 text-center mb-5">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold">알림 시작 시간</label>
+                        <input type="text" class="form-control text-center" name="start_time2" value="{{start_time2}}" placeholder="08:00">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold">알림 종료 시간</label>
+                        <input type="text" class="form-control text-center" name="end_time" value="{{end_time}}" placeholder="23:00">
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold py-3 shadow-sm" style="border-radius: 12px;">
+                        퀴즈 알림 서비스 활성화
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
