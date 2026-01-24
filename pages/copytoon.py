@@ -84,110 +84,132 @@ def db_optimize():
 
 def tel_send_message(dummy=None):
     logger.info("==================================================")
-    logger.info("== [역주행 엔진] 과거 데이터 전수 조사 가동 ==")
+    logger.info("== [완전체] 최신글 자동 감지 & 역주행 엔진 가동 ==")
     logger.info("==================================================")
-    print("\n[알림] 과거 데이터 역주행 수집을 시작합니다.")
+    print("\n[알림] 전수 조사를 위한 최신 ID 감지를 시작합니다.")
 
-    # 시작점: 현재 DB의 마지막 ID부터 과거로 내려갑니다.
-    current_search_id = int(get_config('last_webtoon_id') or 8567115)
-    
-    # 만약 완전히 처음부터 다시 긁고 싶다면 위 숫자를 아주 큰 값(최신글 번호)으로 설정하세요.
-    # 예: current_search_id = 9999999
-    
+    # 1. 진짜 최신 ID 자동 감지 (대문 페이지 접속)
+    try:
+        # 파라미터 없이 접속하여 현재 채널의 가장 최신글들을 가져옵니다.
+        init_req = requests.get('https://t.me/s/webtoonalim', timeout=15)
+        init_soup = bs(init_req.text, "html.parser")
+        init_messages = init_soup.findAll("div", {"class": "tgme_widget_message"})
+        
+        if not init_messages:
+            logger.error("[중단] 텔레그램 채널 메시지를 로드할 수 없습니다.")
+            print("!! 채널 접속 실패. 인터넷 연결이나 URL을 확인하세요.")
+            return
+
+        # 페이지 내에서 가장 큰 숫자가 현재의 진짜 최신 ID입니다.
+        real_latest_id = max([int(m['data-post'].split('/')[-1]) for m in init_messages])
+        logger.info(f"[감지] 텔레그램 서버 최신 ID: {real_latest_id}")
+        print(f">> 실시간 최신글 번호 감지 성공: {real_latest_id}번")
+        
+    except Exception as e:
+        logger.error(f"!!! 최신 ID 감지 중 치명적 오류: {e}")
+        print(f"!!! 최신 번호를 알아낼 수 없어 수집을 중단합니다: {e}")
+        return
+
+    # 2. 수집 시작점 설정
+    # DB에 기록된 마지막 수집 지점이 있으면 거기서부터, 없으면 방금 찾은 최신 ID부터 시작합니다.
+    current_search_id = int(get_config('last_webtoon_id') or real_latest_id)
+    print(f">> 수집 시작 지점: {current_search_id}번 (과거 방향으로 역주행)")
+
     is_continue = True
     total_new_count = 0
     page_count = 0
 
     while is_continue:
         page_count += 1
-        # [핵심] before 파라미터를 사용하여 search_id '이전'의 글들을 호출
+        # [핵심] before 파라미터로 search_id 이전의 과거 데이터 20~25개를 강제 호출
         url = f'https://t.me/s/webtoonalim?before={current_search_id}'
         
-        logger.info(f"[역주행] {page_count}페이지 호출 중... (기준 ID: {current_search_id})")
-        print(f"\n--- {page_count}번 페이지 추적 ({current_search_id}번 이전) ---")
+        logger.info(f"[역주행] {page_count}페이지 호출 (기준 ID: {current_search_id})")
+        print(f"\n--- {page_count}번 페이지 추적 중 ({current_search_id}번 이전) ---")
         
         try:
             req = requests.get(url, timeout=15)
             soup = bs(req.text, "html.parser")
-            # 텔레그램 메시지들을 가져옴 (기본적으로 과거->최신 순으로 나열됨)
             messages = soup.findAll("div", {"class": "tgme_widget_message"})
             
             if not messages:
-                print("!! 해당 구간에 메시지가 없습니다. 역주행을 종료합니다.")
+                print("!! 더 이상 읽을 메시지가 없습니다. 역주행을 종료합니다.")
                 break
 
             new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
             processed_ids = []
 
-            # 역주행 시에는 페이지 내의 메시지들을 최신순(뒤에서부터)으로 검사하는 것이 효율적
+            # 페이지 내 메시지를 최신순(뒤에서부터)으로 분석하여 효율 극대화
             for m in reversed(messages):
                 try:
                     pid = int(m['data-post'].split('/')[-1])
-                    
-                    # 이미 분석을 시도했던 번호는 중복 방지를 위해 기록만 하고 통과
                     processed_ids.append(pid)
                     
                     txt = m.find("div", {"class": "tgme_widget_message_text"})
                     if not txt: continue
                     
-                    # 데이터 해독
+                    # 데이터 복호화 및 분리
                     dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
                     aac = dec.split('\n\n')
 
-                    # [규격 검사] 총 장수(aac[7])가 없으면 신께서 명령하신 대로 종료
+                    # [신의 필터] 규격 검사: 총 장수(aac[7]) 정보가 없으면 구형 데이터로 판단하고 즉시 멈춤
                     if len(aac) < 8 or not aac[7].strip().isdigit():
-                        logger.warning(f"[종료점] ID:{pid} 에서 구형 규격 발견. 역주행을 멈춥니다.")
-                        print(f"[*] ID:{pid}: 구형 포맷 발견 -> 여기서부터는 수집하지 않습니다.")
+                        logger.warning(f"[규격미달] ID:{pid} 에서 구형 포맷 발견. 수집 종료.")
+                        print(f"[*] ID:{pid}: 더 이상 최신 규격이 아닙니다. 여기서 역주행을 중단합니다.")
                         is_continue = False
                         break
 
-                    # 규격 통과 시 DB 준비
+                    # 데이터 분류 및 저장 준비
                     gbun = aac[8] if len(aac) >= 9 else 'adult'
                     db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
                     key = (aac[0], aac[1], int(aac[5]))
                     
+                    # (제목, 부제목, 사이트, URL, 이미지, 회차, 총장수) 순서로 저장
                     new_data_dict[db_t][key] = (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7]))
                     
-                    print(f" -> [분석성공] ID:{pid} | {aac[0]} ({aac[5]}/{aac[7]}장)")
+                    print(f" -> [수집성공] ID:{pid} | {aac[0]} ({aac[5]}/{aac[7]}장)")
                 except: continue
 
-            # DB 저장 (페이지 단위)
+            # DB 저장 (페이지 단위로 즉시 반영)
             with get_list_db() as con:
-                added_count = 0
+                added_page_count = 0
                 for db_t in ['TOON', 'TOON_NORMAL']:
                     data_list = list(new_data_dict[db_t].values())
                     if not data_list: continue
-                    # INSERT OR IGNORE를 사용하면 이미 있는 데이터는 건너뛰고 없는 것만 채웁니다.
+                    # IGNORE를 사용하여 이미 수집된 최신 데이터는 건드리지 않고 비어있는 과거만 채움
                     con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
-                    added_count += len(data_list)
+                    added_page_count += len(data_list)
                 con.commit()
-                if added_count > 0:
-                    print(f"== 신규 데이터 {added_count}개 DB 추가 완료 ==")
+                if added_page_count > 0:
+                    print(f"== DB에 {added_page_count}개의 새로운 데이터를 안전하게 저장했습니다. ==")
 
-            # [역주행의 핵심] 다음 루프의 기준점을 이번 페이지에서 발견한 '가장 과거 ID'로 설정
+            # 다음 구간 설정을 위해 이번 페이지에서 가장 낮은 ID를 찾음
             if processed_ids:
                 oldest_id = min(processed_ids)
-                current_search_id = oldest_id 
+                current_search_id = oldest_id # 기준점을 낮춰서 더 과거로 전진
                 total_new_count += len(processed_ids)
                 
-                print(f">> 현재 {oldest_id}번까지 내려왔습니다. (계속 내려가는 중...)")
+                # 진행 상황 업데이트 및 설정 저장
+                set_config('last_webtoon_id', current_search_id)
+                print(f">> 현재 {oldest_id}번까지 역주행 완료... (계속 내려가는 중)")
                 
                 if oldest_id <= 1:
-                    print(">> 1번 메시지에 도달했습니다.")
+                    print(">> 텔레그램 1번 메시지에 도달했습니다.")
                     is_continue = False
                 
-                time.sleep(0.5) # 텔레그램 서버를 위한 최소한의 예의
+                time.sleep(0.5) # 서버 부하 방지
             else:
                 is_continue = False
                 
         except Exception as e:
-            logger.error(f"!!! 역주행 중 치명적 에러: {e}")
-            print(f"!!! 오류 발생으로 중단: {e}")
+            logger.error(f"!!! 수집 루프 중 치명적 에러: {e}")
+            print(f"!!! 시스템 오류로 인해 중단됨: {e}")
             break
 
     print("\n" + "="*50)
-    logger.info(f"== [역주행 종료] 총 {total_new_count}개 검사 완료 (도착 ID: {current_search_id}) ==")
-    print(f"[완료] 역주행 수집이 끝났습니다. 최종 위치: {current_search_id}")
+    logger.info(f"== [전수 조사 완료] 총 {total_new_count}개 검증 완료 (최종 위치: {current_search_id}) ==")
+    print(f"[완료] 역주행 수집이 성공적으로 끝났습니다.")
+    print(f"최종적으로 {current_search_id}번까지 훑었습니다.")
     print("="*50 + "\n")
 
 # --- [4. 다운로드 엔진] ---
