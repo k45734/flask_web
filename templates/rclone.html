@@ -1,40 +1,139 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-dark text-white text-center"><h4>☁️ RCLONE 클라우드 설정</h4></div>
-        <div class="card-body bg-light">
-            <form action="start" method="POST">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">프로그램명</label>
-                        <input type="text" class="form-control" name="RCLONENAME" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">작업 유형</label>
-                        <select class="form-select" name="RCLONE_C_M">
-                            <option value="copy">복사 (Copy)</option>
-                            <option value="move">이동 (Move)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">실행 주기(Cron)</label>
-                        <input type="text" class="form-control" name="FLASKTIME" value="*/1 * * * *">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">로컬 경로</label>
-                        <input type="text" class="form-control" name="RCLONE_LOCAL" placeholder="/data/local/...">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">원격 경로</label>
-                        <input type="text" class="form-control" name="RCLONE_REMOTE" placeholder="drive:remote/...">
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+        <div>
+            <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-cloud-arrow-up-fill text-success me-2"></i>RCLONE Cloud Sync</h2>
+            <p class="text-muted small mb-0">로컬과 원격 드라이브 간의 데이터 동기화 및 백업 설정</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-5">
+            <div class="card shadow-sm border-0" style="border-radius: 20px;">
+                <div class="card-header bg-white py-3 border-0">
+                    <strong class="text-secondary"><i class="bi bi-plus-circle-fill me-2"></i>새로운 작업 등록</strong>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <form action="start" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">설정 이름 (ID)</label>
+                            <input type="text" name="RCLONENAME" class="form-control border-2 shadow-sm" placeholder="예: 구글드라이브_백업" required>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">로컬 경로 (Source)</label>
+                                <input type="text" name="RCLONE_LOCAL" class="form-control shadow-sm" placeholder="/data/local" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">원격 경로 (Dest)</label>
+                                <input type="text" name="RCLONE_REMOTE" class="form-control shadow-sm" placeholder="remote:/backup" required>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light border-0 p-3 mb-3 rounded-3">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold">작업 모드</label>
+                                    <select name="RCLONE_C_M" class="form-select border-0 shadow-sm small">
+                                        <option value="copy">COPY (복사)</option>
+                                        <option value="move">MOVE (이동/원본삭제)</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold">폴더 생성</label>
+                                    <select name="CREATE_F" class="form-select border-0 shadow-sm small">
+                                        <option value="True">네 (자동생성)</option>
+                                        <option value="False">아니요</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">포함 확장자 (Include)</label>
+                            <input type="text" name="RCLONE_include" class="form-control shadow-sm small" placeholder="*.zip, *.jpg">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">업로드 제한</label>
+                                <input type="text" name="RCLONE_UPLOAD" class="form-control shadow-sm small" value="128K">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-muted">실행 주기 (Cron)</label>
+                                <input type="text" name="FLASKTIME" class="form-control shadow-sm small text-danger fw-bold" value="*/1 * * * *">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">기타 옵션 (ETC)</label>
+                            <input type="text" name="ETC" class="form-control shadow-sm small bg-light" value="{{ ETC }}" placeholder="--dry-run 등">
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm rounded-3">
+                            <i class="bi bi-cloud-plus-fill me-2"></i> 스케줄러 추가하기
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-7">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 20px;">
+                <div class="card-header bg-white py-3">
+                    <strong class="text-secondary"><i class="bi bi-list-ul me-2"></i>등록된 동기화 작업 목록</strong>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-muted small">
+                                <tr>
+                                    <th class="ps-4">프로그램(설정명)</th>
+                                    <th class="text-center">관리 액션</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if rows %}
+                                    {% for row in rows %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">{{ row["RCLONENAME"] }}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-hdd-fill me-1"></i>RCLONE Task Active</div>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3" onClick="location.href='ok/{{ row['RCLONENAME'] }}'">예약</button>
+                                                <button type="button" class="btn btn-sm btn-primary fw-bold px-3" onClick="location.href='now/{{ row['RCLONENAME'] }}'">즉시</button>
+                                                <button type="button" class="btn btn-sm btn-light border fw-bold px-3" onClick="location.href='edit/{{ row['RCLONENAME'] }}'">수정</button>
+                                                <button type="button" class="btn btn-sm btn-danger fw-bold px-3" onClick="if(confirm('정말 삭제하시겠습니까?')) location.href='databasedel/{{ row['RCLONENAME'] }}'">삭제</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center py-5">
+                                            <p class="text-muted mb-0 small">등록된 RCLONE 작업이 없습니다.</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-dark px-5">새 작업 등록</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    body { background-color: #f8f9fa; font-family: 'Pretendard', sans-serif; }
+    .form-control:focus, .form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1); }
+    .btn-group .btn { font-size: 0.75rem; border-top: 0; border-bottom: 0; }
+    .card-header { border-bottom: 1px solid rgba(0,0,0,0.03) !important; }
+</style>
+
 {% endblock %}
