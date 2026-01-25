@@ -162,7 +162,7 @@ def index():
 		dt = dict(zip(keys, values))
 		sch_save.append(dt)
 	data = vnstat_tr()
-	logger.info('%s', data)
+	#logger.info('%s', data)
 	return render_template('main.html', test = date, oos = oos, oocpu = oocpu, memory_percent = memory_percent, disk_percent = disk_percent, version = version, lines = lines, sch_save = sch_save, data = data)
 
 @bp.route("cancle/<FLASKAPPSNAME>", methods=["GET"])
