@@ -98,8 +98,8 @@ class NoRawLogFilter(logging.Filter):
         exclude_list = ['/get_raw_logs', '/log']
         return not any(path in msg for path in exclude_list)
 		
-fileMaxByte = 1024*500
-rfh = logging.handlers.RotatingFileHandler(filename=filepath, mode='a', maxBytes=fileMaxByte, backupCount=5, encoding='utf-8', delay=0)
+fileMaxByte = 10*1024*1024
+rfh = logging.handlers.RotatingFileHandler(filename=filepath, mode='a', maxBytes=fileMaxByte, backupCount=10, encoding='utf-8', delay=0)
 logging.basicConfig(level=logging.INFO,format="[%(asctime)s %(filename)s:%(lineno)d %(levelname)s] - %(message)s",datefmt='%Y-%m-%d %H:%M:%S',handlers=[rfh])
 logger = logging.getLogger()
 logging.getLogger('werkzeug').addFilter(NoRawLogFilter())
