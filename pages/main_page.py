@@ -95,7 +95,7 @@ class NoRawLogFilter(logging.Filter):
     def filter(self, record):
         msg = record.getMessage()
         # /get_raw_logs 및 /log 호출 로그는 기록하지 않음
-        exclude_list = ['/get_raw_logs', '/log','192.168.0.1 ']
+        exclude_list = ['/get_raw_logs', '/log','192.168.0.1 ','192.168.0.87']
         return not any(path in msg for path in exclude_list)
 		
 fileMaxByte = 10*1024*1024

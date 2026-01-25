@@ -248,7 +248,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             cur_c, tar_c = len(img_list), int(t_total or 0)
             
             # 진행 상황 판단 로그
-            status_msg = f" -> [{t_title}] {t_sub} ({cur_c}/{tar_c}장)"
+            status_msg = f" -> [{gbun.upper()}] [{t_title}] {t_sub} ({cur_c}/{tar_c}장)"
             logger.info(status_msg)
             print(status_msg, end=" ", flush=True)
 
