@@ -350,36 +350,37 @@ def start():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		FLASKAPPSNAME = request.form['FLASKAPPSNAME']
-		FLASKAPPS = request.form['FLASKAPPS']
-		FLASKTIME = request.form['FLASKTIME']
-		FLASKTELGM = request.form['FLASKTELGM']
-		FLASKTOKEN = request.form['FLASKTOKEN']
-		FLASKBOTID = request.form['FLASKBOTID']
-		FLASKALIM = request.form['FLASKALIM']
+		# .get()을 사용하여 누락된 데이터가 있어도 400 에러를 방지합니다.
+		FLASKAPPSNAME = request.form.get('FLASKAPPSNAME')
+		FLASKAPPS = request.form.get('FLASKAPPS')
+		FLASKTIME = request.form.get('FLASKTIME', '*/1 * * * *')
+		FLASKTELGM = request.form.get('FLASKTELGM', 'False')
+		FLASKTOKEN = request.form.get('FLASKTOKEN', '')
+		FLASKBOTID = request.form.get('FLASKBOTID', '')
+		FLASKALIM = request.form.get('FLASKALIM', 'True')
+		
+		if not FLASKAPPSNAME:
+			return "프로그램명이 없습니다.", 400
+
 		FLASKAPPS2 = FLASKAPPS.replace("\\", "/")
-		#데이타베이스 없으면 생성
-		con = sqlite3.connect(sub3db,timeout=60)
-		con.execute('CREATE TABLE IF NOT EXISTS ' + FLASKAPPSNAME +' (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
-		#con.execute("PRAGMA synchronous = OFF")
-		#con.execute("PRAGMA journal_mode = MEMORY")
-		con.execute("PRAGMA cache_size = 10000")
-		#con.execute("PRAGMA locking_mode = EXCLUSIVE")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.close()
-		try:		
-			print(FLASKAPPSNAME)
-			con = sqlite3.connect(sub3db,timeout=60)
-			cur = con.cursor()
-			cur.execute("INSERT OR REPLACE INTO " + FLASKAPPSNAME + "  (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM) VALUES (?, ?, ?, ?, ?, ?, ?)", (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
-			con.commit()		
-		except:
-			con.rollback()
+		
+		# 데이터베이스 연결 및 저장
+		con = sqlite3.connect(sub3db, timeout=60)
+		try:
+			# 테이블 생성
+			con.execute(f'CREATE TABLE IF NOT EXISTS {FLASKAPPSNAME} (FLASKAPPSNAME TEXT, FLASKAPPS TEXT, FLASKTIME TEXT, FLASKTELGM TEXT, FLASKTOKEN TEXT, FLASKBOTID TEXT, FLASKALIM TEXT)')
 			
+			# PRAGMA 설정 최적화
+			con.execute("PRAGMA cache_size = 10000")
+			con.execute("PRAGMA journal_mode=WAL")
+			
+			cur = con.cursor()
+			cur.execute(f"INSERT OR REPLACE INTO {FLASKAPPSNAME} (FLASKAPPSNAME, FLASKAPPS, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+					   (FLASKAPPSNAME, FLASKAPPS2, FLASKTIME, FLASKTELGM, FLASKTOKEN, FLASKBOTID, FLASKALIM))
+			con.commit()		
+		except Exception as e:
+			logger.error(f"DB 저장 오류: {e}")
+			con.rollback()
 		finally:
 			con.close()
 			
