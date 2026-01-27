@@ -1354,7 +1354,7 @@ def unse():
 		return render_template('unse.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 
-@bp2.route('unse_ok', methods=['POST'])
+@bp2.route('/unse_ok', methods=['POST'])
 def unse_ok():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
