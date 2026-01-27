@@ -88,10 +88,12 @@
                 <input type="hidden" name="myalim" value="{{ myalim if myalim else 'True' }}">
 
                 <div class="d-grid mt-2">
-                    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-lg" style="border-radius: 12px;">
-                        <i class="fas fa-save me-2"></i> 날씨 알림 설정 저장 및 시작
-                    </button>
-                </div>
+    <button type="submit" class="btn btn-primary btn-lg py-3 fw-bold shadow-lg" 
+            style="border-radius: 12px;"
+            onclick="javascript: form.action='/sub2/weather_ok';">
+        <i class="fas fa-save me-2"></i> 날씨 알림 설정 저장 및 시작
+    </button>
+</div>
             </form>
         </div>
     </div>

@@ -9,106 +9,88 @@
         </div>
 
         <div class="card-body p-4 p-md-5 bg-white">
-            <form method="POST">
+            <form method="POST" id="trackingForm">
                 <div class="card border-0 bg-light rounded-4 p-4 mb-5 border-start border-4 border-primary">
                     <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-pencil-square me-2"></i>배송 정보 입력</h5>
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label small fw-bold text-muted">택배사 선택</label>
-                            <select class="form-select border-2 shadow-sm" name="carrier">
-                                <option value="kr.cjlogistics" {% if rows and rows[2] == 'kr.cjlogistics' %}selected{% endif %}>CJ대한통운</option>
-                                <option value="kr.lotte" {% if rows and rows[2] == 'kr.lotte' %}selected{% endif %}>롯데택배</option>
-                                <option value="kr.hanjin" {% if rows and rows[2] == 'kr.hanjin' %}selected{% endif %}>한진택배</option>
-                                <option value="kr.logen" {% if rows and rows[2] == 'kr.logen' %}selected{% endif %}>로젠택배</option>
-                                <option value="kr.epost" {% if rows and rows[2] == 'kr.epost' %}selected{% endif %}>우체국택배</option>
+                            <select class="form-select border-2 shadow-sm" name="code">
+                                <option value="04" {% if rows[3] == '04' %}selected{% endif %}>CJ대한통운</option>
+                                <option value="05" {% if rows[3] == '05' %}selected{% endif %}>한진택배</option>
+                                <option value="08" {% if rows[3] == '08' %}selected{% endif %}>롯데택배</option>
+                                <option value="01" {% if rows[3] == '01' %}selected{% endif %}>우체국택배</option>
+                                <option value="06" {% if rows[3] == '06' %}selected{% endif %}>로젠택배</option>
                             </select>
                         </div>
                         <div class="col-md-7">
-                            <label class="form-label small fw-bold text-muted">운송장 번호</label>
-                            <input type="text" class="form-control border-2 shadow-sm" name="track_id" placeholder="숫자만 입력" value="{{ rows[3] if rows else '' }}">
+                            <label class="form-label small fw-bold text-muted">운송장 번호 (-제외)</label>
+                            <input type="text" class="form-control border-2 shadow-sm" name="invoice" value="{{ rows[4] if rows else '' }}" placeholder="번호만 입력">
                         </div>
                     </div>
                 </div>
 
-                <div class="card border-0 bg-light rounded-4 p-4 mb-5 border-start border-4 border-info">
-                    <h5 class="fw-bold mb-4 text-info"><i class="bi bi-telegram me-2"></i>텔레그램 알림 설정</h5>
+                <div class="card border-0 bg-white shadow-sm rounded-4 p-4 mb-5 border border-primary-subtle">
+                    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-bell-fill me-2"></i>알림 수신 설정</h5>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">텔레그램 사용 여부</label>
-                            <select class="form-select border-2 shadow-sm" name="telgm">
-                                <option value="True" {% if rows and rows[7] == 'True' %}selected{% endif %}>사용함</option>
-                                <option value="False" {% if rows and rows[7] == 'False' %}selected{% endif %}>사용 안함</option>
+                            <label class="form-label small fw-bold text-muted">특정시간 무음 모드</label>
+                            <select class="form-select border-2 shadow-sm" name="telgm_alim">
+                                <option value="True" {% if rows[10] == 'True' %}selected{% endif %}>활성화 (무음 시간 적용)</option>
+                                <option value="False" {% if rows[10] == 'False' %}selected{% endif %}>비활성화 (항상 소리)</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">무음 알림 시간 사용</label>
-                            <select class="form-select border-2 shadow-sm" name="telgm_alim">
-                                <option value="True" {% if rows and rows[8] == 'True' %}selected{% endif %}>활성화 (설정 시간에 무음)</option>
-                                <option value="False" {% if rows and rows[8] == 'False' %}selected{% endif %}>비활성화 (항상 소리 알림)</option>
+                            <label class="form-label small fw-bold text-muted">실행 모드 선택</label>
+                            <select class="form-select border-2 shadow-sm" name="now">
+                                <option value="True">📅 예약 실행 (Schedule)</option>
+                                <option value="False">🚀 지금 즉시 추적 (Now)</option>
                             </select>
                         </div>
-                        <div class="col-md-12 mt-3">
-                            <label class="form-label small fw-bold text-muted">텔레그램 봇 토큰</label>
-                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_token" placeholder="Bot Token 입력" value="{{ rows[4] if rows else '' }}">
-                        </div>
-                        <div class="col-md-12 mt-3">
-                            <label class="form-label small fw-bold text-muted">텔레그램 봇 ID (Chat ID)</label>
-                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_botid" placeholder="Chat ID 입력" value="{{ rows[5] if rows else '' }}">
-                        </div>
-
+                        
                         <div class="col-md-6 mt-3">
-                            <label class="form-label small fw-bold text-muted">
-                                <i class="bi bi-clock-fill me-1"></i> 무음 시작 시간
-                            </label>
+                            <label class="form-label small fw-bold text-muted">무음 시작 시간</label>
                             <select class="form-select border-2 shadow-sm" name="start_time2">
                                 {% for i in range(0, 24) %}
                                     {% set val = "%02d" % i %}
-                                    <option value="{{ val }}" {% if rows and rows[10] == val %}selected{% endif %}>{{ val }}시</option>
+                                    <option value="{{ val }}" {% if rows[12] == val %}selected{% endif %}>{{ val }}시</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mt-3">
-                            <label class="form-label small fw-bold text-muted">
-                                <i class="bi bi-clock-history me-1"></i> 무음 종료 시간
-                            </label>
+                            <label class="form-label small fw-bold text-muted">무음 종료 시간</label>
                             <select class="form-select border-2 shadow-sm" name="end_time">
                                 {% for i in range(0, 24) %}
                                     {% set val = "%02d" % i %}
-                                    <option value="{{ val }}" {% if rows and rows[11] == val %}selected{% endif %}>{{ val }}시</option>
+                                    <option value="{{ val }}" {% if rows[13] == val %}selected{% endif %}>{{ val }}시</option>
                                 {% endfor %}
                             </select>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <small class="text-primary">
-                                <i class="bi bi-info-circle-fill me-1"></i> 
-                                지정된 시간 동안은 텔레그램 메시지가 <strong>소리 없이(무음)</strong> 전송됩니다.
-                            </small>
                         </div>
                     </div>
                 </div>
 
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <button type="button" class="btn btn-secondary w-100 py-3 fw-bold rounded-3 shadow-sm" onclick="location.href='/';">
+                        <button type="button" class="btn btn-light w-100 py-3 fw-bold rounded-3 border" onclick="location.href='/tracking/tracking_list';">
                             <i class="bi bi-list-columns-reverse me-1"></i> 목록
                         </button>
                     </div>
                     <div class="col-md-9 d-flex gap-2">
-                        <button type="submit" class="btn btn-danger flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="javascript: form.action='/sch_del';">
+                        <button type="submit" class="btn btn-danger flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="javascript: form.action='/sub2/sch_del';">
                             삭제
                         </button>
-                        <button type="submit" class="btn btn-outline-primary flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="javascript: form.action='/tracking/tracking_add';">
-                            추가
-                        </button>
-                        <button type="submit" class="btn btn-primary flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="javascript: form.action='/tracking/tracking_ok';">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="javascript: form.action='/sub2/tracking/tracking_ok';">
                             저장 및 추적 시작 <i class="bi bi-truck ms-1"></i>
                         </button>
                     </div>
                 </div>
 
-                <input type="hidden" name="start_time" value="{{ rows[6] if rows else '00' }}">
+                <input type="hidden" name="start_time" value="{{ rows[6] if rows else '0 */1 * * *' }}">
+                <input type="hidden" name="startname" value="tracking">
                 <input type="hidden" name="myalim" value="{{ rows[9] if rows else 'True' }}">
-                <input type="hidden" name="now" value="True">
+                <input type="hidden" name="telgm" value="{{ rows[7] if rows else 'True' }}">
+                <input type="hidden" name="telgm_token" value="{{ rows[1] if rows else '' }}">
+                <input type="hidden" name="telgm_botid" value="{{ rows[2] if rows else '' }}">
             </form>
         </div>
     </div>
@@ -116,9 +98,7 @@
 
 <style>
     body { background-color: #f1f5f9; font-family: 'Pretendard', sans-serif; }
-    .card-header h3 { letter-spacing: -1px; }
-    .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25); }
-    label { margin-bottom: 0.5rem; display: block; }
+    .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.1); }
 </style>
 
 {% endblock %}
