@@ -877,7 +877,10 @@ def tracking_ok():
 				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				tracking_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
+				thread = threading.Thread(target=tracking_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#tracking_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1176,7 +1179,10 @@ def weather_ok():
 				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
+				thread = threading.Thread(target=weather_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#weather_start(location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1398,7 +1404,10 @@ def unse_ok():
 				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
+				thread = threading.Thread(target=unse_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#unse_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -1952,7 +1961,10 @@ def quiz_ok():
 				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
+				thread = threading.Thread(target=quiz_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#quiz_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -2199,7 +2211,10 @@ def funmom_ok():
 				scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				funmom_start(startname)
+				thread = threading.Thread(target=funmom_start, args=[startname])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#funmom_start(startname)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -2463,7 +2478,10 @@ def news_ok():
 				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
+				thread = threading.Thread(target=newsalim_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#newsalim_start(telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
@@ -2655,7 +2673,10 @@ def hotdeal_ok():
 				scheduler.add_job(hotdeal_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=10,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
-				hotdeal_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
+				thread = threading.Thread(target=hotdeal_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
+				thread.daemon = True # 메인 프로그램 종료 시 함께 종료되도록 설정
+				thread.start()
+				#hotdeal_start(telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time)
 			logger.info('%s 를 스케줄러에 추가하였습니다.', test)
 		except:
 			pass
