@@ -613,7 +613,7 @@ def tracking():
 			start_time2 = '10'
 			end_time = '06'
 		
-		return render_template('tracking.html', rows=None,telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
 
 @bp2.route('tracking_list', methods=["GET"])
 def tracking_list():

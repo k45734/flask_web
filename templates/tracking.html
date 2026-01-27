@@ -16,53 +16,65 @@
                         <div class="col-md-5">
                             <label class="form-label small fw-bold text-muted">택배사 선택</label>
                             <select class="form-select border-2 shadow-sm" name="code">
-                                <option value="04" {% if rows[3] == '04' %}selected{% endif %}>CJ대한통운</option>
-                                <option value="05" {% if rows[3] == '05' %}selected{% endif %}>한진택배</option>
-                                <option value="08" {% if rows[3] == '08' %}selected{% endif %}>롯데택배</option>
-                                <option value="01" {% if rows[3] == '01' %}selected{% endif %}>우체국택배</option>
-                                <option value="06" {% if rows[3] == '06' %}selected{% endif %}>로젠택배</option>
+                                <option value="04" {% if (rows and rows[3] == '04') %}selected{% endif %}>CJ대한통운</option>
+                                <option value="05" {% if (rows and rows[3] == '05') %}selected{% endif %}>한진택배</option>
+                                <option value="08" {% if (rows and rows[3] == '08') %}selected{% endif %}>롯데택배</option>
+                                <option value="01" {% if (rows and rows[3] == '01') %}selected{% endif %}>우체국택배</option>
+                                <option value="06" {% if (rows and rows[3] == '06') %}selected{% endif %}>로젠택배</option>
                             </select>
                         </div>
                         <div class="col-md-7">
                             <label class="form-label small fw-bold text-muted">운송장 번호 (-제외)</label>
-                            <input type="text" class="form-control border-2 shadow-sm" name="invoice" value="{{ rows[4] if rows else '' }}" placeholder="번호만 입력">
+                            <input type="text" class="form-control border-2 shadow-sm" name="invoice" 
+                                   value="{{ rows[4] if rows else '' }}" placeholder="번호만 입력">
                         </div>
                     </div>
                 </div>
 
                 <div class="card border-0 bg-white shadow-sm rounded-4 p-4 mb-5 border border-primary-subtle">
-                    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-bell-fill me-2"></i>알림 수신 설정</h5>
+                    <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-telegram me-2"></i>텔레그램 및 알림 제어</h5>
                     <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">텔레그램 사용 여부</label>
+                            <select class="form-select border-2 shadow-sm" name="telgm">
+                                <option value="True" {% if telgm == 'True' %}selected{% endif %}>사용함</option>
+                                <option value="False" {% if telgm == 'False' %}selected{% endif %}>사용 안함</option>
+                            </select>
+                        </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold text-muted">특정시간 무음 모드</label>
                             <select class="form-select border-2 shadow-sm" name="telgm_alim">
-                                <option value="True" {% if rows[10] == 'True' %}selected{% endif %}>활성화 (무음 시간 적용)</option>
-                                <option value="False" {% if rows[10] == 'False' %}selected{% endif %}>비활성화 (항상 소리)</option>
+                                <option value="True" {% if telgm_alim == 'True' %}selected{% endif %}>활성화 (무음 시간 적용)</option>
+                                <option value="False" {% if telgm_alim == 'False' %}selected{% endif %}>비활성화 (항상 소리)</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">실행 모드 선택</label>
-                            <select class="form-select border-2 shadow-sm" name="now">
-                                <option value="True">📅 예약 실행 (Schedule)</option>
-                                <option value="False">🚀 지금 즉시 추적 (Now)</option>
-                            </select>
+
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label small fw-bold text-muted">텔레그램 봇 토큰</label>
+                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_token" 
+                                   value="{{ telgm_token }}" placeholder="Bot Token 입력">
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label small fw-bold text-muted">텔레그램 봇 ID (Chat ID)</label>
+                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_botid" 
+                                   value="{{ telgm_botid }}" placeholder="Chat ID 입력">
                         </div>
                         
                         <div class="col-md-6 mt-3">
-                            <label class="form-label small fw-bold text-muted">무음 시작 시간</label>
+                            <label class="form-label small fw-bold text-muted"><i class="bi bi-moon-stars-fill me-1"></i> 무음 시작 시간</label>
                             <select class="form-select border-2 shadow-sm" name="start_time2">
                                 {% for i in range(0, 24) %}
                                     {% set val = "%02d" % i %}
-                                    <option value="{{ val }}" {% if rows[12] == val %}selected{% endif %}>{{ val }}시</option>
+                                    <option value="{{ val }}" {% if start_time2 == val %}selected{% endif %}>{{ val }}시</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mt-3">
-                            <label class="form-label small fw-bold text-muted">무음 종료 시간</label>
+                            <label class="form-label small fw-bold text-muted"><i class="bi bi-sun-fill me-1"></i> 무음 종료 시간</label>
                             <select class="form-select border-2 shadow-sm" name="end_time">
                                 {% for i in range(0, 24) %}
                                     {% set val = "%02d" % i %}
-                                    <option value="{{ val }}" {% if rows[13] == val %}selected{% endif %}>{{ val }}시</option>
+                                    <option value="{{ val }}" {% if end_time == val %}selected{% endif %}>{{ val }}시</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -85,13 +97,9 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="start_time" value="{{ rows[6] if rows else '0 */1 * * *' }}">
+                <input type="hidden" name="start_time" value="{{ start_time }}">
                 <input type="hidden" name="startname" value="tracking">
-                <input type="hidden" name="myalim" value="{{ rows[9] if rows else 'True' }}">
-                <input type="hidden" name="telgm" value="{{ rows[7] if rows else 'True' }}">
-                <input type="hidden" name="telgm_token" value="{{ rows[1] if rows else '' }}">
-                <input type="hidden" name="telgm_botid" value="{{ rows[2] if rows else '' }}">
-            </form>
+                </form>
         </div>
     </div>
 </div>
