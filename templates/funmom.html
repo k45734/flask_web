@@ -1,43 +1,108 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow border-0 mx-auto" style="max-width: 700px; border-radius: 20px;">
-        <div class="card-header bg-gradient text-white text-center py-4" style="background: #6610f2;">
-            <h4 class="mb-0"><i class="fas fa-paint-brush me-2"></i> 아이들 색칠공부 다운로더</h4>
+<div class="container mt-5 mb-5">
+    <div class="card shadow-lg border-0 mx-auto" style="max-width: 750px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #6610f2 0%, #8540f5 100%);">
+            <h4 class="mb-0 fw-bold"><i class="fas fa-paint-brush me-2"></i> 아이들 색칠공부 다운로더</h4>
+            <p class="mb-0 opacity-75 small mt-1">자동 다운로드 및 텔레그램 알림 설정</p>
         </div>
-        <div class="card-body p-4 p-md-5">
+
+        <div class="card-body p-4 p-md-5 bg-white">
             <form method="POST">
                 <div class="mb-4">
-                    <label class="form-label fw-bold"><i class="fas fa-clock me-1"></i> 실행 주기 (Cron)</label>
-                    <input type="text" class="form-control form-control-lg border-2" name="start_time" value="{{ start_time }}" placeholder="*/1 * * * *">
+                    <label class="form-label fw-bold"><i class="fas fa-clock me-1 text-primary"></i> 실행 주기 (Cron)</label>
+                    <input type="text" class="form-control form-control-lg border-2 shadow-sm" name="start_time" value="{{ start_time }}" placeholder="*/1 * * * *">
+                    <div class="form-text mt-2 small text-muted">예: <code>0 9 * * *</code> (매일 오전 9시)</div>
                 </div>
                 
-                <div class="mb-4">
-                    <label class="form-label fw-bold"><i class="fas fa-tag me-1"></i> 스케줄 이름</label>
-                    <input type="text" class="form-control bg-light border-0" name="startname" value="funmom" readonly>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-bold"><i class="fas fa-play-circle me-1"></i> 실행 모드 선택</label>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <input type="radio" class="btn-check" name="now" id="mode1" value="True" checked>
-                            <label class="btn btn-outline-primary w-100 py-3 fw-bold" for="mode1">📅 예약 실행</label>
+                <div class="card border-0 bg-light rounded-4 p-4 mb-5 border-start border-4" style="border-color: #6610f2 !important;">
+                    <h5 class="fw-bold mb-4" style="color: #6610f2;"><i class="fab fa-telegram-plane me-2"></i>알림 및 무음 시간 설정</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">텔레그램 사용</label>
+                            <select class="form-select border-2 shadow-sm" name="telgm">
+                                <option value="True" {% if telgm == 'True' %}selected{% endif %}>사용함</option>
+                                <option value="False" {% if telgm == 'False' %}selected{% endif %}>사용 안함</option>
+                            </select>
                         </div>
-                        <div class="col-6">
-                            <input type="radio" class="btn-check" name="now" id="mode2" value="False">
-                            <label class="btn btn-outline-danger w-100 py-3 fw-bold" for="mode2">🚀 즉시 실행</label>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">특정시간 무음 모드</label>
+                            <select class="form-select border-2 shadow-sm" name="telgm_alim">
+                                <option value="True" {% if telgm_alim == 'True' %}selected{% endif %}>활성화 (설정 시간 무음)</option>
+                                <option value="False" {% if telgm_alim == 'False' %}selected{% endif %}>비활성화 (항상 소리)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label small fw-bold text-muted">봇 토큰</label>
+                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_token" value="{{ telgm_token }}">
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label small fw-bold text-muted">챗 ID</label>
+                            <input type="text" class="form-control border-2 shadow-sm" name="telgm_botid" value="{{ telgm_botid }}">
+                        </div>
+
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label small fw-bold text-muted">
+                                <i class="bi bi-moon-stars-fill me-1"></i> 무음 시작 시간
+                            </label>
+                            <select class="form-select border-2 shadow-sm" name="start_time2">
+                                {% for i in range(0, 24) %}
+                                    {% set val = "%02d" % i %}
+                                    <option value="{{ val }}" {% if start_time2 == val %}selected{% endif %}>{{ val }}시</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mt-3">
+                            <label class="form-label small fw-bold text-muted">
+                                <i class="bi bi-sun-fill me-1"></i> 무음 종료 시간
+                            </label>
+                            <select class="form-select border-2 shadow-sm" name="end_time">
+                                {% for i in range(0, 24) %}
+                                    {% set val = "%02d" % i %}
+                                    <option value="{{ val }}" {% if end_time == val %}selected{% endif %}>{{ val }}시</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="d-grid mt-5">
-                    <button type="submit" class="btn btn-lg text-white shadow" style="background: #6610f2; border-radius: 12px;">
-                        설정 저장 및 시작하기
+                <div class="row g-3 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-tag me-1"></i> 스케줄 이름</label>
+                        <input type="text" class="form-control bg-light border-0" name="startname" value="funmom" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold"><i class="fas fa-play-circle me-1"></i> 실행 모드 선택</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="now" id="mode1" value="True" checked>
+                                <label class="btn btn-outline-primary w-100 py-3 fw-bold" for="mode1">📅 예약 실행</label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="now" id="mode2" value="False">
+                                <label class="btn btn-outline-danger w-100 py-3 fw-bold" for="mode2">🚀 즉시 실행</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="myalim" value="{{ myalim if myalim else 'True' }}">
+
+                <div class="d-grid mt-2">
+                    <button type="submit" class="btn btn-lg text-white shadow py-3 fw-bold" style="background: #6610f2; border-radius: 12px;">
+                        <i class="fas fa-save me-2"></i> 설정 저장 및 서비스 시작
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    body { background-color: #f4f7fe; font-family: 'Pretendard', sans-serif; }
+    .form-control:focus, .form-select:focus { border-color: #6610f2; box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.1); }
+    .btn-outline-primary { border-color: #6610f2; color: #6610f2; }
+    .btn-outline-primary:hover, .btn-check:checked + .btn-outline-primary { background-color: #6610f2; border-color: #6610f2; color: #fff; }
+    label { letter-spacing: -0.5px; margin-bottom: 8px; }
+</style>
 {% endblock %}

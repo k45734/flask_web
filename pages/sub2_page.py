@@ -142,195 +142,82 @@ def url_to_image2(url, dfolder, filename):
 		code.write(req.content)
 	comp = '완료'
 	return comp	
+	
+def is_silent_now(start_time2, end_time):
+    """현재 시간이 무음 설정 범위 내에 있는지 판단"""
+    try:
+        now_hr = datetime.now().hour
+        start = int(start_time2)
+        end = int(end_time)
+        
+        if start == end:
+            return True  # 시작/종료 같으면 무음 처리 (기존 로직)
+            
+        if start < end:
+            # 예: 09:00 ~ 18:00
+            return start <= now_hr < end
+        else:
+            # 예: 22:00 ~ 06:00 (자정 포함)
+            return now_hr >= start or now_hr < end
+    except Exception as e:
+        logger.error(f"시간 판별 오류: {e}")
+        return False
 
-#텔레그램 특정시간 조용하게
-def tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
-	alim_start_end = []
-	alim_start_end2 = []
-	mynow = mytime()
-	time_start = start_time2.zfill(2)
-	time_end = end_time.zfill(2)
-	
-	if int(time_start) == int(time_end):
-		print('시작시간과 종료시간 같음')
-		logger.info('시작시간과 종료시간 같음')
-		if telgm_alim == 'True':
-			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
-		else:
-			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
-	
-	else:
-		for i in range(0 , int(time_end)+1):
-			a = str(i).zfill(2)
-			if a == time_end:
-				pass
-			else:
-				alim_start_end.append(a)
-			
-		for i in range(int(time_start) , 25):
-			a = str(i).zfill(2)
-			if a == time_start or a == '24':
-				pass
-			else:
-				alim_start_end2.append(a)
-		
-		list = alim_start_end + alim_start_end2
-		if mynow not in list:
-			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=False))
-			logger.info('일반알림 시끄럽게')
-						
-		#미포함
-		else:
-			asyncio.run(bot.send_message(chat_id = telgm_botid, text=text, disable_notification=True))
-			logger.info('일반알림 무음')
+def telegram_send_sync(bot, chat_id, content, is_photo=False, silent=False):
+    """비동기 함수를 동기적으로 실행하는 헬퍼"""
+    async def _send():
+        if is_photo:
+            await bot.send_photo(chat_id=chat_id, photo=open(content, 'rb'), disable_notification=silent)
+        else:
+            await bot.send_message(chat_id=chat_id, text=content, disable_notification=silent)
+    
+    try:
+        # 이미 루프가 실행 중인 경우를 대비한 처리
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_send())
+        loop.close()
+    except Exception as e:
+        logger.error(f"전송 실패 재시도 중...: {e}")
+        time.sleep(30)
+        # 단순 재시도
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_send())
+        loop.close()
 
-#텔레그램 특정시간 조용하게
-def tel_mute2(start_time2,end_time,telgm_botid,text,bot,telgm_alim):
-	alim_start_end = []
-	alim_start_end2 = []
-	mynow = mytime()
-	time_start = start_time2.zfill(2)
-	time_end = end_time.zfill(2)
-	
-	if int(time_start) == int(time_end):
-		print('시작시간과 종료시간 같음')
-		logger.info('시작시간과 종료시간 같음')
-		if telgm_alim == 'True':
-			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
-		else:
-			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
-	
-	else:
-		for i in range(0 , int(time_end)+1):
-			a = str(i).zfill(2)
-			if a == time_end:
-				pass
-			else:
-				alim_start_end.append(a)
-			
-		for i in range(int(time_start) , 25):
-			a = str(i).zfill(2)
-			if a == time_start or a == '24':
-				pass
-			else:
-				alim_start_end2.append(a)
-		
-		list = alim_start_end + alim_start_end2
-		if mynow not in list:
-			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=False))
-			print('시끄럽게')
-			logger.info('포토알림 시끄럽게')		
-		#미포함
-		else:
-			asyncio.run(bot.send_photo(chat_id = telgm_botid, photo=open(text,'rb'), disable_notification=True))
-			print('무음')
-			logger.info('포토알림 무음')	
-			
-#텔레그램 알림
-def tel(telgm,telgm_alim,telgm_token,telgm_botid,text,start_time2,end_time):	
-	if len(text) <= 4096:
-		if telgm == 'True' :
-			bot = telegram.Bot(token = telgm_token)
-			if telgm_alim == 'True':
-				try:
-					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
-				except Exception as e:
-					logger.error(e)
-					time.sleep(30)
-					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
-			else:
-				try:
-					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
-				except Exception as e:
-					logger.error(e)
-					time.sleep(30)
-					tel_mute(start_time2,end_time,telgm_botid,text,bot,telgm_alim)
-		else:
-			print(text)
-		#time.sleep(10)	
-	else:
-		parts = []
-		while len(text) > 0:
-			if len(text) > 4080: # '(Continuing...)\n'이 16자임을 고려하여 4096-16=4080을 했습니다.
-				part = text[:4080]
-				first_lnbr = part.rfind('\n')
-				if first_lnbr != -1: # 가능하면 개행문자를 기준으로 자릅니다.
-					parts.append(part[:first_lnbr])
-					text = text[(first_lnbr+1):]
-				else:
-					parts.append(part)
-					text = text[4080:]
-			else:
-				parts.append(text)
-				break
-		for idx, part in enumerate(parts):
-			if idx == 0:
-				if telgm == 'True' :
-					bot = telegram.Bot(token = telgm_token)
-					if telgm_alim == 'True':
-						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-						except Exception as e:
-							logger.error(e)
-							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim) 
-					else :
-						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-						except Exception as e:
-							logger.error(e)
-							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-					print(part)
-				else:
-					print(part)
-			else: # 두번째 메시지부터 '(Continuing...)\n'을 앞에 붙여줍니다.
-				if telgm == 'True' :
-					bot = telegram.Bot(token = telgm_token)
-					if telgm_alim == 'True':
-						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-						except Exception as e:
-							logger.error(e)
-							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-					else :
-						try:
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-						except Exception as e:
-							logger.error(e)
-							time.sleep(30)
-							tel_mute(start_time2,end_time,telgm_botid,part,bot,telgm_alim)
-					print(part)
-				else:
-					print(part)
-			#time.sleep(10)
-			time.sleep(0.5)
-	comp = '완료'
-	return comp
+def tel(telgm, telgm_alim, telgm_token, telgm_botid, text, start_time2, end_time):
+    """텍스트 알림 통합 함수"""
+    if telgm != 'True':
+        print(text)
+        return '완료'
 
-#텔레그램 알림
-def tel_img(telgm,telgm_alim,telgm_token,telgm_botid,msg,start_time2,end_time):
-	if telgm == 'True' :
-		bot = telegram.Bot(token = telgm_token)
-		if telgm_alim == 'True':
-			try:
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
-			except Exception as e:
-				logger.error(e)
-				time.sleep(30)
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
-		else:
-			try:
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
-			except Exception as e:
-				logger.error(e)
-				time.sleep(30)
-				tel_mute2(start_time2,end_time,telgm_botid,msg,bot,telgm_alim)
-	else:
-		print(msg)	
-	comp = '완료'
-	return comp	
+    bot = telegram.Bot(token=telgm_token)
+    # 무음 모드 여부 (설정이 True이고 시간대가 맞을 때)
+    silent = is_silent_now(start_time2, end_time) if telgm_alim == 'True' else False
+
+    # 메시지 분할 로직 (4096자 제한)
+    if len(text) > 4096:
+        parts = [text[i:i+4080] for i in range(0, len(text), 4080)]
+        for part in parts:
+            telegram_send_sync(bot, telgm_botid, part, is_photo=False, silent=silent)
+            time.sleep(0.5)
+    else:
+        telegram_send_sync(bot, telgm_botid, text, is_photo=False, silent=silent)
+    
+    return '완료'
+
+def tel_img(telgm, telgm_alim, telgm_token, telgm_botid, msg, start_time2, end_time):
+    """이미지 알림 통합 함수"""
+    if telgm != 'True':
+        print(msg)
+        return '완료'
+
+    bot = telegram.Bot(token=telgm_token)
+    silent = is_silent_now(start_time2, end_time) if telgm_alim == 'True' else False
+    
+    telegram_send_sync(bot, telgm_botid, msg, is_photo=True, silent=silent)
+    return '완료'
 	
 def cleanText(readData):
 	#텍스트에 포함되어 있는 특수 문자 제거
