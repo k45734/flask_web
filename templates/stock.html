@@ -6,7 +6,7 @@
             <h5 class="mb-0">➕ 신규 재고 등록</h5>
         </div>
         <div class="card-body">
-            <form action="start" method="POST" class="row g-3">
+            <form action="{{ url_for('sub4.start') }}" method="POST" class="row g-3">
                 <div class="col-md-3">
                     <input type="date" class="form-control" name="MY_DATE" required>
                 </div>
@@ -14,10 +14,10 @@
                     <input type="text" class="form-control" name="PRODUCT_NAME" placeholder="상품명" required>
                 </div>
                 <div class="col-md-2">
-                    <input type="number" class="form-control text-primary" name="RECEIVING" placeholder="입고량">
+                    <input type="number" class="form-control text-primary" name="RECEIVING" placeholder="입고량" value="0">
                 </div>
                 <div class="col-md-2">
-                    <input type="number" class="form-control text-danger" name="SHIPPING" placeholder="출고량">
+                    <input type="number" class="form-control text-danger" name="SHIPPING" placeholder="출고량" value="0">
                 </div>
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-success w-100">추가</button>
@@ -27,8 +27,12 @@
     </div>
 
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-bottom py-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
             <h4 class="mb-0 text-dark fw-bold">📊 재고 현황 마스터</h4>
+            <div>
+                <a href="{{ url_for('sub4.csv_import') }}" class="btn btn-sm btn-outline-secondary">엑셀 파일 생성</a>
+                <a href="{{ url_for('sub4.csv_download') }}" class="btn btn-sm btn-outline-primary">다운로드</a>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle text-center mb-0">
@@ -54,8 +58,8 @@
                         <td class="bg-light fw-bold">{{ row["TOTAL"] }}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="edit?idx={{ row['idx'] }}&MY_DATE={{ row['MY_DATE'] }}&PRODUCT_NAME={{ row['PRODUCT_NAME'] }}&SHIPPING={{ row['SHIPPING'] }}&RECEIVING={{ row['RECEIVING'] }}&TOTAL={{ row['TOTAL'] }}" class="btn btn-outline-dark">수정</a>
-                                <a href="del?idx={{ row['idx'] }}" class="btn btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
+                                <a href="{{ url_for('sub4.edit', idx=row['idx'], MY_DATE=row['MY_DATE'], PRODUCT_NAME=row['PRODUCT_NAME'], RECEIVING=row['RECEIVING'], SHIPPING=row['SHIPPING'], TOTAL=row['TOTAL']) }}" class="btn btn-outline-dark">수정</a>
+                                <a href="{{ url_for('sub4.databasedel', idx=row['idx']) }}" class="btn btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
                             </div>
                         </td>
                     </tr>
