@@ -5,48 +5,48 @@
         <div class="col-md-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-dark text-white py-3">
-                    <h5 class="mb-0">✏️ 재고 정보 수정</h5>
+                    <h5 class="mb-0"><i class="bi bi-pencil-square"></i> 재고 정보 수정</h5>
                 </div>
                 <div class="card-body p-4">
                     <form action="{{ url_for('sub4.edit_result') }}" method="GET">
                         <div class="row g-3">
-                            <div class="col-md-2">
-                                <label class="form-label small text-muted">번호</label>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">기록 번호</label>
                                 <input type="text" class="form-control bg-light" name="idx" value="{{idx}}" readonly>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-8">
                                 <label class="form-label small text-muted">날짜</label>
                                 <input type="date" class="form-control" name="MY_DATE" value="{{MY_DATE}}" required>
                             </div>
-                            <div class="col-md-6">
+
+                            <div class="col-12">
                                 <label class="form-label small text-muted">상품명</label>
-                                <input type="text" class="form-control" name="PRODUCT_NAME" value="{{PRODUCT_NAME}}" required>
+                                <input type="text" class="form-control bg-light" name="PRODUCT_NAME" value="{{PRODUCT_NAME}}" readonly>
+                                <small class="text-muted">* 상품명은 변경할 수 없습니다. (재고 꼬임 방지)</small>
                             </div>
 
                             <hr class="my-4">
 
-                            <div class="col-md-4">
-                                <label class="form-label small text-primary fw-bold">입고량</label>
-                                <input type="number" class="form-control border-primary" name="RECEIVING" value="{{RECEIVING}}">
+                            <div class="col-md-6">
+                                <label class="form-label small text-primary fw-bold">입고량 수정</label>
+                                <input type="number" class="form-control border-primary" name="RECEIVING" value="{{RECEIVING}}" min="0">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label small text-danger fw-bold">출고량</label>
-                                <input type="number" class="form-control border-danger" name="SHIPPING" value="{{SHIPPING}}">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small text-muted fw-bold">현재고(참고)</label>
-                                <input type="text" class="form-control bg-light" value="{{TOTAL}}" readonly>
+                            <div class="col-md-6">
+                                <label class="form-label small text-danger fw-bold">출고량 수정</label>
+                                <input type="number" class="form-control border-danger" name="SHIPPING" value="{{SHIPPING}}" min="0">
                             </div>
 
                             <div class="col-12 mt-4 d-flex gap-2">
-                                <button type="submit" class="btn btn-dark flex-grow-1">저장하기</button>
-                                <button type="button" class="btn btn-outline-secondary flex-grow-1" onclick="history.back();">취소</button>
+                                <button type="submit" class="btn btn-dark flex-grow-1 py-2">변경 내용 저장</button>
+                                <button type="button" class="btn btn-outline-secondary flex-grow-1 py-2" onclick="history.back();">취소</button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-            <p class="text-center mt-3 text-muted small">※ 합계는 저장 시 입고량과 출고량을 바탕으로 자동 재계산됩니다.</p>
+            <p class="text-center mt-3 text-muted small">
+                재고 수정 시, 전체 합계는 시스템에 의해 자동으로 재계산됩니다.
+            </p>
         </div>
     </div>
 </div>

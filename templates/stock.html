@@ -1,25 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="fw-bold mb-3"><i class="bi bi-speedometer2"></i> 실시간 품목별 재고 현황</h5>
+        </div>
+        {% if summary %}
+            {% for s in summary %}
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm {% if s['CURRENT_STOCK']|int <= 5 %}bg-danger{% else %}bg-primary{% endif %} text-white">
+                    <div class="card-body">
+                        <h6 class="card-title opacity-75 small">{{ s['PRODUCT_NAME'] }}</h6>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <h3 class="mb-0 fw-bold">{{ s['CURRENT_STOCK'] }}</h3>
+                            <small>단위: 개</small>
+                        </div>
+                        {% if s['CURRENT_STOCK']|int <= 5 %}
+                        <div class="mt-2 small"><i class="bi bi-exclamation-triangle"></i> 재고 부족 주의!</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <p class="text-muted">등록된 상품 요약 정보가 없습니다.</p>
+            </div>
+        {% endif %}
+    </div>
+
     <div class="card shadow-sm mb-5 border-0">
-        <div class="card-header bg-success text-white">
+        <div class="card-header bg-success text-white py-3">
             <h5 class="mb-0">➕ 신규 재고 등록</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <form action="{{ url_for('sub4.start') }}" method="POST" class="row g-3">
                 <div class="col-md-3">
+                    <label class="form-label small">날짜</label>
                     <input type="date" class="form-control" name="MY_DATE" required>
                 </div>
                 <div class="col-md-4">
-                    <input type="text" class="form-control" name="PRODUCT_NAME" placeholder="상품명" required>
+                    <label class="form-label small">상품명</label>
+                    <input type="text" class="form-control" name="PRODUCT_NAME" placeholder="상품명을 입력하세요" required>
                 </div>
                 <div class="col-md-2">
-                    <input type="number" class="form-control text-primary" name="RECEIVING" placeholder="입고량" value="0">
+                    <label class="form-label small text-primary">입고량</label>
+                    <input type="number" class="form-control" name="RECEIVING" value="0" min="0">
                 </div>
                 <div class="col-md-2">
-                    <input type="number" class="form-control text-danger" name="SHIPPING" placeholder="출고량" value="0">
+                    <label class="form-label small text-danger">출고량</label>
+                    <input type="number" class="form-control" name="SHIPPING" value="0" min="0">
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-1 d-flex align-items-end">
                     <button type="submit" class="btn btn-success w-100">추가</button>
                 </div>
             </form>
@@ -28,10 +60,10 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 text-dark fw-bold">📊 재고 현황 마스터</h4>
+            <h4 class="mb-0 text-dark fw-bold">📋 입출고 상세 로그</h4>
             <div>
-                <a href="{{ url_for('sub4.csv_import') }}" class="btn btn-sm btn-outline-secondary">엑셀 파일 생성</a>
-                <a href="{{ url_for('sub4.csv_download') }}" class="btn btn-sm btn-outline-primary">다운로드</a>
+                <a href="{{ url_for('sub4.csv_import') }}" class="btn btn-sm btn-outline-secondary">엑셀 생성</a>
+                <a href="{{ url_for('sub4.csv_download') }}" class="btn btn-sm btn-primary">다운로드</a>
             </div>
         </div>
         <div class="table-responsive">
@@ -43,7 +75,7 @@
                         <th>상품명</th>
                         <th class="text-primary">입고</th>
                         <th class="text-danger">출고</th>
-                        <th class="fw-bold">현재고</th>
+                        <th class="fw-bold">변동후 재고</th>
                         <th>관리</th>
                     </tr>
                 </thead>
@@ -51,15 +83,15 @@
                     {% for row in rows %}
                     <tr>
                         <td>{{ row["idx"] }}</td>
-                        <td class="small">{{ row["MY_DATE"] }}</td>
+                        <td class="text-muted small">{{ row["MY_DATE"] }}</td>
                         <td class="fw-bold">{{ row["PRODUCT_NAME"] }}</td>
-                        <td class="text-primary">+{{ row["RECEIVING"] }}</td>
-                        <td class="text-danger">-{{ row["SHIPPING"] }}</td>
+                        <td class="text-primary fw-bold">+{{ row["RECEIVING"] }}</td>
+                        <td class="text-danger fw-bold">-{{ row["SHIPPING"] }}</td>
                         <td class="bg-light fw-bold">{{ row["TOTAL"] }}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ url_for('sub4.edit', idx=row['idx'], MY_DATE=row['MY_DATE'], PRODUCT_NAME=row['PRODUCT_NAME'], RECEIVING=row['RECEIVING'], SHIPPING=row['SHIPPING'], TOTAL=row['TOTAL']) }}" class="btn btn-outline-dark">수정</a>
-                                <a href="{{ url_for('sub4.databasedel', idx=row['idx']) }}" class="btn btn-outline-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+                                <a href="{{ url_for('sub4.databasedel', idx=row['idx']) }}" class="btn btn-outline-danger" onclick="return confirm('이 기록을 삭제하시겠습니까?')">삭제</a>
                             </div>
                         </td>
                     </tr>
