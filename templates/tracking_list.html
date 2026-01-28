@@ -24,12 +24,12 @@
                             <td class="fw-bold text-primary">{{ row['NUMBER'] }}</td>
                             <td>{{ row['BOX'] }}</td>
                             <td>
-                                {% if row['COMPLTE'] == '배송완료' %}
-                                <span class="badge bg-success">배송완료</span>
-                                {% else %}
-                                <span class="badge bg-warning text-dark">배송중</span>
-                                {% endif %}
-                            </td>
+    {% if row['COMPLTE'] == 'True' %}
+        <span class="badge bg-success">배송완료</span>
+    {% else %}
+        <span class="badge bg-warning text-dark">배송중</span>
+    {% endif %}
+</td>
                             <td>
                                 <a href="{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_del" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
                             </td>

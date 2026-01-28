@@ -617,51 +617,18 @@ def tracking():
 
 @bp2.route('tracking_list', methods=["GET"])
 def tracking_list():
-	#데이타베이스 없으면 생성
-	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
-	con.execute("PRAGMA cache_size = 10000")
-	con.execute("PRAGMA locking_mode = NORMAL")
-	con.execute("PRAGMA temp_store = MEMORY")
-	con.execute("PRAGMA auto_vacuum = 1")
-	con.execute("PRAGMA journal_mode=WAL")
-	con.execute("PRAGMA synchronous=NORMAL")
-	con.close()
-	#SQLITE3 DB 없으면 만들다.
+	if not session.get('logFlag'): return redirect(url_for('main.index'))
+	per_page = 10
+	page, _, offset = get_page_args(per_page=per_page)
 	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	con.execute('CREATE TABLE IF NOT EXISTS tracking (PARCEL TEXT, NUMBER TEXT, DATE TEXT, BOX TEXT,COMPLTE TEXT)')
-	con.execute("PRAGMA cache_size = 10000")
-	con.execute("PRAGMA locking_mode = NORMAL")
-	con.execute("PRAGMA temp_store = MEMORY")
-	con.execute("PRAGMA auto_vacuum = 1")
-	con.execute("PRAGMA journal_mode=WAL")
-	con.execute("PRAGMA synchronous=NORMAL")	
+	con.row_factory = sqlite3.Row
+	cur = con.cursor()
+	total = cur.execute("SELECT COUNT(*) FROM tracking").fetchone()[0]
+	# 정렬 조건 수정: 배송중(False) 우선 정렬 후 날짜 역순
+	cur.execute(f"SELECT * FROM tracking ORDER BY COMPLTE ASC, DATE DESC LIMIT {per_page} OFFSET {offset}")
+	view = cur.fetchall()
 	con.close()
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		telgm_token = request.args.get('telgm_token')
-		telgm_botid = request.args.get('telgm_botid')
-		telgm = request.args.get('telgm')
-		telgm_alim = request.args.get('telgm_alim')
-		per_page = 10
-		page, _, offset = get_page_args(per_page=per_page)
-		#알림
-		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-		con.execute("PRAGMA cache_size = 10000")
-		con.execute("PRAGMA locking_mode = NORMAL")
-		con.execute("PRAGMA temp_store = MEMORY")
-		con.execute("PRAGMA auto_vacuum = 1")
-		con.execute("PRAGMA journal_mode=WAL")
-		con.execute("PRAGMA synchronous=NORMAL")
-		con.row_factory = sqlite3.Row
-		cur = con.cursor()
-		cur.execute("SELECT COUNT(*) FROM tracking;")
-		total = cur.fetchone()[0]
-		cur.execute('SELECT * FROM tracking ORDER BY DATE DESC LIMIT ' + str(per_page) + ' OFFSET ' + str(offset))
-		view = cur.fetchall()
-		return render_template('tracking_list.html',view = view, telgm_token = telgm_token, telgm_botid = telgm_botid, telgm = telgm, telgm_alim = telgm_alim, pagination=Pagination(page=page, total=total, per_page=per_page))
-
+	return render_template('tracking_list.html', view=view, pagination=Pagination(page=page, total=total, per_page=per_page))
 @bp2.route('tracking/tracking_add', methods=['GET'])
 def tracking_add():
 	mytime = mydate()
