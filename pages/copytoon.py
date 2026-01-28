@@ -321,11 +321,28 @@ def index_list():
         cur = con.cursor()
         cur.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
         if not cur.fetchone(): return render_template('webtoon_list.html', wow=[], pagination=None, gbun=gbun)
+        
         where, param = ("WHERE TITLE LIKE ?", [f"%{search}%"]) if search else ("", [])
-        cur.execute(f"SELECT TITLE, SUBTITLE, TOTAL_COUNT FROM {table} {where} GROUP BY TITLE, SUBTITLE ORDER BY TITLE ASC LIMIT 15 OFFSET {(page-1)*15}", param)
+        
+        # --- 수정된 쿼리: COUNT(*)를 사용하여 현재 DB에 저장된 이미지 개수를 실시간으로 가져옵니다 ---
+        query = f"""
+            SELECT 
+                TITLE, 
+                SUBTITLE, 
+                TOTAL_COUNT, 
+                COUNT(*) as CURRENT_COUNT 
+            FROM {table} 
+            {where} 
+            GROUP BY TITLE, SUBTITLE 
+            ORDER BY TITLE ASC 
+            LIMIT 15 OFFSET {(page-1)*15}
+        """
+        cur.execute(query, param)
         wow = cur.fetchall()
+        
         cur.execute(f"SELECT COUNT(*) FROM (SELECT 1 FROM {table} {where} GROUP BY TITLE, SUBTITLE)", param)
         total = cur.fetchone()[0]
+        
     pagination = Pagination(page=page, total=total, per_page=15, bs_version=4, add_args={'gbun': gbun, 'search': search})
     return render_template('webtoon_list.html', wow=wow, pagination=pagination, gbun=gbun, search=search)
 
