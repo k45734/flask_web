@@ -58,6 +58,10 @@
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">수정 완료</button>
                     <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-lg">취소</button>
                 </div>
+				<input type="hidden" name="FLASKTIME" value="{{ FLASKTIME }}">
+				<input type="hidden" name="RCLONE_CONFIG" value="{{ RCLONE_CONFIG }}">
+				<input type="hidden" name="RCLONE_UPLOAD" value="{{ RCLONE_UPLOAD }}">
+				<input type="hidden" name="DELETE_F" value="{{ DELETE_F }}">
             </form>
         </div>
     </div>

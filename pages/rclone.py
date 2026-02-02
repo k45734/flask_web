@@ -194,58 +194,30 @@ def edit(RCLONENAME):
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		#데이터베이스 컬럼 추가하기
-		conn = sqlite3.connect(sub3db,timeout=60)
-		cur = conn.cursor()
-		sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%RCLONE_UPLOAD%'"
-		cur.execute(sql)
-		rows = cur.fetchall()
-		if len(rows) == 0:
-			sql = "alter table " + RCLONENAME + " add column RCLONE_UPLOAD TEXT"
-			cur.execute(sql)
-		else:
-			pass
-		conn.commit()
-		conn.close()
-		#데이터베이스 컬럼 추가하기
-		conn = sqlite3.connect(sub3db,timeout=60)
-		cur = conn.cursor()
-		sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%DELETE_F%'"
-		cur.execute(sql)
-		rows = cur.fetchall()
-		if len(rows) == 0:
-			sql = "alter table " + RCLONENAME + " add column DELETE_F TEXT"
-			cur.execute(sql)
-		else:
-			pass
-		conn.commit()
-		conn.close()
-		#데이터베이스 컬럼 추가하기
-		conn = sqlite3.connect(sub3db,timeout=60)
-		cur = conn.cursor()
-		sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%CREATE_F%'"
-		cur.execute(sql)
-		rows = cur.fetchall()
-		if len(rows) == 0:
-			sql = "alter table " + RCLONENAME + " add column CREATE_F TEXT"
-			cur.execute(sql)
-		else:
-			pass
-		conn.commit()
-		conn.close()
-		#데이터베이스 컬럼 추가하기
-		conn = sqlite3.connect(sub3db,timeout=60)
-		cur = conn.cursor()
-		sql = "SELECT sql FROM sqlite_master WHERE name='" + RCLONENAME + "' AND sql LIKE '%ETC%'"
-		cur.execute(sql)
-		rows = cur.fetchall()
-		if len(rows) == 0:
-			sql = "alter table " + RCLONENAME + " add column ETC TEXT"
-			cur.execute(sql)
-		else:
-			pass
-		conn.commit()
-		conn.close()
+		try:
+			# 1. 현재 테이블의 스키마 정보를 한 번만 가져옴
+			cur.execute("SELECT sql FROM sqlite_master WHERE name=?", (RCLONENAME,))
+			table_info = cur.fetchone()
+        
+			if table_info:
+				table_sql = table_info[0]
+				# 2. 추가할 컬럼 리스트 정의
+				columns_to_add = ['RCLONE_UPLOAD', 'DELETE_F', 'CREATE_F', 'ETC']
+            
+				for col in columns_to_add:
+					# 3. 해당 컬럼이 SQL 문 내에 없는 경우에만 ALTER TABLE 실행
+					if col not in table_sql:
+						alter_sql = "ALTER TABLE {} ADD COLUMN {} TEXT".format(RCLONENAME, col)
+						cur.execute(alter_sql)
+						logger.info('테이블 %s에 %s 컬럼을 추가했습니다.', RCLONENAME, col)
+            
+				conn.commit()
+		except Exception as e:
+			conn.rollback()
+			logger.error('DB 스키마 업데이트 중 오류 발생: %s', e)
+		finally:
+			conn.close()
+			
 		conn = sqlite3.connect(sub3db,timeout=60)
 		conn.row_factory = sqlite3.Row
 		cursor = conn.cursor()
@@ -268,31 +240,51 @@ def edit(RCLONENAME):
 
 @rclone.route("edit_result/<RCLONENAME>", methods=['POST'])
 def edit_result(RCLONENAME):
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		RCLONENAME = request.form['RCLONENAME']
-		FLASKTIME = request.form['FLASKTIME']
-		RCLONE_REMOTE = request.form['RCLONE_REMOTE']
-		RCLONE_CONFIG = request.form['RCLONE_CONFIG']
-		RCLONE_LOCAL = request.form['RCLONE_LOCAL']
-		RCLONE_C_M = request.form['RCLONE_C_M']
-		RCLONE_include = request.form['RCLONE_include']
-		RCLONE_UPLOAD = request.form['RCLONE_UPLOAD']
-		CREATE_F = request.form['CREATE_F']
-		DELETE_F = request.form['DELETE_F']
-		ETC = request.form['ETC']
-		conn = sqlite3.connect(sub3db,timeout=60)
-		cursor = conn.cursor()
-		try:
-			sql_update = "UPDATE " + RCLONENAME + " SET RCLONE_C_M = ? , RCLONE_include = ?, FLASKTIME = ?, RCLONE_REMOTE = ?, RCLONE_CONFIG = ?, RCLONE_LOCAL =? , RCLONE_UPLOAD=? , CREATE_F=?, DELETE_F=? , ETC = ? WHERE RCLONENAME = ?"
-			cursor.execute(sql_update,(RCLONE_C_M, RCLONE_include, FLASKTIME, RCLONE_REMOTE, RCLONE_CONFIG, RCLONE_LOCAL, RCLONE_UPLOAD, CREATE_F, DELETE_F, ETC, RCLONENAME))
-			conn.commit()
-		except:
-			conn.rollback()
-		finally:	
-			conn.close()
-		return redirect(url_for('rclone.second'))
+    if not session.get('logFlag'):
+        return redirect(url_for('main.index'))
+    
+    # 1. 데이터를 가져올 때 .get()을 사용하여 기본값 설정 (에러 방지)
+    # HTML 폼에 해당 name이 없어도 None이나 지정한 기본값을 반환하여 400 에러를 막습니다.
+    data = {
+        'RCLONENAME': request.form.get('RCLONENAME'),
+        'FLASKTIME': request.form.get('FLASKTIME', '*/1 * * * *'),
+        'RCLONE_REMOTE': request.form.get('RCLONE_REMOTE'),
+        'RCLONE_CONFIG': request.form.get('RCLONE_CONFIG', ''),
+        'RCLONE_LOCAL': request.form.get('RCLONE_LOCAL'),
+        'RCLONE_C_M': request.form.get('RCLONE_C_M'),
+        'RCLONE_include': request.form.get('RCLONE_include', ''),
+        'RCLONE_UPLOAD': request.form.get('RCLONE_UPLOAD', '128K'),
+        'CREATE_F': request.form.get('CREATE_F', 'False'),
+        'DELETE_F': request.form.get('DELETE_F', 'False'),
+        'ETC': request.form.get('ETC', '')
+    }
+
+    conn = sqlite3.connect(sub3db, timeout=60)
+    cursor = conn.cursor()
+    try:
+        # 2. 쿼리문을 더 읽기 쉽게 작성
+        sql_update = """
+            UPDATE {} SET 
+                RCLONE_C_M = ?, RCLONE_include = ?, FLASKTIME = ?, 
+                RCLONE_REMOTE = ?, RCLONE_CONFIG = ?, RCLONE_LOCAL = ?, 
+                RCLONE_UPLOAD = ?, CREATE_F = ?, DELETE_F = ?, ETC = ? 
+            WHERE RCLONENAME = ?
+        """.format(data['RCLONENAME'])
+        
+        cursor.execute(sql_update, (
+            data['RCLONE_C_M'], data['RCLONE_include'], data['FLASKTIME'],
+            data['RCLONE_REMOTE'], data['RCLONE_CONFIG'], data['RCLONE_LOCAL'],
+            data['RCLONE_UPLOAD'], data['CREATE_F'], data['DELETE_F'], 
+            data['ETC'], data['RCLONENAME']
+        ))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Update Error: {e}")
+    finally:    
+        conn.close()
+        
+    return redirect(url_for('rclone.second'))
 		
 @rclone.route("databasedel/<RCLONENAME>", methods=["GET"])
 def databasedel(RCLONENAME):
