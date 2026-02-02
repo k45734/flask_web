@@ -191,53 +191,59 @@ def second():
 		
 @rclone.route("edit/<RCLONENAME>", methods=['GET'])
 def edit(RCLONENAME):
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		try:
-			# 1. 현재 테이블의 스키마 정보를 한 번만 가져옴
-			cur.execute("SELECT sql FROM sqlite_master WHERE name=?", (RCLONENAME,))
-			table_info = cur.fetchone()
-        
-			if table_info:
-				table_sql = table_info[0]
-				# 2. 추가할 컬럼 리스트 정의
-				columns_to_add = ['RCLONE_UPLOAD', 'DELETE_F', 'CREATE_F', 'ETC']
-            
-				for col in columns_to_add:
-					# 3. 해당 컬럼이 SQL 문 내에 없는 경우에만 ALTER TABLE 실행
-					if col not in table_sql:
-						alter_sql = "ALTER TABLE {} ADD COLUMN {} TEXT".format(RCLONENAME, col)
-						cur.execute(alter_sql)
-						logger.info('테이블 %s에 %s 컬럼을 추가했습니다.', RCLONENAME, col)
-            
-				conn.commit()
-		except Exception as e:
-			conn.rollback()
-			logger.error('DB 스키마 업데이트 중 오류 발생: %s', e)
-		finally:
-			conn.close()
-			
-		conn = sqlite3.connect(sub3db,timeout=60)
-		conn.row_factory = sqlite3.Row
-		cursor = conn.cursor()
-		sql = "select * from " + RCLONENAME + " where RCLONENAME = ?"
-		cursor.execute(sql, (RCLONENAME,))
-		row = cursor.fetchone()
-		RCLONENAME = row['RCLONENAME']
-		FLASKTIME = row['FLASKTIME']
-		RCLONE_CONFIG = row['RCLONE_CONFIG']
-		RCLONE_REMOTE = row['RCLONE_REMOTE']
-		RCLONE_LOCAL = row['RCLONE_LOCAL']
-		RCLONE_C_M = row['RCLONE_C_M']
-		RCLONE_include = row['RCLONE_include']
-		RCLONE_UPLOAD = row['RCLONE_UPLOAD']
-		CREATE_F = row['CREATE_F']
-		DELETE_F = row['DELETE_F']
-		ETC = row['ETC']
-		cursor.close()
-		return render_template('rclone_edit.html', RCLONE_C_M=RCLONE_C_M, RCLONE_include=RCLONE_include, RCLONENAME=RCLONENAME, RCLONE_CONFIG=RCLONE_CONFIG,RCLONE_REMOTE=RCLONE_REMOTE,RCLONE_LOCAL=RCLONE_LOCAL,FLASKTIME=FLASKTIME, RCLONE_UPLOAD=RCLONE_UPLOAD,CREATE_F=CREATE_F,DELETE_F=DELETE_F,ETC=ETC)
+    if not session.get('logFlag'):
+        return redirect(url_for('main.index'))
+    
+    conn = sqlite3.connect(sub3db, timeout=60)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
 
+    try:
+        # [개선] 컬럼이 없으면 자동으로 추가해주는 안전 장치
+        cur.execute("SELECT sql FROM sqlite_master WHERE name=?", (RCLONENAME,))
+        table_info = cur.fetchone()
+        if table_info:
+            table_sql = table_info[0]
+            # 체크할 컬럼 리스트
+            cols = ['RCLONE_UPLOAD', 'DELETE_F', 'CREATE_F', 'ETC']
+            for col in cols:
+                if col not in table_sql:
+                    cur.execute(f"ALTER TABLE {RCLONENAME} ADD COLUMN {col} TEXT")
+            conn.commit()
+
+        # 데이터 가져오기
+        sql = f"SELECT * FROM {RCLONENAME} WHERE RCLONENAME = ?"
+        cur.execute(sql, (RCLONENAME,))
+        row = cur.fetchone()
+
+        if row is None:
+            return "해당 설정을 찾을 수 없습니다.", 404
+
+        # dict 형태로 변환하면서 누락된 값(None) 처리
+        res = dict(row)
+        # 만약 DB에 값이 없더라도 에러가 나지 않게 기본값 할당
+        context = {
+            'RCLONENAME': res.get('RCLONENAME'),
+            'FLASKTIME': res.get('FLASKTIME', '*/1 * * * *'),
+            'RCLONE_CONFIG': res.get('RCLONE_CONFIG', ''),
+            'RCLONE_REMOTE': res.get('RCLONE_REMOTE', ''),
+            'RCLONE_LOCAL': res.get('RCLONE_LOCAL', ''),
+            'RCLONE_C_M': res.get('RCLONE_C_M', 'copy'),
+            'RCLONE_include': res.get('RCLONE_include', ''),
+            'RCLONE_UPLOAD': res.get('RCLONE_UPLOAD', '128K'),
+            'CREATE_F': res.get('CREATE_F', 'False'),
+            'DELETE_F': res.get('DELETE_F', 'False'),
+            'ETC': res.get('ETC', '')
+        }
+
+    except Exception as e:
+        logger.error(f"Edit Page Error: {e}")
+        return f"Internal Error: {e}", 500
+    finally:
+        conn.close()
+
+    return render_template('rclone_edit.html', **context)
+	
 @rclone.route("edit_result/<RCLONENAME>", methods=['POST'])
 def edit_result(RCLONENAME):
     if not session.get('logFlag'):
