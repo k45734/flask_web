@@ -194,34 +194,37 @@ def edit(RCLONENAME):
     if not session.get('logFlag'):
         return redirect(url_for('main.index'))
     
-    conn = sqlite3.connect(sub3db, timeout=60)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-
+    # 초기값 설정 (에러 시 UnboundLocalError 방지)
+    conn = None
+    
     try:
-        # [개선] 컬럼이 없으면 자동으로 추가해주는 안전 장치
+        conn = sqlite3.connect(sub3db, timeout=60)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor() # 여기서 cur가 정의됩니다.
+
+        # 1. DB 스키마 업데이트 (컬럼 자동 추가)
         cur.execute("SELECT sql FROM sqlite_master WHERE name=?", (RCLONENAME,))
         table_info = cur.fetchone()
+        
         if table_info:
             table_sql = table_info[0]
-            # 체크할 컬럼 리스트
             cols = ['RCLONE_UPLOAD', 'DELETE_F', 'CREATE_F', 'ETC']
             for col in cols:
                 if col not in table_sql:
-                    cur.execute(f"ALTER TABLE {RCLONENAME} ADD COLUMN {col} TEXT")
+                    # 안전하게 컬럼 추가
+                    cur.execute("ALTER TABLE {} ADD COLUMN {} TEXT".format(RCLONENAME, col))
             conn.commit()
 
-        # 데이터 가져오기
-        sql = f"SELECT * FROM {RCLONENAME} WHERE RCLONENAME = ?"
+        # 2. 데이터 가져오기
+        sql = "SELECT * FROM {} WHERE RCLONENAME = ?".format(RCLONENAME)
         cur.execute(sql, (RCLONENAME,))
         row = cur.fetchone()
 
         if row is None:
             return "해당 설정을 찾을 수 없습니다.", 404
 
-        # dict 형태로 변환하면서 누락된 값(None) 처리
+        # 3. 템플릿에 전달할 데이터 정리
         res = dict(row)
-        # 만약 DB에 값이 없더라도 에러가 나지 않게 기본값 할당
         context = {
             'RCLONENAME': res.get('RCLONENAME'),
             'FLASKTIME': res.get('FLASKTIME', '*/1 * * * *'),
@@ -235,12 +238,18 @@ def edit(RCLONENAME):
             'DELETE_F': res.get('DELETE_F', 'False'),
             'ETC': res.get('ETC', '')
         }
+        
+        return render_template('rclone_edit.html', **context)
 
     except Exception as e:
-        logger.error(f"Edit Page Error: {e}")
-        return f"Internal Error: {e}", 500
+        if conn:
+            conn.rollback()
+        logger.error("Edit 함수 에러 발생: %s", e)
+        return "Internal Server Error: {}".format(e), 500
+        
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
     return render_template('rclone_edit.html', **context)
 	
