@@ -133,9 +133,11 @@ def tel_send_message(dummy=None):
                 try:
                     pid = int(m['data-post'].split('/')[-1])
                     processed_ids.append(pid)
-                    
+                    print(f"[*] 현재 {pid}번 분석 중...", end='\r')
+                    logger.info(f"[*] 현재 {pid}번 분석 중...", end='\r')
                     # [핵심] 지난번 수집했던 최신글 지점에 도달하면 종료
                     if pid <= last_stop_id:
+                        print(f"[도달] 이전 수집 지점({last_stop_id})에 도달했습니다. 수집을 종료합니다.")
                         logger.info(f"[도달] 이전 수집 지점({last_stop_id})에 도달했습니다. 수집을 종료합니다.")
                         is_continue = False
                         break
