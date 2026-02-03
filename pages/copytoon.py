@@ -85,46 +85,44 @@ def db_optimize():
         logger.info("[완료] 모든 최적화 작업 종료")
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
-# --- [3. 수집 엔진 (수정됨)] ---
+# --- [3. 수집 엔진 (최종 지능형 역주행)] ---
 def tel_send_message(dummy=None):
-    logger.info("== [지능형 역주행] 최신글 -> 지난 수집 지점 추적 시작 ==")
+    logger.info("== [지능형 엔진] 최신글 -> 종착역 추적 가동 ==")
     
-    # 1. 진짜 최신 ID 자동 감지
     try:
+        # 텔레그램 서버에서 현재 가장 최신 ID 감지
         init_req = requests.get('https://t.me/s/webtoonalim', timeout=15)
         init_soup = bs(init_req.text, "html.parser")
         init_messages = init_soup.findAll("div", {"class": "tgme_widget_message"})
         
         if not init_messages:
-            logger.error("[중단] 채널 메시지를 로드할 수 없습니다.")
+            logger.error("[중단] 텔레그램 데이터를 가져올 수 없습니다.")
             return
 
         real_latest_id = max([int(m['data-post'].split('/')[-1]) for m in init_messages])
-        # 지난번 실행 시의 '최신' 지점을 종착역으로 설정 (없으면 1부터)
+        # 지난번 실행 때 '최신'이었던 지점을 종착역으로 설정
         last_stop_id = int(get_config('last_webtoon_id') or 0)
         
-        logger.info(f"[정보] 현재 최신: {real_latest_id} | 지난번 종착역: {last_stop_id}")
+        logger.info(f"[정보] 시작점(최신): {real_latest_id} | 종착역(과거): {last_stop_id}")
         
     except Exception as e:
-        logger.error(f"!!! 최신 ID 감지 오류: {e}")
+        logger.error(f"!!! 초기화 오류: {e}")
         return
 
-    # 2. 역주행 시작 (현재 최신부터 과거로)
     current_search_id = real_latest_id
     is_continue = True
     total_new_count = 0
-    page_count = 0
 
     while is_continue:
-        page_count += 1
         url = f'https://t.me/s/webtoonalim?before={current_search_id}'
-        
         try:
             req = requests.get(url, timeout=15)
             soup = bs(req.text, "html.parser")
             messages = soup.findAll("div", {"class": "tgme_widget_message"})
             
-            if not messages: break
+            if not messages:
+                logger.info("[정보] 더 이상 읽을 메시지가 없습니다.")
+                break
 
             new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
             processed_ids = []
@@ -133,12 +131,14 @@ def tel_send_message(dummy=None):
                 try:
                     pid = int(m['data-post'].split('/')[-1])
                     processed_ids.append(pid)
-                    print(f"[*] 현재 {pid}번 분석 중...", end='\r')
-                    logger.info(f"[*] 현재 {pid}번 분석 중...", end='\r')
-                    # [핵심] 지난번 수집했던 최신글 지점에 도달하면 종료
+                    
+                    # 100단위로 진행 상황 로그 출력 (실시간 확인용)
+                    if pid % 100 == 0:
+                        logger.info(f"[*] 현재 {pid}번 분석 중... (목표: {last_stop_id})")
+                    
+                    # [중단 조건] 지난번 수집했던 최신 지점에 도달하면 종료
                     if pid <= last_stop_id:
-                        print(f"[도달] 이전 수집 지점({last_stop_id})에 도달했습니다. 수집을 종료합니다.")
-                        logger.info(f"[도달] 이전 수집 지점({last_stop_id})에 도달했습니다. 수집을 종료합니다.")
+                        logger.info(f"[도달] 이전 수집 지점({last_stop_id}) 확인. 역주행을 종료합니다.")
                         is_continue = False
                         break
                     
@@ -148,7 +148,7 @@ def tel_send_message(dummy=None):
                     dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
                     aac = dec.split('\n\n')
 
-                    # 규격 검사 (데이터가 이상해도 멈추지 않고 건너뜀)
+                    # 규격 검사 (오류 시 종료하지 않고 건너뜀)
                     if len(aac) < 8 or not aac[7].strip().isdigit():
                         continue
 
@@ -168,21 +168,21 @@ def tel_send_message(dummy=None):
                 con.commit()
 
             if processed_ids:
-                oldest_in_page = min(processed_ids)
-                current_search_id = oldest_in_page
-                # 텔레그램 1번 메시지 방지
-                if oldest_in_page <= 1: is_continue = False
+                oldest_id = min(processed_ids)
+                current_search_id = oldest_id
+                # 텔레그램 시작점 도달 시 종료
+                if oldest_id <= 1: is_continue = False
                 time.sleep(0.3)
             else:
                 is_continue = False
                 
         except Exception as e:
-            logger.error(f"!!! 루프 오류: {e}")
+            logger.error(f"!!! 수집 루프 오류: {e}")
             break
 
-    # 3. 모든 수집이 완료된 후, '진짜 최신 ID'를 다음번의 종착역으로 저장
+    # [중요] 모든 작업이 끝나면 '이번 회차의 최신 ID'를 다음번의 종착역으로 저장
     set_config('last_webtoon_id', real_latest_id)
-    logger.info(f"== [수집 완료] 총 {total_new_count}개 확보. 다음 종착역: {real_latest_id} ==")
+    logger.info(f"== [완료] 신규 {total_new_count}개 수집됨. (최종 위치: {real_latest_id}) ==")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
