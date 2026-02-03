@@ -136,34 +136,29 @@ def proc_test(name):
 	msg = '{} {} 동일 프로세스 확인 완료....'.format(aa,bb)
 	return msg
 	
-def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE,RCLONE_C_M, RCLONE_include, RCLONE_UPLOAD, CREATE_F,DELETE_F,ETC):
-	if len(RCLONE_include) == 0:
-		RCLONE_include_F = ''
-	else:
-		RCLONE_include_F = RCLONE_include + ' '
-	if CREATE_F == 'True':
-		CREATE_FF = ' --create-empty-src-dirs'
-	else:
-		CREATE_FF = ''
-	if DELETE_F == 'True':
-		DELETE_FF = ' --delete-empty-src-dirs'
-	else:
-		DELETE_FF = ''
-	#--dropbox-batch-mode async --dropbox-batch-size 500
-	if len(ETC) == 0 :
-		add_cc = ' '
-	else:
-		add_cc = ' ' + ETC + ' '
-	
-	if RCLONE_C_M == 'move':
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include_F + '--log-level ERROR --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --transfers=4 --checkers=8' + CREATE_FF + DELETE_FF + ' --delete-after --drive-chunk-size=1M --bwlimit=' + RCLONE_UPLOAD + add_cc + '--log-file /data/log/' + RCLONENAME + '.log'
-	else:
-		FLASKAPPS = '/data/rclone ' + RCLONE_C_M + ' ' + RCLONE_LOCAL + ' ' + RCLONE_REMOTE + ' -L --config ' + RCLONE_CONFIG + ' ' + RCLONE_include_F + '--log-level ERROR --min-age 1m --stats 10s --stats-file-name-length 0 --min-age 1m --transfers=4 --checkers=8' + CREATE_FF + DELETE_FF + ' --delete-after --drive-chunk-size=1M --bwlimit=' + RCLONE_UPLOAD + add_cc + '--log-file /data/log/' + RCLONENAME + '.log'
-	print(FLASKAPPS)
-	logger.info(FLASKAPPS)	
-	subprocess.call(FLASKAPPS, shell=True)
-	comp = '완료'
-	return comp	
+def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE, RCLONE_C_M, RCLONE_include, RCLONE_UPLOAD, CREATE_F, DELETE_F, ETC):
+    # 1. include 옵션 처리: --include 플래그와 따옴표 추가
+    include_part = f'--include "{RCLONE_include}" ' if RCLONE_include else ''
+    
+    # 2. 기타 플래그 처리
+    create_part = ' --create-empty-src-dirs' if CREATE_F == 'True' else ''
+    delete_part = ' --delete-empty-src-dirs' if DELETE_F == 'True' else ''
+    etc_part = f' {ETC} ' if ETC else ' '
+
+    # 3. 전체 명령어 조립 (경로에도 따옴표를 붙여 공백 에러 방지)
+    FLASKAPPS = (
+        f'/data/rclone {RCLONE_C_M} "{RCLONE_LOCAL}" "{RCLONE_REMOTE}" '
+        f'-L --config "{RCLONE_CONFIG}" {include_part}'
+        f'--log-level ERROR --min-age 1m --stats 10s --stats-file-name-length 0 '
+        f'--transfers=4 --checkers=8{create_part}{create_part} '
+        f'--delete-after --drive-chunk-size=1M --bwlimit={RCLONE_UPLOAD}'
+        f'{etc_part}--log-file "/data/log/{RCLONENAME}.log"'
+    )
+    
+    print(f"실행될 명령어: {FLASKAPPS}")
+    logger.info(FLASKAPPS)
+    subprocess.call(FLASKAPPS, shell=True)
+    return '완료'
 	
 @rclone.route('/')
 @rclone.route('index')
