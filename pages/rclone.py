@@ -137,22 +137,20 @@ def proc_test(name):
 	return msg
 	
 def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE, RCLONE_C_M, RCLONE_include, RCLONE_UPLOAD, CREATE_F, DELETE_F, ETC):
-    # 1. include 옵션 처리: --include 플래그와 따옴표 추가
-    include_part = f'--include "{RCLONE_include}" ' if RCLONE_include else ''
-    
-    # 2. 기타 플래그 처리
-    create_part = ' --create-empty-src-dirs' if CREATE_F == 'True' else ''
-    delete_part = ' --delete-empty-src-dirs' if DELETE_F == 'True' else ''
-    etc_part = f' {ETC} ' if ETC else ' '
+    # 인자값(CREATE_F)을 바탕으로 플래그 생성
+    create_flag = ' --create-empty-src-dirs' if CREATE_F == 'True' else ''
+    delete_flag = ' --delete-empty-src-dirs' if DELETE_F == 'True' else ''
+    include_flag = f' --include "{RCLONE_include}"' if RCLONE_include else ''
+    etc_flag = f' {ETC}' if ETC else ''
 
-    # 3. 전체 명령어 조립 (경로에도 따옴표를 붙여 공백 에러 방지)
+    # 중복 없이 단 한 번씩만 조립
     FLASKAPPS = (
         f'/data/rclone {RCLONE_C_M} "{RCLONE_LOCAL}" "{RCLONE_REMOTE}" '
-        f'-L --config "{RCLONE_CONFIG}" {include_part}'
-        f'--log-level ERROR --min-age 1m --stats 10s --stats-file-name-length 0 '
-        f'--transfers=4 --checkers=8{create_part}{create_part} '
+        f'-L --config "{RCLONE_CONFIG}"{include_flag} '
+        f'--log-level INFO --min-age 1m --stats 10s --stats-file-name-length 0 '
+        f'--transfers=4 --checkers=8{create_flag}{delete_flag} '
         f'--delete-after --drive-chunk-size=1M --bwlimit={RCLONE_UPLOAD}'
-        f'{etc_part}--log-file "/data/log/{RCLONENAME}.log"'
+        f'{etc_flag} --log-file "/data/log/{RCLONENAME}.log"'
     )
     
     print(f"실행될 명령어: {FLASKAPPS}")
