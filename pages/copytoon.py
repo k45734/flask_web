@@ -321,15 +321,34 @@ def index_list():
 @webtoon.route('/alim_list')
 def alim_list():
     try:
-        with get_status_db() as con_s:
-            con_s.row_factory = sqlite3.Row
-            rows = con_s.execute("SELECT SUM(CASE WHEN COMPLETE = 'False' THEN 1 ELSE 0 END) as 'False', SUM(CASE WHEN COMPLETE = 'True' THEN 1 ELSE 0 END) as 'True', COUNT(*) as TOTAL FROM STATUS").fetchall()
-            rows2 = rows # 실제 환경에 따라 성인/일반 쿼리 분리 가능
-        # [수정] 올바른 파일명(webtoon_alim_list.html)으로 호출
-        return render_template('webtoon_alim_list.html', rows=rows, rows2=rows2)
+        # 각 테이블별로 (현재 이미지수 >= 전체 이미지수) 인 에피소드를 계산하는 내부 함수
+        def get_db_summary(table_name):
+            with get_list_db() as con:
+                # 서브쿼리 설명: 
+                # 1. 제목/부제목별로 그룹화하여 현재 가진 이미지 개수(COUNT)를 구함
+                # 2. TOTAL_COUNT와 비교하여 완료(1) 또는 미완료(0)로 표시
+                query = f"""
+                    SELECT 
+                        SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) as COMPLETE,
+                        SUM(CASE WHEN is_complete = 0 THEN 1 ELSE 0 END) as INCOMPLETE,
+                        COUNT(*) as TOTAL
+                    FROM (
+                        SELECT 
+                            CASE WHEN COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0 THEN 1 ELSE 0 END as is_complete
+                        FROM {table_name}
+                        GROUP BY TITLE, SUBTITLE
+                    )
+                """
+                res = con.execute(query).fetchone()
+                return res if res['TOTAL'] > 0 else {'COMPLETE': 0, 'INCOMPLETE': 0, 'TOTAL': 0}
+
+        adult_data = get_db_summary('TOON')
+        normal_data = get_db_summary('TOON_NORMAL')
+
+        return render_template('webtoon_alim_list.html', adult=adult_data, normal=normal_data)
     except Exception as e:
-        logger.error(f"Alim List Error: {e}")
-        return render_template('webtoon_alim_list.html', rows=[], rows2=[])
+        logger.error(f"Alim List 상세 현황 에러: {e}")
+        return render_template('webtoon_alim_list.html', adult=None, normal=None)
 
 @webtoon.route('db_list_reset')
 def db_list_reset():
