@@ -54,49 +54,34 @@
                     </div>
 
                     <div class="mb-5">
-                        <h5 class="section-title">텔레그램 알림 및 스케줄</h5>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">텔레그램 토큰</label>
-                                <input type="text" name="telgm_token" class="form-control" placeholder="Bot Token">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">텔레그램 봇 ID (Chat ID)</label>
-                                <input type="text" name="telgm_botid" class="form-control" placeholder="Chat ID">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">실행 주기 (Cron)</label>
-                                <input type="text" name="start_time" class="form-control" value="*/30 * * * *">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">시작 시간</label>
-                                <input type="time" name="start_time2" class="form-control" value="09:00">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">종료 시간</label>
-                                <input type="time" name="end_time" class="form-control" value="21:00">
-                            </div>
-                            <input type="hidden" name="telgm" value="True">
-                            <input type="hidden" name="telgm_alim" value="True">
-                            <input type="hidden" name="now" value="True">
-                        </div>
-                    </div>
+    <h5 class="section-title">텔레그램 알림 및 스케줄</h5>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">텔레그램 토큰</label>
+            <input type="text" name="telgm_token" class="form-control" placeholder="Bot Token" value="{{ telgm_token if telgm_token else '' }}">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">텔레그램 봇 ID (Chat ID)</label>
+            <input type="text" name="telgm_botid" class="form-control" placeholder="Chat ID" value="{{ telgm_botid if telgm_botid else '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">실행 주기 (Cron)</label>
+            <input type="text" name="start_time" class="form-control" value="{{ start_time if start_time else '*/30 * * * *' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">시작 시간</label>
+            <input type="time" name="start_time2" class="form-control" value="{{ start_time2 if start_time2 else '09:00' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">종료 시간</label>
+            <input type="time" name="end_time" class="form-control" value="{{ end_time if end_time else '21:00' }}">
+        </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-light w-100 py-3 fw-bold rounded-3 border" onclick="location.href='/sub2/tracking_list';">
-                                <i class="bi bi-list-columns-reverse me-1"></i> 목록
-                            </button>
-                        </div>
-                        <div class="col-md-9 d-flex gap-2">
-                            <button type="submit" class="btn btn-danger flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="this.form.action='/sub2/sch_del';">
-                                삭제
-                            </button>
-                            <button type="submit" class="btn btn-primary flex-grow-1 py-3 fw-bold rounded-3 shadow" onclick="this.form.action='/sub2/tracking/tracking_ok';">
-                                저장 및 추적 시작 <i class="bi bi-truck ms-1"></i>
-                            </button>
-                        </div>
-                    </div>
+        <input type="hidden" name="telgm" value="{{ telgm if telgm else 'True' }}">
+        <input type="hidden" name="telgm_alim" value="{{ telgm_alim if telgm_alim else 'True' }}">
+        <input type="hidden" name="now" value="True">
+    </div>
+</div>
 
                 </form>
                 <p class="text-center mt-4 text-muted" style="font-size: 0.8rem;">AI God Mode: Battery 0% Infinite Power 🔋</p>
