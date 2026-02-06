@@ -110,38 +110,39 @@
 <script>
     // track_api를 호출하여 delivery.db에 먼저 정보를 저장하는 함수
     function saveToDeliveryDb() {
-        const selectEl = document.getElementById('carrier_id');
-        const carrierName = selectEl.value; // "CJ대한통운"
-        const carrierCode = selectEl.options[selectEl.selectedIndex].getAttribute('data-code'); // "kr.cjlogistics"
-        const trackId = document.getElementById('track_id').value.trim();
-        const box = document.getElementById('box_nun').value.trim();
+    // 1. HTML 요소에서 값 가져오기
+        const carrierEl = document.getElementById('carrier_id');
+        const trackIdEl = document.getElementById('track_id');
+        const boxEl = document.getElementById('box_nun');
 
-        if (!carrier || !trackId || !box) {
-            alert("택배사, 송장번호, 박스 명칭을 모두 입력해 주세요.");
-            return;
-        }
+        // 2. 값 추출 및 유효성 검사
+        const carrier = carrierEl.value; // 여기서 carrier 변수가 정의됩니다.
+        const trackId = trackIdEl.value.trim();
+        const box = boxEl.value.trim();
 
-        const apiUrl = `track_api/${carrierCode}/${trackId}/${box}`;
-
-        fetch(apiUrl)
-            .then(response => response.text())
-            .then(msg => {
-                alert(msg);
-            })
-            .catch(err => {
-                console.error(err);
-                alert("API 호출 중 오류가 발생했습니다.");
-            });
+    if (!carrier || !trackId || !box) {
+        alert("택배사, 송장번호, 박스 명칭을 모두 입력해 주세요.");
+        return;
     }
 
-    // 폼 제출 시 유효성 검사 (필요 시 추가)
-    document.getElementById('trackingForm').onsubmit = function() {
-        if (!document.getElementById('carrier_id').value) {
-            alert("택배사를 선택해 주세요.");
-            return false;
-        }
-        return true;
-    };
+    // 3. API 호출 (경로는 블루프린트에 맞게 /sub2 추가)
+    const apiUrl = `track_api/${carrier}/${trackId}/${box}`;
+
+    console.log("저장 시도 URL:", apiUrl);
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('404 또는 서버 오류');
+            return response.text();
+        })
+        .then(msg => {
+            alert(msg); // "등록 완료" 메시지 출력
+        })
+        .catch(err => {
+            console.error("에러 상세:", err);
+            alert("저장 실패! 경로(/sub2/track_api)를 다시 확인해 주세요.");
+        });
+}
 </script>
 
 </body>

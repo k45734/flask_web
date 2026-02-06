@@ -784,13 +784,14 @@ def tracking_del(carrier_id,track_id):
 		cursor.close()
 		con.close()
 	return redirect(url_for('sub2.tracking'))	
-
+reverse_code = {v: k for k, v in code.items()}
 @bp2.route("track_api/<carrier_id>/<track_id>/<box_nun>", methods=["GET"])
 def track_api(carrier_id, track_id, box_nun):
 	if len(track_id) == 0:
 		msg = '택배사 {} 송장번호 {} 등록 실패'.format(carrier_id,track_id)
 	else:
 		print(carrier_id, track_id)
+		display_name = reverse_code.get(carrier_id, carrier_id)
 		mytime = mydate()
 		#SQLITE3 DB 없으면 만들다.
 		con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
