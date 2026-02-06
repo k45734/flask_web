@@ -121,7 +121,7 @@
             return;
         }
 
-        const apiUrl = `track_api/${carrier}/${trackId}/${box}`;
+        const apiUrl = `track_api/${carrierCode}/${trackId}/${box}`;
 
         fetch(apiUrl)
             .then(response => response.text())
