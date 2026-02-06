@@ -33,7 +33,7 @@
                                 <select name="carrier_id" id="carrier_id" class="form-select" required>
                                     <option value="">택배사를 선택하세요</option>
                                     {% for name, id in carriers.items() %}
-                                        <option value="{{ id }}">{{ name }}</option>
+                                        <option value="{{ name }}" data-code="{{ id }}">{{ name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -110,7 +110,9 @@
 <script>
     // track_api를 호출하여 delivery.db에 먼저 정보를 저장하는 함수
     function saveToDeliveryDb() {
-        const carrier = document.getElementById('carrier_id').value;
+        const selectEl = document.getElementById('carrier_id');
+        const carrierName = selectEl.value; // "CJ대한통운"
+        const carrierCode = selectEl.options[selectEl.selectedIndex].getAttribute('data-code'); // "kr.cjlogistics"
         const trackId = document.getElementById('track_id').value.trim();
         const box = document.getElementById('box_nun').value.trim();
 
