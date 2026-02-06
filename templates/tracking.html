@@ -68,14 +68,29 @@
             <label class="form-label">실행 주기 (Cron)</label>
             <input type="text" name="start_time" class="form-control" value="{{ start_time if start_time else '*/30 * * * *' }}">
         </div>
-        <div class="col-md-4">
-            <label class="form-label">시작 시간</label>
-            <input type="time" name="start_time2" class="form-control" value="{{ start_time2 if start_time2 else '09:00' }}">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">종료 시간</label>
-            <input type="time" name="end_time" class="form-control" value="{{ end_time if end_time else '21:00' }}">
-        </div>
+       <div class="col-md-4">
+    <label class="form-label">시작 시간</label>
+    <select name="start_time2" class="form-select">
+        {% for h in range(0, 24) %}
+            {% set hr = "%02d" | format(h) %}
+            <option value="{{ hr }}" {{ 'selected' if start_time2 == hr or (not start_time2 and h == 9) }}>
+                {{ hr }}시
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="col-md-4">
+    <label class="form-label">종료 시간</label>
+    <select name="end_time" class="form-select">
+        {% for h in range(0, 24) %}
+            {% set hr = "%02d" | format(h) %}
+            <option value="{{ hr }}" {{ 'selected' if end_time == hr or (not end_time and h == 21) }}>
+                {{ hr }}시
+            </option>
+        {% endfor %}
+    </select>
+</div>
 
         <input type="hidden" name="telgm" value="{{ telgm if telgm else 'True' }}">
         <input type="hidden" name="telgm_alim" value="{{ telgm_alim if telgm_alim else 'True' }}">
