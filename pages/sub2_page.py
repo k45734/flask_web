@@ -783,7 +783,22 @@ def tracking_del(carrier_id,track_id):
 		con.commit()
 		cursor.close()
 		con.close()
-	return redirect(url_for('sub2.tracking'))	
+	return redirect(url_for('sub2.tracking'))
+# 파일 상단에 전역 변수로 정의
+code = { 
+    "DHL":"de.dhl", "Sagawa":"jp.sagawa", "Kuroneko Yamato":"jp.yamato",
+    "Japan Post":"jp.yuubin", "천일택배":"kr.chunilps", "CJ대한통운":"kr.cjlogistics",
+    "CU 편의점택배":"kr.cupost", "GS Postbox 택배":"kr.cvsnet", "CWAY (Woori Express)":"kr.cway",
+    "대신택배":"kr.daesin", "우체국 택배":"kr.epost", "한의사랑택배":"kr.hanips",
+    "한진택배":"kr.hanjin", "합동택배":"kr.hdexp", "홈픽":"kr.homepick",
+    "한서호남택배":"kr.honamlogis", "일양로지스":"kr.ilyanglogis", "경동택배":"kr.kdexp",
+    "건영택배":"kr.kunyoung", "로젠택배":"kr.logen", "롯데택배":"kr.lotte",
+    "SLX":"kr.slx", "성원글로벌카고":"kr.swgexp", "TNT":"nl.tnt",
+    "EMS":"un.upu.ems", "Fedex":"us.fedex", "UPS":"us.ups",
+    "USPS":"us.usps", "Cainiao": "cn.cainiao.global", "LTL":"kr.ltl",
+    "롯데국제택배":"kr.lotte.global", "LX 판토스":"kr.epantos", "오늘의픽업":"kr.todaypickup",
+    "우체국EMS":"kr.epost.ems", "쿠팡":"kr.coupangls"
+}
 reverse_code = {v: k for k, v in code.items()}
 @bp2.route("track_api/<carrier_id>/<track_id>/<box_nun>", methods=["GET"])
 def track_api(carrier_id, track_id, box_nun):
