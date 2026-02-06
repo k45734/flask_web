@@ -524,6 +524,43 @@ def tracking_start(telgm,telgm_alim,telgm_token,telgm_botid,start_time2,end_time
 	
 @bp2.route('tracking')
 def tracking():
+	code = { "DHL":"de.dhl",
+		"Sagawa":"jp.sagawa",
+		"Kuroneko Yamato":"jp.yamato",
+		"Japan Post":"jp.yuubin",
+		"천일택배":"kr.chunilps",
+		"CJ대한통운":"kr.cjlogistics",
+		"CU 편의점택배":"kr.cupost",
+		"GS Postbox 택배":"kr.cvsnet",
+		"CWAY (Woori Express)":"kr.cway",
+		"대신택배":"kr.daesin",
+		"우체국 택배":"kr.epost",
+		"우체국택배":"kr.epost",
+		"한의사랑택배":"kr.hanips",
+		"한진택배":"kr.hanjin",
+		"합동택배":"kr.hdexp",
+		"홈픽":"kr.homepick",
+		"한서호남택배":"kr.honamlogis",
+		"일양로지스":"kr.ilyanglogis",
+		"경동택배":"kr.kdexp",
+		"건영택배":"kr.kunyoung",
+		"로젠택배":"kr.logen",
+		"롯데택배":"kr.lotte",
+		"SLX":"kr.slx",
+		"성원글로벌카고":"kr.swgexp",
+		"TNT":"nl.tnt",
+		"EMS":"un.upu.ems",
+		"Fedex":"us.fedex",
+		"UPS":"us.ups",
+		"USPS":"us.usps",
+		"Cainiao": "cn.cainiao.global",
+		"LTL":"kr.ltl",
+		"롯데국제택배":"kr.lotte.global",
+		"LX 판토스":"kr.epantos",
+		"오늘의픽업":"kr.todaypickup",
+		"우체국EMS":"kr.epost.ems",
+		"쿠팡":"kr.coupangls"
+		}
 	#데이타베이스 없으면 생성
 	con = sqlite3.connect(sub2db + '/telegram.db',timeout=60)
 	con.execute('CREATE TABLE IF NOT EXISTS tracking (telgm_token TEXT, telgm_botid TEXT, start_time TEXT, telgm TEXT, telgm_alim TEXT)')
@@ -613,7 +650,7 @@ def tracking():
 			start_time2 = '10'
 			end_time = '06'
 		
-		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time)
+		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time, carriers=code)
 
 @bp2.route('tracking_list', methods=["GET"])
 def tracking_list():
