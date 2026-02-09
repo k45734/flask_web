@@ -1,46 +1,89 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid mt-4 px-4">
+<div class="container mt-4">
     <div class="text-center mb-5">
-        <h2 class="fw-bold" style="color: #2c3e50;">✅ 웹툰 수집 완료 보관소</h2>
-        <p class="text-muted">이미지가 100% 확보되어 즉시 감상 가능한 리스트입니다.</p>
+        <h2 class="fw-bold" style="color: #2c3e50;">📊 웹툰 서버 다운로드 현황</h2>
+        <p class="text-muted">상단은 전체 요약, 하단 리스트는 완료된 목록만 표시합니다.</p>
     </div>
 
-    <div class="row mb-5 justify-content-center">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-primary text-white p-3 text-center">
-                <h5>🔞 성인 완료</h5>
-                <h2 class="fw-bold">{{ adult['COMPLETE'] }} <small>개 에피소드</small></h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white text-center py-3">
+                    <h5 class="mb-0">🔞 성인 웹툰 요약 (전체)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3">미완료</th>
+                                <th class="py-3 text-primary">다운완료</th>
+                                <th class="py-3 fw-bold">총 갯수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if adult %}
+                            <tr>
+                                <td class="py-4 text-danger font-monospace">{{ adult['INCOMPLETE'] }}</td>
+                                <td class="py-4 text-primary font-monospace">{{ adult['COMPLETE'] }}</td>
+                                <td class="py-4 fw-bold font-monospace">{{ adult['TOTAL'] }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-success text-white p-3 text-center">
-                <h5>😊 일반 완료</h5>
-                <h2 class="fw-bold">{{ normal['COMPLETE'] }} <small>개 에피소드</small></h2>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h5 class="mb-0">😊 일반 웹툰 요약 (전체)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3">미완료</th>
+                                <th class="py-3 text-primary">다운완료</th>
+                                <th class="py-3 fw-bold">총 갯수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if normal %}
+                            <tr>
+                                <td class="py-4 text-danger font-monospace">{{ normal['INCOMPLETE'] }}</td>
+                                <td class="py-4 text-primary font-monospace">{{ normal['COMPLETE'] }}</td>
+                                <td class="py-4 fw-bold font-monospace">{{ normal['TOTAL'] }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-light">
-            <ul class="nav nav-pills card-header-pills" id="completeTab" role="tablist">
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header bg-white">
+            <ul class="nav nav-tabs card-header-tabs" id="statusTab" role="tablist">
                 <li class="nav-item">
-                    <button class="nav-link active fw-bold" id="adult-tab" data-bs-toggle="tab" data-bs-target="#adult-done" type="button">성인 완료 리스트</button>
+                    <button class="nav-link active fw-bold text-danger" data-bs-toggle="tab" data-bs-target="#tab-adult" type="button">🔞 성인 완료 리스트</button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link fw-bold" id="normal-tab" data-bs-toggle="tab" data-bs-target="#normal-done" type="button">일반 완료 리스트</button>
+                    <button class="nav-link fw-bold text-success" data-bs-toggle="tab" data-bs-target="#tab-normal" type="button">😊 일반 완료 리스트</button>
                 </li>
             </ul>
         </div>
-        <div class="card-body tab-content" id="completeTabContent">
-            <div class="tab-pane fade show active" id="adult-done">
+        <div class="card-body tab-content">
+            <div class="tab-pane fade show active" id="tab-adult">
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle">
-                        <thead class="table-dark">
+                    <table class="table table-hover">
+                        <thead class="table-light">
                             <tr>
-                                <th style="width: 40%">제목</th>
-                                <th style="width: 40%">부제목</th>
-                                <th class="text-center">확보 이미지</th>
+                                <th>제목</th>
+                                <th>부제목</th>
+                                <th class="text-center">이미지 수</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,26 +91,24 @@
                             <tr>
                                 <td class="fw-bold">{{ item['TITLE'] }}</td>
                                 <td>{{ item['SUBTITLE'] }}</td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill bg-primary">{{ item['CURRENT_COUNT'] }} / {{ item['TOTAL_COUNT'] }} 장</span>
-                                </td>
+                                <td class="text-center"><span class="badge bg-primary">{{ item['CURRENT_COUNT'] }}장 완독 가능</span></td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="3" class="py-5 text-center text-muted">아직 완료된 성인 웹툰이 없습니다.</td></tr>
+                            <tr><td colspan="3" class="py-4 text-center text-muted">수집 완료된 데이터가 없습니다.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="normal-done">
+            <div class="tab-pane fade" id="tab-normal">
                 <div class="table-responsive">
-                    <table class="table table-striped align-middle">
-                        <thead class="table-dark">
+                    <table class="table table-hover">
+                        <thead class="table-light">
                             <tr>
-                                <th style="width: 40%">제목</th>
-                                <th style="width: 40%">부제목</th>
-                                <th class="text-center">확보 이미지</th>
+                                <th>제목</th>
+                                <th>부제목</th>
+                                <th class="text-center">이미지 수</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,12 +116,10 @@
                             <tr>
                                 <td class="fw-bold">{{ item['TITLE'] }}</td>
                                 <td>{{ item['SUBTITLE'] }}</td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill bg-success">{{ item['CURRENT_COUNT'] }} / {{ item['TOTAL_COUNT'] }} 장</span>
-                                </td>
+                                <td class="text-center"><span class="badge bg-success">{{ item['CURRENT_COUNT'] }}장 완독 가능</span></td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="3" class="py-5 text-center text-muted">아직 완료된 일반 웹툰이 없습니다.</td></tr>
+                            <tr><td colspan="3" class="py-4 text-center text-muted">수집 완료된 데이터가 없습니다.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -90,7 +129,15 @@
     </div>
 
     <div class="text-center mt-5 mb-5">
-        <a href="{{ url_for('webtoon.index') }}" class="btn btn-outline-dark px-5">메인으로 돌아가기</a>
+        <a href="{{ url_for('webtoon.index') }}" class="btn btn-outline-secondary px-5 shadow-sm">메인으로 돌아가기</a>
     </div>
 </div>
+
+<style>
+    .card { border-radius: 15px; overflow: hidden; }
+    .font-monospace { font-size: 1.25rem; font-weight: 700; }
+    .nav-tabs .nav-link { border: none; padding: 12px 20px; }
+    .nav-tabs .nav-link.active { border-bottom: 3px solid currentColor; }
+    .badge { font-size: 0.85rem; }
+</style>
 {% endblock %}

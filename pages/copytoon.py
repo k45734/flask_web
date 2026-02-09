@@ -321,9 +321,9 @@ def index_list():
 @webtoon.route('/alim_list')
 def alim_list():
     try:
-        def get_detailed_status(table_name):
+        def get_db_data(table_name):
             with get_list_db() as con:
-                # 1. 요약 정보 (기존 유지)
+                # 1. 상단 요약용 (전체 현황: 완료 + 미완료 모두 계산)
                 summary_query = f"""
                     SELECT 
                         SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) as COMPLETE,
@@ -336,10 +336,9 @@ def alim_list():
                 """
                 summary = con.execute(summary_query).fetchone()
 
-                # 2. [수정] 수집이 100% 완료된 상세 목록만 추출
+                # 2. 하단 리스트용 (100% 완료된 에피소드만 추출)
                 list_query = f"""
-                    SELECT 
-                        TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT
+                    SELECT TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT
                     FROM {table_name}
                     GROUP BY TITLE, SUBTITLE
                     HAVING COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0
@@ -349,14 +348,14 @@ def alim_list():
                 
                 return summary, details
 
-        adult_sum, adult_det = get_detailed_status('TOON')
-        normal_sum, normal_det = get_detailed_status('TOON_NORMAL')
+        adult_sum, adult_list = get_db_data('TOON')
+        normal_sum, normal_list = get_db_data('TOON_NORMAL')
 
         return render_template('webtoon_alim_list.html', 
-                               adult=adult_sum, adult_list=adult_det,
-                               normal=normal_sum, normal_list=normal_det)
+                               adult=adult_sum, adult_list=adult_list,
+                               normal=normal_sum, normal_list=normal_list)
     except Exception as e:
-        logger.error(f"완료 목록 로드 에러: {e}")
+        logger.error(f"현황판 로드 에러: {e}")
         return render_template('webtoon_alim_list.html', adult=None, normal=None)
 
 @webtoon.route('db_list_reset')
