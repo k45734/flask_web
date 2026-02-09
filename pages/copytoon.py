@@ -321,33 +321,44 @@ def index_list():
 @webtoon.route('/alim_list')
 def alim_list():
     try:
-        # 각 테이블별로 (현재 이미지수 >= 전체 이미지수) 인 에피소드를 계산하는 내부 함수
-        def get_db_summary(table_name):
+        def get_detailed_status(table_name):
             with get_list_db() as con:
-                # 서브쿼리 설명: 
-                # 1. 제목/부제목별로 그룹화하여 현재 가진 이미지 개수(COUNT)를 구함
-                # 2. TOTAL_COUNT와 비교하여 완료(1) 또는 미완료(0)로 표시
-                query = f"""
+                # 1. 요약 정보 (기존 로직 유지)
+                summary_query = f"""
                     SELECT 
                         SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) as COMPLETE,
                         SUM(CASE WHEN is_complete = 0 THEN 1 ELSE 0 END) as INCOMPLETE,
                         COUNT(*) as TOTAL
                     FROM (
-                        SELECT 
-                            CASE WHEN COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0 THEN 1 ELSE 0 END as is_complete
-                        FROM {table_name}
-                        GROUP BY TITLE, SUBTITLE
+                        SELECT CASE WHEN COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0 THEN 1 ELSE 0 END as is_complete
+                        FROM {table_name} GROUP BY TITLE, SUBTITLE
                     )
                 """
-                res = con.execute(query).fetchone()
-                return res if res['TOTAL'] > 0 else {'COMPLETE': 0, 'INCOMPLETE': 0, 'TOTAL': 0}
+                summary = con.execute(summary_query).fetchone()
 
-        adult_data = get_db_summary('TOON')
-        normal_data = get_db_summary('TOON_NORMAL')
+                # 2. 제목별 상세 목록 (이미지 수집 현황 포함)
+                # 최근 수집된 순서나 제목 순으로 정렬 가능합니다.
+                list_query = f"""
+                    SELECT 
+                        TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT,
+                        CASE WHEN COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0 THEN '완료' ELSE '미흡' END as STATUS
+                    FROM {table_name}
+                    GROUP BY TITLE, SUBTITLE
+                    ORDER BY TITLE ASC, SUBTITLE DESC
+                    LIMIT 100 -- 너무 많을 경우를 대비해 100개로 제한 (조정 가능)
+                """
+                details = con.execute(list_query).fetchall()
+                
+                return summary, details
 
-        return render_template('webtoon_alim_list.html', adult=adult_data, normal=normal_data)
+        adult_sum, adult_det = get_detailed_status('TOON')
+        normal_sum, normal_det = get_detailed_status('TOON_NORMAL')
+
+        return render_template('webtoon_alim_list.html', 
+                               adult=adult_sum, adult_list=adult_det,
+                               normal=normal_sum, normal_list=normal_det)
     except Exception as e:
-        logger.error(f"Alim List 상세 현황 에러: {e}")
+        logger.error(f"상세 목록 로드 에러: {e}")
         return render_template('webtoon_alim_list.html', adult=None, normal=None)
 
 @webtoon.route('db_list_reset')
