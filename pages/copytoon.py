@@ -323,7 +323,7 @@ def alim_list():
     try:
         def get_detailed_status(table_name):
             with get_list_db() as con:
-                # 1. 요약 정보 (기존 로직 유지)
+                # 1. 요약 정보 (기존 유지)
                 summary_query = f"""
                     SELECT 
                         SUM(CASE WHEN is_complete = 1 THEN 1 ELSE 0 END) as COMPLETE,
@@ -336,16 +336,14 @@ def alim_list():
                 """
                 summary = con.execute(summary_query).fetchone()
 
-                # 2. 제목별 상세 목록 (이미지 수집 현황 포함)
-                # 최근 수집된 순서나 제목 순으로 정렬 가능합니다.
+                # 2. [수정] 수집이 100% 완료된 상세 목록만 추출
                 list_query = f"""
                     SELECT 
-                        TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT,
-                        CASE WHEN COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0 THEN '완료' ELSE '미흡' END as STATUS
+                        TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT
                     FROM {table_name}
                     GROUP BY TITLE, SUBTITLE
+                    HAVING COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0
                     ORDER BY TITLE ASC, SUBTITLE DESC
-                    LIMIT 100 -- 너무 많을 경우를 대비해 100개로 제한 (조정 가능)
                 """
                 details = con.execute(list_query).fetchall()
                 
@@ -358,7 +356,7 @@ def alim_list():
                                adult=adult_sum, adult_list=adult_det,
                                normal=normal_sum, normal_list=normal_det)
     except Exception as e:
-        logger.error(f"상세 목록 로드 에러: {e}")
+        logger.error(f"완료 목록 로드 에러: {e}")
         return render_template('webtoon_alim_list.html', adult=None, normal=None)
 
 @webtoon.route('db_list_reset')
