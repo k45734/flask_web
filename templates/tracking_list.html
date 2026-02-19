@@ -34,13 +34,13 @@
     <a href="{{ url_for('sub2.tracking_one', 
                 carrier_id=row['PARCEL'], 
                 track_id=row['NUMBER'], 
-                telgm_token=telgm_token, 
-                telgm_botid=telgm_botid, 
-                telgm=telgm, 
-                telgm_alim=telgm_alim) }}" 
+                telgm_token=tel_conf.token, 
+                telgm_botid=tel_conf.botid, 
+                telgm=tel_conf.telgm, 
+                telgm_alim=tel_conf.alim) }}" 
        class="btn btn-sm btn-outline-primary">추적</a>
-
-    <a href="{{ url_for('sub2.tracking_del', carrier_id=row['PARCEL'], track_id=row['NUMBER']) }}" 
+       
+    <a href="{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_del" 
        class="btn btn-sm btn-outline-danger" 
        onclick="return confirm('삭제하시겠습니까?')">삭제</a>
 </td>
