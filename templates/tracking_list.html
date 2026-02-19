@@ -31,6 +31,8 @@
     {% endif %}
 </td>
                             <td>
+                                <a href="{{ url_for('sub2.tracking_one', carrier_id=row['PARCEL'], track_id=row['NUMBER'], telgm=telgm, telgm_alim=telgm_alim, telgm_token=telgm_token, telgm_botid=telgm_botid) }}" 
+       class="btn btn-sm btn-outline-primary">추적</a
                                 <a href="{{row['PARCEL']}}/{{row['NUMBER']}}/tracking_del" class="btn btn-sm btn-outline-danger" onclick="return confirm('삭제하시겠습니까?')">삭제</a>
                             </td>
                         </tr>
