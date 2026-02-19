@@ -652,20 +652,37 @@ def tracking():
 		
 		return render_template('tracking.html', telgm_token = telgm_token, telgm_botid = telgm_botid, start_time = start_time, telgm = telgm, telgm_alim = telgm_alim, start_time2 = start_time2, end_time = end_time, carriers=code)
 
+# sub2_page.py 의 tracking_list 함수 수정
 @bp2.route('tracking_list', methods=["GET"])
 def tracking_list():
-	if not session.get('logFlag'): return redirect(url_for('main.index'))
-	per_page = 10
-	page, _, offset = get_page_args(per_page=per_page)
-	con = sqlite3.connect(sub2db + '/delivery.db',timeout=60)
-	con.row_factory = sqlite3.Row
-	cur = con.cursor()
-	total = cur.execute("SELECT COUNT(*) FROM tracking").fetchone()[0]
-	# 정렬 조건 수정: 배송중(False) 우선 정렬 후 날짜 역순
-	cur.execute(f"SELECT * FROM tracking ORDER BY COMPLTE ASC, DATE DESC LIMIT {per_page} OFFSET {offset}")
-	view = cur.fetchall()
-	con.close()
-	return render_template('tracking_list.html', view=view, pagination=Pagination(page=page, total=total, per_page=per_page))
+    if not session.get('logFlag'): return redirect(url_for('main.index'))
+    
+    # 텔레그램 설정값 가져오기 (추가)
+    con_tel = sqlite3.connect(sub2db + '/telegram.db', timeout=60)
+    con_tel.row_factory = sqlite3.Row
+    row_tel = con_tel.cursor().execute("select * from tracking").fetchone()
+    con_tel.close()
+    
+    # 기본값 설정
+    tel_conf = {
+        'token': row_tel['telgm_token'] if row_tel else 'none',
+        'botid': row_tel['telgm_botid'] if row_tel else 'none',
+        'telgm': row_tel['telgm'] if row_tel else 'False',
+        'alim': row_tel['telgm_alim'] if row_tel else 'False'
+    }
+
+    per_page = 10
+    page, _, offset = get_page_args(per_page=per_page)
+    con = sqlite3.connect(sub2db + '/delivery.db', timeout=60)
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    total = cur.execute("SELECT COUNT(*) FROM tracking").fetchone()[0]
+    cur.execute(f"SELECT * FROM tracking ORDER BY COMPLTE ASC, DATE DESC LIMIT {per_page} OFFSET {offset}")
+    view = cur.fetchall()
+    con.close()
+    
+    # tel_conf를 템플릿에 추가로 전달
+    return render_template('tracking_list.html', view=view, pagination=Pagination(page=page, total=total, per_page=per_page), tel_conf=tel_conf)
 @bp2.route('tracking/tracking_add', methods=['GET'])
 def tracking_add():
 	mytime = mydate()
