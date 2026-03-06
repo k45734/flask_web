@@ -92,102 +92,138 @@ def db_optimize():
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
 def tel_send_message(dummy=None):
-    """봇 API를 사용하여 텔레그램 채널의 이중 인코딩 데이터를 수신"""
-    logger.info("== [API 기반 동기화] 텔레그램 봇 데이터 수신 가동 ==")
+    """봇 API를 사용하여 텔레그램 채널의 이중 인코딩 데이터를 수신 (Log & Print 완전 동기화)"""
+    msg = "== [API 기반 동기화] 텔레그램 봇 데이터 수신 가동 =="
+    logger.info(msg)
+    print(f"\n{msg}")
 
-    # 1. 설정값 불러오기 (봇 토큰 및 마지막 처리 ID)
+    # 1. 설정값 불러오기
     token = get_config('bot_token')
     if not token:
-        logger.error("봇 토큰이 설정되지 않았습니다. 설정을 확인해주세요.")
+        msg = "!!! [경고] 봇 토큰이 설정되지 않았습니다. 설정을 확인해주세요."
+        logger.error(msg)
+        print(msg)
         return
 
     last_id = get_config('last_telegram_update_id')
     last_id = int(last_id) if last_id else 0
+    msg = f">> 현재 동기화 기준 ID: {last_id}"
+    logger.info(msg)
+    print(msg)
 
     # 2. 텔레그램 getUpdates API 호출
-    # offset을 사용하여 마지막으로 읽은 메시지 이후의 것만 가져옴
     url = f"https://api.telegram.org/bot{token}/getUpdates"
     params = {"offset": last_id + 1, "timeout": 20}
 
     try:
+        msg = f">> 텔레그램 서버에 업데이트 확인 요청 중... (offset: {last_id + 1})"
+        logger.info(msg)
+        print(msg)
+        
         res = requests.get(url, params=params, timeout=25)
         data = res.json()
         
         if not data.get("ok"):
-            logger.error(f"텔레그램 API 오류: {data.get('description')}")
+            msg = f"!!! 텔레그램 API 오류: {data.get('description')}"
+            logger.error(msg)
+            print(msg)
             return
         
         updates = data.get("result", [])
+        msg = f">> 수신된 업데이트 패키지 개수: {len(updates)}개"
+        logger.info(msg)
+        print(msg)
+
         new_last_id = last_id
 
-        for update in updates:
-            # 채널 포스트(channel_post) 객체에서 메시지 추출
+        for idx, update in enumerate(updates, 1):
             msg_obj = update.get("channel_post")
             if not msg_obj:
                 continue
             
             msg_text = msg_obj.get("text", "")
+            update_id = update["update_id"]
+            
+            msg = f"   [{idx}/{len(updates)}] Update ID {update_id} 분석 중..."
+            logger.info(msg)
+            print(msg, end=" ")
+
             if msg_text.startswith("DATA:"):
                 # ✅ 수정된 이중 해독 함수 호출
                 if decode_and_save_to_db(msg_text):
-                    logger.info(f"✅ 새 데이터 처리 완료 (Update ID: {update['update_id']})")
+                    msg = f"✅ 처리 성공 (Update ID: {update_id})"
+                    logger.info(msg)
+                    print("-> [성공]")
+                else:
+                    msg = f"❌ 처리 실패 (Update ID: {update_id})"
+                    logger.error(msg)
+                    print("-> [실패]")
+            else:
+                msg = f"⏩ 데이터 형식 아님 (Update ID: {update_id})"
+                logger.info(msg)
+                print("-> [건너뜀]")
             
-            # 마지막 처리한 update_id 갱신
-            if update["update_id"] > new_last_id:
-                new_last_id = update["update_id"]
+            if update_id > new_last_id:
+                new_last_id = update_id
 
-        # 3. 다음 실행을 위한 기준점(Update ID) 저장
+        # 3. 다음 실행을 위한 기준점 저장
         if new_last_id > last_id:
             set_config('last_telegram_update_id', new_last_id)
-            logger.info(f"🚀 동기화 기준점 업데이트: {new_last_id}")
+            msg = f"🚀 동기화 완료: 기준점이 {new_last_id}(으)로 갱신되었습니다."
+            logger.info(msg)
+            print(f"\n{msg}")
+        else:
+            msg = ">> 새로운 데이터가 없어 기준점을 유지합니다."
+            logger.info(msg)
+            print(f"\n{msg}")
 
     except Exception as e:
-        logger.error(f"!!! 데이터 수신 중 치명적 오류: {e}")
+        msg = f"!!! [치명적 오류] 데이터 수신 중 예외 발생: {e}"
+        logger.error(msg)
+        print(msg)
 
 def decode_and_save_to_db(msg_text):
-    """
-    서버(webtoon_server.py)에서 전송한 이중 인코딩 데이터를 해독하여 DB에 적재.
-    구조: DATA:[ b64(str(tuple1)), b64(str(tuple2)), ... ]
-    """
+    """이중 인코딩 데이터를 해독하여 DB에 적재 (Log & Print 완전 동기화)"""
     try:
-        # 1. 1차 해독: 전체 패키지(JSON 리스트)의 Base64 해제
+        # 1. 1차 해독
         encoded_data = msg_text.replace("DATA:", "")
         decoded_json = base64.b64decode(encoded_data).decode('utf-8')
         payload_list = json.loads(decoded_json)
         
+        total_items = len(payload_list)
+        success_count = 0
+        
         with get_list_db() as con:
             for item_b64 in payload_list:
                 try:
-                    # 2. 2차 해독: 리스트 내부 개별 아이템의 Base64 해제
-                    # 서버에서 b64encode(str(r).encode()) 로 보낸 것을 복구
+                    # 2. 2차 해독
                     item_str = base64.b64decode(item_b64).decode('utf-8')
-                    
-                    # 3. 객체 복원: 문자열 형태의 튜플 "(TITLE, SUBTITLE, ...)"을 실제 데이터로 변환
-                    # 기존 eval() 대신 안전한 ast.literal_eval() 사용
+                    # 3. 객체 복원
                     item = ast.literal_eval(item_str)
                     
-                    # 4. DB 적재 (서버 쿼리 순서와 매칭)
-                    # 서버: TITLE, SUBTITLE, SITE, URL, IMAGE, IMG_NUM, COMPLETE, TOTAL_COUNT
+                    # 4. DB 적재
                     con.execute("""
                         INSERT OR IGNORE INTO TOON 
                         (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
                         VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        item[0],           # TITLE
-                        item[1],           # SUBTITLE
-                        item[2],           # SITE
-                        item[3],           # URL
-                        item[4],           # IMAGE
-                        int(item[5]),      # IMG_NUM (정수화)
-                        int(item[7])       # TOTAL_COUNT (정수화)
-                    ))
+                    """, (item[0], item[1], item[2], item[3], item[4], int(item[5]), int(item[7])))
+                    success_count += 1
                 except Exception as e:
-                    logger.error(f"개별 아이템 해독/저장 실패: {e}")
+                    msg = f"   ! 개별 아이템 해독 실패: {e}"
+                    logger.error(msg)
+                    print(f"\n{msg}")
                     continue
             con.commit()
-        return True
+        
+        msg = f"📦 DB 적재 결과: {success_count}/{total_items}개 완료"
+        logger.info(msg)
+        print(f" ({success_count}/{total_items})", end="")
+        return True if success_count > 0 else False
+
     except Exception as e:
-        logger.error(f"전체 디코딩 치명적 오류: {e}")
+        msg = f"!!! [디코딩 오류] 데이터 구조 파싱 실패: {e}"
+        logger.error(msg)
+        print(f"\n{msg}")
         return False
 		
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
