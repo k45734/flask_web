@@ -1,5 +1,5 @@
 ﻿#-*- coding: utf-8 -*-
-import os, sys, sqlite3, logging, asyncio, base64, requests, json, time, re, zipfile, shutil, platform, threading
+import os, sys, sqlite3, logging, asyncio, base64, requests, json, time, re, zipfile, shutil, platform, threading,io
 from flask import Blueprint, render_template, request, session, redirect, url_for
 from bs4 import BeautifulSoup as bs
 from datetime import datetime
