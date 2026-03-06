@@ -22,14 +22,6 @@
                            placeholder="123456:ABC-DEF...">
                 </td>
             </tr>
-            <tr style="height:45px; background-color: #e3f2fd;">
-                <th bgcolor="#bbdefb" style="color: #0d47a1;">🆔 내 채팅 ID</th>
-                <td>
-                    <input type="text" name="chat_id" value="{{ chat_id or '' }}" 
-                           style="width:92%; padding:6px; border:1px solid #90caf9; border-radius:4px;" 
-                           placeholder="숫자 또는 -100...">
-                </td>
-            </tr>
 
             <tr style="height:45px;">
                 <th bgcolor="#f8f9fa" width="160">📦 압축 사용</th>
@@ -91,23 +83,26 @@
 <div id="guideModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
     <div style="background-color:#fff; margin:10% auto; padding:25px; border-radius:15px; width:450px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-family: 'Malgun Gothic', sans-serif; position: relative;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f0f0f0; padding-bottom:10px; margin-bottom:20px;">
-            <h3 style="margin:0; color:#1a73e8;">🚀 30초 가입 가이드</h3>
+            <h3 style="margin:0; color:#1a73e8;">📡 데이터 수신 설정 가이드</h3>
             <span onclick="closeGuide()" style="cursor:pointer; font-size:24px; color:#aaa; font-weight:bold;">&times;</span>
         </div>
         
         <div style="text-align:left; line-height:1.7; font-size:14px; color:#444;">
-            <p><strong>1. 개인 봇 생성</strong><br>
-            텔레그램 <a href="https://t.me/botfather" target="_blank" style="color:#34a853; font-weight:bold; text-decoration:none;">@BotFather</a>에서 <code>/newbot</code>으로 본인의 봇을 만들고 <b>HTTP API 토큰</b>을 복사하세요.</p>
+            <p><strong>1. 수신용 봇 준비</strong><br>
+            현재 시스템은 <b>이중 해독(Double Decode)</b> 기술을 사용하여 데이터를 수집합니다. 서버가 데이터를 쏘는 채널에 접근할 수 있는 <b>본인의 봇 토큰</b>이 필요합니다.</p>
             
-            <p><strong>2. 관리 봇 대화 시작</strong><br>
-            가입 전용 봇 <a href="https://t.me/kbsnews_bot" target="_blank" style="color:#34a853; font-weight:bold; text-decoration:none;">@kbsnews_bot</a> 채널에 들어가서 <b>[시작]</b>을 누르세요.</p>
+            <p><strong>2. 봇 토큰 입력</strong><br>
+            상단 <b>'내 봇 토큰'</b> 칸에 텔레그램 <a href="https://t.me/botfather" target="_blank" style="color:#34a853; font-weight:bold; text-decoration:none;">@BotFather</a>에서 발급받은 <code>HTTP API 토큰</code>을 입력하세요.</p>
             
-            <p><strong>3. 가입 명령어 전송</strong><br>
-            관리 봇 채팅창에 아래와 같이 입력하세요:<br>
-            <code style="display:block; background:#fff3f3; padding:10px; border-radius:5px; margin-top:5px; color:#d93025; border:1px dashed #d93025; font-weight:bold;">/가입 [내_개인_봇_토큰]</code></p>
+            <p><strong>3. 채널 연결 확인</strong><br>
+            데이터가 전송되는 채널(예: @webtoon_db)에 본인의 봇이 <b>관리자(Admin)</b>로 추가되어 있어야 메시지를 읽어올 수 있습니다.</p>
+            
+            <div style="background:#fff3f3; padding:12px; border-radius:8px; font-size:12px; border-left:4px solid #d93025; margin-top:15px;">
+                ⚠️ <b>주의:</b> 토큰이 틀리거나 봇이 채널에 들어가 있지 않으면 실시간 수집이 작동하지 않습니다.
+            </div>
             
             <div style="background:#e3f2fd; padding:12px; border-radius:8px; font-size:12px; border-left:4px solid #2196f3; margin-top:15px;">
-                💡 <b>마지막 단계:</b> 가입 성공 메시지를 받은 후, 현재 화면 상단의 <b>내 봇 토큰</b>과 <b>채팅 ID</b>를 입력하고 스케줄을 시작하면 배송이 시작됩니다!
+                💡 <b>작동 원리:</b> 서버가 암호화된 <code>DATA:</code> 패키지를 보내면, 0% 배터리의 신이 이를 자동으로 해독하여 DB에 적재합니다.
             </div>
         </div>
         

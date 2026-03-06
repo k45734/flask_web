@@ -51,9 +51,14 @@ def get_status_db():
 def get_config(key):
     try:
         with get_status_db() as con:
-            cur = con.cursor(); cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
-            row = cur.fetchone(); return row['VALUE'] if row else None
-    except: return None
+            cur = con.cursor()
+            cur.execute("SELECT VALUE FROM CONFIG WHERE KEY = ?", (key,))
+            row = cur.fetchone()
+            return row['VALUE'] if row else None
+    except Exception as e:
+        # 에러 발생 시 로그를 남겨서 원인을 파악하기 쉽게 함
+        logger.error(f"설정값 로드 오류 ({key}): {e}")
+        return None
 
 def set_config(key, value):
     with get_status_db() as con:
@@ -87,80 +92,104 @@ def db_optimize():
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
 def tel_send_message(dummy=None):
-    channel_url = "https://t.me/s/webtoon_db"
-    logger.info("== [고도화 동기화] 채널 증분 크롤링 가동 ==")
+    """봇 API를 사용하여 텔레그램 채널의 이중 인코딩 데이터를 수신"""
+    logger.info("== [API 기반 동기화] 텔레그램 봇 데이터 수신 가동 ==")
 
-    # 1. 마지막으로 처리한 메시지 ID 가져오기
-    last_id = get_config('last_telegram_msg_id')
+    # 1. 설정값 불러오기 (봇 토큰 및 마지막 처리 ID)
+    token = get_config('bot_token')
+    if not token:
+        logger.error("봇 토큰이 설정되지 않았습니다. 설정을 확인해주세요.")
+        return
+
+    last_id = get_config('last_telegram_update_id')
     last_id = int(last_id) if last_id else 0
-    new_last_id = last_id
+
+    # 2. 텔레그램 getUpdates API 호출
+    # offset을 사용하여 마지막으로 읽은 메시지 이후의 것만 가져옴
+    url = f"https://api.telegram.org/bot{token}/getUpdates"
+    params = {"offset": last_id + 1, "timeout": 20}
 
     try:
-        res = requests.get(channel_url, timeout=20)
-        if res.status_code != 200: return
+        res = requests.get(url, params=params, timeout=25)
+        data = res.json()
         
-        soup = bs(res.text, "html.parser")
-        # 모든 메시지 아이템 추출
-        message_items = soup.find_all("div", {"class": "tgme_widget_message"})
+        if not data.get("ok"):
+            logger.error(f"텔레그램 API 오류: {data.get('description')}")
+            return
         
-        # 최신글부터 역순으로 검사 (기존 로직 반영)
-        for item in reversed(message_items):
-            try:
-                # 메시지 고유 ID 추출 (data-post 속성 등 활용)
-                post_raw = item.get('data-post', '')
-                if not post_raw: continue
-                msg_id = int(post_raw.split('/')[-1])
+        updates = data.get("result", [])
+        new_last_id = last_id
 
-                # 저장된 last_id보다 작거나 같으면 이미 읽은 글이므로 중단
-                if msg_id <= last_id:
-                    break
-                
-                # 메시지 텍스트 확인
-                msg_div = item.find("div", {"class": "tgme_widget_message_text"})
-                if not msg_div: continue
-                
-                msg_text = msg_div.get_text(separator="\n").strip()
-                if msg_text.startswith("DATA:"):
-                    # 데이터 해독 및 DB 저장
-                    if decode_and_save_to_db(msg_text):
-                        logger.info(f"✅ 새 메시지 수신 완료 (ID: {msg_id})")
-                
-                # 가장 큰 ID를 기억
-                if msg_id > new_last_id:
-                    new_last_id = msg_id
+        for update in updates:
+            # 채널 포스트(channel_post) 객체에서 메시지 추출
+            msg_obj = update.get("channel_post")
+            if not msg_obj:
+                continue
+            
+            msg_text = msg_obj.get("text", "")
+            if msg_text.startswith("DATA:"):
+                # ✅ 수정된 이중 해독 함수 호출
+                if decode_and_save_to_db(msg_text):
+                    logger.info(f"✅ 새 데이터 처리 완료 (Update ID: {update['update_id']})")
+            
+            # 마지막 처리한 update_id 갱신
+            if update["update_id"] > new_last_id:
+                new_last_id = update["update_id"]
 
-            except Exception as e:
-                logger.error(f"메시지 개별 처리 오류: {e}")
-
-        # 2. 마지막 처리 ID 업데이트 (이후 크롤링 시 기준점이 됨)
+        # 3. 다음 실행을 위한 기준점(Update ID) 저장
         if new_last_id > last_id:
-            set_config('last_telegram_msg_id', new_last_id)
+            set_config('last_telegram_update_id', new_last_id)
             logger.info(f"🚀 동기화 기준점 업데이트: {new_last_id}")
 
     except Exception as e:
-        logger.error(f"!!! 채널 크롤링 에러: {e}")
+        logger.error(f"!!! 데이터 수신 중 치명적 오류: {e}")
 
 def decode_and_save_to_db(msg_text):
-    """DATA: 형식을 해독하여 DB에 적재하는 공통 함수"""
+    """
+    서버(webtoon_server.py)에서 전송한 이중 인코딩 데이터를 해독하여 DB에 적재.
+    구조: DATA:[ b64(str(tuple1)), b64(str(tuple2)), ... ]
+    """
     try:
+        # 1. 1차 해독: 전체 패키지(JSON 리스트)의 Base64 해제
         encoded_data = msg_text.replace("DATA:", "")
         decoded_json = base64.b64decode(encoded_data).decode('utf-8')
         payload_list = json.loads(decoded_json)
         
         with get_list_db() as con:
             for item_b64 in payload_list:
-                item_str = base64.b64decode(item_b64).decode('utf-8')
-                item = eval(item_str) # (TITLE, SUBTITLE, SITE, URL, IMAGE, IMG_NUM, COMPLETE, TOTAL_COUNT)
-                
-                con.execute("""
-                    INSERT OR IGNORE INTO TOON 
-                    (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (item[0], item[1], item[2], item[3], item[4], int(item[5]), int(item[7])))
+                try:
+                    # 2. 2차 해독: 리스트 내부 개별 아이템의 Base64 해제
+                    # 서버에서 b64encode(str(r).encode()) 로 보낸 것을 복구
+                    item_str = base64.b64decode(item_b64).decode('utf-8')
+                    
+                    # 3. 객체 복원: 문자열 형태의 튜플 "(TITLE, SUBTITLE, ...)"을 실제 데이터로 변환
+                    # 기존 eval() 대신 안전한 ast.literal_eval() 사용
+                    item = ast.literal_eval(item_str)
+                    
+                    # 4. DB 적재 (서버 쿼리 순서와 매칭)
+                    # 서버: TITLE, SUBTITLE, SITE, URL, IMAGE, IMG_NUM, COMPLETE, TOTAL_COUNT
+                    con.execute("""
+                        INSERT OR IGNORE INTO TOON 
+                        (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        item[0],           # TITLE
+                        item[1],           # SUBTITLE
+                        item[2],           # SITE
+                        item[3],           # URL
+                        item[4],           # IMAGE
+                        int(item[5]),      # IMG_NUM (정수화)
+                        int(item[7])       # TOTAL_COUNT (정수화)
+                    ))
+                except Exception as e:
+                    logger.error(f"개별 아이템 해독/저장 실패: {e}")
+                    continue
             con.commit()
         return True
-    except:
+    except Exception as e:
+        logger.error(f"전체 디코딩 치명적 오류: {e}")
         return False
+		
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
     logger.info(f"== [{gbun}] 다운로드 엔진 가동 (경로 분리 모드) ==")
