@@ -140,7 +140,9 @@ def tel_send_message(dummy=None):
             continue
 
     # 마지막 처리 ID 저장
-    set_config('last_webtoon_id', max([int(m['data-post'].split('/')[-1]) for m in messages]))
+    if messages:
+        current_max_id = max([int(m['data-post'].split('/')[-1]) for m in messages])
+        set_config('last_webtoon_id', max(last_stop_id, current_max_id))
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
