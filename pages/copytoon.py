@@ -87,7 +87,7 @@ def db_optimize():
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
 def tel_send_message(dummy=None):
-    channel_url = "https://t.me/s/webtoon_db2"
+    channel_url = "https://t.me/s/webtoon_db"
     logger.info("== [고도화 동기화] 채널 증분 크롤링 가동 ==")
 
     # 1. 마지막으로 처리한 메시지 ID 가져오기
