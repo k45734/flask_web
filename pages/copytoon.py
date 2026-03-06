@@ -115,8 +115,8 @@ def tel_send_message(dummy=None):
         
             b64_list = json.loads(file_res.text)
 
-           new_rows = []
-           for b64_item in b64_list:
+            new_rows = []
+            for b64_item in b64_list:
                 # 1. Base64 디코딩
                 dec = base64.b64decode(b64_item.encode()).decode('utf-8')
             
