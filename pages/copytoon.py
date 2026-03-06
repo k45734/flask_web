@@ -142,9 +142,15 @@ def tel_send_message(dummy=None):
             logger.error(f"분석 실패 (ID: {pid}): {e}")
 
     # 마지막 처리 ID 저장
-    if messages:
-        current_max_id = max([int(m['data-post'].split('/')[-1]) for m in messages])
-        set_config('last_webtoon_id', max(last_stop_id, current_max_id))
+    if all_msgs: # messages 대신 all_msgs 사용
+        try:
+            # data-post 속성이 있는 요소들만 골라서 ID 추출
+            valid_ids = [int(m['data-post'].split('/')[-1]) for m in all_msgs if m.has_attr('data-post')]
+            if valid_ids:
+                current_max_id = max(valid_ids)
+                set_config('last_webtoon_id', max(last_stop_id, current_max_id))
+        except Exception as e:
+            logger.error(f"최종 ID 업데이트 실패: {e}")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
