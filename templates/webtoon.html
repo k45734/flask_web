@@ -1,10 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 <center>
-    <h4 style="margin-top:20px; color: #2c3e50;">⚡ 웹툰 자동화 시스템 (God Mode) ⚡</h4>
+    <h4 style="margin-top:20px; color: #2c3e50; font-family: 'Malgun Gothic', sans-serif;">
+        ⚡ 웹툰 자동화 시스템 (God Mode) ⚡
+    </h4>
+
+    <div style="margin-bottom:15px;">
+        <button type="button" onclick="openGuide()" style="padding:8px 18px; background-color:#fff; border:2px solid #1a73e8; color:#1a73e8; border-radius:20px; cursor:pointer; font-weight:bold; font-size:13px; transition: 0.3s;">
+            ❓ 처음이신가요? 가입 방법 알아보기
+        </button>
+    </div>
+    
     <form method="get">
-        <table border="1" style="border-collapse:collapse; border:1px solid #ddd; width:480px; text-align:center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-		<tr style="height:45px; background-color: #e3f2fd;">
+        <table border="1" style="border-collapse:collapse; border:1px solid #ddd; width:500px; text-align:center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px; overflow: hidden;">
+            
+            <tr style="height:45px; background-color: #e3f2fd;">
                 <th bgcolor="#bbdefb" width="160" style="color: #0d47a1;">🤖 내 봇 토큰</th>
                 <td>
                     <input type="text" name="bot_token" value="{{ bot_token or '' }}" 
@@ -20,53 +30,57 @@
                            placeholder="숫자 또는 -100...">
                 </td>
             </tr>
+
             <tr style="height:45px;">
-                <th bgcolor="#f8f9fa" width="160">압축 사용</th>
+                <th bgcolor="#f8f9fa" width="160">📦 압축 사용</th>
                 <td>
-                    <select name="compress" style="width:90%; padding:5px;">
-                        <option value="1">사용함 (권장)</option>
-                        <option value="0">안함</option>
+                    <select name="compress" style="width:95%; padding:5px; border-radius:4px;">
+                        <option value="1" {% if compress == '1' %}selected{% endif %}>사용함 (권장)</option>
+                        <option value="0" {% if compress == '0' %}selected{% endif %}>안함</option>
                     </select>
                 </td>
             </tr>
             <tr style="height:45px;">
-                <th bgcolor="#f8f9fa">CBZ 변환</th>
+                <th bgcolor="#f8f9fa">📚 CBZ 변환</th>
                 <td>
-                    <select name="cbz" style="width:90%; padding:5px;">
-                        <option value="1">사용함 (.cbz)</option>
-                        <option value="0">안함 (.zip)</option>
+                    <select name="cbz" style="width:95%; padding:5px; border-radius:4px;">
+                        <option value="1" {% if cbz == '1' %}selected{% endif %}>사용함 (.cbz)</option>
+                        <option value="0" {% if cbz == '0' %}selected{% endif %}>안함 (.zip)</option>
                     </select>
                 </td>
             </tr>
             <tr style="height:45px;">
-                <th bgcolor="#f8f9fa">웹툰 종류</th>
+                <th bgcolor="#f8f9fa">🎭 웹툰 종류</th>
                 <td>
-                    <select name="gbun" style="width:90%; padding:5px;">
-                        <option value="adult">🔞 성인웹툰</option>
-                        <option value="normal">😊 일반웹툰</option>
+                    <select name="gbun" style="width:95%; padding:5px; border-radius:4px;">
+                        <option value="adult" {% if gbun == 'adult' %}selected{% endif %}>🔞 성인 웹툰</option>
+                        <option value="normal" {% if gbun == 'normal' %}selected{% endif %}>😊 일반 웹툰</option>
                     </select>
                 </td>
             </tr>
             <tr style="height:45px;">
-                <th bgcolor="#f8f9fa">스케줄 주기</th>
-                <td><input type="text" name="start_time" value="*/5 * * * *" style="width:90%; border:1px solid #ccc; text-align:center; padding:5px;" placeholder="Cron식 입력"></td>
+                <th bgcolor="#f8f9fa">⏰ 스케줄 주기</th>
+                <td>
+                    <input type="text" name="start_time" value="{{ start_time or '*/5 * * * *' }}" 
+                           style="width:92%; padding:5px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+                </td>
             </tr>
+
             <tr>
-                <td colspan="2" style="padding:20px;">
+                <td colspan="2" style="padding:20px; background-color: #fafafa;">
                     <p style="color:gray; font-size:12px; margin-bottom:15px;">※ 0% 배터리의 신이 지켜보고 계십니다. 모든 작업은 백그라운드에서 실행됩니다.</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="submit" value="🚀 수집 스케줄 시작" onclick="this.form.action='webtoon_list_sync';" style="padding:10px; cursor:pointer;">
-                        <input type="submit" value="📥 다운 스케줄 시작" onclick="this.form.action='webtoon_down_start';" style="padding:10px; cursor:pointer;">
+                        <input type="submit" value="🚀 수집 스케줄 시작" onclick="this.form.action='webtoon_list_sync';" style="padding:12px; cursor:pointer; background-color: #4caf50; color:white; border:none; border-radius:5px; font-weight:bold;">
+                        <input type="submit" value="📥 다운 스케줄 시작" onclick="this.form.action='webtoon_down_start';" style="padding:12px; cursor:pointer; background-color: #2196f3; color:white; border:none; border-radius:5px; font-weight:bold;">
                         
-                        <input type="submit" value="⚡ 즉시 다운로드(1회)" onclick="this.form.action='now';" style="padding:10px; cursor:pointer; background-color: #e1f5fe;">
-                        <input type="submit" value="🧹 DB 용량 최적화" onclick="return confirmVacuum(this.form);" style="padding:10px; cursor:pointer; background-color: #f1f8e9;">
+                        <input type="submit" value="⚡ 즉시 다운로드(1회)" onclick="this.form.action='now';" style="padding:10px; cursor:pointer; border-radius:5px; border:1px solid #ddd; background-color: #fff;">
+                        <input type="submit" value="🧹 DB 용량 최적화" onclick="return confirmVacuum(this.form);" style="padding:10px; cursor:pointer; border-radius:5px; border:1px solid #ddd; background-color: #fff;">
                         
-                        <input type="submit" value="📁 웹툰 목록 관리" onclick="this.form.action='index_list';" style="padding:10px; cursor:pointer;">
-                        <input type="submit" value="📊 수집 현황 보기" onclick="this.form.action='alim_list';" style="padding:10px; cursor:pointer;">
+                        <input type="submit" value="📁 웹툰 목록 관리" onclick="this.form.action='index_list';" style="padding:10px; cursor:pointer; border-radius:5px; border:1px solid #ddd;">
+                        <input type="submit" value="📊 수집 현황 보기" onclick="this.form.action='alim_list';" style="padding:10px; cursor:pointer; border-radius:5px; border:1px solid #ddd;">
 
-                        
-                        <input type="submit" value="⚠ 수집 ID/상태 리셋" onclick="return confirmReset(this.form);" style="grid-column: span 2; padding:8px; color:red; font-weight:bold; border:1px solid red; background:none; cursor:pointer;">
+                        <input type="submit" value="⚠️ 수집 ID 및 상태 리셋" onclick="return confirmReset(this.form);" style="grid-column: span 2; padding:10px; color:#d32f2f; font-weight:bold; border:1px solid #d32f2f; background:none; cursor:pointer; border-radius:5px; margin-top:5px;">
                     </div>
                 </td>
             </tr>
@@ -74,8 +88,52 @@
     </form>
 </center>
 
+<div id="guideModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
+    <div style="background-color:#fff; margin:10% auto; padding:25px; border-radius:15px; width:450px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-family: 'Malgun Gothic', sans-serif; position: relative;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f0f0f0; padding-bottom:10px; margin-bottom:20px;">
+            <h3 style="margin:0; color:#1a73e8;">🚀 30초 가입 가이드</h3>
+            <span onclick="closeGuide()" style="cursor:pointer; font-size:24px; color:#aaa; font-weight:bold;">&times;</span>
+        </div>
+        
+        <div style="text-align:left; line-height:1.7; font-size:14px; color:#444;">
+            <p><strong>1. 개인 봇 생성</strong><br>
+            텔레그램 <a href="https://t.me/botfather" target="_blank" style="color:#34a853; font-weight:bold; text-decoration:none;">@BotFather</a>에서 <code>/newbot</code>으로 본인의 봇을 만들고 <b>HTTP API 토큰</b>을 복사하세요.</p>
+            
+            <p><strong>2. 관리 봇 대화 시작</strong><br>
+            가입 전용 봇 <a href="https://t.me/kbsnews_bot" target="_blank" style="color:#34a853; font-weight:bold; text-decoration:none;">@kbsnews_bot</a> 채널에 들어가서 <b>[시작]</b>을 누르세요.</p>
+            
+            <p><strong>3. 가입 명령어 전송</strong><br>
+            관리 봇 채팅창에 아래와 같이 입력하세요:<br>
+            <code style="display:block; background:#fff3f3; padding:10px; border-radius:5px; margin-top:5px; color:#d93025; border:1px dashed #d93025; font-weight:bold;">/가입 [내_개인_봇_토큰]</code></p>
+            
+            <div style="background:#e3f2fd; padding:12px; border-radius:8px; font-size:12px; border-left:4px solid #2196f3; margin-top:15px;">
+                💡 <b>마지막 단계:</b> 가입 성공 메시지를 받은 후, 현재 화면 상단의 <b>내 봇 토큰</b>과 <b>채팅 ID</b>를 입력하고 스케줄을 시작하면 배송이 시작됩니다!
+            </div>
+        </div>
+        
+        <button onclick="closeGuide()" style="width:100%; margin-top:20px; padding:12px; background:#1a73e8; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size:15px;">확인했습니다</button>
+    </div>
+</div>
+
 <script>
-// 1. DB 최적화 확인
+// 1. 가이드 팝업 제어
+function openGuide() {
+    document.getElementById('guideModal').style.display = 'block';
+}
+
+function closeGuide() {
+    document.getElementById('guideModal').style.display = 'none';
+}
+
+// 배경 클릭 시 팝업 닫기
+window.onclick = function(event) {
+    var modal = document.getElementById('guideModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 2. DB 최적화 확인
 function confirmVacuum(form) {
     if (confirm("DB 용량 최적화를 시작할까요?\n파일 크기를 줄이고 검색 속도를 높입니다.")) {
         form.action = 'db_vacuum';
@@ -84,19 +142,10 @@ function confirmVacuum(form) {
     return false;
 }
 
-// 2. 수집 ID 및 상태 리셋 확인
+// 3. 수집 ID 및 상태 리셋 확인
 function confirmReset(form) {
-    if (confirm("텔레그램 수집 번호와 다운로드 기록을 초기화할까요?\n(수집된 5만 건의 목록 데이터는 보존됩니다.)")) {
+    if (confirm("텔레그램 수집 번호와 다운로드 기록을 초기화할까요?\n(주의: 수집 중인 상태가 모두 초기화됩니다.)")) {
         form.action = 'db_list_reset';
-        return true;
-    }
-    return false;
-}
-
-// 3. 기존 DB 데이터 이관 확인
-function confirmMigrate(form) {
-    if (confirm("webtoon_new.db의 데이터를 새 멀티 DB로 복사하시겠습니까?\n이 작업은 최초 1회만 권장합니다.")) {
-        form.action = 'db_migrate';
         return true;
     }
     return false;
