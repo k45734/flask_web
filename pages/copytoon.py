@@ -86,48 +86,81 @@ def db_optimize():
         logger.info("[완료] 모든 최적화 작업 종료")
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
-# --- [3. 수집 엔진 (최종 지능형 역주행)] ---
 def tel_send_message(dummy=None):
-    token = get_config('bot_token')
-    target_chat_id = get_config('chat_id')
-    
-    if not token or not target_chat_id:
-        logger.error("봇 토큰 또는 채팅 ID가 설정되지 않았습니다.")
-        return
+    channel_url = "https://t.me/s/webtoon_db2"
+    logger.info("== [고도화 동기화] 채널 증분 크롤링 가동 ==")
 
-    logger.info("== [API 기반 전용 봇] 동기화 엔진 가동 ==")
-    
-    # 텔레그램 봇 API 호출 (getUpdates 사용)
-    api_url = f"https://api.telegram.org/bot{token}/getUpdates"
+    # 1. 마지막으로 처리한 메시지 ID 가져오기
+    last_id = get_config('last_telegram_msg_id')
+    last_id = int(last_id) if last_id else 0
+    new_last_id = last_id
+
     try:
-        res = requests.get(api_url, timeout=15).json()
-        if not res.get("ok"): return
+        res = requests.get(channel_url, timeout=20)
+        if res.status_code != 200: return
+        
+        soup = bs(res.text, "html.parser")
+        # 모든 메시지 아이템 추출
+        message_items = soup.find_all("div", {"class": "tgme_widget_message"})
+        
+        # 최신글부터 역순으로 검사 (기존 로직 반영)
+        for item in reversed(message_items):
+            try:
+                # 메시지 고유 ID 추출 (data-post 속성 등 활용)
+                post_raw = item.get('data-post', '')
+                if not post_raw: continue
+                msg_id = int(post_raw.split('/')[-1])
 
-        for update in res.get("result", []):
-            msg = update.get("message", {})
-            # 지정된 채팅방에서 온 메시지만 처리
-            if str(msg.get("chat", {}).get("id")) != str(target_chat_id): continue
-            
-            # 1. 문서(JSON 파일)가 포함된 경우
-            if "document" in msg:
-                file_id = msg["document"]["file_id"]
-                # 파일 다운로드 경로 획득
-                f_res = requests.get(f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}").json()
-                file_path = f_res["result"]["file_path"]
-                file_url = f"https://api.telegram.org/file/bot{token}/{file_path}"
+                # 저장된 last_id보다 작거나 같으면 이미 읽은 글이므로 중단
+                if msg_id <= last_id:
+                    break
                 
-                # 파일 내용 읽기
-                data_json = requests.get(file_url).json()
-                # 이후 기존 데이터 저장 로직 수행...
+                # 메시지 텍스트 확인
+                msg_div = item.find("div", {"class": "tgme_widget_message_text"})
+                if not msg_div: continue
                 
-            # 2. 혹은 기존처럼 텍스트(DATA:)가 포함된 경우
-            elif "text" in msg and "DATA:" in msg["text"]:
-                # 기존의 텍스트 파싱 로직 수행...
-                pass
+                msg_text = msg_div.get_text(separator="\n").strip()
+                if msg_text.startswith("DATA:"):
+                    # 데이터 해독 및 DB 저장
+                    if decode_and_save_to_db(msg_text):
+                        logger.info(f"✅ 새 메시지 수신 완료 (ID: {msg_id})")
+                
+                # 가장 큰 ID를 기억
+                if msg_id > new_last_id:
+                    new_last_id = msg_id
+
+            except Exception as e:
+                logger.error(f"메시지 개별 처리 오류: {e}")
+
+        # 2. 마지막 처리 ID 업데이트 (이후 크롤링 시 기준점이 됨)
+        if new_last_id > last_id:
+            set_config('last_telegram_msg_id', new_last_id)
+            logger.info(f"🚀 동기화 기준점 업데이트: {new_last_id}")
 
     except Exception as e:
-        logger.error(f"API 수집 에러: {e}")
+        logger.error(f"!!! 채널 크롤링 에러: {e}")
 
+def decode_and_save_to_db(msg_text):
+    """DATA: 형식을 해독하여 DB에 적재하는 공통 함수"""
+    try:
+        encoded_data = msg_text.replace("DATA:", "")
+        decoded_json = base64.b64decode(encoded_data).decode('utf-8')
+        payload_list = json.loads(decoded_json)
+        
+        with get_list_db() as con:
+            for item_b64 in payload_list:
+                item_str = base64.b64decode(item_b64).decode('utf-8')
+                item = eval(item_str) # (TITLE, SUBTITLE, SITE, URL, IMAGE, IMG_NUM, COMPLETE, TOTAL_COUNT)
+                
+                con.execute("""
+                    INSERT OR IGNORE INTO TOON 
+                    (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (item[0], item[1], item[2], item[3], item[4], int(item[5]), int(item[7])))
+            con.commit()
+        return True
+    except:
+        return False
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
     logger.info(f"== [{gbun}] 다운로드 엔진 가동 (경로 분리 모드) ==")
