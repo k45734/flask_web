@@ -87,102 +87,60 @@ def db_optimize():
 
 # --- [3. 수집 엔진 (최종 지능형 역주행)] ---
 def tel_send_message(dummy=None):
-    logger.info("== [지능형 엔진] 최신글 -> 종착역 추적 가동 ==")
+    logger.info("== [JSON 파일 기반] 역주행 엔진 가동 ==")
     
-    try:
-        # 텔레그램 서버에서 현재 가장 최신 ID 감지
-        init_req = requests.get('https://t.me/s/webtoonalim', timeout=15)
-        init_soup = bs(init_req.text, "html.parser")
-        init_messages = init_soup.findAll("div", {"class": "tgme_widget_message"})
-        
-        if not init_messages:
-            logger.error("[중단] 텔레그램 데이터를 가져올 수 없습니다.")
-            return
+    # 1. 텔레그램 채널 접속 및 메시지 파싱
+    url = 'https://t.me/s/webtoonalim'
+    res = requests.get(url, timeout=15)
+    soup = bs(res.text, "html.parser")
+    
+    # 파일(Document)이 포함된 메시지 요소 찾기
+    messages = soup.findAll("div", {"class": "tgme_widget_message"})
+    last_stop_id = int(get_config('last_webtoon_id') or 0)
+    
+    for m in reversed(messages):
+        pid = int(m['data-post'].split('/')[-1])
+        if pid <= last_stop_id: continue # 이미 처리한 파일은 스킵
 
-        real_latest_id = max([int(m['data-post'].split('/')[-1]) for m in init_messages])
-        # 지난번 실행 때 '최신'이었던 지점을 종착역으로 설정
-        last_stop_id = int(get_config('last_webtoon_id') or 0)
+        # 2. 메시지 안에서 파일 링크 추출
+        # 텔레그램 s/ 페이지에서는 직접 다운로드 링크(href)가 노출됩니다.
+        file_link = m.find("a", {"class": "tgme_widget_message_document_wrap"})
+        if not file_link: continue
         
-        logger.info(f"[정보] 시작점(최신): {real_latest_id} | 종착역(과거): {last_stop_id}")
-        
-    except Exception as e:
-        logger.error(f"!!! 초기화 오류: {e}")
-        return
-
-    current_search_id = real_latest_id
-    is_continue = True
-    total_new_count = 0
-
-    while is_continue:
-        url = f'https://t.me/s/webtoonalim?before={current_search_id}'
         try:
-            req = requests.get(url, timeout=15)
-            soup = bs(req.text, "html.parser")
-            messages = soup.findAll("div", {"class": "tgme_widget_message"})
-            
-            if not messages:
-                logger.info("[정보] 더 이상 읽을 메시지가 없습니다.")
-                break
+            download_url = file_link.get('href')
+            # 3. JSON 파일 다운로드 및 데이터 로드
+            file_res = requests.get(download_url, timeout=20)
+            b64_list = json.loads(file_res.text) # JSON 리스트 [ "base64...", "base64..." ]
 
-            new_data_dict = {'TOON': {}, 'TOON_NORMAL': {}}
-            processed_ids = []
-
-            for m in reversed(messages):
-                try:
-                    pid = int(m['data-post'].split('/')[-1])
-                    processed_ids.append(pid)
-                    
-                    # 100단위로 진행 상황 로그 출력 (실시간 확인용)
-                    if pid % 100 == 0:
-                        logger.info(f"[*] 현재 {pid}번 분석 중... (목표: {last_stop_id})")
-                    
-                    # [중단 조건] 지난번 수집했던 최신 지점에 도달하면 종료
-                    if pid <= last_stop_id:
-                        logger.info(f"[도달] 이전 수집 지점({last_stop_id}) 확인. 역주행을 종료합니다.")
-                        is_continue = False
-                        break
-                    
-                    txt = m.find("div", {"class": "tgme_widget_message_text"})
-                    if not txt: continue
-                    
-                    dec = base64.b64decode(txt.get_text(strip=True).encode('ascii')).decode('utf-8')
-                    aac = dec.split('\n\n')
-
-                    # 규격 검사 (오류 시 종료하지 않고 건너뜀)
-                    if len(aac) < 8 or not aac[7].strip().isdigit():
-                        continue
-
-                    gbun = aac[8] if len(aac) >= 9 else 'adult'
-                    db_t = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-                    key = (aac[0], aac[1], int(aac[5]))
-                    new_data_dict[db_t][key] = (aac[0], aac[1], aac[2], aac[3], aac[4], int(aac[5]), int(aac[7]))
-                    total_new_count += 1
-                except: continue
-
-            # DB 저장
-            with get_list_db() as con:
-                for db_t in ['TOON', 'TOON_NORMAL']:
-                    data_list = list(new_data_dict[db_t].values())
-                    if data_list:
-                        con.executemany(f"INSERT OR IGNORE INTO {db_t} VALUES (?,?,?,?,?,?,?)", data_list)
-                con.commit()
-
-            if processed_ids:
-                oldest_id = min(processed_ids)
-                current_search_id = oldest_id
-                # 텔레그램 시작점 도달 시 종료
-                if oldest_id <= 1: is_continue = False
-                time.sleep(0.3)
-            else:
-                is_continue = False
+            # 4. 리스트 순회 처리
+            new_rows = []
+            for b64_item in b64_list:
+                # base64 디코딩하여 튜플 형태의 문자열 복원
+                dec = base64.b64decode(b64_item.encode()).decode('utf-8')
                 
-        except Exception as e:
-            logger.error(f"!!! 수집 루프 오류: {e}")
-            break
+                # 문자열 정제 (예: "('제목', '화', ...)" -> ['제목', '화', ...])
+                # eval을 쓰거나, 콤마(,)로 split하여 리스트화
+                data = eval(dec) 
+                
+                # DB 저장용 데이터 구조 생성 (서버 row_dict의 순서에 맞춰야 함)
+                # data[0]:제목, data[1]:부제목, data[2]:사이트, data[3]:URL, data[4]:이미지, data[5]:번호, data[7]:총개수
+                new_rows.append((data[0], data[1], data[2], data[3], data[4], int(data[5]), int(data[7])))
 
-    # [중요] 모든 작업이 끝나면 '이번 회차의 최신 ID'를 다음번의 종착역으로 저장
-    set_config('last_webtoon_id', real_latest_id)
-    logger.info(f"== [완료] 신규 {total_new_count}개 수집됨. (최종 위치: {real_latest_id}) ==")
+            # 5. DB에 한꺼번에 저장
+            if new_rows:
+                with get_list_db() as con:
+                    # gbun 판단 로직은 서버 전달 방식에 따라 보강 (여기서는 기본 TOON)
+                    con.executemany("INSERT OR IGNORE INTO TOON VALUES (?,?,?,?,?,?,?)", new_rows)
+                    con.commit()
+                logger.info(f"[성공] {pid}번 파일로부터 {len(new_rows)}개 데이터 수집")
+
+        except Exception as e:
+            logger.error(f"!!! {pid}번 파일 처리 실패: {e}")
+            continue
+
+    # 마지막 처리 ID 저장
+    set_config('last_webtoon_id', max([int(m['data-post'].split('/')[-1]) for m in messages]))
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
