@@ -88,65 +88,58 @@ def db_optimize():
 
 # --- [3. 수집 엔진 (최종 지능형 역주행)] ---
 def tel_send_message(dummy=None):
-    logger.info("== [JSON 파일 기반] 역주행 엔진 가동 ==")
+    logger.info("== [공개 웹 텍스트 기반] 동기화 엔진 가동 ==")
     
-    # 1. 텔레그램 채널 접속 및 메시지 파싱
     url = 'https://t.me/s/webtoonalim'
     res = requests.get(url, timeout=15)
     soup = bs(res.text, "html.parser")
     
-    # 파일(Document)이 포함된 메시지 요소 찾기
-    messages = soup.findAll("div", {"class": "tgme_widget_message"})
+    # 모든 메시지 요소 찾기
+    messages = soup.find_all("div", {"class": "tgme_widget_message_text"})
     last_stop_id = int(get_config('last_webtoon_id') or 0)
     
-    for m in reversed(messages):
-        pid = int(m['data-post'].split('/')[-1])
-        if pid <= last_stop_id: continue # 이미 처리한 파일은 스킵
-
-        # 2. 메시지 안에서 파일 링크 추출
-        # 텔레그램 s/ 페이지에서는 직접 다운로드 링크(href)가 노출됩니다.
-        file_link = m.find("a", {"class": "tgme_widget_message_document_wrap"})
-        if not file_link: continue
-        
+    # 'tgme_widget_message'에서 ID를 추출하기 위해 부모 요소를 탐색
+    all_msgs = soup.find_all("div", {"class": "tgme_widget_message"})
+    
+    for m in reversed(all_msgs):
         try:
-            download_url = file_link.get('href')
-            file_res = requests.get(download_url, timeout=20)
-            if file_res.status_code != 200: return
-        
-            b64_list = json.loads(file_res.text)
+            pid = int(m['data-post'].split('/')[-1])
+            if pid <= last_stop_id: continue
 
+            # 메시지 본문(텍스트) 영역 찾기
+            text_area = m.find("div", {"class": "tgme_widget_message_text"})
+            if not text_area or "DATA:" not in text_area.text:
+                continue
+            
+            # "DATA:" 이후의 Base64 문자열 추출
+            raw_text = text_area.text.replace("DATA:", "").strip()
+            
+            # JSON 파싱
+            json_data = base64.b64decode(raw_text).decode('utf-8')
+            b64_list = json.loads(json_data)
+            
             new_rows = []
             for b64_item in b64_list:
-                # 1. Base64 디코딩
                 dec = base64.b64decode(b64_item.encode()).decode('utf-8')
-            
-                # 2. 서버가 보낸 튜플 문자열 파싱 (ast.literal_eval 사용 권장)
-                # 서버 데이터 순서: (0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:IMG_NUM, 6:COMPLETE, 7:TOTAL_COUNT)
-                data = ast.literal_eval(dec) 
-            
-                # 3. 클라이언트 DB 컬럼 순서에 맞게 재배열 (7개 항목)
-                # (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT)
+                data = ast.literal_eval(dec) # 서버 데이터 8개 항목
+                
+                # 클라이언트 DB 7개 항목 매핑
                 matched_row = (
-                    data[0],          # TITLE
-                    data[1],          # SUBTITLE
-                    data[2],          # SITE (WEBTOON_SITE)
-                    data[3],          # URL (WEBTOON_URL)
-                    data[4],          # IMAGE (WEBTOON_IMAGE)
-                    int(data[5]),     # IMG_NUM (WEBTOON_IMAGE_NUMBER)
-                    int(data[7])      # TOTAL_COUNT (서버의 7번 인덱스)
+                    data[0], data[1], data[2], data[3], data[4],
+                    int(data[5]), int(data[7])
                 )
                 new_rows.append(matched_row)
 
-            # 4. DB 일괄 저장
             if new_rows:
                 with get_list_db() as con:
-                    # 테이블 구조에 맞게 7개의 '?' 사용
                     con.executemany("INSERT OR IGNORE INTO TOON VALUES (?,?,?,?,?,?,?)", new_rows)
                     con.commit()
-                logger.info(f"[성공] {len(new_rows)}개 데이터를 DB 구조에 맞춰 저장했습니다.")
+                logger.info(f"[성공] 텍스트 파싱으로 {len(new_rows)}개 저장 (ID: {pid})")
+
+            set_config('last_webtoon_id', str(pid))
 
         except Exception as e:
-            logger.error(f"!!! 데이터 일치화 작업 실패: {e}")
+            logger.error(f"분석 실패 (ID: {pid}): {e}")
 
     # 마지막 처리 ID 저장
     if messages:
