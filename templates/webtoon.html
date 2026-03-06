@@ -4,6 +4,22 @@
     <h4 style="margin-top:20px; color: #2c3e50;">⚡ 웹툰 자동화 시스템 (God Mode) ⚡</h4>
     <form method="get">
         <table border="1" style="border-collapse:collapse; border:1px solid #ddd; width:480px; text-align:center; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+		<tr style="height:45px; background-color: #e3f2fd;">
+                <th bgcolor="#bbdefb" width="160" style="color: #0d47a1;">🤖 내 봇 토큰</th>
+                <td>
+                    <input type="text" name="bot_token" value="{{ bot_token or '' }}" 
+                           style="width:92%; padding:6px; border:1px solid #90caf9; border-radius:4px;" 
+                           placeholder="123456:ABC-DEF...">
+                </td>
+            </tr>
+            <tr style="height:45px; background-color: #e3f2fd;">
+                <th bgcolor="#bbdefb" style="color: #0d47a1;">🆔 내 채팅 ID</th>
+                <td>
+                    <input type="text" name="chat_id" value="{{ chat_id or '' }}" 
+                           style="width:92%; padding:6px; border:1px solid #90caf9; border-radius:4px;" 
+                           placeholder="숫자 또는 -100...">
+                </td>
+            </tr>
             <tr style="height:45px;">
                 <th bgcolor="#f8f9fa" width="160">압축 사용</th>
                 <td>

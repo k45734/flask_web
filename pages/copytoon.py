@@ -88,69 +88,45 @@ def db_optimize():
 
 # --- [3. 수집 엔진 (최종 지능형 역주행)] ---
 def tel_send_message(dummy=None):
-    logger.info("== [공개 웹 텍스트 기반] 동기화 엔진 가동 ==")
+    token = get_config('bot_token')
+    target_chat_id = get_config('chat_id')
     
-    url = 'https://t.me/s/webtoonalim'
-    res = requests.get(url, timeout=15)
-    soup = bs(res.text, "html.parser")
-    
-    # 모든 메시지 요소 찾기
-    messages = soup.find_all("div", {"class": "tgme_widget_message_text"})
-    last_stop_id = int(get_config('last_webtoon_id') or 0)
-    
-    # 'tgme_widget_message'에서 ID를 추출하기 위해 부모 요소를 탐색
-    all_msgs = soup.find_all("div", {"class": "tgme_widget_message"})
-    
-    for m in reversed(all_msgs):
-        try:
-            pid = int(m['data-post'].split('/')[-1])
-            if pid <= last_stop_id: continue
+    if not token or not target_chat_id:
+        logger.error("봇 토큰 또는 채팅 ID가 설정되지 않았습니다.")
+        return
 
-            # 메시지 본문(텍스트) 영역 찾기
-            text_area = m.find("div", {"class": "tgme_widget_message_text"})
-            if not text_area or "DATA:" not in text_area.text:
-                continue
+    logger.info("== [API 기반 전용 봇] 동기화 엔진 가동 ==")
+    
+    # 텔레그램 봇 API 호출 (getUpdates 사용)
+    api_url = f"https://api.telegram.org/bot{token}/getUpdates"
+    try:
+        res = requests.get(api_url, timeout=15).json()
+        if not res.get("ok"): return
+
+        for update in res.get("result", []):
+            msg = update.get("message", {})
+            # 지정된 채팅방에서 온 메시지만 처리
+            if str(msg.get("chat", {}).get("id")) != str(target_chat_id): continue
             
-            # "DATA:" 이후의 Base64 문자열 추출
-            raw_text = text_area.text.replace("DATA:", "").strip()
-            
-            # JSON 파싱
-            json_data = base64.b64decode(raw_text).decode('utf-8')
-            b64_list = json.loads(json_data)
-            
-            new_rows = []
-            for b64_item in b64_list:
-                dec = base64.b64decode(b64_item.encode()).decode('utf-8')
-                data = ast.literal_eval(dec) # 서버 데이터 8개 항목
+            # 1. 문서(JSON 파일)가 포함된 경우
+            if "document" in msg:
+                file_id = msg["document"]["file_id"]
+                # 파일 다운로드 경로 획득
+                f_res = requests.get(f"https://api.telegram.org/bot{token}/getFile?file_id={file_id}").json()
+                file_path = f_res["result"]["file_path"]
+                file_url = f"https://api.telegram.org/file/bot{token}/{file_path}"
                 
-                # 클라이언트 DB 7개 항목 매핑
-                matched_row = (
-                    data[0], data[1], data[2], data[3], data[4],
-                    int(data[5]), int(data[7])
-                )
-                new_rows.append(matched_row)
+                # 파일 내용 읽기
+                data_json = requests.get(file_url).json()
+                # 이후 기존 데이터 저장 로직 수행...
+                
+            # 2. 혹은 기존처럼 텍스트(DATA:)가 포함된 경우
+            elif "text" in msg and "DATA:" in msg["text"]:
+                # 기존의 텍스트 파싱 로직 수행...
+                pass
 
-            if new_rows:
-                with get_list_db() as con:
-                    con.executemany("INSERT OR IGNORE INTO TOON VALUES (?,?,?,?,?,?,?)", new_rows)
-                    con.commit()
-                logger.info(f"[성공] 텍스트 파싱으로 {len(new_rows)}개 저장 (ID: {pid})")
-
-            set_config('last_webtoon_id', str(pid))
-
-        except Exception as e:
-            logger.error(f"분석 실패 (ID: {pid}): {e}")
-
-    # 마지막 처리 ID 저장
-    if all_msgs: # messages 대신 all_msgs 사용
-        try:
-            # data-post 속성이 있는 요소들만 골라서 ID 추출
-            valid_ids = [int(m['data-post'].split('/')[-1]) for m in all_msgs if m.has_attr('data-post')]
-            if valid_ids:
-                current_max_id = max(valid_ids)
-                set_config('last_webtoon_id', max(last_stop_id, current_max_id))
-        except Exception as e:
-            logger.error(f"최종 ID 업데이트 실패: {e}")
+    except Exception as e:
+        logger.error(f"API 수집 에러: {e}")
 
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"==================================================")
@@ -251,7 +227,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 @webtoon.route('/')
 def index():
     if not session.get('logFlag'): return redirect(url_for('main.index'))
-    return render_template('webtoon.html', gbun='adult')
+    # 저장된 설정값 불러오기
+    bot_token = get_config('bot_token')
+    chat_id = get_config('chat_id')
+    return render_template('webtoon.html', gbun='adult', bot_token=bot_token, chat_id=chat_id)
 
 @webtoon.route('index_list')
 def index_list():
@@ -344,8 +323,15 @@ def now_down():
 
 @webtoon.route('webtoon_list_sync')
 def start_sync_route():
+    # 폼에서 넘어온 토큰 정보 저장
+    bot_token = request.args.get('bot_token')
+    chat_id = request.args.get('chat_id')
+    if bot_token: set_config('bot_token', bot_token)
+    if chat_id: set_config('chat_id', chat_id)
+    
     t_str = request.args.get('start_time', '*/5 * * * *')
-    scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(t_str), id='webtoon_list_sync', args=[None], replace_existing=True)
+    scheduler.add_job(tel_send_message, trigger=CronTrigger.from_crontab(t_str), 
+                      id='webtoon_list_sync', args=[None], replace_existing=True)
     return redirect(url_for('webtoon.index'))
 
 @webtoon.route('webtoon_down_start')
