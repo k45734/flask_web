@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, session, redirect, url_fo
 from bs4 import BeautifulSoup as bs
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
+import ast
 
 # [필수 라이브러리 및 스케줄러]
 try:
@@ -109,35 +110,43 @@ def tel_send_message(dummy=None):
         
         try:
             download_url = file_link.get('href')
-            # 3. JSON 파일 다운로드 및 데이터 로드
             file_res = requests.get(download_url, timeout=20)
-            b64_list = json.loads(file_res.text) # JSON 리스트 [ "base64...", "base64..." ]
+            if file_res.status_code != 200: return
+        
+            b64_list = json.loads(file_res.text)
 
-            # 4. 리스트 순회 처리
-            new_rows = []
-            for b64_item in b64_list:
-                # base64 디코딩하여 튜플 형태의 문자열 복원
+           new_rows = []
+           for b64_item in b64_list:
+                # 1. Base64 디코딩
                 dec = base64.b64decode(b64_item.encode()).decode('utf-8')
-                
-                # 문자열 정제 (예: "('제목', '화', ...)" -> ['제목', '화', ...])
-                # eval을 쓰거나, 콤마(,)로 split하여 리스트화
-                data = eval(dec) 
-                
-                # DB 저장용 데이터 구조 생성 (서버 row_dict의 순서에 맞춰야 함)
-                # data[0]:제목, data[1]:부제목, data[2]:사이트, data[3]:URL, data[4]:이미지, data[5]:번호, data[7]:총개수
-                new_rows.append((data[0], data[1], data[2], data[3], data[4], int(data[5]), int(data[7])))
+            
+                # 2. 서버가 보낸 튜플 문자열 파싱 (ast.literal_eval 사용 권장)
+                # 서버 데이터 순서: (0:TITLE, 1:SUBTITLE, 2:SITE, 3:URL, 4:IMAGE, 5:IMG_NUM, 6:COMPLETE, 7:TOTAL_COUNT)
+                data = ast.literal_eval(dec) 
+            
+                # 3. 클라이언트 DB 컬럼 순서에 맞게 재배열 (7개 항목)
+                # (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT)
+                matched_row = (
+                    data[0],          # TITLE
+                    data[1],          # SUBTITLE
+                    data[2],          # SITE (WEBTOON_SITE)
+                    data[3],          # URL (WEBTOON_URL)
+                    data[4],          # IMAGE (WEBTOON_IMAGE)
+                    int(data[5]),     # IMG_NUM (WEBTOON_IMAGE_NUMBER)
+                    int(data[7])      # TOTAL_COUNT (서버의 7번 인덱스)
+                )
+                new_rows.append(matched_row)
 
-            # 5. DB에 한꺼번에 저장
+            # 4. DB 일괄 저장
             if new_rows:
                 with get_list_db() as con:
-                    # gbun 판단 로직은 서버 전달 방식에 따라 보강 (여기서는 기본 TOON)
+                    # 테이블 구조에 맞게 7개의 '?' 사용
                     con.executemany("INSERT OR IGNORE INTO TOON VALUES (?,?,?,?,?,?,?)", new_rows)
                     con.commit()
-                logger.info(f"[성공] {pid}번 파일로부터 {len(new_rows)}개 데이터 수집")
+                logger.info(f"[성공] {len(new_rows)}개 데이터를 DB 구조에 맞춰 저장했습니다.")
 
         except Exception as e:
-            logger.error(f"!!! {pid}번 파일 처리 실패: {e}")
-            continue
+            logger.error(f"!!! 데이터 일치화 작업 실패: {e}")
 
     # 마지막 처리 ID 저장
     if messages:
