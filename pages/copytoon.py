@@ -211,7 +211,7 @@ def decode_and_save_to_db(msg_text):
                     print(f"✅ 성공: {item[0]} > {item[1]}")
                     logging.info(f"SUCCESS: {item[0]} ({item[1]})")
                 except Exception as e:
-					error_msg = f"❌ 실패: {str(e)}"
+                    error_msg = f"❌ 실패: {str(e)}"
                     print("-" * 50)
                     print(error_msg)
                     print(f"   데이터 샘플: {item_b64[:30]}...")
