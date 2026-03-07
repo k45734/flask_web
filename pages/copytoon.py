@@ -214,7 +214,7 @@ def decode_and_save_to_db(msg_text):
                     error_msg = f"❌ 실패: {str(e)}"
                     print("-" * 50)
                     print(error_msg)
-                    print(f"   데이터 샘플: {item_b64[:30]}...")
+                    print(f"   데이터 샘플: {item_b64}...")
                     print("-" * 50)
             
                     logging.error(f"FAILED : {str(e)} | Data: {item_b64}")
