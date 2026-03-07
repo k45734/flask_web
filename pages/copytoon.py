@@ -218,7 +218,6 @@ def decode_and_save_to_db(msg_text):
                     print("-" * 50)
             
                     logging.error(f"FAILED : {str(e)} | Data: {item_b64}")
-            continue
                     continue
             con.commit()
         
