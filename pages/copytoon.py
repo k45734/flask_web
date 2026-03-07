@@ -208,16 +208,16 @@ def decode_and_save_to_db(msg_text):
                         VALUES (?, ?, ?, ?, ?, ?, ?)
                     """, (item[0], item[1], item[2], item[3], item[4], int(item[5]), int(item[7])))
                     success_count += 1
-                    print(f"✅ [{success_count}] 성공: {item[0]} > {item[1]}")
+                    print(f"✅ 성공: {item[0]} > {item[1]}")
                     logging.info(f"SUCCESS: {item[0]} ({item[1]})")
                 except Exception as e:
-					error_msg = f"❌ [{success_count}] 실패: {str(e)}"
+					error_msg = f"❌ 실패: {str(e)}"
                     print("-" * 50)
                     print(error_msg)
                     print(f"   데이터 샘플: {item_b64[:30]}...")
                     print("-" * 50)
             
-                    logging.error(f"FAILED at index {success_count}: {str(e)} | Data: {item_b64[:50]}")
+                    logging.error(f"FAILED : {str(e)} | Data: {item_b64}")
             continue
                     continue
             con.commit()
