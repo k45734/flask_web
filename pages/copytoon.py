@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup as bs
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
 import ast
-
+import zlib
 # [필수 라이브러리 및 스케줄러]
 try:
     from flask_paginate import Pagination, get_page_args
@@ -29,7 +29,15 @@ WEBTOON_PATH = at[0] + '/data/webtoon'
 
 os.makedirs(WEBTOON_PATH, exist_ok=True)
 os.makedirs(os.path.dirname(LIST_DB), exist_ok=True)
-
+def log_and_print(msg, level="info"):
+    """출력과 로그 기록을 동시에 처리하는 통합 함수"""
+    if level == "info":
+        logger.info(msg)
+    elif level == "error":
+        logger.error(msg)
+    elif level == "warning":
+        logger.warning(msg)
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
 def get_list_db():
     con = sqlite3.connect(LIST_DB, timeout=300)
     con.row_factory = sqlite3.Row
@@ -92,144 +100,121 @@ def db_optimize():
     except Exception as e: logger.error(f"!!! 최적화 오류: {e}")
 
 def tel_send_message(dummy=None):
-    """봇 API를 사용하여 텔레그램 채널의 이중 인코딩 데이터를 수신 (Log & Print 완전 동기화)"""
-    msg = "== [API 기반 동기화] 텔레그램 봇 데이터 수신 가동 =="
-    logger.info(msg)
-    print(f"\n{msg}")
+    """봇 API를 사용하여 텔레그램 채널의 압축 데이터를 수신"""
+    log_and_print("=== 텔레그램 데이터 동기화 엔진 가동 ===")
 
-    # 1. 설정값 불러오기
     token = get_config('bot_token')
     if not token:
-        msg = "!!! [경고] 봇 토큰이 설정되지 않았습니다. 설정을 확인해주세요."
-        logger.error(msg)
-        print(msg)
+        log_and_print("!!! [중단] 봇 토큰이 설정되지 않았습니다.", "error")
         return
 
     last_id = get_config('last_telegram_update_id')
     last_id = int(last_id) if last_id else 0
-    msg = f">> 현재 동기화 기준 ID: {last_id}"
-    logger.info(msg)
-    print(msg)
+    log_and_print(f">> 현재 기준 Update ID: {last_id}")
 
-    # 2. 텔레그램 getUpdates API 호출
     url = f"https://api.telegram.org/bot{token}/getUpdates"
     params = {"offset": last_id + 1, "timeout": 20}
 
     try:
-        msg = f">> 텔레그램 서버에 업데이트 확인 요청 중... (offset: {last_id + 1})"
-        logger.info(msg)
-        print(msg)
-        
         res = requests.get(url, params=params, timeout=25)
         data = res.json()
         
         if not data.get("ok"):
-            msg = f"!!! 텔레그램 API 오류: {data.get('description')}"
-            logger.error(msg)
-            print(msg)
+            log_and_print(f"!!! API 오류: {data.get('description')}", "error")
             return
         
         updates = data.get("result", [])
-        msg = f">> 수신된 업데이트 패키지 개수: {len(updates)}개"
-        logger.info(msg)
-        print(msg)
+        if not updates:
+            log_and_print(">> 새로운 데이터가 없습니다.")
+            return
 
+        log_and_print(f">> 수신된 패키지: {len(updates)}개 발견")
         new_last_id = last_id
 
         for idx, update in enumerate(updates, 1):
             msg_obj = update.get("channel_post")
-            if not msg_obj:
-                continue
+            if not msg_obj: continue
             
             msg_text = msg_obj.get("text", "")
             update_id = update["update_id"]
             
-            msg = f"   [{idx}/{len(updates)}] Update ID {update_id} 분석 중..."
-            logger.info(msg)
-            print(msg, end=" ")
-
-            if msg_text.startswith("DATA:"):
-                # ✅ 수정된 이중 해독 함수 호출
-                if decode_and_save_to_db(msg_text):
-                    msg = f"✅ 처리 성공 (Update ID: {update_id})"
-                    logger.info(msg)
-                    print("-> [성공]")
-                else:
-                    msg = f"❌ 처리 실패 (Update ID: {update_id})"
-                    logger.error(msg)
-                    print("-> [실패]")
+            # 데이터 유형 판별 및 처리
+            if msg_text.startswith("DATA_Z:"):
+                log_and_print(f"   [{idx}/{len(updates)}] 압축 데이터(DATA_Z) 해독 시작... (ID: {update_id})")
+                decode_and_save_to_db(msg_text, is_compressed=True)
+            elif msg_text.startswith("DATA:"):
+                log_and_print(f"   [{idx}/{len(updates)}] 일반 데이터(DATA) 해독 시작... (ID: {update_id})")
+                decode_and_save_to_db(msg_text, is_compressed=False)
             else:
-                msg = f"⏩ 데이터 형식 아님 (Update ID: {update_id})"
-                logger.info(msg)
-                print("-> [건너뜀]")
+                log_and_print(f"   [{idx}/{len(updates)}] 일반 메시지 스킵 (ID: {update_id})")
             
             if update_id > new_last_id:
                 new_last_id = update_id
 
-        # 3. 다음 실행을 위한 기준점 저장
+        # 기준점 업데이트
         if new_last_id > last_id:
             set_config('last_telegram_update_id', new_last_id)
-            msg = f"🚀 동기화 완료: 기준점이 {new_last_id}(으)로 갱신되었습니다."
-            logger.info(msg)
-            print(f"\n{msg}")
-        else:
-            msg = ">> 새로운 데이터가 없어 기준점을 유지합니다."
-            logger.info(msg)
-            print(f"\n{msg}")
+            log_and_print(f"🚀 동기화 완료: 기준점 갱신 ({new_last_id})")
 
     except Exception as e:
-        msg = f"!!! [치명적 오류] 데이터 수신 중 예외 발생: {e}"
-        logger.error(msg)
-        print(msg)
+        log_and_print(f"!!! 수신 엔진 치명적 오류: {e}", "error")
 
-def decode_and_save_to_db(msg_text):
-    """이중 인코딩 데이터를 해독하여 DB에 적재 (Log & Print 완전 동기화)"""
+def decode_and_save_to_db(msg_text, is_compressed=False):
+    """해독된 데이터의 제목과 회차명을 실시간으로 출력하며 DB 적재"""
     try:
-        # 1. 1차 해독
-        encoded_data = msg_text.replace("DATA:", "")
-        decoded_json = base64.b64decode(encoded_data).decode('utf-8')
-        payload_list = json.loads(decoded_json)
+        # 1. 데이터 복원 (압축/일반)
+        if is_compressed:
+            encoded_data = msg_text.replace("DATA_Z:", "")
+            raw_bytes = base64.b64decode(encoded_data)
+            json_str = zlib.decompress(raw_bytes).decode('utf-8')
+            payload_list = json.loads(json_str)
+        else:
+            encoded_data = msg_text.replace("DATA:", "")
+            json_str = base64.b64decode(encoded_data).decode('utf-8')
+            payload_list = json.loads(json_str)
         
-        total_items = len(payload_list)
+        total_count = len(payload_list)
         success_count = 0
         
+        # 어떤 작품들이 들어있는지 먼저 요약 출력
+        log_and_print(f"      🔍 패키지 내부 데이터 해독 중 (총 {total_count}개 항목)...")
+
         with get_list_db() as con:
-            for item_b64 in payload_list:
+            for item_data in payload_list:
                 try:
-                    # 2. 2차 해독
-                    item_str = base64.b64decode(item_b64).decode('utf-8')
-                    # 3. 객체 복원
-                    item = ast.literal_eval(item_str)
+                    # 2. 항목별 2차 해독 (Base64 -> String -> List)
+                    if isinstance(item_data, str):
+                        item_raw = base64.b64decode(item_data).decode('utf-8')
+                        item = ast.literal_eval(item_raw)
+                    else:
+                        item = item_data
                     
-                    # 4. DB 적재
+                    # 3. 데이터 정보 추출 (제목, 부제목, 이미지 번호)
+                    title = item[0]
+                    subtitle = item[1]
+                    img_num = item[5]
+                    
+                    # DB Insert
                     con.execute("""
                         INSERT OR IGNORE INTO TOON 
                         (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
                         VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (item[0], item[1], item[2], item[3], item[4], int(item[5]), int(item[7])))
+                    """, (title, subtitle, item[2], item[3], item[4], int(img_num), int(item[7])))
+                    
+                    # [추가] 무엇이 해독되었는지 상세 출력
+                    # 동일 회차의 이미지가 여러 장이므로, 첫 번째 이미지(001)일 때만 제목을 출력하면 깔끔합니다.
+                    if str(img_num).endswith('1'):
+                        log_and_print(f"      ✨ 해독됨: {title} > {subtitle}")
+                    
                     success_count += 1
-                    print(f"✅ 성공: {item[0]} > {item[1]}")
-                    logging.info(f"SUCCESS: {item[0]} ({item[1]})")
                 except Exception as e:
-                    error_msg = f"❌ 실패: {str(e)}"
-                    print("-" * 50)
-                    print(error_msg)
-                    print(f"   데이터 샘플: {item_b64}...")
-                    print("-" * 50)
-            
-                    logging.error(f"FAILED : {str(e)} | Data: {item_b64}")
                     continue
             con.commit()
         
-        msg = f"📦 DB 적재 결과: {success_count}/{total_items}개 완료"
-        logger.info(msg)
-        print(f" ({success_count}/{total_items})", end="")
-        return True if success_count > 0 else False
-
+        log_and_print(f"      ✅ 최종 완료: {success_count}/{total_count} 항목 DB 저장 성공")
+        return True
     except Exception as e:
-        msg = f"!!! [디코딩 오류] 데이터 구조 파싱 실패: {e}"
-        logger.error(msg)
-        print(f"\n{msg}")
+        log_and_print(f"   ❌ 데이터 해독 실패: {e}", "error")
         return False
 		
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
