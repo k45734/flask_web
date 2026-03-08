@@ -160,15 +160,19 @@ def tel_send_message(dummy=None):
         log_and_print(f"!!! 수신 엔진 치명적 오류: {e}", "error")
 
 def decode_and_save_to_db(msg_text, is_compressed=False):
-    """해독된 데이터의 제목과 회차명을 실시간으로 출력하며 DB 적재"""
+    """
+    해독된 데이터의 제목과 회차명을 출력하며 DB(adult/normal)에 적재합니다.
+    """
     try:
-        # 1. 데이터 복원 (압축/일반)
+        # 1. 데이터 복원 (압축 해제 또는 Base64 디코딩)
         if is_compressed:
+            # DATA_Z: 접두어 제거 후 zlib 압축 해제
             encoded_data = msg_text.replace("DATA_Z:", "")
             raw_bytes = base64.b64decode(encoded_data)
             json_str = zlib.decompress(raw_bytes).decode('utf-8')
             payload_list = json.loads(json_str)
         else:
+            # DATA: 접두어 제거 후 Base64 디코딩
             encoded_data = msg_text.replace("DATA:", "")
             json_str = base64.b64decode(encoded_data).decode('utf-8')
             payload_list = json.loads(json_str)
@@ -176,45 +180,57 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
         total_count = len(payload_list)
         success_count = 0
         
-        # 어떤 작품들이 들어있는지 먼저 요약 출력
         log_and_print(f"      🔍 패키지 내부 데이터 해독 중 (총 {total_count}개 항목)...")
 
         with get_list_db() as con:
             for item_data in payload_list:
                 try:
-                    # 2. 항목별 2차 해독 (Base64 -> String -> List)
+                    # 2. 항목별 2차 해독 (Base64 -> String -> List/Tuple)
                     if isinstance(item_data, str):
                         item_raw = base64.b64decode(item_data).decode('utf-8')
                         item = ast.literal_eval(item_raw)
                     else:
                         item = item_data
                     
-                    # 3. 데이터 정보 추출 (제목, 부제목, 이미지 번호)
+                    # 3. 데이터 매핑 (서버 전송 규격 기준)
+                    # item 구조: [제목, 부제목, 사이트, URL, 이미지경로, 순번, 완료여부, 총갯수, (추가될구분자)]
                     title = item[0]
                     subtitle = item[1]
-                    img_num = item[5]
+                    site = item[2]
+                    url = item[3]
+                    img_url = item[4]
+                    img_num = int(item[5])
+                    total_img_count = int(item[7])
                     
-                    # DB Insert
-                    con.execute("""
-                        INSERT OR IGNORE INTO TOON 
+                    # 4. [중요] adult/normal 테이블 결정 로직
+                    # 서버(webtoon_server.py)에서 전송 시 8번째 인덱스 등에 'adult'/'normal'을 넣어준다고 가정하거나,
+                    # 현재는 기본적으로 'TOON'(adult)에 넣되 필요시 로직을 분기합니다.
+                    # 만약 데이터 내부에 구분자가 없다면 호출 시점의 gbun을 참고해야 합니다.
+                    target_table = 'TOON' 
+                    if len(item) > 8:
+                        target_table = 'TOON' if item[8] == 'adult' else 'TOON_NORMAL'
+
+                    # 5. DB Insert 실행
+                    con.execute(f"""
+                        INSERT OR IGNORE INTO {target_table} 
                         (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
                         VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (title, subtitle, item[2], item[3], item[4], int(img_num), int(item[7])))
+                    """, (title, subtitle, site, url, img_url, img_num, total_img_count))
                     
-                    # [추가] 무엇이 해독되었는지 상세 출력
-                    # 동일 회차의 이미지가 여러 장이므로, 첫 번째 이미지(001)일 때만 제목을 출력하면 깔끔합니다.
+                    # 진행 상황 출력 (첫 번째 이미지일 때만 출력하여 로그 폭주 방지)
                     if str(img_num).endswith('1'):
-                        log_and_print(f"      ✨ 해독됨: {title} > {subtitle}")
+                        log_and_print(f"      ✨ 해독됨: [{target_table}] {title} > {subtitle}")
                     
                     success_count += 1
                 except Exception as e:
+                    logger.error(f"      ❌ 개별 항목 처리 오류: {e}")
                     continue
             con.commit()
         
         log_and_print(f"      ✅ 최종 완료: {success_count}/{total_count} 항목 DB 저장 성공")
         return True
     except Exception as e:
-        log_and_print(f"   ❌ 데이터 해독 실패: {e}", "error")
+        log_and_print(f"   ❌ 데이터 해독 패키지 처리 실패: {e}", "error")
         return False
 		
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
