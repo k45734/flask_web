@@ -413,7 +413,7 @@ def alim_list():
 @webtoon.route('db_list_reset')
 def db_list_reset():
     with get_status_db() as con:
-        con.execute("DELETE FROM STATUS"); con.execute("UPDATE CONFIG SET VALUE='0' WHERE KEY='last_webtoon_id'"); con.commit()
+        con.execute("DELETE FROM STATUS"); con.execute("UPDATE CONFIG SET VALUE='0' WHERE KEY='last_telegram_update_id'"); con.commit()
     return "<script>alert('리셋 완료'); history.back();</script>"
 
 @webtoon.route('db_vacuum')
