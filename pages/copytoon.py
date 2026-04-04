@@ -391,10 +391,11 @@ def alim_list():
                 # 2. 하단 리스트용 (100% 완료된 에피소드만 추출)
                 list_query = f"""
                     SELECT TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT
+                    ROUND((COUNT(*) / TOTAL_COUNT) * 100, 1) as PROGRESS_RATE -- 진행률 추가
                     FROM {table_name}
                     GROUP BY TITLE, SUBTITLE
                     HAVING COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0
-                    ORDER BY TITLE ASC, SUBTITLE DESC
+                    ORDER BY PROGRESS_RATE DESC
                 """
                 details = con.execute(list_query).fetchall()
                 
