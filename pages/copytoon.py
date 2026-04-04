@@ -393,7 +393,7 @@ def alim_list():
                     SELECT TITLE, SUBTITLE, TOTAL_COUNT, COUNT(*) as CURRENT_COUNT
                     FROM {table_name}
                     GROUP BY TITLE, SUBTITLE
-                    HAVING COUNT(*) >= TOTAL_COUNT AND TOTAL_COUNT > 0
+                    HAVING COUNT(*) < TOTAL_COUNT AND TOTAL_COUNT > 0
                     ORDER BY TITLE ASC, SUBTITLE DESC;
                 """
                 details = con.execute(list_query).fetchall()
