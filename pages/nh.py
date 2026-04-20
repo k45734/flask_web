@@ -1105,34 +1105,6 @@ def nh_login():
 			add_data(a,b,c,d,e,f,g)
 		return redirect(url_for('nh.index'))
 
-#농협택배 예약취소(목록에서 가능하다)
-@nh.route('<rsvno>/<rcvNm>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<prodNm>/<priceTypeNm>/<date>/nh_del', methods=["GET"])
-def nh_del(rsvno,rcvNm,rcvHpno,rcvAddr,rcvAddrDtl,prodNm,priceTypeNm,date):
-	if not session.get('logFlag'):
-		return redirect(url_for('main.index'))
-	else:
-		if rsvno == 'NULL':
-			a = rcvNm
-			t = date
-			ac = delete_top2(a,t,rsvno)
-			if '없음' in ac:
-				total = '예약하신접수가 없습니다.'
-			else:
-				total = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(t,rsvno,a)
-			all = [total]
-		else:
-			now,num,myday,nowtime,mytime = mydate()
-			at,aa,ai = delete_top(rsvno)
-			a = aa
-			test = at
-			t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
-			ac = delete_top2(a,t,rsvno)
-			if '없음' in ac:
-				total = '예약하신접수가 없습니다.'
-			else:
-				total = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at,ai,aa)
-			all = [total]
-		return render_template('msg.html', msg = all)
 
 #농협택배 예약수정(목록에서 가능하다)
 @nh.route('<rsvNo>/<rcvHpno>/<rcvAddr>/<rcvAddrDtl>/<priceTypeNm>/nh_edit', methods=["GET"])
