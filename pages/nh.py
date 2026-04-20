@@ -1325,17 +1325,44 @@ def nh_delivery_api(search):
 #농협택배 예약취소 API
 @nh.route('<rsvno>/nh_del_api', methods=["GET"])
 def nh_del_api(rsvno):
-	now,num,myday,nowtime,mytime = mydate()
-	at,aa,ai = delete_top(rsvno)
-	a = aa
-	test = at
-	t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
-	ac = delete_top2(a,t,rsvno)
-	if '없음' in ac:
-		all = '예약하신접수가 없습니다.'
-	else:
-		all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at,ai,aa)
-	return jsonify(all)
+    now, num, myday, nowtime, mytime = mydate()
+    
+    # 1. 농협 사이트 조회 시도
+    at, aa, ai = delete_top(rsvno)
+    
+    # 2. 만약 농협 사이트 조회가 안 된다면 (at, aa가 비어있음)
+    if not at or not aa:
+        # DB에서 예약번호(rsvno)만 가지고 강제로 지우는 로직 실행
+        con = sqlite3.connect(mydir + '/db/nh.db', timeout=60)
+        cur = con.cursor()
+        
+        # 삭제 전 확인 (선택 사항)
+        cur.execute('SELECT rcvNm, date FROM nh WHERE rsvNo = ?', (rsvno,))
+        row = cur.fetchone()
+        
+        if row:
+            # DB에 데이터가 있다면 강제 삭제
+            cur.execute('DELETE FROM nh WHERE rsvNo = ?', (rsvno,))
+            con.commit()
+            con.close()
+            return jsonify(f"농협 조회가 안 되어 DB에서 예약번호 {rsvno} 데이터를 강제 삭제했습니다.")
+        else:
+            con.close()
+            return jsonify("농협 사이트와 DB 모두에 해당 정보가 없습니다.")
+
+    # 3. 조회가 성공했을 경우 (기존 로직)
+    a = aa
+    test = at
+    t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
+    
+    ac = delete_top2(a, t, rsvno)
+    
+    if '없음' in ac:
+        all = '예약하신 접수가 없습니다.'
+    else:
+        all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at, ai, aa)
+        
+    return jsonify(all)
 	
 #농협택배 주소테스트 API
 @nh.route('<address>/nh_addrtest_api', methods=["GET"])
