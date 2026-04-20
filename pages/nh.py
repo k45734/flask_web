@@ -135,21 +135,48 @@ def addr_not(d):
 	
 #주소검색을 한뒤 자동 입력하기		
 def addr(ein):
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:
-		url2 = 'https://www.juso.go.kr/support/AddressMainSearch.do?searchKeyword=' + ein
-		req = s.get(url2)
-		html = req.text
-		gogo = bs(html, "html.parser")	
-		test = gogo.find("div",{"class":"addr_cont"})
-		#for i in test:
-		#우편번호를 찾는다.
-		zipcode = test.find('input',{'id':'bsiZonNo1'})
-		new_addr = test.find('input', {'id':'rnAddr1'})
-		old_addr = test.find('input', {'id':'lndnAddr1'})
-		d = zipcode['value']
-		e = new_addr['value']				
-		return [d,e]
+    header = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+    }
+    
+    with requests.Session() as s:
+        url = 'https://m.search.naver.com/search.naver?query=' + ein + ' 우편번호'
+        
+        try:
+            req = s.get(url, headers=header, timeout=5)
+            # 접속 자체가 실패했거나 페이지가 이상하면 에러 발생시킴
+            if req.status_code != 200:
+                return None 
+
+            soup = bs(req.text, "html.parser")
+            full_text = soup.get_text(" ", strip=True)
+            full_text = re.sub(r'\s+', ' ', full_text)
+            
+            # --- 데이터 추출 ---
+            # 1. 우편번호 (d)
+            d = ""
+            zip_match = re.search(r'\b\d{5}\b', full_text)
+            if zip_match:
+                d = zip_match.group()
+            
+            # 2. 새주소 (e)
+            e = ""
+            road_match = re.search(r'도로명\s*(.+?\))', full_text)
+            if road_match:
+                e = road_match.group(1).strip()
+            
+            # --- 검증 로직 추가 (중요!) ---
+            # 우편번호나 주소 중 하나라도 비어있다면 잘못된 데이터로 간주
+            if not d or not e:
+                print(f"데이터 누락 발생 (d:{d}, e:{e}) - 접수 중단")
+                return None # None을 반환하여 다음 단계 진행을 막음
+
+            return [d, e]
+
+        except Exception as err:
+            print(f"시스템 에러: {err}")
+            return None # 에러 시 None 반환
 		
 #택배조회 확인
 def checkURL(url2):
