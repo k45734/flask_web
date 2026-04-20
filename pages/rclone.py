@@ -462,9 +462,9 @@ def start():
 	if not session.get('logFlag'):
 		return redirect(url_for('main.index'))
 	else:
-		RCLONENAME = request.form['RCLONENAME']
+		#RCLONENAME = request.form['RCLONENAME']
 		FLASKTIME = request.form['FLASKTIME']
-		RCLONE_CONFIG = request.form['RCLONE_CONFIG']
+		#RCLONE_CONFIG = request.form['RCLONE_CONFIG']
 		RCLONE_LOCAL = request.form['RCLONE_LOCAL']
 		RCLONE_REMOTE = request.form['RCLONE_REMOTE']
 		RCLONE_C_M = request.form['RCLONE_C_M']
@@ -472,6 +472,8 @@ def start():
 		RCLONE_UPLOAD = request.form['RCLONE_UPLOAD']
 		CREATE_F = request.form['CREATE_F']
 		DELETE_F = request.form['DELETE_F']
+        RCLONENAME = request.form.get('RCLONENAME')
+        RCLONE_CONFIG = request.form.get('RCLONE_CONFIG', '/data/rclone.conf')
 		ETC = request.form['ETC']
 		#데이타베이스 없으면 생성
 		try:

@@ -67,7 +67,19 @@
                                 <input type="text" name="FLASKTIME" class="form-control shadow-sm small text-danger fw-bold" value="*/1 * * * *">
                             </div>
                         </div>
-
+<div class="row g-2 mb-3">
+    <div class="col-md-6">
+        <label class="form-label small fw-bold text-muted">Rclone 설정 파일 경로</label>
+        <input type="text" name="RCLONE_CONFIG" class="form-control shadow-sm small" placeholder="/data/rclone.conf" required>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label small fw-bold text-muted">빈 폴더 삭제 여부</label>
+        <select name="DELETE_F" class="form-select border-0 shadow-sm small">
+            <option value="False">아니요</option>
+            <option value="True">네 (삭제)</option>
+        </select>
+    </div>
+</div>
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-muted">기타 옵션 (ETC)</label>
                             <input type="text" name="ETC" class="form-control shadow-sm small bg-light" value="{{ ETC }}" placeholder="--dry-run 등">
