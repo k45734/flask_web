@@ -151,32 +151,60 @@ def addr(ein):
             full_text = soup.get_text(" ", strip=True)
             full_text = re.sub(r'\s+', ' ', full_text)
             
-            # 1. 우편번호 추출 (d)
             d = ""
+            e = ""
+            
+            # 1. 우편번호 (d) 추출 (5자리 숫자)
             zip_match = re.search(r'\b\d{5}\b', full_text)
             if zip_match:
                 d = zip_match.group()
             
-            # 2. 새주소 추출 (e)
-            e = ""
-            # 기본 전략: '도로명' 뒤부터 첫 번째 닫는 괄호 ')' 까지만 추출
-            road_match = re.search(r'도로명\s*(.+?\))', full_text)
-            if road_match:
-                e = road_match.group(1).strip()
-            else:
-                # 괄호가 없는 경우를 대비한 백업: '지번'이나 '우편'이라는 글자가 나오기 전까지만 추출
-                road_match = re.search(r'도로명\s*(.+?)(?=\s*(지번|우편|내비|길찾기|주변|$))', full_text)
-                if road_match:
-                    e = road_match.group(1).strip()
+            # 2. 새주소 (e) 추출 로직
+            if "복사" in full_text:
+                parts = full_text.split("복사")
+                # '복사' 앞(before)과 뒤(after) 중 도로명 주소가 있는 곳을 찾음
+                before_copy = parts[0].strip()
+                after_copy = parts[1].strip() if len(parts) > 1 else ""
+                
+                # 도로명 주소 핵심 패턴 (시/도 시/군/구 ... 로/길 번호)
+                road_pattern = r'([가-힣]+[도시]\s+[가-힣]+[시군구]\s+.*?[가-힣]+[로|길][\d\s-]+)'
+                
+                # 전략 1: 검색어가 포함된 도로명 주소가 복사 앞부분에 있는지 확인 (새주소 검색 대응)
+                match_before = re.search(road_pattern, before_copy)
+                # 전략 2: 복사 뒷부분에서 '내비게이션' 전까지 추출 (구주소 검색 대응)
+                match_after = None
+                if "내비게이션" in after_copy:
+                    target_area = after_copy.split("내비게이션")[0].strip()
+                    # 괄호가 나오면 그 앞까지만 가져와서 구주소 혼입 방지
+                    if "(" in target_area:
+                        target_area = target_area.split("(")[0].strip()
+                    match_after = re.search(road_pattern, target_area)
+                
+                # 우선순위 결정: 앞부분에 도로명 주소가 있으면 먼저 선택
+                if match_before:
+                    e = match_before.group(1).strip()
+                elif match_after:
+                    e = match_after.group(1).strip()
             
-            # 우편번호나 주소가 하나라도 없으면 접수 방지(None)
-            if not d or not e:
-                return None
+            # 3. 최종 정제 및 백업 (중복 주소 및 불필요한 키워드 제거)
+            if not e:
+                backup = re.search(r'([가-힣]+[도시]\s+[가-힣]+[시군구]\s+.*?[가-힣]+[로|길][\d\s-]+)', full_text)
+                if backup: e = backup.group(1).strip()
+            
+            if e:
+                # '로' 또는 '길' 뒤의 숫자(번지수)까지만 남기고 그 뒤의 아파트명/지번 등은 제거
+                clean_match = re.search(r'(.*?[가-힣]+[로|길][\d\s-]+)', e)
+                if clean_match:
+                    e = clean_match.group(1).strip()
+                
+                # 기타 UI 찌꺼기 제거
+                e = re.split(r'입력|내용|더보기|조회|주소|내비|길찾기|영문|관련|복사', e)[0].strip()
+                e = re.sub(r'우편번호|도로명|지번|검색|삭제|@txt@', '', e).strip()
+                e = ' '.join(e.split())
 
-            return [d, e]
+            return [d, e] if d and e else None
 
         except:
-            # 예상치 못한 에러 발생 시에도 None을 반환하여 잘못된 데이터 접수 방지
             return None
 		
 #택배조회 확인
