@@ -764,49 +764,52 @@ def edit_db(rsvno,rcvHpno,rcvTelno,rcvPostno,rcvAddr,rcvAddrDtl,priceTypeNm):
 	
 #실서버 예약 취소 실구동
 def delete_top(rsvno):
+	at, aa, ai = "", "", ""
 	con = sqlite3.connect(mydir + '/db/nh.db',timeout=60)
 	con.row_factory = sqlite3.Row
 	cur = con.cursor()
 	sql = "select * from mydata"
 	cur.execute(sql)
 	rows = cur.fetchall()
-	
-	for row in rows:
-		id = row['NHID']
-		pw = row['NHPASSWD']
-	LOGIN_INFO = {'userId': id,
-				'pwd': pw,
-				'rurl': '/main.do'
-				}
-	DELETE_INFO = { 'rsvNo': rsvno,
-					'searchType': '',
-					'searchText': '', 
-					'sndTelno':	''
+	try:
+		for row in rows:
+			id = row['NHID']
+			pw = row['NHPASSWD']
+		LOGIN_INFO = {'userId': id,
+					'pwd': pw,
+					'rurl': '/main.do'
 					}
-	header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
-	with requests.Session() as s:
-		url = 'https://ex.nhlogis.co.kr/user/login/doLogin.json'
-		url2 = 'https://ex.nhlogis.co.kr/resrv/inq/list.do'
-		req = s.post(url, data=LOGIN_INFO)
-		
-		req1 = s.get(url2)
-		html = req1.text
-		gogo = bs(html, "html.parser")
-		loginok = gogo.find('div', {'class':'util-box'})
-		if loginok == None:
-			print("로그인이 않되었습니다.")
-		else:
-
-			list = 'https://ex.nhlogis.co.kr/resrv/inq/delete.json'
-			req_list = s.post(list, data=DELETE_INFO).json() 
-			i = req_list['data']
-			ass2 = req_list['result']
-			if ass2 != True:
-				print("정보가 없습니다.")
+		DELETE_INFO = { 'rsvNo': rsvno,
+						'searchType': '',
+						'searchText': '', 
+						'sndTelno':	''
+						}
+		header = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5)\AppleWebKit 537.36 (KHTML, like Gecko) Chrome","Accept":"text/html,application/xhtml+xml,application/xml;\q=0.9,imgwebp,*/*;q=0.8"}
+		with requests.Session() as s:
+			url = 'https://ex.nhlogis.co.kr/user/login/doLogin.json'
+			url2 = 'https://ex.nhlogis.co.kr/resrv/inq/list.do'
+			req = s.post(url, data=LOGIN_INFO)
+			
+			req1 = s.get(url2)
+			html = req1.text
+			gogo = bs(html, "html.parser")
+			loginok = gogo.find('div', {'class':'util-box'})
+			if loginok == None:
+				print("로그인이 않되었습니다.")
 			else:
-				at = i['rsvDt']
-				aa = i['rcvNm']
-				ai = i['rsvNo']
+
+				list = 'https://ex.nhlogis.co.kr/resrv/inq/delete.json'
+				req_list = s.post(list, data=DELETE_INFO).json() 
+				i = req_list['data']
+				ass2 = req_list['result']
+				if ass2 != True:
+					print("정보가 없습니다.")
+				else:
+					at = i['rsvDt']
+					aa = i['rcvNm']
+					ai = i['rsvNo']
+	except Exception as e:
+		print(f"조회 중 에러: {e}")
 	return [at,aa,ai]
 
 def dbfile(numt,now):
@@ -1325,16 +1328,16 @@ def nh_delivery_api(search):
 #농협택배 예약취소 API
 @nh.route('<rsvno>/nh_del_api', methods=["GET"])
 def nh_del_api(rsvno):
-    try:
+try:
         now, num, myday, nowtime, mytime = mydate()
         
         # 1. 농협 사이트 조회 시도
         at, aa, ai = delete_top(rsvno)
         
-        # 2. 사이트 조회가 실패했을 경우 (UnboundLocalError 방지 및 DB 삭제 준비)
-        if not at or not aa:
-            # DB에서 예약번호(rsvno)로 이름과 날짜를 직접 찾아옵니다.
-            # mydir 변수가 정의되어 있는지 확인하세요.
+        # 2. 사이트 조회가 실패한 경우 (at이 빈 문자열임)
+        if not at:
+            # DB에서 예약번호(rsvno)로 직접 정보를 찾아옵니다.
+            import sqlite3
             con = sqlite3.connect(mydir + '/db/nh.db', timeout=60)
             cur = con.cursor()
             cur.execute('SELECT rcvNm, date FROM nh WHERE rsvNo = ?', (rsvno,))
@@ -1342,38 +1345,34 @@ def nh_del_api(rsvno):
             con.close()
             
             if row:
-                # DB에 데이터가 있다면 해당 값으로 세팅하여 삭제 로직으로 보냅니다.
                 aa = row[0] # rcvNm
-                at = row[1] # date (이미 yy-mm-dd 형식일 가능성이 큼)
+                at = row[1] # date (예: 260420)
             else:
-                return jsonify("농협 사이트와 내부 DB 모두에 데이터가 없습니다.")
+                return jsonify("농협 사이트와 DB 모두에 데이터가 없습니다.")
 
-        # 3. 날짜 형식 변환 및 삭제 로직 실행
+        # 3. 날짜 및 이름 변수 설정
         a = aa
         test = at
         
-        # 날짜 형식에 따른 예외 처리 (이미 '260420' 형식인 경우 대비)
-        try:
-            if "-" in test:
-                t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
-            else:
-                t = test
-        except:
-            t = test # 변환 실패 시 원본 사용
+        # 날짜 형식 변환 (하이픈이 있으면 변환, 없으면 그대로 사용)
+        if "-" in test:
+            t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
+        else:
+            t = test
 
-        # 기존에 잘 작동하던 delete_top2 호출
+        # 4. 검증된 삭제 함수 호출
         ac = delete_top2(a, t, rsvno)
         
         if '없음' in ac:
-            all = '예약 정보를 찾을 수 없어 DB 삭제를 시도했으나 실패했습니다.'
+            all = 'DB 삭제에 실패했습니다.'
         else:
-            all = '[DB 삭제 완료]\n예약번호 {}\n{} 님 정보가 정리되었습니다.'.format(rsvno, a)
+            all = f"{at}\n예약번호 {rsvno}\n{a} 님 예약취소(DB삭제) 되었습니다."
             
         return jsonify(all)
 
     except Exception as e:
-        # 500 에러 대신 어떤 에러인지 화면에 표시해줍니다.
-        return jsonify(f"서버 내부 에러 발생: {str(e)}")
+        # 에러 발생 시 로그를 찍어줍니다.
+        return jsonify(f"최종 에러 발생: {str(e)}")
 	
 #농협택배 주소테스트 API
 @nh.route('<address>/nh_addrtest_api', methods=["GET"])
