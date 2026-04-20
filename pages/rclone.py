@@ -472,8 +472,8 @@ def start():
 		RCLONE_UPLOAD = request.form['RCLONE_UPLOAD']
 		CREATE_F = request.form['CREATE_F']
 		DELETE_F = request.form['DELETE_F']
-        RCLONENAME = request.form.get('RCLONENAME')
-        RCLONE_CONFIG = request.form.get('RCLONE_CONFIG', '/data/rclone.conf')
+		RCLONENAME = request.form.get('RCLONENAME')
+		RCLONE_CONFIG = request.form.get('RCLONE_CONFIG', '/data/rclone.conf')
 		ETC = request.form['ETC']
 		#데이타베이스 없으면 생성
 		try:
