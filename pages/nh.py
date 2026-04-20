@@ -1139,57 +1139,80 @@ def edit_result(rsvNo,rcvHpno,rcvAddr,rcvAddrDtl,priceTypeNm):
 		
 		return render_template('msg.html', msg = all)		
 #농협택배 예약
-@nh.route('nh_add', methods=["GET"])
+@nh.route('/nh_add', methods=['GET', 'POST'])
 def nh_add():
-	msg = []
-	now,num,myday,nowtime,mytime = mydate()
-	a = request.args.get('rcvNm') #받는사람
-	b = request.args.get('rcvHpno') #휴대폰번호
-	c = request.args.get('rcvAddr') #주소
-	d = request.args.get('rcvAddrDtl') #상세주소
-	e = request.args.get('prodNm') #물품명
-	f = request.args.get('prodNm') + '_' + num #물품명
-	g = request.args.get('priceTypeNm') #택배 선불/착불
-	h = request.args.get('boxType') #무게 타입 5kg 이하 01 이상 02
-	texter = [a,b,c,d,e,f,g,h]
-	v,w = adduse(texter)
-	a = texter[0]
-	r = texter[4]
-	u = texter[5]
-	numt = num
-	st_json = jsonfile(numt, a, r, u, v, w, g, h)
-	if st_json == None:
-		pass
-	else:
-		all2 = rezcomp(st_json)
-		for i in all2:
-			ck1 = i['rcvNm']
-			ck4 = i['rcvAddr']
-			ck2 = i['rcvAddrDtl']
-			ck3 = i['rcvHpno']
-			ck6 = i['priceTypeNm']
-			ck7 = i['rcvPostno']
-			aa = i['complte']
-			rsvno = i['rsvNo']
-			rcpNo = i['rcpNo']
-		adduse2(rsvno,rcpNo,numt, a, r, u)
-		ff = texter[1]
-		af = len(ff)
-		if af == 11:		
-			mydata = myguest(ff)
-		else:
-			mydata = '처음구매자입니다.'
-		not_addr = addr_not(ck7)
-		msg_1 = '이름 : {}'.format(ck1)
-		msg_2 = '연락처 : {}'.format(ck4)
-		msg_3 = '주 소 : {} {}'.format(ck2,ck3)
-		msg_4 = '택배비 결재방법은 {} 입니다.'.format(ck6)
-		msg_5 = '예약이 {}하였습니다.'.format(aa)
-		msg_6 = '{} {}'.format(mydata,not_addr)
-		msg_7 = '예약번호는 {}'.format(rsvno)
-		all = [msg_1,msg_2,msg_3,msg_4,msg_5,msg_6,msg_7]
-	
-	return render_template('msg.html', msg = all)
+    # 1. POST 요청인지 확인
+    if request.method == 'POST':
+        msg = []
+        now, num, myday, nowtime, mytime = mydate()
+        
+        # 2. request.args 대신 request.form을 사용해야 POST 데이터를 읽을 수 있습니다.
+        # html의 <input name="rcvNm"> 등 name 속성과 일치해야 합니다.
+        a = request.form.get('rcvNm')      # 받는사람
+        b = request.form.get('rcvHpno')    # 휴대폰번호
+        c = request.form.get('rcvAddr')    # 주소
+        d = request.form.get('rcvAddrDtl') # 상세주소
+        e = request.form.get('prodNm')     # 물품명
+        f = "{}_{}".format(e, num)         # 물품명_번호
+        g = request.form.get('priceTypeNm') # 택배 선불/착불
+        h = request.form.get('boxType')     # 무게 타입
+        
+        texter = [a, b, c, d, e, f, g, h]
+        
+        try:
+            # adduse 등의 외부 함수 로직 수행
+            v, w = adduse(texter)
+            numt = num
+            
+            st_json = jsonfile(numt, a, e, f, v, w, g, h)
+            
+            if st_json is not None:
+                all2 = rezcomp(st_json)
+                # 데이터 추출
+                for i in all2:
+                    ck1 = i.get('rcvNm')
+                    ck2 = i.get('rcvAddr')
+                    ck3 = i.get('rcvAddrDtl')
+                    ck4 = i.get('rcvHpno')
+                    ck6 = i.get('priceTypeNm')
+                    ck7 = i.get('rcvPostno')
+                    aa = i.get('complte')
+                    rsvno = i.get('rsvNo')
+                    rcpNo = i.get('rcpNo')
+                
+                adduse2(rsvno, rcpNo, numt, a, e, f)
+                
+                # 기존 구매자 여부 확인
+                if len(b) == 11:        
+                    mydata = myguest(b)
+                else:
+                    mydata = '처음구매자입니다.'
+                
+                not_addr = addr_not(ck7)
+                
+                # 메시지 구성 (순서 및 변수 매핑 수정)
+                msg_1 = '이름 : {}'.format(ck1)
+                msg_2 = '연락처 : {}'.format(ck4)
+                msg_3 = '주 소 : {} {}'.format(ck2, ck3)
+                msg_4 = '결제방법 : {}'.format(ck6)
+                msg_5 = '결과 : 예약이 {}하였습니다.'.format(aa)
+                msg_6 = '참고 : {} {}'.format(mydata, not_addr)
+                msg_7 = '예약번호 : {}'.format(rsvno)
+                
+                all_msg = [msg_1, msg_2, msg_3, msg_4, msg_5, msg_6, msg_7]
+                return render_template('msg.html', msg=all_msg)
+            
+            else:
+                flash("예약 데이터를 생성하지 못했습니다.")
+                return redirect(url_for('nh.index'))
+
+        except Exception as ex:
+            logger.error(f"nh_add 에러 발생: {ex}")
+            flash("처리 중 에러가 발생했습니다.")
+            return redirect(url_for('nh.index'))
+
+    # GET 요청 시 메인으로 리다이렉트
+    return redirect(url_for('nh.index'))
 
 #DB 에만 저장한다.
 @nh.route('nh_add_wait', methods=["GET"])
