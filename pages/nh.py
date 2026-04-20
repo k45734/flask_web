@@ -145,38 +145,39 @@ def addr(ein):
         
         try:
             req = s.get(url, headers=header, timeout=5)
-            # 접속 자체가 실패했거나 페이지가 이상하면 에러 발생시킴
-            if req.status_code != 200:
-                return None 
+            if req.status_code != 200: return None 
 
             soup = bs(req.text, "html.parser")
             full_text = soup.get_text(" ", strip=True)
             full_text = re.sub(r'\s+', ' ', full_text)
             
-            # --- 데이터 추출 ---
-            # 1. 우편번호 (d)
+            # 1. 우편번호 추출 (d)
             d = ""
             zip_match = re.search(r'\b\d{5}\b', full_text)
             if zip_match:
                 d = zip_match.group()
             
-            # 2. 새주소 (e)
+            # 2. 새주소 추출 (e)
             e = ""
+            # 기본 전략: '도로명' 뒤부터 첫 번째 닫는 괄호 ')' 까지만 추출
             road_match = re.search(r'도로명\s*(.+?\))', full_text)
             if road_match:
                 e = road_match.group(1).strip()
+            else:
+                # 괄호가 없는 경우를 대비한 백업: '지번'이나 '우편'이라는 글자가 나오기 전까지만 추출
+                road_match = re.search(r'도로명\s*(.+?)(?=\s*(지번|우편|내비|길찾기|주변|$))', full_text)
+                if road_match:
+                    e = road_match.group(1).strip()
             
-            # --- 검증 로직 추가 (중요!) ---
-            # 우편번호나 주소 중 하나라도 비어있다면 잘못된 데이터로 간주
+            # 우편번호나 주소가 하나라도 없으면 접수 방지(None)
             if not d or not e:
-                print(f"데이터 누락 발생 (d:{d}, e:{e}) - 접수 중단")
-                return None # None을 반환하여 다음 단계 진행을 막음
+                return None
 
             return [d, e]
 
-        except Exception as err:
-            print(f"시스템 에러: {err}")
-            return None # 에러 시 None 반환
+        except:
+            # 예상치 못한 에러 발생 시에도 None을 반환하여 잘못된 데이터 접수 방지
+            return None
 		
 #택배조회 확인
 def checkURL(url2):
