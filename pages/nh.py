@@ -6,7 +6,7 @@ try:
 	sys.setdefaultencoding('utf-8')
 except:
 	pass
-from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, Blueprint, jsonify, Response
 import os, io, re, zipfile, shutil, json, time, random, base64, urllib.request, platform, logging, requests, os.path, threading, time, subprocess, datetime
 import urllib.request as urllib2
 try:
