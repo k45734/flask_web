@@ -1325,44 +1325,55 @@ def nh_delivery_api(search):
 #농협택배 예약취소 API
 @nh.route('<rsvno>/nh_del_api', methods=["GET"])
 def nh_del_api(rsvno):
-    now, num, myday, nowtime, mytime = mydate()
-    
-    # 1. 농협 사이트 조회 시도
-    at, aa, ai = delete_top(rsvno)
-    
-    # 2. 만약 농협 사이트 조회가 안 된다면 (at, aa가 비어있음)
-    if not at or not aa:
-        # DB에서 예약번호(rsvno)만 가지고 강제로 지우는 로직 실행
-        con = sqlite3.connect(mydir + '/db/nh.db', timeout=60)
-        cur = con.cursor()
+    try:
+        now, num, myday, nowtime, mytime = mydate()
         
-        # 삭제 전 확인 (선택 사항)
-        cur.execute('SELECT rcvNm, date FROM nh WHERE rsvNo = ?', (rsvno,))
-        row = cur.fetchone()
+        # 1. 농협 사이트 조회 시도
+        at, aa, ai = delete_top(rsvno)
         
-        if row:
-            # DB에 데이터가 있다면 강제 삭제
-            cur.execute('DELETE FROM nh WHERE rsvNo = ?', (rsvno,))
-            con.commit()
+        # 2. 사이트 조회가 실패했을 경우 (UnboundLocalError 방지 및 DB 삭제 준비)
+        if not at or not aa:
+            # DB에서 예약번호(rsvno)로 이름과 날짜를 직접 찾아옵니다.
+            # mydir 변수가 정의되어 있는지 확인하세요.
+            con = sqlite3.connect(mydir + '/db/nh.db', timeout=60)
+            cur = con.cursor()
+            cur.execute('SELECT rcvNm, date FROM nh WHERE rsvNo = ?', (rsvno,))
+            row = cur.fetchone()
             con.close()
-            return jsonify(f"농협 조회가 안 되어 DB에서 예약번호 {rsvno} 데이터를 강제 삭제했습니다.")
-        else:
-            con.close()
-            return jsonify("농협 사이트와 DB 모두에 해당 정보가 없습니다.")
+            
+            if row:
+                # DB에 데이터가 있다면 해당 값으로 세팅하여 삭제 로직으로 보냅니다.
+                aa = row[0] # rcvNm
+                at = row[1] # date (이미 yy-mm-dd 형식일 가능성이 큼)
+            else:
+                return jsonify("농협 사이트와 내부 DB 모두에 데이터가 없습니다.")
 
-    # 3. 조회가 성공했을 경우 (기존 로직)
-    a = aa
-    test = at
-    t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
-    
-    ac = delete_top2(a, t, rsvno)
-    
-    if '없음' in ac:
-        all = '예약하신 접수가 없습니다.'
-    else:
-        all = '{}\n예약번호 {}\n{} 님 예약취소 되었습니다.'.format(at, ai, aa)
+        # 3. 날짜 형식 변환 및 삭제 로직 실행
+        a = aa
+        test = at
         
-    return jsonify(all)
+        # 날짜 형식에 따른 예외 처리 (이미 '260420' 형식인 경우 대비)
+        try:
+            if "-" in test:
+                t = now.strptime(test, "%Y-%m-%d").strftime("%y%m%d")
+            else:
+                t = test
+        except:
+            t = test # 변환 실패 시 원본 사용
+
+        # 기존에 잘 작동하던 delete_top2 호출
+        ac = delete_top2(a, t, rsvno)
+        
+        if '없음' in ac:
+            all = '예약 정보를 찾을 수 없어 DB 삭제를 시도했으나 실패했습니다.'
+        else:
+            all = '[DB 삭제 완료]\n예약번호 {}\n{} 님 정보가 정리되었습니다.'.format(rsvno, a)
+            
+        return jsonify(all)
+
+    except Exception as e:
+        # 500 에러 대신 어떤 에러인지 화면에 표시해줍니다.
+        return jsonify(f"서버 내부 에러 발생: {str(e)}")
 	
 #농협택배 주소테스트 API
 @nh.route('<address>/nh_addrtest_api', methods=["GET"])
