@@ -1368,7 +1368,7 @@ def nh_del_api(rsvno):
         else:
             all = f"{at}\n예약번호 {rsvno}\n{a} 님 예약취소(DB삭제) 되었습니다."
             
-        return jsonify(all)
+        return Response(json.dumps(all, ensure_ascii=False),mimetype='application/json')
 
     except Exception as e:
         # 에러 발생 시 로그를 찍어줍니다.
