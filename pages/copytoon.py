@@ -233,20 +233,22 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
         log_and_print(f"   ❌ 데이터 해독 패키지 처리 실패: {e}", "error")
         return False
 		
+# --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    logger.info(f"==================================================")
-    logger.info(f"== [{gbun}] 다운로드 엔진 가동 (안전 모드) ==")
-    logger.info(f"==================================================")
-    print(f"\n[다운로드] {gbun} 구역 작업 시작...")
+    logger.info(f"== [{gbun}] 다운로드 엔진 가동 (디스크/용량 검증 모드) ==")
+    
+    # [보강] 1. 하드디스크 잔여 용량 체크 (2GB 미만 시 중단)
+    total, used, free = shutil.disk_usage(WEBTOON_PATH)
+    free_gb = free // (2**30)
+    if free_gb < 2:
+        log_and_print(f"!!! [중단] 디스크 공간 부족: 현재 {free_gb}GB 남음", "error")
+        return
 
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    
     try:
-        # 1. gbun 기반 최상위 경로 생성 및 확인
         target_gbun_path = os.path.join(WEBTOON_PATH, gbun)
         os.makedirs(target_gbun_path, exist_ok=True)
 
-        # 2. 다운로드 대상 쿼리 (STATUS_DB와 결합)
         with get_list_db() as con_l:
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
             query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
@@ -255,81 +257,57 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             targets = con_l.execute(query).fetchall()
             con_l.execute("DETACH DATABASE s_db")
 
-        print(f">> 분석 결과: 총 {len(targets)}개의 에피소드가 대기 중입니다.")
+        print(f">> 분석 결과: {len(targets)}건 대기 중 (여유 공간: {free_gb}GB)")
 
         for t_title, t_sub, t_total in targets:
-            # 3. 이미지 리스트 확보
             with get_list_db() as con_l:
-                cur_l = con_l.cursor()
-                cur_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub))
-                img_list = cur_l.fetchall()
+                img_list = con_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
             
             cur_c, tar_c = len(img_list), int(t_total or 0)
-            status_msg = f" -> [{gbun.upper()}] [{t_title}] {t_sub} ({cur_c}/{tar_c}장)"
-            logger.info(status_msg)
-            print(status_msg, end=" ", flush=True)
+            print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})", end=" ", flush=True)
 
-            # 4. 수집 완료 여부 검사 (이미지 수가 목표치에 도달했는지 확인)
             if cur_c > 0 and cur_c >= tar_c:
-                print(" -> [다운로드 개시]")
                 f_path = os.path.join(target_gbun_path, t_title, t_sub)
                 os.makedirs(f_path, exist_ok=True)
                 
+                # [보강] 2. 이미지 개별 용량 및 유효성 체크 다운로드
                 sc = 0 
                 for img_url, img_num in img_list:
                     img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
-                    if not os.path.exists(img_file):
+                    # 파일이 없거나 1KB 미만이면 재다운로드
+                    if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
                         try:
                             r = requests.get(img_url, timeout=20)
-                            if r.status_code == 200:
+                            if r.status_code == 200 and len(r.content) > 1024:
                                 with open(img_file, 'wb') as f: f.write(r.content)
                                 sc += 1
-                        except Exception as e:
-                            logger.error(f"   ! 이미지 다운로드 실패 (번호:{img_num}): {e}")
-                            continue
+                        except: continue
 
-                # 5. [강화된 후처리] 실제 파일 개수 검증 후 압축
+                # [보강] 3. 압축 전 최종 파일 수 검증
                 actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
-                
                 if len(actual_files) < tar_c:
-                    print(f" -> [중단] 파일 부족 ({len(actual_files)}/{tar_c}장)")
-                    logger.warning(f"파일 누락으로 압축 스킵: {t_title} - {t_sub}")
+                    print(f"-> [미달] {len(actual_files)}장 수집됨")
                     continue
 
                 try:
                     if str(compress) == '1':
                         ext = ".cbz" if str(cbz) == '1' else ".zip"
                         z_name = f_path + ext
-                        print(f"    └ [압축] {os.path.basename(z_name)}...", end="")
-                        
                         with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
                             for file in actual_files:
-                                file_path = os.path.join(f_path, file)
-                                if os.path.exists(file_path):
-                                    z.write(file_path, file)
-                        
+                                fp = os.path.join(f_path, file)
+                                if os.path.exists(fp): z.write(fp, file)
+                        # [보강] rclone 충돌 방지를 위해 ignore_errors 설정
                         shutil.rmtree(f_path, ignore_errors=True) 
-                        print(" 완료!")
+                        print("-> 압축완료", end=" ")
                     
-                    # 모든 과정 성공 시에만 완료 처리
                     with get_status_db() as con_s:
                         con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
                         con_s.commit()
-                    logger.info(f"    └ [성공] {t_title} 완료")
-
-                except Exception as e:
-                    print(f" 실패! ({e})")
-                    logger.error(f"압축/완료 처리 중 오류: {e}")
-            else:
-                shortage = tar_c - cur_c
-                print(f" -> [대기] {shortage}장 부족")
-
-        print(f"\n[알림] {gbun} 구역 작업 종료.")
-        logger.info(f"== [{gbun}] 다운로드 엔진 종료 ==")
-            
-    except Exception as e: 
-        logger.error(f"!!! Down Error: {e}")
-        print(f"!!! 치명적 오류 발생: {e}")
+                    print("-> DB등록")
+                except Exception as e: logger.error(f"후처리 오류: {e}")
+            else: print(f"-> {tar_c - cur_c}장 부족")
+    except Exception as e: logger.error(f"Down Error: {e}")
 
 # --- [5. 웹 라우트] ---
 @webtoon.route('/')
