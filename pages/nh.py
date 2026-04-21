@@ -133,79 +133,66 @@ def addr_not(d):
 		msg = resp['data']['procMsg']
 	return msg
 	
-#주소검색을 한뒤 자동 입력하기		
+# 주소검색을 한뒤 자동 입력하기 (행안부 내부 API 활용 방식)
 def addr(ein):
-    header = {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-    }
+    # SSL 경고 무시 (필요 시)
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
-    with requests.Session() as s:
-        url = 'https://m.search.naver.com/search.naver?query=' + ein + ' 우편번호'
+    url = "https://www.juso.go.kr/api/solr/solrKeywordSearch"
+    
+    # 돼지님이 분석하신 페이로드와 헤더 그대로 적용
+    headers = {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Origin": "https://www.juso.go.kr",
+        "Referer": "https://www.juso.go.kr/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+    }
+
+    payload = {
+        "keyword": ein,
+        "strSearchType": "HSTRY",
+        "strFirstSort": "none",
+        "strAblYn": "N",
+        "strAotYn": "N",
+        "strSynnYn": None,
+        "hstryYn": "Y",
+        "reqFrom": "RN_SEARCH_KOR_WEB",
+        "checkMoblieYn": "N",
+        "strFunctionName": "Y",
+        "pageable": {"page": 0, "size": 5},
+        "strAroundYn": "N",
+        "isLogAccessEnabled": True
+    }
+
+    try:
+        # verify=False로 보안 연결 에러 방지, timeout 설정으로 무한 대기 방지
+        response = requests.post(url, headers=headers, json=payload, verify=False, timeout=5)
         
-        try:
-            req = s.get(url, headers=header, timeout=5)
-            if req.status_code != 200: return None 
+        if response.status_code == 200:
+            data = response.json()
+            # 분석했던 경로: results -> content (리스트)
+            results_content = data.get('results', {}).get('content', [])
+            
+            if results_content:
+                first = results_content[0]
+                # zipCl: 우편번호, rdNm: 도로명주소
+                d = first.get('zipCl', '').strip()
+                e = first.get('rdNm', '').strip()
+                
+                if d and e:
+                    return [d, e]
+            
+            return None # 결과가 없는 경우
+        else:
+            return None # 서버 응답 에러 시
 
-            soup = bs(req.text, "html.parser")
-            full_text = soup.get_text(" ", strip=True)
-            full_text = re.sub(r'\s+', ' ', full_text)
-            
-            d = ""
-            e = ""
-            
-            # 1. 우편번호 (d) 추출 (5자리 숫자)
-            zip_match = re.search(r'\b\d{5}\b', full_text)
-            if zip_match:
-                d = zip_match.group()
-            
-            # 2. 새주소 (e) 추출 로직
-            if "복사" in full_text:
-                parts = full_text.split("복사")
-                # '복사' 앞(before)과 뒤(after) 중 도로명 주소가 있는 곳을 찾음
-                before_copy = parts[0].strip()
-                after_copy = parts[1].strip() if len(parts) > 1 else ""
-                
-                # 도로명 주소 핵심 패턴 (시/도 시/군/구 ... 로/길 번호)
-                road_pattern = r'([가-힣]+[도시]\s+[가-힣]+[시군구]\s+.*?[가-힣]+[로|길][\d\s-]+)'
-                
-                # 전략 1: 검색어가 포함된 도로명 주소가 복사 앞부분에 있는지 확인 (새주소 검색 대응)
-                match_before = re.search(road_pattern, before_copy)
-                # 전략 2: 복사 뒷부분에서 '내비게이션' 전까지 추출 (구주소 검색 대응)
-                match_after = None
-                if "내비게이션" in after_copy:
-                    target_area = after_copy.split("내비게이션")[0].strip()
-                    # 괄호가 나오면 그 앞까지만 가져와서 구주소 혼입 방지
-                    if "(" in target_area:
-                        target_area = target_area.split("(")[0].strip()
-                    match_after = re.search(road_pattern, target_area)
-                
-                # 우선순위 결정: 앞부분에 도로명 주소가 있으면 먼저 선택
-                if match_before:
-                    e = match_before.group(1).strip()
-                elif match_after:
-                    e = match_after.group(1).strip()
-            
-            # 3. 최종 정제 및 백업 (중복 주소 및 불필요한 키워드 제거)
-            if not e:
-                backup = re.search(r'([가-힣]+[도시]\s+[가-힣]+[시군구]\s+.*?[가-힣]+[로|길][\d\s-]+)', full_text)
-                if backup: e = backup.group(1).strip()
-            
-            if e:
-                # '로' 또는 '길' 뒤의 숫자(번지수)까지만 남기고 그 뒤의 아파트명/지번 등은 제거
-                clean_match = re.search(r'(.*?[가-힣]+[로|길][\d\s-]+)', e)
-                if clean_match:
-                    e = clean_match.group(1).strip()
-                
-                # 기타 UI 찌꺼기 제거
-                e = re.split(r'입력|내용|더보기|조회|주소|내비|길찾기|영문|관련|복사', e)[0].strip()
-                e = re.sub(r'우편번호|도로명|지번|검색|삭제|@txt@', '', e).strip()
-                e = ' '.join(e.split())
-
-            return [d, e] if d and e else None
-
-        except:
-            return None
+    except Exception as ex:
+        # 에러 발생 시 로그 기록 (이미 nh.py에 logger가 정의되어 있으므로 활용 가능)
+        if 'logger' in globals():
+            logger.error(f"주소 검색 API 에러: {ex}")
+        return None
 		
 #택배조회 확인
 def checkURL(url2):
