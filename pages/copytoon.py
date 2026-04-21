@@ -308,7 +308,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 if os.path.exists(file_path):
                                     z.write(file_path, file)
                         
-                        shutil.rmtree(f_path) 
+                        shutil.rmtree(f_path, ignore_errors=True) 
                         print(" 완료!")
                     
                     # 모든 과정 성공 시에만 완료 처리
