@@ -1382,7 +1382,7 @@ def nh_del_api(rsvno):
             all = 'DB 삭제에 실패했습니다.'
         else:
             all = f"{at}\n예약번호 {rsvno}\n{a} 님 예약취소(DB삭제) 되었습니다."
-            
+            all = all.replace("\n", "<br>")
         return Response(json.dumps(all, ensure_ascii=False),mimetype='application/json')
 
     except Exception as e:
