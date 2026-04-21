@@ -28,7 +28,14 @@
                             <option value="False">아니요</option>
                         </select>
                     </div>
-
+                    <div class="col-md-12 mt-4">
+    <h6 class="text-muted border-bottom pb-2">스케줄 설정</h6>
+</div>
+<div class="col-md-6">
+    <label class="form-label fw-bold text-danger">실행 주기 (Cron)</label>
+    <input type="text" class="form-control border-danger fw-bold" name="FLASKTIME" value="{{ FLASKTIME }}">
+    <div class="form-text text-muted small">예: */1 * * * * (매 1분마다)</div>
+</div>
                     <div class="col-12 mt-4">
                         <h6 class="text-muted border-bottom pb-2">경로 설정</h6>
                     </div>
@@ -58,7 +65,7 @@
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">수정 완료</button>
                     <button type="button" onclick="history.back()" class="btn btn-outline-secondary btn-lg">취소</button>
                 </div>
-				<input type="hidden" name="FLASKTIME" value="{{ FLASKTIME }}">
+				
 				<input type="hidden" name="RCLONE_CONFIG" value="{{ RCLONE_CONFIG }}">
 				<input type="hidden" name="RCLONE_UPLOAD" value="{{ RCLONE_UPLOAD }}">
 				<input type="hidden" name="DELETE_F" value="{{ DELETE_F }}">
