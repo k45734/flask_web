@@ -261,9 +261,12 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 
         for t_title, t_sub, t_total in targets:
             with get_list_db() as con_l:
-                img_list = con_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
+                #img_list = con_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
+                img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
             
-            cur_c, tar_c = len(img_list), int(t_total or 0)
+            #cur_c, tar_c = len(img_list), int(t_total or 0)
+            cur_c = len(img_list)
+            tar_c = cur_c
             print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})", end=" ", flush=True)
 
             if cur_c > 0 and cur_c >= tar_c:
@@ -335,7 +338,7 @@ def index_list():
                 TITLE, 
                 SUBTITLE, 
                 TOTAL_COUNT, 
-                COUNT(*) as CURRENT_COUNT 
+                COUNT(DISTINCT WEBTOON_IMAGE_NUMBER) as CURRENT_COUNT 
             FROM {table} 
             {where} 
             GROUP BY TITLE, SUBTITLE 
