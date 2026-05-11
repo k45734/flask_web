@@ -325,7 +325,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                             log_and_print(f"  - [경고] [{gbun}] {t_title} - {t_sub} 압축 대상 누락됨: {file}", "error")
                                 if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
                                     shutil.rmtree(f_path, ignore_errors=True)
-                                    log_and_print("-> [{gbun}] {t_title} - {t_sub} 압축완료")
+                                    log_and_print(f"-> [{gbun}] {t_title} - {t_sub} 압축완료")
                                 else:
                                     log_and_print(f"-> [오류] [{gbun}] {t_title} - {t_sub} 압축 파일 생성 실패: {z_name}", "error")
                             except Exception as e:
@@ -334,7 +334,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         with get_status_db() as con_s:
                             con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
                             con_s.commit()
-                        log_and_print("-> [{gbun}] {t_title} - {t_sub} DB등록")
+                        log_and_print(f"-> [{gbun}] {t_title} - {t_sub} DB등록")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
