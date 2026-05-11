@@ -279,13 +279,21 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         # 이미지 다운로드
                         for img_url, img_num in img_list:
                             img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
-                            if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
-                                try:
-                                    r = requests.get(img_url, timeout=20)
-                                    if r.status_code == 200 and len(r.content) > 1024:
-                                        with open(img_file, 'wb') as f: f.write(r.content)
-                                except: continue
-
+                            for attempt in range(3):
+                                if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
+                                    try:
+                                        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                                        r = requests.get(img_url, timeout=15, headers=headers)
+                                        if r.status_code == 200 and len(r.content) > 1024:
+                                            with open(img_file, 'wb') as f: f.write(r.content)
+                                            break
+                                        else:
+                                            time.sleep(1)
+                                    except: 
+                                        time.sleep(1)
+                                        continue
+                                else:
+                                    break
                         # 파일 수 검증
                         actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
                         if len(actual_files) < tar_c:
