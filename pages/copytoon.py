@@ -279,6 +279,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         # 이미지 다운로드
                         for img_url, img_num in img_list:
                             img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
+                            success = False
                             for attempt in range(3):
                                 if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
                                     try:
@@ -288,12 +289,18 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                             with open(img_file, 'wb') as f: f.write(r.content)
                                             break
                                         else:
+                                            log_and_print(f"  - [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
                                             time.sleep(1)
-                                    except: 
+                                    except Exception as e: 
+                                        log_and_print(f"  - [시도 {attempt}/3] 에러 발생 ({img_num:03d}.jpg): {e}")
                                         time.sleep(1)
                                         continue
                                 else:
+                                    success = True
                                     break
+                            if not success:
+                                log_and_print(f"!!! [최종 실패] 이미지 URL 확인 필요: {img_num:03d}.jpg")
+                                log_and_print(f"    URL: {img_url}", "error") # URL을 에러 등급으로 기록
                         # 파일 수 검증
                         actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
                         if len(actual_files) < tar_c:
