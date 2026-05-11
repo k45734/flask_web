@@ -261,6 +261,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
             for t_title, t_sub in targets:
+                t_title = t_title.strip()
+                t_sub = t_sub.strip()
                 try:
                     log_and_print(f"작업 시작 : {t_title} - {t_sub}")
                     
@@ -274,7 +276,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 
                     if cur_c > 0:
                         f_path = os.path.join(target_gbun_path, t_title, t_sub)
-                        os.makedirs(f_path, exist_ok=True)
+                        if not os.path.exists(f_path):
+                            os.makedirs(f_path, exist_ok=True)
                         
                         # 이미지 다운로드
                         for img_url, img_num in img_list:
@@ -290,10 +293,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                             success = True
                                             break
                                         else:
-                                            log_and_print(f"  - [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
+                                            log_and_print(f"  - [{gbun}] {t_title} - {t_sub} [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
                                             time.sleep(1)
                                     except Exception as e: 
-                                        log_and_print(f"  - [시도 {attempt}/3] 에러 발생 ({img_num:03d}.jpg): {e}")
+                                        log_and_print(f"  - [{gbun}] {t_title} - {t_sub} [시도 {attempt}/3] 에러 발생 ({img_num:03d}.jpg): {e}")
                                         time.sleep(1)
                                         continue
                                 else:
@@ -301,11 +304,11 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                     break
                             if not success:
                                 log_and_print(f"!!! [최종 실패] 이미지 URL 확인 필요: {img_num:03d}.jpg")
-                                log_and_print(f"    URL: {img_url}", "error") # URL을 에러 등급으로 기록
+                                log_and_print(f" [{gbun}] {t_title} - {t_sub} URL: {img_url}", "error") # URL을 에러 등급으로 기록
                         # 파일 수 검증
                         actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
                         if len(actual_files) < tar_c:
-                            log_and_print(f"-> [미달] {len(actual_files)}장 수집됨")
+                            log_and_print(f"-> [{gbun}] {t_title} - {t_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
 
                         # 압축 처리
@@ -319,22 +322,22 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                         if os.path.exists(fp):
                                             z.write(fp, file)
                                         else:
-                                            log_and_print(f"  - [경고] 압축 대상 누락됨: {file}", "error")
+                                            log_and_print(f"  - [경고] [{gbun}] {t_title} - {t_sub} 압축 대상 누락됨: {file}", "error")
                                 if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
                                     shutil.rmtree(f_path, ignore_errors=True)
-                                    log_and_print("-> 압축완료")
+                                    log_and_print("-> [{gbun}] {t_title} - {t_sub} 압축완료")
                                 else:
-                                    log_and_print(f"-> [오류] 압축 파일 생성 실패: {z_name}", "error")
+                                    log_and_print(f"-> [오류] [{gbun}] {t_title} - {t_sub} 압축 파일 생성 실패: {z_name}", "error")
                             except Exception as e:
-                                log_and_print(f"-> [치명적 오류] 압축 중 사고 발생: {e}", "error")
+                                log_and_print(f"-> [치명적 오류] [{gbun}] {t_title} - {t_sub} 압축 중 사고 발생: {e}", "error")
                         # DB 완료 기록 (STATUS DB 연결)
                         with get_status_db() as con_s:
                             con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
                             con_s.commit()
-                        log_and_print("-> DB등록")
+                        log_and_print("-> [{gbun}] {t_title} - {t_sub} DB등록")
                         
                 except Exception as loop_e:
-                    logger.error(f"회차 처리 중 오류 ({t_title}): {loop_e}")
+                    logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
 
     except Exception as e:
         logger.error(f"Down Error: {e}")
