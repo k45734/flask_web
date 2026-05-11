@@ -287,6 +287,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                         r = requests.get(img_url, timeout=15, headers=headers)
                                         if r.status_code == 200 and len(r.content) > 1024:
                                             with open(img_file, 'wb') as f: f.write(r.content)
+                                            success = True
                                             break
                                         else:
                                             log_and_print(f"  - [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
