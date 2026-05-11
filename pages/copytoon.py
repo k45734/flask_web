@@ -240,6 +240,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     # [보강] 1. 하드디스크 잔여 용량 체크 (2GB 미만 시 중단)
     total, used, free = shutil.disk_usage(WEBTOON_PATH)
     free_gb = free // (2**30)
+    log_and_print(f"디스크 체크 완료: {free_gb}GB 남음")
     if free_gb < 2:
         log_and_print(f"!!! [중단] 디스크 공간 부족: 현재 {free_gb}GB 남음", "error")
         return
@@ -250,11 +251,13 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
         os.makedirs(target_gbun_path, exist_ok=True)
 
         with get_list_db() as con_l:
+            log_and_print("DB 연결 시도 중...")
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
             query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
             if title_filter: query += f" AND a.TITLE = '{title_filter}'"
             query += " GROUP BY a.TITLE, a.SUBTITLE"
             targets = con_l.execute(query).fetchall()
+            log_and_print(f"조회 완료: {len(targets)}건 발견")
             con_l.execute("DETACH DATABASE s_db")
 
         print(f">> 분석 결과: {len(targets)}건 대기 중 (여유 공간: {free_gb}GB)")
