@@ -235,85 +235,84 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
 		
 # --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    logger.info(f"== [{gbun}] 다운로드 엔진 가동 (디스크/용량 검증 모드) ==")
+    logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
     
-    # [보강] 1. 하드디스크 잔여 용량 체크 (2GB 미만 시 중단)
     total, used, free = shutil.disk_usage(WEBTOON_PATH)
     free_gb = free // (2**30)
-    log_and_print(f"디스크 체크 완료: {free_gb}GB 남음")
+    
     if free_gb < 2:
-        log_and_print(f"!!! [중단] 디스크 공간 부족: 현재 {free_gb}GB 남음", "error")
+        log_and_print(f"!!! [중단] 디스크 공간 부족: {free_gb}GB 남음", "error")
         return
 
     db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+    
     try:
         target_gbun_path = os.path.join(WEBTOON_PATH, gbun)
         os.makedirs(target_gbun_path, exist_ok=True)
 
+        # 1. DB를 한 번 열어서 targets와 img_list를 모두 처리합니다.
         with get_list_db() as con_l:
-            log_and_print("DB 연결 시도 중...")
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
-            query = f"SELECT a.TITLE, a.SUBTITLE, a.TOTAL_COUNT FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
+            query = f"SELECT a.TITLE, a.SUBTITLE FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
             if title_filter: query += f" AND a.TITLE = '{title_filter}'"
             query += " GROUP BY a.TITLE, a.SUBTITLE"
-            targets = con_l.execute(query).fetchall()
-            log_and_print(f"조회 완료: {len(targets)}건 발견")
-            con_l.execute("DETACH DATABASE s_db")
-
-        print(f">> 분석 결과: {len(targets)}건 대기 중 (여유 공간: {free_gb}GB)")
-
-        for t_title, t_sub, t_total in targets:
-            with get_list_db() as con_l:
-                #img_list = con_l.execute(f"SELECT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
-                img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
             
-            #cur_c, tar_c = len(img_list), int(t_total or 0)
-            cur_c = len(img_list)
-            tar_c = cur_c
-            print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})", end=" ", flush=True)
+            targets = con_l.execute(query).fetchall()
+            log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
-            if cur_c > 0 and cur_c >= tar_c:
-                f_path = os.path.join(target_gbun_path, t_title, t_sub)
-                os.makedirs(f_path, exist_ok=True)
-                
-                # [보강] 2. 이미지 개별 용량 및 유효성 체크 다운로드
-                sc = 0 
-                for img_url, img_num in img_list:
-                    img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
-                    # 파일이 없거나 1KB 미만이면 재다운로드
-                    if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
-                        try:
-                            r = requests.get(img_url, timeout=20)
-                            if r.status_code == 200 and len(r.content) > 1024:
-                                with open(img_file, 'wb') as f: f.write(r.content)
-                                sc += 1
-                        except: continue
-
-                # [보강] 3. 압축 전 최종 파일 수 검증
-                actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
-                if len(actual_files) < tar_c:
-                    print(f"-> [미달] {len(actual_files)}장 수집됨")
-                    continue
-
+            for t_title, t_sub in targets:
                 try:
-                    if str(compress) == '1':
-                        ext = ".cbz" if str(cbz) == '1' else ".zip"
-                        z_name = f_path + ext
-                        with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
-                            for file in actual_files:
-                                fp = os.path.join(f_path, file)
-                                if os.path.exists(fp): z.write(fp, file)
-                        # [보강] rclone 충돌 방지를 위해 ignore_errors 설정
-                        shutil.rmtree(f_path, ignore_errors=True) 
-                        print("-> 압축완료", end=" ")
+                    log_and_print(f"작업 시작 : {t_title} - {t_sub}")
                     
-                    with get_status_db() as con_s:
-                        con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
-                        con_s.commit()
-                    print("-> DB등록")
-                except Exception as e: logger.error(f"후처리 오류: {e}")
-            else: print(f"-> {tar_c - cur_c}장 부족")
-    except Exception as e: logger.error(f"Down Error: {e}")
+                    # 중복 제거하여 리스트업
+                    img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
+                    
+                    cur_c = len(img_list)
+                    tar_c = cur_c # DB 수치가 아닌 실제 리스트 수로 목표 고정
+                    
+                    log_and_print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})", end=" ", flush=True)
+
+                    if cur_c > 0:
+                        f_path = os.path.join(target_gbun_path, t_title, t_sub)
+                        os.makedirs(f_path, exist_ok=True)
+                        
+                        # 이미지 다운로드
+                        for img_url, img_num in img_list:
+                            img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
+                            if not os.path.exists(img_file) or os.path.getsize(img_file) < 1024:
+                                try:
+                                    r = requests.get(img_url, timeout=20)
+                                    if r.status_code == 200 and len(r.content) > 1024:
+                                        with open(img_file, 'wb') as f: f.write(r.content)
+                                except: continue
+
+                        # 파일 수 검증
+                        actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
+                        if len(actual_files) < tar_c:
+                            log_and_print(f"-> [미달] {len(actual_files)}장 수집됨")
+                            continue
+
+                        # 압축 처리
+                        if str(compress) == '1':
+                            ext = ".cbz" if str(cbz) == '1' else ".zip"
+                            z_name = f_path + ext
+                            with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                                for file in actual_files:
+                                    z.write(os.path.join(f_path, file), file)
+                            shutil.rmtree(f_path, ignore_errors=True)
+                            log_and_print("-> 압축완료", end=" ")
+                        
+                        # DB 완료 기록 (STATUS DB 연결)
+                        with get_status_db() as con_s:
+                            con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
+                            con_s.commit()
+                        log_and_print("-> DB등록")
+                        
+                except Exception as loop_e:
+                    logger.error(f"회차 처리 중 오류 ({t_title}): {loop_e}")
+
+    except Exception as e:
+        logger.error(f"Down Error: {e}")
 
 # --- [5. 웹 라우트] ---
 @webtoon.route('/')
