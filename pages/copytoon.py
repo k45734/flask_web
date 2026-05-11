@@ -284,7 +284,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
                             success = False
                             for attempt in range(3):
-                                if not os.path.exists(img_file) or os.path.getsize(img_file) < 0:
+                                if not os.path.exists(img_file) or os.path.getsize(img_file) < 1:
                                     try:
                                         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                                         r = requests.get(img_url, timeout=15, headers=headers)
