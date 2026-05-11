@@ -281,11 +281,11 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             img_file = os.path.join(f_path, f"{img_num:03d}.jpg")
                             success = False
                             for attempt in range(3):
-                                if not os.path.exists(img_file) or os.path.getsize(img_file) < 100:
+                                if not os.path.exists(img_file) or os.path.getsize(img_file) < 0:
                                     try:
                                         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                                         r = requests.get(img_url, timeout=15, headers=headers)
-                                        if r.status_code == 200 and len(r.content) > 100:
+                                        if r.status_code == 200 and len(r.content) > 0:
                                             with open(img_file, 'wb') as f: f.write(r.content)
                                             success = True
                                             break
@@ -314,7 +314,11 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             z_name = f_path + ext
                             with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
                                 for file in actual_files:
-                                    z.write(os.path.join(f_path, file), file)
+                                    fp = os.path.join(f_path, file)
+                                    if os.path.exists(fp):
+                                        z.write(fp, file)
+                                    else:
+                                        log_and_print(f"  - [경고] 압축 대상 누락됨: {file}", "error")
                             shutil.rmtree(f_path, ignore_errors=True)
                             log_and_print("-> 압축완료")
                         
