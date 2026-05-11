@@ -270,7 +270,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                     cur_c = len(img_list)
                     tar_c = cur_c # DB 수치가 아닌 실제 리스트 수로 목표 고정
                     
-                    log_and_print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})", end=" ", flush=True)
+                    log_and_print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})")
 
                     if cur_c > 0:
                         f_path = os.path.join(target_gbun_path, t_title, t_sub)
@@ -300,7 +300,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 for file in actual_files:
                                     z.write(os.path.join(f_path, file), file)
                             shutil.rmtree(f_path, ignore_errors=True)
-                            log_and_print("-> 압축완료", end=" ")
+                            log_and_print("-> 압축완료")
                         
                         # DB 완료 기록 (STATUS DB 연결)
                         with get_status_db() as con_s:
