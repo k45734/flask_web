@@ -312,16 +312,21 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         if str(compress) == '1':
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
                             z_name = f_path + ext
-                            with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
-                                for file in actual_files:
-                                    fp = os.path.join(f_path, file)
-                                    if os.path.exists(fp):
-                                        z.write(fp, file)
-                                    else:
-                                        log_and_print(f"  - [경고] 압축 대상 누락됨: {file}", "error")
-                            shutil.rmtree(f_path, ignore_errors=True)
-                            log_and_print("-> 압축완료")
-                        
+                            try:
+                                with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                                    for file in actual_files:
+                                        fp = os.path.join(f_path, file)
+                                        if os.path.exists(fp):
+                                            z.write(fp, file)
+                                        else:
+                                            log_and_print(f"  - [경고] 압축 대상 누락됨: {file}", "error")
+                                if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
+							        shutil.rmtree(f_path, ignore_errors=True)
+                                    log_and_print("-> 압축완료")
+                                else:
+                                    log_and_print(f"-> [오류] 압축 파일 생성 실패: {z_name}", "error")
+                            except Exception as e:
+                                log_and_print(f"-> [치명적 오류] 압축 중 사고 발생: {e}", "error")
                         # DB 완료 기록 (STATUS DB 연결)
                         with get_status_db() as con_s:
                             con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
