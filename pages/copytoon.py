@@ -338,6 +338,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
 
     except Exception as e:
         logger.error(f"Down Error: {e}")
+    logger.info(f"== [{gbun}] 다운로드 엔진 완료 ==")
 
 # --- [5. 웹 라우트] ---
 @webtoon.route('/')
