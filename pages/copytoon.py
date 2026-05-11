@@ -321,7 +321,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                         else:
                                             log_and_print(f"  - [경고] 압축 대상 누락됨: {file}", "error")
                                 if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
-							        shutil.rmtree(f_path, ignore_errors=True)
+                                    shutil.rmtree(f_path, ignore_errors=True)
                                     log_and_print("-> 압축완료")
                                 else:
                                     log_and_print(f"-> [오류] 압축 파일 생성 실패: {z_name}", "error")
