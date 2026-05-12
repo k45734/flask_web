@@ -42,8 +42,8 @@ def get_list_db():
     con = sqlite3.connect(LIST_DB, timeout=300)
     con.row_factory = sqlite3.Row
     # 아래 줄들을 추가하여 자동 생성을 보장합니다.
-    con.execute("CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
-    con.execute("CREATE TABLE IF NOT EXISTS TOON_NORMAL (TITLE TEXT, SUBTITLE TEXT, WEBTOON_SITE TEXT, WEBTOON_URL TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+    con.execute("CREATE TABLE IF NOT EXISTS TOON (TITLE TEXT, SUBTITLE TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
+    con.execute("CREATE TABLE IF NOT EXISTS TOON_NORMAL (TITLE TEXT, SUBTITLE TEXT, WEBTOON_IMAGE TEXT, WEBTOON_IMAGE_NUMBER INTEGER, TOTAL_COUNT INTEGER)")
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA synchronous=NORMAL")
     return con
@@ -196,11 +196,9 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     # item 구조: [제목, 부제목, 사이트, URL, 이미지경로, 순번, 완료여부, 총갯수, (추가될구분자)]
                     title = item[0]
                     subtitle = item[1]
-                    site = item[2]
-                    url = item[3]
-                    img_url = item[4]
-                    img_num = int(item[5])
-                    total_img_count = int(item[7])
+                    img_url = item[2]
+                    img_num = int(item[3])
+                    total_img_count = int(item[4])
                     
                     # 4. [중요] adult/normal 테이블 결정 로직
                     # 서버(webtoon_server.py)에서 전송 시 8번째 인덱스 등에 'adult'/'normal'을 넣어준다고 가정하거나,
@@ -213,9 +211,9 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     # 5. DB Insert 실행
                     con.execute(f"""
                         INSERT OR IGNORE INTO {target_table} 
-                        (TITLE, SUBTITLE, WEBTOON_SITE, WEBTOON_URL, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (title, subtitle, site, url, img_url, img_num, total_img_count))
+                        (TITLE, SUBTITLE, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (title, subtitle, img_url, img_num, total_img_count))
                     
                     # 진행 상황 출력 (첫 번째 이미지일 때만 출력하여 로그 폭주 방지)
                     if str(img_num).endswith('1'):
