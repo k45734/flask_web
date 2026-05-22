@@ -314,11 +314,11 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
                             z_name = f_path + ext
                             try:
-                                with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                                with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED, metadata_encoding='utf-8') as z:
                                     for file in actual_files:
                                         fp = os.path.join(f_path, file)
                                         if os.path.exists(fp):
-                                            z.write(fp, file)
+                                            z.write(fp, arcname=file)
                                         else:
                                             log_and_print(f"  - [경고] [{gbun}] {t_title} - {t_sub} 압축 대상 누락됨: {file}", "error")
                                 if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
