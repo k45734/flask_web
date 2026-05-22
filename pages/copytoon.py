@@ -314,14 +314,29 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             continue
                         #압축
                         if str(compress) == '1':
+                            safe_sub = re.sub(r'[\\/*?:"<>|]', "_", t_sub.strip())
+                            match = re.search(r'(\d+)', safe_sub)
+                            if match:
+                                number = match.group(1)
+                                # '1화'처럼 뒤에 글자가 붙어있다면 001화 형태로 변환
+                                new_sub = t_sub.replace(number, f"{int(number):03d}")
+                            else:
+                                new_sub = t_sub
+    
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
-                            z_name = f_path + ext
+    
+                            # f_path를 기반으로 폴더 이름은 그대로 두되, 파일명만 new_sub를 사용하도록 변경
+                            # 기존: z_name = f_path + ext
+                            # 수정: f_path의 마지막 폴더명(t_sub)을 new_sub로 교체한 파일명 생성
+                            parent_dir = os.path.dirname(f_path)
+                            z_name = os.path.join(parent_dir, f"{new_sub}{ext}")
+    
                             # 임시 파일 경로 설정 (rclone 마운트 외부 경로 권장)
                             temp_z_name = z_name + ".tmp" 
     
                             try:
                                 # metadata_encoding 제거 (쓰기 시 지원 안 함)
-                                with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                                with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_STORED) as z:
                                     for file in actual_files:
                                         fp = os.path.join(f_path, file)
                                         if os.path.exists(fp):
