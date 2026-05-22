@@ -308,24 +308,33 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         if len(actual_files) < tar_c:
                             log_and_print(f"-> [{gbun}] {t_title} - {t_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
-
-                        # 압축 처리
+                        #압축
                         if str(compress) == '1':
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
                             z_name = f_path + ext
+                            # 임시 파일 경로 설정 (rclone 마운트 외부 경로 권장)
+                            temp_z_name = z_name + ".tmp" 
+    
                             try:
-                                with zipfile.ZipFile(z_name, 'w', zipfile.ZIP_DEFLATED, metadata_encoding='utf-8') as z:
+                                # metadata_encoding 제거 (쓰기 시 지원 안 함)
+                                with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_DEFLATED) as z:
                                     for file in actual_files:
                                         fp = os.path.join(f_path, file)
                                         if os.path.exists(fp):
                                             z.write(fp, arcname=file)
                                         else:
                                             log_and_print(f"  - [경고] [{gbun}] {t_title} - {t_sub} 압축 대상 누락됨: {file}", "error")
-                                if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
+        
+                                # 파일이 정상적으로 생성되었는지 확인 후 이동
+                                if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 0:
+                                    # 안전하게 최종 파일명으로 이동 (원자적 작업)
+                                    shutil.move(temp_z_name, z_name)
+                                    # 원본 이미지 폴더 삭제
                                     shutil.rmtree(f_path, ignore_errors=True)
                                     log_and_print(f"-> [{gbun}] {t_title} - {t_sub} 압축완료")
                                 else:
                                     log_and_print(f"-> [오류] [{gbun}] {t_title} - {t_sub} 압축 파일 생성 실패: {z_name}", "error")
+            
                             except Exception as e:
                                 log_and_print(f"-> [치명적 오류] [{gbun}] {t_title} - {t_sub} 압축 중 사고 발생: {e}", "error")
                         # DB 완료 기록 (STATUS DB 연결)
