@@ -230,7 +230,11 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
     except Exception as e:
         log_and_print(f"   ❌ 데이터 해독 패키지 처리 실패: {e}", "error")
         return False
-		
+def sanitize_filename(name):
+    # 특수문자들을 제거하거나 언더바(_)로 교체
+    # Kavita/Linux 파일 시스템에서 문제가 될만한 문자들 제거
+    return re.sub(r'[\\/*?:"<>|]', "_", name).strip()
+	
 # --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
@@ -259,8 +263,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
             for t_title, t_sub in targets:
-                t_title = t_title.strip()
-                t_sub = t_sub.strip()
+                t_title = sanitize_filename(t_title.strip())
+                t_sub = sanitize_filename(t_sub.strip())
                 try:
                     log_and_print(f"작업 시작 : {t_title} - {t_sub}")
                     
