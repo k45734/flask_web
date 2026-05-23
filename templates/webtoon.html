@@ -24,14 +24,15 @@
             </tr>
 
             <tr style="height:45px;">
-                <th bgcolor="#f8f9fa" width="160">📦 압축 사용</th>
-                <td>
-                    <select name="compress" style="width:95%; padding:5px; border-radius:4px;">
-                        <option value="1" {% if compress == '1' %}selected{% endif %}>사용함 (권장)</option>
-                        <option value="0" {% if compress == '0' %}selected{% endif %}>안함</option>
-                    </select>
-                </td>
-            </tr>
+    <th bgcolor="#f8f9fa" width="160">📦 압축 사용</th>
+    <td>
+        <select name="compress" style="width:95%; padding:5px; border-radius:4px;">
+            <option value="1" {% if compress == '1' %}selected{% endif %}>사용함 (권장)</option>
+            <!-- 아래 줄의 or not compress를 추가하여 기본값을 0으로 설정 -->
+            <option value="0" {% if compress == '0' or not compress %}selected{% endif %}>사용안함</option>
+        </select>
+    </td>
+</tr>
             <tr style="height:45px;">
                 <th bgcolor="#f8f9fa">📚 CBZ 변환</th>
                 <td>
