@@ -147,7 +147,7 @@ def exec_start(RCLONENAME, RCLONE_CONFIG, FLASKTIME, RCLONE_LOCAL, RCLONE_REMOTE
     FLASKAPPS = (
         f'/data/rclone {RCLONE_C_M} "{RCLONE_LOCAL}" "{RCLONE_REMOTE}" '
         f'-L --config "{RCLONE_CONFIG}"{include_flag} '
-        f'--log-level DEBUG ---stats 10s --stats-file-name-length 0 '
+        f'--log-level DEBUG --stats 10s --stats-file-name-length 0 '
         f'{create_flag}{delete_flag} '
         f'--bwlimit={RCLONE_UPLOAD}'
         f'{etc_flag} --log-file "/data/log/{RCLONENAME}.log"'
