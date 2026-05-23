@@ -234,7 +234,14 @@ def sanitize_filename(name):
     # 특수문자들을 제거하거나 언더바(_)로 교체
     # Kavita/Linux 파일 시스템에서 문제가 될만한 문자들 제거
     return re.sub(r'[\\/*?:"<>|]', "_", name).strip()
-	
+def format_subtitle(sub):
+    # 정규식으로 숫자 찾기
+    match = re.search(r'(\d+)', sub)
+    if match:
+        number = match.group(1)
+        # 숫자를 3자리로 변환 (예: 1 -> 001)
+        return sub.replace(number, f"{int(number):03d}")
+    return sub	
 # --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
@@ -252,7 +259,6 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
         target_gbun_path = os.path.join(WEBTOON_PATH, gbun)
         os.makedirs(target_gbun_path, exist_ok=True)
 
-        # 1. DB를 한 번 열어서 targets와 img_list를 모두 처리합니다.
         with get_list_db() as con_l:
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
             query = f"SELECT a.TITLE, a.SUBTITLE FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
@@ -265,19 +271,27 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             for t_title, t_sub in targets:
                 t_title = sanitize_filename(t_title.strip())
                 t_sub = sanitize_filename(t_sub.strip())
+                
+                # [수정] t_sub를 001화 형식으로 변환 (폴더명 및 압축파일명 통일용)
+                match = re.search(r'(\d+)', t_sub)
+                formatted_sub = t_sub
+                if match:
+                    number = match.group(1)
+                    formatted_sub = t_sub.replace(number, f"{int(number):03d}")
+
                 try:
-                    log_and_print(f"작업 시작 : {t_title} - {t_sub}")
+                    log_and_print(f"작업 시작 : {t_title} - {formatted_sub}")
                     
-                    # 중복 제거하여 리스트업
                     img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
                     
                     cur_c = len(img_list)
-                    tar_c = cur_c # DB 수치가 아닌 실제 리스트 수로 목표 고정
+                    tar_c = cur_c
                     
-                    log_and_print(f" -> [{gbun.upper()}] {t_title} {t_sub} ({cur_c}/{tar_c})")
+                    log_and_print(f" -> [{gbun.upper()}] {t_title} {formatted_sub} ({cur_c}/{tar_c})")
 
                     if cur_c > 0:
-                        f_path = os.path.join(target_gbun_path, t_title, t_sub)
+                        # [수정] 폴더 경로에 formatted_sub 사용
+                        f_path = os.path.join(target_gbun_path, t_title, formatted_sub)
                         if not os.path.exists(f_path):
                             os.makedirs(f_path, exist_ok=True)
                         
@@ -295,10 +309,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                             success = True
                                             break
                                         else:
-                                            log_and_print(f"  - [{gbun}] {t_title} - {t_sub} [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
+                                            log_and_print(f"  - [{gbun}] {t_title} - {formatted_sub} [시도 {attempt}/3] 다운로드 실패 ({img_num:03d}.jpg): HTTP {r.status_code}")
                                             time.sleep(1)
                                     except Exception as e: 
-                                        log_and_print(f"  - [{gbun}] {t_title} - {t_sub} [시도 {attempt}/3] 에러 발생 ({img_num:03d}.jpg): {e}")
+                                        log_and_print(f"  - [{gbun}] {t_title} - {formatted_sub} [시도 {attempt}/3] 에러 발생 ({img_num:03d}.jpg): {e}")
                                         time.sleep(1)
                                         continue
                                 else:
@@ -306,61 +320,40 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                     break
                             if not success:
                                 log_and_print(f"!!! [최종 실패] 이미지 URL 확인 필요: {img_num:03d}.jpg")
-                                log_and_print(f" [{gbun}] {t_title} - {t_sub} URL: {img_url}", "error") # URL을 에러 등급으로 기록
-                        # 파일 수 검증
+                                log_and_print(f" [{gbun}] {t_title} - {formatted_sub} URL: {img_url}", "error")
+
                         actual_files = [f for f in os.listdir(f_path) if os.path.isfile(os.path.join(f_path, f))]
                         if len(actual_files) < tar_c:
-                            log_and_print(f"-> [{gbun}] {t_title} - {t_sub} [미달] {len(actual_files)}장 수집됨")
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
-                        #압축
+                        
+                        # 압축
                         if str(compress) == '1':
-                            safe_sub = re.sub(r'[\\/*?:"<>|]', "_", t_sub.strip())
-                            match = re.search(r'(\d+)', safe_sub)
-                            if match:
-                                number = match.group(1)
-                                # '1화'처럼 뒤에 글자가 붙어있다면 001화 형태로 변환
-                                new_sub = t_sub.replace(number, f"{int(number):03d}")
-                            else:
-                                new_sub = t_sub
-    
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
-    
-                            # f_path를 기반으로 폴더 이름은 그대로 두되, 파일명만 new_sub를 사용하도록 변경
-                            # 기존: z_name = f_path + ext
-                            # 수정: f_path의 마지막 폴더명(t_sub)을 new_sub로 교체한 파일명 생성
                             parent_dir = os.path.dirname(f_path)
-                            z_name = os.path.join(parent_dir, f"{new_sub}{ext}")
-    
-                            # 임시 파일 경로 설정 (rclone 마운트 외부 경로 권장)
+                            z_name = os.path.join(parent_dir, f"{formatted_sub}{ext}")
                             temp_z_name = z_name + ".tmp" 
-    
+                            
                             try:
-                                # metadata_encoding 제거 (쓰기 시 지원 안 함)
                                 with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_STORED) as z:
                                     for file in actual_files:
                                         fp = os.path.join(f_path, file)
                                         if os.path.exists(fp):
                                             z.write(fp, arcname=file)
-                                        else:
-                                            log_and_print(f"  - [경고] [{gbun}] {t_title} - {t_sub} 압축 대상 누락됨: {file}", "error")
-        
-                                # 파일이 정상적으로 생성되었는지 확인 후 이동
+                                
                                 if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 0:
-                                    # 안전하게 최종 파일명으로 이동 (원자적 작업)
                                     shutil.move(temp_z_name, z_name)
-                                    # 원본 이미지 폴더 삭제
                                     shutil.rmtree(f_path, ignore_errors=True)
-                                    log_and_print(f"-> [{gbun}] {t_title} - {t_sub} 압축완료")
+                                    log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축완료")
                                 else:
-                                    log_and_print(f"-> [오류] [{gbun}] {t_title} - {t_sub} 압축 파일 생성 실패: {z_name}", "error")
-            
+                                    log_and_print(f"-> [오류] [{gbun}] {t_title} - {formatted_sub} 압축 파일 생성 실패: {z_name}", "error")
                             except Exception as e:
-                                log_and_print(f"-> [치명적 오류] [{gbun}] {t_title} - {t_sub} 압축 중 사고 발생: {e}", "error")
-                        # DB 완료 기록 (STATUS DB 연결)
+                                log_and_print(f"-> [치명적 오류] [{gbun}] {t_title} - {formatted_sub} 압축 중 사고 발생: {e}", "error")
+
                         with get_status_db() as con_s:
                             con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
                             con_s.commit()
-                        log_and_print(f"-> [{gbun}] {t_title} - {t_sub} DB등록")
+                        log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
