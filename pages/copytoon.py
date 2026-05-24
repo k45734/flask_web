@@ -231,9 +231,15 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
         log_and_print(f"   ❌ 데이터 해독 패키지 처리 실패: {e}", "error")
         return False
 def sanitize_filename(name):
-    # 특수문자들을 제거하거나 언더바(_)로 교체
-    # Kavita/Linux 파일 시스템에서 문제가 될만한 문자들 제거
-    return re.sub(r'[\\/*?:"<>|]', "_", name).strip()
+    # 1. 대괄호 [ ] 만 찾아내서 삭제합니다 (내용은 그대로 유지)
+    name = re.sub(r'[\[\]]', '', name)
+    
+    # 2. 파일명 금지 문자들을 언더바(_)로 교체합니다
+    name = re.sub(r'[\\/*?:"<>|]', "_", name)
+    
+    # 3. 공백이 여러 개 겹치면 하나로 줄이고, 앞뒤 공백을 자릅니다
+    return re.sub(r'\s+', ' ', name).strip()
+	
 def format_subtitle(sub):
     # 정규식으로 숫자 찾기
     match = re.search(r'(\d+)', sub)
@@ -269,8 +275,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
             for t_title, t_sub in targets:
-                t_title = sanitize_filename(t_title.strip())
-                t_sub = sanitize_filename(t_sub.strip())
+                t_title = sanitize_filename(t_title.replace(" ", "").strip())
+                t_sub = sanitize_filename(t_sub.replace(" ", "").strip())
                 
                 # [수정] t_sub를 001화 형식으로 변환 (폴더명 및 압축파일명 통일용)
                 match = re.search(r'(\d+)', t_sub)
