@@ -332,7 +332,16 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         if len(actual_files) < tar_c:
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
-                        
+                        # 압축 전, 모든 파일의 쓰기 완료를 보장하는 로직
+                        for file in actual_files:
+                            fp = os.path.join(f_path, file)
+                            try:
+                                with open(fp, 'ab') as f: 
+                                    f.flush()
+                                    os.fsync(f.fileno()) 
+                            except Exception as e:
+                                log_and_print(f"파일 동기화 중 오류: {file} - {e}")
+                        time.sleep(5)
                         # 압축
                         if str(compress) == '1':
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
@@ -342,7 +351,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             
                             try:
                                 with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_STORED) as z:
-                                    for file in actual_files:
+                                    for file in sorted(actual_files):
                                         fp = os.path.join(f_path, file)
                                         if os.path.exists(fp):
                                             z.write(fp, arcname=file)
