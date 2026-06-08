@@ -194,13 +194,19 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     else:
                         item = item_data
                     
-                    # 3. [교정] 수집 서버 규격에 맞춘 정확한 인덱스 매핑
+                    # 3. [교정 및 방어코드] 수집 서버 규격에 맞춘 정확한 인덱스 매핑 및 NoneType 방어
                     # 규격: [TITLE(0), SUBTITLE(1), SITE(2), URL(3), IMAGE(4), IMG_NUM(5), COMPLETE(6), TOTAL_COUNT(7), GBUN(8)]
                     title = item[0]
                     subtitle = item[1]
                     img_url = item[4]               # 4번째 인덱스가 이미지 URL입니다.
-                    img_num = int(item[5])          # 5번째 인덱스가 이미지 번호입니다.
-                    total_img_count = int(item[7])  # 7번째 인덱스가 총 이미지 장수입니다.
+                    
+                    # [방어] img_num(5번)이 None이거나 비어있으면 루프 인덱스 대용이나 1로 대체
+                    raw_img_num = item[5]
+                    img_num = int(raw_img_num) if raw_img_num is not None else 1
+                    
+                    # [방어] total_img_count(7번)가 None이면 기본값 0으로 처리 (최적화 엔진이 추후 보정)
+                    raw_total_count = item[7]
+                    total_img_count = int(raw_total_count) if raw_total_count is not None else 0
                     
                     # 4. 성인(adult) / 일반(normal) 테이블 결정
                     target_table = 'TOON' 
