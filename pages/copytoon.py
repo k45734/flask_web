@@ -161,18 +161,17 @@ def tel_send_message(dummy=None):
 
 def decode_and_save_to_db(msg_text, is_compressed=False):
     """
-    해독된 데이터의 제목과 회차명을 출력하며 DB(adult/normal)에 적재합니다.
+    해독된 데이터의 제목과 회차명을 출력하며 DB(adult/normal)에 정확한 규격으로 적재합니다.
+    도메인 변경 감지 시 무한 루프를 방지하면서 안전하게 STATUS를 초기화합니다.
     """
     try:
         # 1. 데이터 복원 (압축 해제 또는 Base64 디코딩)
         if is_compressed:
-            # DATA_Z: 접두어 제거 후 zlib 압축 해제
             encoded_data = msg_text.replace("DATA_Z:", "")
             raw_bytes = base64.b64decode(encoded_data)
             json_str = zlib.decompress(raw_bytes).decode('utf-8')
             payload_list = json.loads(json_str)
         else:
-            # DATA: 접두어 제거 후 Base64 디코딩
             encoded_data = msg_text.replace("DATA:", "")
             json_str = base64.b64decode(encoded_data).decode('utf-8')
             payload_list = json.loads(json_str)
@@ -182,40 +181,57 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
         
         log_and_print(f"      🔍 패키지 내부 데이터 해독 중 (총 {total_count}개 항목)...")
 
+        # 도메인 변경 여부를 기록할 셋(Set) - 한 회차당 딱 한 번만 STATUS를 지우기 위함
+        cleared_episodes = set()
+
         with get_list_db() as con:
             for item_data in payload_list:
                 try:
-                    # 2. 항목별 2차 해독 (Base64 -> String -> List/Tuple)
+                    # 2. 항목별 2차 해독
                     if isinstance(item_data, str):
                         item_raw = base64.b64decode(item_data).decode('utf-8')
                         item = ast.literal_eval(item_raw)
                     else:
                         item = item_data
                     
-                    # 3. 데이터 매핑 (서버 전송 규격 기준)
-                    # item 구조: [제목, 부제목, 사이트, URL, 이미지경로, 순번, 완료여부, 총갯수, (추가될구분자)]
+                    # 3. [교정] 수집 서버 규격에 맞춘 정확한 인덱스 매핑
+                    # 규격: [TITLE(0), SUBTITLE(1), SITE(2), URL(3), IMAGE(4), IMG_NUM(5), COMPLETE(6), TOTAL_COUNT(7), GBUN(8)]
                     title = item[0]
                     subtitle = item[1]
-                    img_url = item[2]
-                    img_num = int(item[3])
-                    total_img_count = int(item[4])
+                    img_url = item[4]               # 4번째 인덱스가 이미지 URL입니다.
+                    img_num = int(item[5])          # 5번째 인덱스가 이미지 번호입니다.
+                    total_img_count = int(item[7])  # 7번째 인덱스가 총 이미지 장수입니다.
                     
-                    # 4. [중요] adult/normal 테이블 결정 로직
-                    # 서버(webtoon_server.py)에서 전송 시 8번째 인덱스 등에 'adult'/'normal'을 넣어준다고 가정하거나,
-                    # 현재는 기본적으로 'TOON'(adult)에 넣되 필요시 로직을 분기합니다.
-                    # 만약 데이터 내부에 구분자가 없다면 호출 시점의 gbun을 참고해야 합니다.
+                    # 4. 성인(adult) / 일반(normal) 테이블 결정
                     target_table = 'TOON' 
                     if len(item) > 8:
                         target_table = 'TOON' if item[8] == 'adult' else 'TOON_NORMAL'
 
-                    # 5. DB Insert 실행
+                    # [안전장치] 첫 번째 이미지 수신 시, 기존 주소와 대조하여 도메인 변경 여부 확인
+                    ep_key = (title, subtitle, target_table)
+                    if img_num == 1 and ep_key not in cleared_episodes:
+                        old_row = con.execute(f"""
+                            SELECT WEBTOON_IMAGE FROM {target_table} 
+                            WHERE TITLE=? AND SUBTITLE=? AND WEBTOON_IMAGE_NUMBER=1
+                        """, (title, subtitle)).fetchone()
+                        
+                        # 기존 주소와 새로 들어온 주소가 다르면 도메인이 변경된 것으로 판단
+                        if old_row and old_row[0] != img_url:
+                            with get_status_db() as con_s:
+                                con_s.execute("DELETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (title, subtitle))
+                                con_s.commit()
+                            cleared_episodes.add(ep_key)
+                            log_and_print(f"🔄 [{title} {subtitle}] 도메인 변경 감지 -> 재다운로드를 위해 완료 상태 초기화")
+
+                    # 5. DB Insert 실행 (중복 시 새 이미지 주소로 갱신)
                     con.execute(f"""
-                        INSERT OR IGNORE INTO {target_table} 
+                        INSERT INTO {target_table} 
                         (TITLE, SUBTITLE, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
                         VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(TITLE, SUBTITLE, WEBTOON_IMAGE_NUMBER) 
+                        DO UPDATE SET WEBTOON_IMAGE = EXCLUDED.WEBTOON_IMAGE
                     """, (title, subtitle, img_url, img_num, total_img_count))
                     
-                    # 진행 상황 출력 (첫 번째 이미지일 때만 출력하여 로그 폭주 방지)
                     if str(img_num).endswith('1'):
                         log_and_print(f"      ✨ 해독됨: [{target_table}] {title} > {subtitle}")
                     
@@ -274,21 +290,27 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             targets = con_l.execute(query).fetchall()
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
+            # down 함수 내의 해당 반복문 부분을 아래와 같이 수정하세요.
             for t_title, t_sub in targets:
-                t_title = sanitize_filename(t_title.replace(" ", "").strip())
-                t_sub = sanitize_filename(t_sub.replace(" ", "").strip())
+                # DB 검색용 원본 이름 보존
+                raw_title = t_title
+                raw_sub = t_sub
+
+                # 파일/폴더 생성용 정제 이름
+                t_title_clean = sanitize_filename(t_title.replace(" ", "").strip())
+                t_sub_clean = sanitize_filename(t_sub.replace(" ", "").strip())
                 
-                # [수정] t_sub를 001화 형식으로 변환 (폴더명 및 압축파일명 통일용)
-                match = re.search(r'(\d+)', t_sub)
-                formatted_sub = t_sub
+                match = re.search(r'(\d+)', t_sub_clean)
+                formatted_sub = t_sub_clean
                 if match:
                     number = match.group(1)
-                    formatted_sub = t_sub.replace(number, f"{int(number):03d}")
+                    formatted_sub = t_sub_clean.replace(number, f"{int(number):03d}")
 
                 try:
-                    log_and_print(f"작업 시작 : {t_title} - {formatted_sub}")
+                    log_and_print(f"작업 시작 : {t_title_clean} - {formatted_sub}")
                     
-                    img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (t_title, t_sub)).fetchall()
+                    # [교정] 쿼리문 조건절(WHERE)에는 정제 전 원본 변수인 raw_title, raw_sub를 넣어야 데이터를 찾을 수 있습니다.
+                    img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (raw_title, raw_sub)).fetchall()
                     
                     cur_c = len(img_list)
                     tar_c = cur_c
