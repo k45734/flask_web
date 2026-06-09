@@ -162,7 +162,7 @@ def tel_send_message(dummy=None):
 def decode_and_save_to_db(msg_text, is_compressed=False):
     """
     해독된 데이터의 제목과 회차명을 출력하며 DB(adult/normal)에 정확한 규격으로 적재합니다.
-    도메인 변경 감지 시 무한 루프를 방지하면서 안전하게 STATUS를 초기화합니다.
+    중복 시 새 이미지 주소로 실시간 갱신하며, 실제 도메인 변경 시 알림 로그를 출력합니다.
     """
     try:
         # 1. 데이터 복원 (압축 해제 또는 Base64 디코딩)
@@ -181,7 +181,7 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
         
         log_and_print(f"      🔍 패키지 내부 데이터 해독 중 (총 {total_count}개 항목)...")
 
-        # 도메인 변경 여부를 기록할 셋(Set) - 한 회차당 딱 한 번만 STATUS를 지우기 위함
+        # 도메인 변경 체크 기록용 셋
         cleared_episodes = set()
 
         with get_list_db() as con:
@@ -195,7 +195,6 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                         item = item_data
                     
                     # 3. [서버 전송 규격 매핑 교정]
-                    # 서버 규격: [TITLE(0), SUBTITLE(1), IMAGE(2), IMG_NUM(3), TOTAL_COUNT(4), None, None, None, GBUN(8)]
                     title = item[0]
                     subtitle = item[1]
                     img_url = item[2] if len(item) > 2 else "" # 2번째 인덱스가 실제 이미지 URL (src)
@@ -218,23 +217,28 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     if len(item) > 8 and item[8] is not None:
                         target_table = 'TOON' if item[8] == 'adult' else 'TOON_NORMAL'
 
-                    # [안전장치] 첫 번째 이미지 수신 시, 기존 주소와 대조하여 도메인 변경 여부 확인
+                    # [안전장치] 첫 번째 이미지 수신 시, 기존 주소와 대조하여 도메인 변경 여부 확인 및 로그 출력
                     ep_key = (title, subtitle, target_table)
                     if img_num == 1 and ep_key not in cleared_episodes:
+                        # 1. 기존 DB에 저장되어 있던 1번 이미지의 주소를 조회
                         old_row = con.execute(f"""
                             SELECT WEBTOON_IMAGE FROM {target_table} 
                             WHERE TITLE=? AND SUBTITLE=? AND WEBTOON_IMAGE_NUMBER=1
                         """, (title, subtitle)).fetchone()
                         
-                        # 기존 주소와 새로 들어온 주소가 다르면 도메인이 변경된 것으로 판단
-                        if old_row and old_row[0] != img_url:
-                            with get_status_db() as con_s:
-                                con_s.execute("DELETE FROM STATUS WHERE TITLE=? AND SUBTITLE=?", (title, subtitle))
-                                con_s.commit()
-                            cleared_episodes.add(ep_key)
-                            log_and_print(f"🔄 [{title} {subtitle}] 도메인 변경 감지 -> 재다운로드를 위해 완료 상태 초기화")
+                        # 2. 기존에 주소가 있었는데, 새로 들어온 주소와 '실제 도메인'이 다른 경우에만 감지
+                        if old_row and old_row[0]:
+                            # 가변 토큰(?token=...) 제외하고 순수 주소 앞부분만 비교
+                            old_pure_url = old_row[0].split('?')[0].strip()
+                            new_pure_url = img_url.split('?')[0].strip()
 
-                    # 5. DB Insert 실행 (중복 시 새 이미지 주소로 갱신)
+                            if old_pure_url != new_pure_url:
+                                log_and_print(f"🔄 [{target_table}] {title} > {subtitle} : 최신 이미지 도메인(주소) 업데이트 완료")
+                        
+                        # 1번 이미지를 만났다면 검사가 끝났으므로 이번 동기화 주기에서 제외하도록 중복 처리 등록
+                        cleared_episodes.add(ep_key)
+
+                    # 5. DB Insert 실행 (중복 시 새 이미지 주소로 실시간 갱신)
                     con.execute(f"""
                         INSERT INTO {target_table} 
                         (TITLE, SUBTITLE, WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER, TOTAL_COUNT) 
