@@ -194,23 +194,28 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     else:
                         item = item_data
                     
-                    # 3. [교정 및 방어코드] 수집 서버 규격에 맞춘 정확한 인덱스 매핑 및 NoneType 방어
-                    # 규격: [TITLE(0), SUBTITLE(1), SITE(2), URL(3), IMAGE(4), IMG_NUM(5), COMPLETE(6), TOTAL_COUNT(7), GBUN(8)]
+                    # 3. [서버 전송 규격 매핑 교정]
+                    # 서버 규격: [TITLE(0), SUBTITLE(1), IMAGE(2), IMG_NUM(3), TOTAL_COUNT(4), None, None, None, GBUN(8)]
                     title = item[0]
                     subtitle = item[1]
-                    img_url = item[4]               # 4번째 인덱스가 이미지 URL입니다.
+                    img_url = item[2] if len(item) > 2 else "" # 2번째 인덱스가 실제 이미지 URL (src)
                     
-                    # [방어] img_num(5번)이 None이거나 비어있으면 루프 인덱스 대용이나 1로 대체
-                    raw_img_num = item[5]
+                    # [방어코드] img_url이 정상적인 주소 형태(http)가 아니면 잘못된 패킷이므로 스킵
+                    if not isinstance(img_url, str) or not img_url.startswith('http'):
+                        logger.error(f"      ❌ 잘못된 이미지 URL 스킵 처리: {img_url} (값 오류)")
+                        continue
+
+                    # [방어] img_num(3번) NoneType 및 타입 안정성 확보
+                    raw_img_num = item[3] if len(item) > 3 else 1
                     img_num = int(raw_img_num) if raw_img_num is not None else 1
                     
-                    # [방어] total_img_count(7번)가 None이면 기본값 0으로 처리 (최적화 엔진이 추후 보정)
-                    raw_total_count = item[7]
+                    # [방어] total_img_count(4번) NoneType 및 타입 안정성 확보
+                    raw_total_count = item[4] if len(item) > 4 else 0
                     total_img_count = int(raw_total_count) if raw_total_count is not None else 0
                     
                     # 4. 성인(adult) / 일반(normal) 테이블 결정
                     target_table = 'TOON' 
-                    if len(item) > 8:
+                    if len(item) > 8 and item[8] is not None:
                         target_table = 'TOON' if item[8] == 'adult' else 'TOON_NORMAL'
 
                     # [안전장치] 첫 번째 이미지 수신 시, 기존 주소와 대조하여 도메인 변경 여부 확인
