@@ -431,10 +431,16 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                     try: os.remove(z_name)
                                     except: pass
                             
+                                # 임시 파일을 최종 본명(.cbz)으로 변경
                                 shutil.move(temp_z_name, z_name)
-                                # 검수와 안착이 100% 보장되었으므로 기존 원본 이미지 폴더(JPG) 과감히 삭제 (용량 확보 및 Kavita 중복 인식 방지)
-                                shutil.rmtree(f_path, ignore_errors=True)
-                                log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 무결성 검수 통과 및 압축 완료 (원본 폴더 정리)")
+                                
+                                # 💡 [초강력 방어 가드] 최종 파일(.cbz)이 디스크에 온전히 존재하고 정상 용량일 때만 원본 폴더 정리!
+                                if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
+                                    shutil.rmtree(f_path, ignore_errors=True)
+                                    log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 무결성 검수 통과 및 압축 완료 (원본 폴더 정리)")
+                                else:
+                                    log_and_print(f"⚠️ [경고] {t_title} - {formatted_sub} 최종 파일 유실 감지! 원본 안전을 위해 폴더를 삭제하지 않습니다.", "error")
+                                    is_compression_success = False # DB 등록 보류
                             else:
                                 log_and_print(f"💥 [치명적 오류] {t_title} - {formatted_sub} 총 {max_retries}회 압축 시도했으나 실패. 다음 주기에 재시도합니다.", "error")
                                 if os.path.exists(temp_z_name):
@@ -449,7 +455,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 con_s.commit()
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록 완료")
                         else:
-                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축 실패로 인해 이번 주기 DB 완료 등록 보류")
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축 에러/유실로 인해 이번 주기 DB 완료 등록 보류")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
