@@ -299,13 +299,13 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
         with get_list_db() as con_l:
             con_l.execute(f"ATTACH DATABASE '{STATUS_DB}' AS s_db")
             query = f"SELECT a.TITLE, a.SUBTITLE FROM {db_table} a LEFT JOIN s_db.STATUS s ON a.TITLE = s.TITLE AND a.SUBTITLE = s.SUBTITLE WHERE (s.COMPLETE IS NULL OR s.COMPLETE != 'True') AND a.TOTAL_COUNT > 0"
-            if title_filter: query += f" AND a.TITLE = '{title_filter}'"
+            if title_filter: 
+                query += f" AND a.TITLE = '{title_filter}'"
             query += " GROUP BY a.TITLE, a.SUBTITLE"
             
             targets = con_l.execute(query).fetchall()
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
-            # down 함수 내의 해당 반복문 부분을 아래와 같이 수정하세요.
             for t_title, t_sub in targets:
                 # DB 검색용 원본 이름 보존
                 raw_title = t_title
@@ -324,7 +324,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                 try:
                     log_and_print(f"작업 시작 : {t_title_clean} - {formatted_sub}")
                     
-                    # [교정] 쿼리문 조건절(WHERE)에는 정제 전 원본 변수인 raw_title, raw_sub를 넣어야 데이터를 찾을 수 있습니다.
+                    # 쿼리 조건절에는 정제 전 원본 변수인 raw_title, raw_sub 매핑
                     img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (raw_title, raw_sub)).fetchall()
                     
                     cur_c = len(img_list)
@@ -333,8 +333,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                     log_and_print(f" -> [{gbun.upper()}] {t_title} {formatted_sub} ({cur_c}/{tar_c})")
 
                     if cur_c > 0:
-                        # [수정] 폴더 경로에 formatted_sub 사용
-                        f_path = os.path.join(target_gbun_path, t_title, formatted_sub)
+                        f_path = os.path.join(target_gbun_path, t_title_clean, formatted_sub)
                         if not os.path.exists(f_path):
                             os.makedirs(f_path, exist_ok=True)
                         
@@ -348,7 +347,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                                         r = requests.get(img_url, timeout=15, headers=headers)
                                         if r.status_code == 200 and len(r.content) > 0:
-                                            with open(img_file, 'wb') as f: f.write(r.content)
+                                            with open(img_file, 'wb') as f: 
+                                                f.write(r.content)
                                             success = True
                                             break
                                         else:
@@ -369,7 +369,8 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                         if len(actual_files) < tar_c:
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
-                        # 압축 전, 모든 파일의 쓰기 완료를 보장하는 로직
+                        
+                        # 압축 전, 모든 파일의 쓰기 완료를 보장하는 동기화 로직
                         for file in actual_files:
                             fp = os.path.join(f_path, file)
                             try:
@@ -378,34 +379,77 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                     os.fsync(f.fileno()) 
                             except Exception as e:
                                 log_and_print(f"파일 동기화 중 오류: {file} - {e}")
-                        time.sleep(5)
-                        # 압축
+                        time.sleep(2) # 파일 안정화를 위한 미세 쿨다운
+                        
+                        # --- [개선된 압축 및 자동 검수/재시도 블록] ---
+                        is_compression_success = True # 압축 미사용 유저 혹은 압축 성공 판정용 플래그
+                        
                         if str(compress) == '1':
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
                             parent_dir = os.path.dirname(f_path)
                             z_name = os.path.join(parent_dir, f"{formatted_sub}{ext}")
                             temp_z_name = z_name + ".tmp" 
                             
-                            try:
-                                with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_STORED) as z:
-                                    for file in sorted(actual_files):
-                                        fp = os.path.join(f_path, file)
-                                        if os.path.exists(fp):
-                                            z.write(fp, arcname=file)
-                                
-                                if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 0:
-                                    shutil.move(temp_z_name, z_name)
-                                    shutil.rmtree(f_path, ignore_errors=True)
-                                    log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축완료")
-                                else:
-                                    log_and_print(f"-> [오류] [{gbun}] {t_title} - {formatted_sub} 압축 파일 생성 실패: {z_name}", "error")
-                            except Exception as e:
-                                log_and_print(f"-> [치명적 오류] [{gbun}] {t_title} - {formatted_sub} 압축 중 사고 발생: {e}", "error")
+                            max_retries = 3
+                            is_valid_zip = False
+                            
+                            for retry_attempt in range(1, max_retries + 1):
+                                if os.path.exists(temp_z_name):
+                                    try: os.remove(temp_z_name)
+                                    except: pass
 
-                        with get_status_db() as con_s:
-                            con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (t_title, t_sub, 'True'))
-                            con_s.commit()
-                        log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록")
+                                try:
+                                    log_and_print(f"   📦 [{gbun}] 압축 진행 중... (시도 {retry_attempt}/{max_retries})")
+                                    
+                                    # 표준 압축 규격(ZIP_DEFLATED) 가동 및 파일 내부 최상위 배치(arcname)
+                                    with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_DEFLATED) as z:
+                                        for file in sorted(actual_files):
+                                            fp = os.path.join(f_path, file)
+                                            if os.path.exists(fp):
+                                                if os.path.getsize(fp) > 0:
+                                                    z.write(fp, arcname=file)
+                                                else:
+                                                    logger.error(f"⚠️ [{gbun}] {t_title} - {file} 파일이 0바이트라 압축에서 제외됨")
+                                    
+                                    # 압축 무결성 검수 (testzip)
+                                    if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 0:
+                                        with zipfile.ZipFile(temp_z_name, 'r') as verify_z:
+                                            bad_file = verify_z.testzip()
+                                            if bad_file is None:
+                                                is_valid_zip = True
+                                                break
+                                            else:
+                                                log_and_print(f"❌ [검수 실패] {t_title} - {formatted_sub} 내부 손상 발견: {bad_file} -> 재시도", "error")
+                                                
+                                except Exception as e:
+                                    log_and_print(f"⚠️ [압축 에러] {t_title} - {formatted_sub} (시도 {retry_attempt} 실패): {e}", "error")
+                                
+                                time.sleep(0.5) # 디스크 쿨다운
+
+                            if is_valid_zip:
+                                if os.path.exists(z_name):
+                                    try: os.remove(z_name)
+                                    except: pass
+                            
+                                shutil.move(temp_z_name, z_name)
+                                # 검수와 안착이 100% 보장되었으므로 기존 원본 이미지 폴더(JPG) 과감히 삭제 (용량 확보 및 Kavita 중복 인식 방지)
+                                shutil.rmtree(f_path, ignore_errors=True)
+                                log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 무결성 검수 통과 및 압축 완료 (원본 폴더 정리)")
+                            else:
+                                log_and_print(f"💥 [치명적 오류] {t_title} - {formatted_sub} 총 {max_retries}회 압축 시도했으나 실패. 다음 주기에 재시도합니다.", "error")
+                                if os.path.exists(temp_z_name):
+                                    try: os.remove(temp_z_name)
+                                    except: pass
+                                is_compression_success = False # DB 등록을 막기 위해 플래그 하락
+                        
+                        # 압축이 필요 없거나, 압축 검수가 완벽히 성공했을 때만 완료 처리(STATUS DB) 등록
+                        if is_compression_success:
+                            with get_status_db() as con_s:
+                                con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (raw_title, raw_sub, 'True'))
+                                con_s.commit()
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록 완료")
+                        else:
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축 실패로 인해 이번 주기 DB 완료 등록 보류")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
