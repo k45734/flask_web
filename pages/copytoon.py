@@ -282,7 +282,8 @@ def format_subtitle(sub):
 # --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
     # 1. 💡 [Flask 중복 방지] Lock 파일 경로 설정 및 선제 검사
-    LOCK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "copytoon.lock")
+    lock_name = f"copytoon_{gbun}.lock"
+    LOCK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), lock_name)
     
     if os.path.exists(LOCK_FILE):
         log_and_print("⚠️ [중복 실행 방지] 이미 다운로드 엔진이 배경에서 가동 중입니다. 새로운 요청을 차단합니다.", "error")
