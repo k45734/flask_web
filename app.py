@@ -8,7 +8,6 @@ except:
 
 import os
 import socket  # 💡 소켓 라이브러리 상단 추가
-
 try:
 	from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
 except ImportError:
@@ -68,9 +67,28 @@ def createFolder(directory):
     except OSError:
         print ('Error: Creating directory. ' +  directory)
 		
-
+def clear_ghost_locks():
+    # 💡 이제 DB 폴더(/data/db)를 정확히 타겟팅합니다.
+    # (app.py에 설정된 기본 경로 변수 구조를 그대로 활용하시거나 직접 입력하셔도 됩니다)
+    at = os.path.splitdrive(os.getcwd()) if platform.system() == 'Windows' else ('', '/data')
+    
+    # 2. 베이스 경로를 바탕으로 정확한 DB 폴더 경로 완성
+    db_dir = at[0] + '/data/db'
+    
+    lock_names = ["copytoon_adult.lock", "copytoon_normal.lock"]
+    
+    for name in lock_names:
+        lock_path = os.path.join(db_dir, name)
+        if os.path.exists(lock_path):
+            try:
+                os.remove(lock_path)
+                print(f"🧹 [도커 초기화] DB 폴더에 남아있던 유령 자물쇠 제거 완료: {lock_path}")
+            except Exception as e:
+                print(f"⚠️ [도커 초기화] 유령 자물쇠 제거 실패 ({name}): {e}")
+				
 def create_app():
 	createFolder(logdata)
+	clear_ghost_locks()
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
 	
