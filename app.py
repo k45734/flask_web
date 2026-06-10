@@ -7,6 +7,7 @@ except:
 	pass
 
 import os
+import socket  # 💡 소켓 라이브러리 상단 추가
 
 try:
 	from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
@@ -72,6 +73,8 @@ def create_app():
 	createFolder(logdata)
 	app = Flask(__name__)	
 	app.secret_key = os.urandom(12)
+	
+	# 💡 블루프린트 및 모듈들을 로드합니다 (이때 scheduler 객체가 메모리에 올라옵니다)
 	from pages import main_page
 	from pages import sub2_page
 	from pages import sub3_page
@@ -79,6 +82,7 @@ def create_app():
 	from pages import copytoon
 	from pages import rclone
 	from pages import nh
+	
 	app.register_blueprint(main_page.bp)
 	app.register_blueprint(sub2_page.bp2)
 	app.register_blueprint(sub3_page.bp3)
@@ -86,11 +90,28 @@ def create_app():
 	app.register_blueprint(copytoon.webtoon)
 	app.register_blueprint(rclone.rclone)
 	app.register_blueprint(nh.nh)
+
+	# ✨ [핵심 조치] Flask 웹 서버 가동 직전, 소켓 락 검증 후 스케줄러 최종 기동
+	try:
+		# 전역 변수로 binder를 유지하여 함수가 끝나도 소켓 자물쇠가 풀리지 않게 방어
+		global binder
+		binder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		binder.bind(('127.0.0.1', 49999))
+		
+		# 포트 선점에 성공했다면 이 프로세스가 메인(1번 워커)이므로 스케줄러 가동
+		if not main_page.scheduler.running:
+			main_page.scheduler.start()
+			print("🚀 [스케줄러 시스템] 메인 프로세스 검증 완료 - 스케줄러를 안전하게 구동합니다.")
+	except socket.error:
+		# 이미 49999 포트가 닫혀있다면 다른 프로세스가 스케줄러를 돌리고 있는 중임
+		print("⚠️ [스케줄러 시스템] 이미 다른 프로세스에서 스케줄러가 실행 중이므로 가동을 양보합니다.")
+
+	# 웹 서버 구동 (use_reloader=False 필수: True일 경우 내부적으로 프로세스를 2번 띄움)
 	app.run(host="0.0.0.0", debug=False, threaded=True, use_reloader=False)
 	return app
 	
 if __name__ == '__main__':
-	#2023-03-30 DB파일 이전
+	# DB파일 이전 로직
 	if platform.system() == 'Windows':
 		at = os.path.splitdrive(os.getcwd())
 		wwin = at[0] + '/data'
@@ -101,108 +122,16 @@ if __name__ == '__main__':
 	if not os.path.exists(output_save_folder_path):
 		os.mkdir(output_save_folder_path)
 		print('폴더 생성완료')
-		try:
-			shutil.move(wwin + '/jobs.sqlite' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/database.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/telegram.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/news.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/funmom.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/quiz.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/unse.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/delivery.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/rclone.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/webtoon_new.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/ip_list.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/shop.db' , output_save_folder_path)
-		except:
-			pass
-	else:
-		try:
-			shutil.move(wwin + '/jobs.sqlite' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/database.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/telegram.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/news.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/funmom.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/quiz.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/unse.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/delivery.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/rclone.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/webtoon_new.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/ip_list.db' , output_save_folder_path)
-		except:
-			pass
-		try:
-			shutil.move(wwin + '/shop.db' , output_save_folder_path)
-		except:
-			pass
+	
+	# 다량의 shutil.move 로직 (중복 제거 및 정리)
+	db_files = ['jobs.sqlite', 'database.db', 'telegram.db', 'news.db', 'funmom.db', 
+	            'quiz.db', 'unse.db', 'delivery.db', 'rclone.db', 'webtoon_new.db', 'ip_list.db', 'shop.db']
+	for db_f in db_files:
+		try: shutil.move(wwin + f'/{db_f}', output_save_folder_path)
+		except: pass
 		
-	#VNSTAT 설치 및 실행
-	if platform.system() == 'Windows':
-		pass
-	else:
+	# VNSTAT 설치 및 실행
+	if platform.system() != 'Windows':
 		if os.path.exists('/usr/bin/vnstat'):
 			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 			subprocess.call('/usr/bin/vnstat -i eth0', shell=True)
@@ -211,4 +140,6 @@ if __name__ == '__main__':
 			subprocess.call('apk add vnstat', shell=True)
 			subprocess.call('/usr/sbin/vnstatd -d', shell=True)
 			subprocess.call('/usr/bin/vnstat -i eth0', shell=True)
+
+	# 💡 깔끔하게 앱 팩토리 구동
 	create_app()

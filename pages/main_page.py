@@ -117,7 +117,7 @@ job_defaults = {
 	'misfire_grace_time': 15*60
 	}
 scheduler = BackgroundScheduler(jobstores=jobstores, job_defaults=job_defaults,executors=executors, timezone='Asia/Seoul') 
-scheduler.start()
+#scheduler.start()
 
 @bp.route("/")
 @bp.route("index")

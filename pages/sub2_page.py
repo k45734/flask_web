@@ -911,7 +911,7 @@ def tracking_ok():
 		con.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(tracking_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=tracking_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
@@ -1213,7 +1213,7 @@ def weather_ok():
 		con.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(weather_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[location,telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=weather_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
@@ -1438,7 +1438,7 @@ def unse_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(unse_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=unse_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
@@ -1995,7 +1995,7 @@ def quiz_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(quiz_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=quiz_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
@@ -2245,7 +2245,7 @@ def funmom_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname],max_instances=10,replace_existing=True)
+				scheduler.add_job(funmom_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[startname],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=funmom_start, args=[startname])
@@ -2512,7 +2512,7 @@ def news_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(newsalim_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=newsalim_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
@@ -2707,7 +2707,7 @@ def hotdeal_ok():
 		conn.close()
 		try:
 			if now == 'True':
-				scheduler.add_job(hotdeal_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=10,replace_existing=True)
+				scheduler.add_job(hotdeal_start, trigger=CronTrigger.from_crontab(start_time), id=startname, args=[telgm,telgm_alim,telgm_token,telgm_botid,myalim, start_time2, end_time],max_instances=1,replace_existing=True)
 				test = scheduler.get_job(startname).id
 			else:
 				thread = threading.Thread(target=hotdeal_start, args=[telgm,telgm_alim,telgm_token,telgm_botid, start_time2, end_time])
