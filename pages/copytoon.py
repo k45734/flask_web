@@ -281,18 +281,34 @@ def format_subtitle(sub):
     return sub	
 # --- [4. 강화된 다운로드 엔진] ---
 def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
-    logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
+    # 1. 💡 [Flask 중복 방지] Lock 파일 경로 설정 및 선제 검사
+    LOCK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "copytoon.lock")
     
-    total, used, free = shutil.disk_usage(WEBTOON_PATH)
-    free_gb = free // (2**30)
-    
-    if free_gb < 2:
-        log_and_print(f"!!! [중단] 디스크 공간 부족: {free_gb}GB 남음", "error")
+    if os.path.exists(LOCK_FILE):
+        log_and_print("⚠️ [중복 실행 방지] 이미 다운로드 엔진이 배경에서 가동 중입니다. 새로운 요청을 차단합니다.", "error")
         return
 
-    db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
-    
+    # 2. 💡 Lock 파일 생성 (작업 선점)
     try:
+        with open(LOCK_FILE, "w") as f:
+            f.write("running")
+    except Exception as e:
+        log_and_print(f"❌ Lock 파일 생성 실패: {e}", "error")
+        return
+
+    # 3. 💡 try-finally 구조를 통해 어떤 에러가 나도 Lock 파일이 무조건 지워지도록 안전 보호막 생성
+    try:
+        logger.info(f"== [{gbun}] 다운로드 엔진 가동 ==")
+        
+        total, used, free = shutil.disk_usage(WEBTOON_PATH)
+        free_gb = free // (2**30)
+        
+        if free_gb < 2:
+            log_and_print(f"!!! [중단] 디스크 공간 부족: {free_gb}GB 남음", "error")
+            return
+
+        db_table = 'TOON' if gbun == 'adult' else 'TOON_NORMAL'
+        
         target_gbun_path = os.path.join(WEBTOON_PATH, gbun)
         os.makedirs(target_gbun_path, exist_ok=True)
 
@@ -407,25 +423,21 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                                 else:
                                                     logger.error(f"⚠️ [{gbun}] {t_title} - {file} 파일이 0바이트라 압축에서 제외됨")
                                     
-                                    # 💡 무결성 검수 + 파일 목록 교차 대조 가드 가동
+                                    # 💡 22바이트 이하 유령 파일은 검수 전 무조건 예선 탈락
                                     if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 22:
                                         with zipfile.ZipFile(temp_z_name, 'r') as verify_z:
                                             bad_file = verify_z.testzip()
                                             
-                                            # 압축 파일 내부의 파일 목록 추출
+                                            # 압축 내부 목록 vs 원본 기대 목록 1:1 대조 세트 생성
                                             zip_content_list = verify_z.namelist()
-                                            
-                                            # 원본 파일 리스트(0바이트 제외)와 압축 내역이 완벽히 일치하는지 비교 세트 생성
                                             expected_files = sorted([f for f in actual_files if os.path.getsize(os.path.join(f_path, f)) > 0])
                                             
-                                            # 조건 1: 깨진 파일이 없어야 함 (testzip)
-                                            # 조건 2: 압축 내부 개수와 실제 파일 개수가 같아야 함
-                                            # 조건 3: 파일 목록 구성이 완벽히 일치해야 함
+                                            # 무결성 완벽 + 개수 일치 + 파일명 목록 일치 3종 검증
                                             if bad_file is None and len(zip_content_list) == len(expected_files) and sorted(zip_content_list) == expected_files:
                                                 is_valid_zip = True
                                                 break
                                             else:
-                                                log_and_print(f"❌ [검수 실패] {t_title} - {formatted_sub} 원본 파일 목록과 압축 파일 내부 대조 불일치 (재시도)", "error")
+                                                log_and_print(f"❌ [검수 실패] {t_title} - {formatted_sub} 목록 대조 불일치 혹은 빈 압축 파일 감지 (재시도)", "error")
                                                 
                                 except Exception as e:
                                     log_and_print(f"⚠️ [압축 에러] {t_title} - {formatted_sub} (시도 {retry_attempt} 실패): {e}", "error")
@@ -439,12 +451,12 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             
                                 shutil.move(temp_z_name, z_name)
                                 
-                                # 최종 검증: 본명으로 바뀐 .cbz 파일이 안전하게 존재하고 22바이트 껍데기가 아닐 때만 원본 폴더 정리
+                                # 💡 최종 안착된 .cbz 파일이 진짜 껍데기(22바이트 이하)가 아닐 때만 원본 정리
                                 if os.path.exists(z_name) and os.path.getsize(z_name) > 22:
                                     shutil.rmtree(f_path, ignore_errors=True)
                                     log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 1:1 목록 대조 및 무결성 검수 통과 완료 (원본 정리)")
                                 else:
-                                    log_and_print(f"⚠️ [경고] {t_title} - {formatted_sub} 최종 파일 대조 실패 혹은 껍데기 파일 감지! 원본 보존.", "error")
+                                    log_and_print(f"⚠️ [경고] {t_title} - {formatted_sub} 최종 파일이 빈 껍데기(22바이트)로 확인됨! 원본 보존.", "error")
                                     is_compression_success = False 
                             else:
                                 log_and_print(f"💥 [치명적 오류] {t_title} - {formatted_sub} 총 {max_retries}회 대조 검수 실패. 다음 주기에 재시도합니다.", "error")
@@ -459,14 +471,24 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 con_s.commit()
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록 완료")
                         else:
-                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 대조 에러로 인해 이번 주기 DB 완료 등록 보류")
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 검증 실패로 인해 이번 주기 DB 완료 등록 보류")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
 
+        logger.info(f"== [{gbun}] 다운로드 엔진 완료 ==")
+
     except Exception as e:
         logger.error(f"Down Error: {e}")
-    logger.info(f"== [{gbun}] 다운로드 엔진 완료 ==")
+        
+    finally:
+        # 4. 💡 [중요] 정상 종료든 폭발이든 Flask 스레드가 떠날 때 무조건 Lock 파일을 지워 다음 통로를 열어줌
+        if os.path.exists(LOCK_FILE):
+            try:
+                os.remove(LOCK_FILE)
+                log_and_print("🧹 엔진 가동 안정화 종료 및 Lock 파일 해제 완료.")
+            except Exception as remove_e:
+                logger.error(f"Lock 파일 제거 실패: {remove_e}")
 
 # --- [5. 웹 라우트] ---
 @webtoon.route('/')
