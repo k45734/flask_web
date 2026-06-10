@@ -307,11 +307,9 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
             log_and_print(f">> 분석 결과: {len(targets)}건 대기 중")
 
             for t_title, t_sub in targets:
-                # DB 검색용 원본 이름 보존
                 raw_title = t_title
                 raw_sub = t_sub
 
-                # 파일/폴더 생성용 정제 이름
                 t_title_clean = sanitize_filename(t_title.replace(" ", "").strip())
                 t_sub_clean = sanitize_filename(t_sub.replace(" ", "").strip())
                 
@@ -324,7 +322,6 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                 try:
                     log_and_print(f"작업 시작 : {t_title_clean} - {formatted_sub}")
                     
-                    # 쿼리 조건절에는 정제 전 원본 변수인 raw_title, raw_sub 매핑
                     img_list = con_l.execute(f"SELECT DISTINCT WEBTOON_IMAGE, WEBTOON_IMAGE_NUMBER FROM {db_table} WHERE TITLE=? AND SUBTITLE=? ORDER BY WEBTOON_IMAGE_NUMBER ASC", (raw_title, raw_sub)).fetchall()
                     
                     cur_c = len(img_list)
@@ -370,7 +367,7 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} [미달] {len(actual_files)}장 수집됨")
                             continue
                         
-                        # 압축 전, 모든 파일의 쓰기 완료를 보장하는 동기화 로직
+                        # 파일 동기화 로직
                         for file in actual_files:
                             fp = os.path.join(f_path, file)
                             try:
@@ -379,10 +376,10 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                     os.fsync(f.fileno()) 
                             except Exception as e:
                                 log_and_print(f"파일 동기화 중 오류: {file} - {e}")
-                        time.sleep(2) # 파일 안정화를 위한 미세 쿨다운
+                        time.sleep(2)
                         
-                        # --- [개선된 압축 및 자동 검수/재시도 블록] ---
-                        is_compression_success = True # 압축 미사용 유저 혹은 압축 성공 판정용 플래그
+                        # --- [압축 및 정밀 대조 검수 블록] ---
+                        is_compression_success = True 
                         
                         if str(compress) == '1':
                             ext = ".cbz" if str(cbz) == '1' else ".zip"
@@ -401,7 +398,6 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                 try:
                                     log_and_print(f"   📦 [{gbun}] 압축 진행 중... (시도 {retry_attempt}/{max_retries})")
                                     
-                                    # 표준 압축 규격(ZIP_DEFLATED) 가동 및 파일 내부 최상위 배치(arcname)
                                     with zipfile.ZipFile(temp_z_name, 'w', zipfile.ZIP_DEFLATED) as z:
                                         for file in sorted(actual_files):
                                             fp = os.path.join(f_path, file)
@@ -411,51 +407,59 @@ def down(compress, cbz, alldown, title_filter, sub_filter, gbun):
                                                 else:
                                                     logger.error(f"⚠️ [{gbun}] {t_title} - {file} 파일이 0바이트라 압축에서 제외됨")
                                     
-                                    # 압축 무결성 검수 (testzip)
-                                    if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 0:
+                                    # 💡 무결성 검수 + 파일 목록 교차 대조 가드 가동
+                                    if os.path.exists(temp_z_name) and os.path.getsize(temp_z_name) > 22:
                                         with zipfile.ZipFile(temp_z_name, 'r') as verify_z:
                                             bad_file = verify_z.testzip()
-                                            if bad_file is None:
+                                            
+                                            # 압축 파일 내부의 파일 목록 추출
+                                            zip_content_list = verify_z.namelist()
+                                            
+                                            # 원본 파일 리스트(0바이트 제외)와 압축 내역이 완벽히 일치하는지 비교 세트 생성
+                                            expected_files = sorted([f for f in actual_files if os.path.getsize(os.path.join(f_path, f)) > 0])
+                                            
+                                            # 조건 1: 깨진 파일이 없어야 함 (testzip)
+                                            # 조건 2: 압축 내부 개수와 실제 파일 개수가 같아야 함
+                                            # 조건 3: 파일 목록 구성이 완벽히 일치해야 함
+                                            if bad_file is None and len(zip_content_list) == len(expected_files) and sorted(zip_content_list) == expected_files:
                                                 is_valid_zip = True
                                                 break
                                             else:
-                                                log_and_print(f"❌ [검수 실패] {t_title} - {formatted_sub} 내부 손상 발견: {bad_file} -> 재시도", "error")
+                                                log_and_print(f"❌ [검수 실패] {t_title} - {formatted_sub} 원본 파일 목록과 압축 파일 내부 대조 불일치 (재시도)", "error")
                                                 
                                 except Exception as e:
                                     log_and_print(f"⚠️ [압축 에러] {t_title} - {formatted_sub} (시도 {retry_attempt} 실패): {e}", "error")
                                 
-                                time.sleep(0.5) # 디스크 쿨다운
+                                time.sleep(0.5)
 
                             if is_valid_zip:
                                 if os.path.exists(z_name):
                                     try: os.remove(z_name)
                                     except: pass
                             
-                                # 임시 파일을 최종 본명(.cbz)으로 변경
                                 shutil.move(temp_z_name, z_name)
                                 
-                                # 💡 [초강력 방어 가드] 최종 파일(.cbz)이 디스크에 온전히 존재하고 정상 용량일 때만 원본 폴더 정리!
-                                if os.path.exists(z_name) and os.path.getsize(z_name) > 0:
+                                # 최종 검증: 본명으로 바뀐 .cbz 파일이 안전하게 존재하고 22바이트 껍데기가 아닐 때만 원본 폴더 정리
+                                if os.path.exists(z_name) and os.path.getsize(z_name) > 22:
                                     shutil.rmtree(f_path, ignore_errors=True)
-                                    log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 무결성 검수 통과 및 압축 완료 (원본 폴더 정리)")
+                                    log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 1:1 목록 대조 및 무결성 검수 통과 완료 (원본 정리)")
                                 else:
-                                    log_and_print(f"⚠️ [경고] {t_title} - {formatted_sub} 최종 파일 유실 감지! 원본 안전을 위해 폴더를 삭제하지 않습니다.", "error")
-                                    is_compression_success = False # DB 등록 보류
+                                    log_and_print(f"⚠️ [경고] {t_title} - {formatted_sub} 최종 파일 대조 실패 혹은 껍데기 파일 감지! 원본 보존.", "error")
+                                    is_compression_success = False 
                             else:
-                                log_and_print(f"💥 [치명적 오류] {t_title} - {formatted_sub} 총 {max_retries}회 압축 시도했으나 실패. 다음 주기에 재시도합니다.", "error")
+                                log_and_print(f"💥 [치명적 오류] {t_title} - {formatted_sub} 총 {max_retries}회 대조 검수 실패. 다음 주기에 재시도합니다.", "error")
                                 if os.path.exists(temp_z_name):
                                     try: os.remove(temp_z_name)
                                     except: pass
-                                is_compression_success = False # DB 등록을 막기 위해 플래그 하락
+                                is_compression_success = False 
                         
-                        # 압축이 필요 없거나, 압축 검수가 완벽히 성공했을 때만 완료 처리(STATUS DB) 등록
                         if is_compression_success:
                             with get_status_db() as con_s:
                                 con_s.execute("INSERT OR REPLACE INTO STATUS (TITLE, SUBTITLE, COMPLETE) VALUES (?,?,?)", (raw_title, raw_sub, 'True'))
                                 con_s.commit()
                             log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} DB등록 완료")
                         else:
-                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 압축 에러/유실로 인해 이번 주기 DB 완료 등록 보류")
+                            log_and_print(f"-> [{gbun}] {t_title} - {formatted_sub} 대조 에러로 인해 이번 주기 DB 완료 등록 보류")
                         
                 except Exception as loop_e:
                     logger.error(f"회차 처리 중 오류 [{gbun}] {t_title} - {t_sub} : {loop_e}")
