@@ -248,7 +248,7 @@ def decode_and_save_to_db(msg_text, is_compressed=False):
                     """, (title, subtitle, img_url, img_num, total_img_count))
                     
                     if str(img_num).endswith('1'):
-                        log_and_print(f"      ✨ 해독됨: [{target_table}] {title} > {subtitle}")
+                        log_and_print(f"      ✨ 해독됨: [{target_table}] {title} > {subtitle} {img_url}")
                     
                     success_count += 1
                 except Exception as e:
